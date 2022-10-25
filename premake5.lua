@@ -1,6 +1,3 @@
-require "cmake"
-require "clion"
-
 workspace "based"
     startproject "basededitor"
     architecture "x64"
@@ -19,6 +16,10 @@ externals = {}
 externals["maclibs"] = "external/maclibs"
 externals["sdl2"] = "external/sdl2"
 externals["spdlog"] = "external/spdlog"
+externals["glad"] = "external/glad"
+
+-- Process Glad before anything else
+include "external/glad"
 
 project "based"
     location "based"
@@ -42,12 +43,18 @@ project "based"
         "%{prj.name}/include/based",
         "%{prj.name}/include/based/core",
         "%{externals.sdl2}/include",
-        "%{externals.spdlog}/include"
+        "%{externals.spdlog}/include",
+        "%{externals.glad}/include"
     }
 
     flags
     {
         "FatalWarnings"
+    }
+
+    defines
+    {
+        "GLFW_INCLUDE_NONE" -- Ensures glad doesn't include glfw
     }
 
     filter {"system:windows", "configurations:*"}
@@ -135,7 +142,8 @@ project "basededitor"
 
         links
         {
-            "SDL2"
+            "SDL2",
+            "glad"
         }
 
     filter {"system:macosx", "configurations:*"}
@@ -155,13 +163,20 @@ project "basededitor"
 
         links
         {
-            "SDL2.framework"
+            "SDL2.framework",
+            "glad"
         }
 
     filter {"system:linux", "configurations:*"}
         defines
         {
             "BASED_PLATFORM_LINUX"
+        }
+
+        links
+        {
+            "SDL2",
+            "glad"
         }
 
     filter "configurations:Debug"

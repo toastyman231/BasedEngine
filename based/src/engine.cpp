@@ -46,6 +46,9 @@ namespace based
             while (mIsRunning)
             {
                 mWindow.PumpEvents();
+
+                mWindow.BeginRender();
+                mWindow.EndRender();
             }
 
             Shutdown();
