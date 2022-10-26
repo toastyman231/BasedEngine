@@ -43,20 +43,6 @@ namespace based::core
 
 		gladLoadGLLoader(SDL_GL_GetProcAddress);
 
-		//TODO: Move to renderer initialization
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC0_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		glClearColor(
-			static_cast<float>(0x64) / static_cast<float>(0xFF),
-			static_cast<float>(0x95) / static_cast<float>(0xFF),
-			static_cast<float>(0xED) / static_cast<float>(0xFF),
-			1
-		);
-
 		return true;
 	}
 
@@ -84,7 +70,7 @@ namespace based::core
 
 	void Window::BeginRender()
 	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		Engine::Instance().GetRenderManager().Clear();
 	}
 
 	void Window::EndRender()
