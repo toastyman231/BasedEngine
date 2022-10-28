@@ -22,7 +22,8 @@ namespace based::graphics
 			BASED_ERROR("OpenGL Error: {}", errorstr.c_str());
 
 			error = glGetError();
+			BASED_ASSERT(!shouldAssert, "OpenGL Error!");
 		}
-		BASED_ASSERT(!shouldAssert, "OpenGL Error!");
+		
 	}
 }

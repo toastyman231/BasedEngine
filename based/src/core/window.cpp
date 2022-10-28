@@ -3,6 +3,8 @@
 #include "engine.h"
 #include "log.h"
 #include "glad/glad.h"
+#include "input/mouse.h"
+#include "input/keyboard.h"
 
 namespace based::core
 {
@@ -49,6 +51,7 @@ namespace based::core
 	void Window::Shutdown()
 	{
 		SDL_DestroyWindow(mWindow);
+		SDL_GL_DeleteContext(mGLContext);
 		mWindow = nullptr;
 	}
 
@@ -66,6 +69,15 @@ namespace based::core
 					break;
 			}
 		}
+
+		// Update input
+		input::Mouse::Update();
+		input::Keyboard::Update();
+	}
+
+	void Window::GetSize(int& width, int& height)
+	{
+		SDL_GetWindowSize(mWindow, &width, &height);
 	}
 
 	void Window::BeginRender()

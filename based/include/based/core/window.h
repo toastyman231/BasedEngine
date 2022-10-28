@@ -16,6 +16,8 @@ namespace based::core
 
 		void PumpEvents();
 
+		void GetSize(int& width, int& height);
+
 		void BeginRender();
 		void EndRender();
 	private:

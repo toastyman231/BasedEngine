@@ -15,6 +15,8 @@ namespace based
         void Run();
         inline void Quit() { mIsRunning = false; }
 
+        inline core::Window& GetWindow() { return mWindow; }
+
         // Managers
         inline managers::RenderManager& GetRenderManager() { return mRenderManager; }
     private:
