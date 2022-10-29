@@ -34,12 +34,15 @@ project "based"
     files 
     {
         "%{prj.name}/include/**.h",
+        "%{prj.name}/include/**.cpp",
         "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp"
+        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/**.natvis"
     }
 
     externalincludedirs
     {
+        "%{prj.name}/include",
         "%{prj.name}/include/based",
         "%{prj.name}/include/based/core",
         "%{externals.sdl2}/include",
@@ -119,7 +122,8 @@ project "basededitor"
 
     externalincludedirs
     {
-        "based/include"
+        "based/include",
+        "%{externals.spdlog}/include"
     }
 
     flags

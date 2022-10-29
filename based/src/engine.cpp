@@ -1,11 +1,11 @@
 #include "engine.h"
 
 #include "log.h"
-#include "graphics/mesh.h"
-#include "graphics/shader.h"
+#include "app.h"
 
 #include "input/mouse.h"
 #include "input/keyboard.h"
+#include "input/joystick.h"
 
 #include "SDL2/SDL.h"
 
@@ -23,6 +23,22 @@ namespace based
     }
 
     //private
+
+    void Engine::Update()
+    {
+        mWindow.PumpEvents();
+        mApp->Update();
+    }
+
+    void Engine::Render()
+    {
+        mWindow.BeginRender();
+
+        mApp->Render();
+
+        mWindow.EndRender();
+    }
+
     void Engine::GetInfo()
     {
         BASED_TRACE("BasedEngine v{}.{}", 0, 1);
@@ -43,86 +59,20 @@ namespace based
         #endif
     }
 
-    void Engine::Run()
+    void Engine::Run(App* app)
     {
+        mLogManager.Initialize();
+        BASED_ASSERT(!mApp, "Attempting to call Engine::Run when a valid app already exists!");
+        if (mApp) return;
+
+        mApp = app;
         if (Initialize())
         {
+            // Core loop
+            while (mIsRunning)
             {
-                // Test mesh
-                float vertices[]
-                {
-                     0.5,  0.5f, 0.f,
-                     0.5, -0.5f, 0.f,
-                    -0.5, -0.5f, 0.f,
-                    -0.5,  0.5f, 0.f,
-                };
-                uint32_t elements[]
-                {
-                    0, 3, 1,
-                    1, 3, 2
-                };
-                std::shared_ptr<graphics::Mesh> mesh = std::make_shared<graphics::Mesh>(&vertices[0], 4, 3, &elements[0], 6);
-
-                // Test shader
-                const char* vertexShader = R"(
-                    #version 410 core
-                    layout (location = 0) in vec3 position;
-                    out vec3 vpos;
-                    uniform vec2 offset = vec2(0.5);
-                    void main()
-                    {
-                        vpos = position + vec3(offset, 0);
-                        gl_Position = vec4(position, 1.0);
-                    }
-                )";
-                const char* fragmentShader = R"(
-                    #version 410 core
-                    out vec4 outColor;
-                    in vec3 vpos;
-
-                    uniform vec3 color = vec3(0.0);
-                    void main()
-                    {
-                        outColor = vec4(vpos, 1.0);
-                    }
-                )";
-                std::shared_ptr<graphics::Shader> shader = std::make_shared<graphics::Shader>(vertexShader, fragmentShader);
-                shader->SetUniformFloat3("color", 1, 0, 0);
-
-                float xKeyOffset = 0.f;
-                float yKeyOffset = 0.f;
-                float keySpeed = 0.0001f;
-
-                // Core loop
-                while (mIsRunning)
-                {
-                    mWindow.PumpEvents();
-
-                    int windowWidth = 0;
-                    int windowHeight = 0;
-                    GetWindow().GetSize(windowWidth, windowHeight);
-                    
-                    float xNorm = (float)input::Mouse::X() / (float)windowWidth;
-                    float yNorm = (float)(windowHeight - input::Mouse::Y()) / (float)windowHeight;
-
-                    if (input::Keyboard::Key(BASED_INPUT_KEY_LEFT)) xKeyOffset -= keySpeed;
-                    if (input::Keyboard::Key(BASED_INPUT_KEY_RIGHT)) xKeyOffset += keySpeed;
-                    if (input::Keyboard::Key(BASED_INPUT_KEY_UP)) yKeyOffset += keySpeed;
-                    if (input::Keyboard::Key(BASED_INPUT_KEY_DOWN)) yKeyOffset -= keySpeed;
-
-                    if (input::Keyboard::KeyDown(BASED_INPUT_KEY_LEFT)) xKeyOffset -= keySpeed * 100;
-                    if (input::Keyboard::KeyDown(BASED_INPUT_KEY_RIGHT)) xKeyOffset += keySpeed * 100;
-
-                    shader->SetUniformFloat2("offset", xNorm + xKeyOffset, yNorm + yKeyOffset);
-
-                    mWindow.BeginRender();
-
-                    auto rc = std::make_unique<graphics::rendercommands::RenderMesh>(mesh, shader);
-                    mRenderManager.Submit(std::move(rc));
-                    mRenderManager.Flush();
-
-                    mWindow.EndRender();
-                }
+                Update();
+                Render();
             }
 
             Shutdown();
@@ -135,7 +85,6 @@ namespace based
         bool ret = false;
         if (!mIsInitialized)
         {
-            mLogManager.Initialize();
             GetInfo();
 
             if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
@@ -148,7 +97,8 @@ namespace based
                 SDL_VERSION(&version);
                 BASED_INFO("SDL {}.{}.{}", (int32_t)version.major, (int32_t)version.minor, (int32_t)version.patch);
 
-                if (mWindow.Create())
+                core::WindowProperties props = mApp->GetWindowProperties();
+                if (mWindow.Create(props))
                 {
                     // Initialize Managers
                     mRenderManager.Initialize();
@@ -160,6 +110,9 @@ namespace based
                     // Initialize input
                     input::Mouse::Initialize();
                     input::Keyboard::Initialize();
+
+                    // Initialize client
+                    mApp->Initialize();
                 }
             }
 
@@ -178,6 +131,12 @@ namespace based
         mIsRunning = false;
         mIsInitialized = false;
 
+        // Shutdown client
+        mApp->Shutdown();
+
+        // Shutdown input
+        input::Joystick::Shutdown();
+
         // Managers - shutdown in reverse order
         mRenderManager.Shutdown();
 
@@ -194,5 +153,6 @@ namespace based
     Engine::Engine() 
         : mIsRunning(false) 
         , mIsInitialized(false)
+        , mApp(nullptr)
     {}
 }

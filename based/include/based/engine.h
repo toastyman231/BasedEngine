@@ -6,15 +6,17 @@
 
 namespace based
 {
+    class App;
     class Engine
     {
     public:
         static Engine& Instance();
         ~Engine() {}
 
-        void Run();
+        void Run(App* app);
         inline void Quit() { mIsRunning = false; }
 
+        inline App& GetApp() { return *mApp; }
         inline core::Window& GetWindow() { return mWindow; }
 
         // Managers
@@ -24,11 +26,14 @@ namespace based
 
         [[nodiscard]] bool Initialize();
         void Shutdown();
+        void Update();
+        void Render();
 
         bool mIsRunning;
         bool mIsInitialized;
 
         core::Window mWindow;
+        App* mApp;
 
         // Managers
         managers::LogManager mLogManager;

@@ -1,13 +1,30 @@
 #include "core/window.h"
 #include "SDL2/SDL.h"
 #include "engine.h"
+#include "app.h"
 #include "log.h"
 #include "glad/glad.h"
 #include "input/mouse.h"
 #include "input/keyboard.h"
+#include "input/joystick.h"
 
 namespace based::core
 {
+	WindowProperties::WindowProperties()
+	{
+		title = "BasedApp";
+		x = SDL_WINDOWPOS_CENTERED;
+		y = SDL_WINDOWPOS_CENTERED;
+		w = 1920;
+		h = 1080;
+		wMin = 320;
+		hMin = 180;
+		flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+		ccR = static_cast<float>(0x64) / static_cast<float>(0xFF);
+		ccG = static_cast<float>(0x95) / static_cast<float>(0xFF);
+		ccB = static_cast<float>(0xED) / static_cast<float>(0xFF);
+	}
+
 	Window::Window() : mWindow(nullptr) {}
 	Window::~Window()
 	{
@@ -17,9 +34,9 @@ namespace based::core
 		}
 	}
 
-	bool Window::Create()
+	bool Window::Create(const WindowProperties& props)
 	{
-		mWindow = SDL_CreateWindow("BasedGame", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+		mWindow = SDL_CreateWindow(props.title.c_str(), props.x, props.y, props.w, props.h, props.flags);
 		if (!mWindow)
 		{
 			BASED_ERROR("Error creating window: {}", SDL_GetError());
@@ -34,7 +51,7 @@ namespace based::core
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-		SDL_SetWindowMinimumSize(mWindow, 200, 200);
+		SDL_SetWindowMinimumSize(mWindow, props.wMin, props.hMin);
 
 		mGLContext = SDL_GL_CreateContext(mWindow);
 		if (mGLContext == nullptr)
@@ -45,6 +62,9 @@ namespace based::core
 
 		gladLoadGLLoader(SDL_GL_GetProcAddress);
 
+		Engine::Instance().GetRenderManager().SetClearColor(props.ccR, props.ccG, props.ccB, 1.f);
+
+		mImguiWindow.Create(props.imguiProps);
 		return true;
 	}
 
@@ -65,14 +85,22 @@ namespace based::core
 				case SDL_QUIT:
 					Engine::Instance().Quit();
 					break;
+				case SDL_CONTROLLERDEVICEADDED:
+					input::Joystick::OnJoystickConnected(e.cdevice);
+					break;
+				case SDL_CONTROLLERDEVICEREMOVED:
+					input::Joystick::OnJoystickDisconnected(e.cdevice);
+					break;
 				default:
 					break;
 			}
 		}
 
 		// Update input
-		input::Mouse::Update();
-		input::Keyboard::Update();
+		if (!mImguiWindow.WantCaptureMouse()) input::Mouse::Update();
+		if (!mImguiWindow.WantCaptureKeyboard()) input::Keyboard::Update();
+		
+		input::Joystick::Update();
 	}
 
 	void Window::GetSize(int& width, int& height)
@@ -87,6 +115,10 @@ namespace based::core
 
 	void Window::EndRender()
 	{
+		mImguiWindow.BeginRender();
+		Engine::Instance().GetApp().ImguiRender();
+		mImguiWindow.EndRender();
+
 		SDL_GL_SwapWindow(mWindow);
 	}
 }
