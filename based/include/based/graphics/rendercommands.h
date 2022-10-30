@@ -5,6 +5,7 @@ namespace based::graphics
 {
 	class Mesh;
 	class Shader;
+	class Framebuffer;
 
 	namespace rendercommands
 	{
@@ -23,10 +24,26 @@ namespace based::graphics
 				, mShader(shader)
 			{}
 
-			virtual void Execute();
+			virtual void Execute() override;
 		private:
 			std::weak_ptr<Mesh> mMesh;
 			std::weak_ptr<Shader> mShader;
+		};
+
+		class PushFramebuffer : public RenderCommand
+		{
+		public:
+			PushFramebuffer(std::weak_ptr<Framebuffer> framebuffer) : mFramebuffer(framebuffer) {}
+			virtual void Execute() override;
+		private:
+			std::weak_ptr<Framebuffer> mFramebuffer;
+		};
+
+		class PopFramebuffer : public RenderCommand
+		{
+		public:
+			PopFramebuffer() {}
+			virtual void Execute() override;
 		};
 	}
 }

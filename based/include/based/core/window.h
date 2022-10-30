@@ -2,9 +2,15 @@
 
 #include "imguiwindow.h"
 #include <string>
+#include <memory>
+#include "external/glm/glm.hpp"
 
 struct SDL_Window;
 using SDL_GLContext = void*;
+namespace based::graphics
+{
+	class Framebuffer;
+}
 
 namespace based::core
 {
@@ -14,7 +20,7 @@ namespace based::core
 		int x, y, w, h;
 		int wMin, hMin;
 		int flags;
-		float ccR, ccG, ccB;
+		glm::vec3 clearColor;
 		ImguiWindowProperties imguiProps;
 
 		WindowProperties();
@@ -31,10 +37,11 @@ namespace based::core
 
 		void PumpEvents();
 
-		void GetSize(int& width, int& height);
+		glm::ivec2 GetSize();
 
-		SDL_Window* GetSDLWindow() { return mWindow; }
-		SDL_GLContext GetGLContext() { return mGLContext; }
+		inline SDL_Window* GetSDLWindow() { return mWindow; }
+		inline SDL_GLContext GetGLContext() { return mGLContext; }
+		inline graphics::Framebuffer* GetFramebuffer() { return mFramebuffer.get(); }
 
 		void BeginRender();
 		void EndRender();
@@ -42,5 +49,6 @@ namespace based::core
 		SDL_Window* mWindow;
 		SDL_GLContext mGLContext;
 		ImguiWindow mImguiWindow;
+		std::shared_ptr<graphics::Framebuffer> mFramebuffer;
 	};
 }

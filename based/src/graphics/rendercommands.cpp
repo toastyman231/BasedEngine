@@ -1,9 +1,11 @@
 #include "graphics/rendercommands.h"
+#include "engine.h"
 #include "log.h"
 
 #include "graphics/mesh.h"
 #include "graphics/shader.h"
 #include "graphics/helpers.h"
+#include "graphics/framebuffer.h"
 
 #include "glad/glad.h"
 
@@ -34,5 +36,23 @@ namespace based::graphics::rendercommands
 		{
 			BASED_WARN("Attempting to execute RenderMesh with invalid data");
 		}
+	}
+
+	void PushFramebuffer::Execute()
+	{
+		std::shared_ptr<Framebuffer> fb = mFramebuffer.lock();
+		if (fb)
+		{
+			Engine::Instance().GetRenderManager().PushFramebuffer(fb);
+		}
+		else
+		{
+			BASED_WARN("Attempting to execute a RenderMesh with invalid data");
+		}
+	}
+
+	void PopFramebuffer::Execute()
+	{
+		Engine::Instance().GetRenderManager().PopFramebuffer();
 	}
 }

@@ -4,6 +4,7 @@
 #include "app.h"
 #include "log.h"
 #include "glad/glad.h"
+#include "graphics/framebuffer.h"
 #include "input/mouse.h"
 #include "input/keyboard.h"
 #include "input/joystick.h"
@@ -20,9 +21,10 @@ namespace based::core
 		wMin = 320;
 		hMin = 180;
 		flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
-		ccR = static_cast<float>(0x64) / static_cast<float>(0xFF);
-		ccG = static_cast<float>(0x95) / static_cast<float>(0xFF);
-		ccB = static_cast<float>(0xED) / static_cast<float>(0xFF);
+		clearColor = glm::vec3(
+			static_cast<float>(0x64) / static_cast<float>(0xFF),
+			static_cast<float>(0x95) / static_cast<float>(0xFF),
+			static_cast<float>(0xED) / static_cast<float>(0xFF));
 	}
 
 	Window::Window() : mWindow(nullptr) {}
@@ -50,6 +52,7 @@ namespace based::core
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 		SDL_SetWindowMinimumSize(mWindow, props.wMin, props.hMin);
 
@@ -62,7 +65,8 @@ namespace based::core
 
 		gladLoadGLLoader(SDL_GL_GetProcAddress);
 
-		Engine::Instance().GetRenderManager().SetClearColor(props.ccR, props.ccG, props.ccB, 1.f);
+		mFramebuffer = std::make_shared<graphics::Framebuffer>(props.w, props.h);
+		mFramebuffer->SetClearColor({ props.clearColor.r, props.clearColor.g, props.clearColor.b, 1.f });
 
 		mImguiWindow.Create(props.imguiProps);
 		return true;
@@ -103,18 +107,26 @@ namespace based::core
 		input::Joystick::Update();
 	}
 
-	void Window::GetSize(int& width, int& height)
+	glm::ivec2 Window::GetSize()
 	{
-		SDL_GetWindowSize(mWindow, &width, &height);
+		int w, h;
+		SDL_GetWindowSize(mWindow, &w, &h);
+		return glm::ivec2(w, h);
 	}
 
 	void Window::BeginRender()
 	{
-		Engine::Instance().GetRenderManager().Clear();
+		auto& rm = Engine::Instance().GetRenderManager();
+		rm.Clear();
+		rm.Submit(BASED_SUBMIT_RC(PushFramebuffer, mFramebuffer));
 	}
 
 	void Window::EndRender()
 	{
+		auto& rm = Engine::Instance().GetRenderManager();
+		rm.Submit(BASED_SUBMIT_RC(PopFramebuffer));
+		rm.Flush();
+
 		mImguiWindow.BeginRender();
 		Engine::Instance().GetApp().ImguiRender();
 		mImguiWindow.EndRender();
