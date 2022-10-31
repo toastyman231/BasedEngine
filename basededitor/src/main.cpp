@@ -6,6 +6,8 @@
 #include "based/graphics/mesh.h"
 #include "based/graphics/shader.h"
 #include "based/graphics/framebuffer.h"
+#include "based/graphics/texture.h"
+
 #include "based/input/mouse.h"
 #include "based/input/keyboard.h"
 #include "based/input/joystick.h"
@@ -22,6 +24,8 @@ class Editor : public based::App
 private:
     std::shared_ptr<graphics::Mesh> mMesh;
     std::shared_ptr<graphics::Shader> mShader;
+    std::shared_ptr<graphics::Texture> mTexture;
+    std::shared_ptr<graphics::Texture> mTexture2;
 
     float xKeyOffset = 0.f;
     float yKeyOffset = 0.f;
@@ -29,7 +33,7 @@ private:
 
     glm::vec2 mRectPos, mRectSize;
 public:
-    core::WindowProperties GetWindowProperties()
+    core::WindowProperties GetWindowProperties() override
     {
         core::WindowProperties props;
         props.title = "BasedEditor";
@@ -54,17 +58,27 @@ public:
             0, 3, 1,
             1, 3, 2
         };
-        mMesh = std::make_shared<graphics::Mesh>(&vertices[0], 4, 3, &elements[0], 6);
+        float texcoords[]
+        {
+            1.f, 1.f,
+            1.f, 0.f,
+            0.f, 0.f,
+            0.f, 1.f
+        };
+        mMesh = std::make_shared<graphics::Mesh>(&vertices[0], 4, 3, &texcoords[0], &elements[0], 6);
 
         // Test shader
         const char* vertexShader = R"(
                     #version 410 core
                     layout (location = 0) in vec3 position;
+                    layout (location = 1) in vec2 texcoords;
                     out vec3 vpos;
+                    out vec2 uvs;
                     uniform vec2 offset = vec2(0.5);
                     uniform mat4 model = mat4(1.0);
                     void main()
                     {
+                        uvs = texcoords;
                         vpos = position + vec3(offset, 0);
                         gl_Position = model * vec4(position, 1.0);
                     }
@@ -73,12 +87,15 @@ public:
                     #version 410 core
                     out vec4 outColor;
                     in vec3 vpos;
+                    in vec2 uvs;
 
                     uniform vec3 color = vec3(0.0);
                     uniform float blue = 0.5f;
+                    uniform sampler2D tex;
                     void main()
                     {
-                        outColor = vec4(vpos.xy, blue, 1.0);
+                        //outColor = vec4(vpos.xy, blue, 1.0);
+                        outColor = texture(tex, uvs);
                     }
                 )";
         mShader = std::make_shared<graphics::Shader>(vertexShader, fragmentShader);
@@ -86,6 +103,12 @@ public:
 
         mRectPos = glm::vec2(0.f);
         mRectSize = glm::vec2(1.f);
+
+        // Texture
+        mTexture = std::make_shared<graphics::Texture>("res/bro.png");
+        mTexture->SetTextureFilter(graphics::TextureFilter::Nearest);
+        mTexture2 = std::make_shared<graphics::Texture>("res/bro2.png");
+        mTexture2->SetTextureFilter(graphics::TextureFilter::Nearest);
     }
 
     void Shutdown() override
@@ -107,6 +130,11 @@ public:
 
         if (input::Keyboard::KeyDown(BASED_INPUT_KEY_LEFT)) xKeyOffset -= keySpeed * 100;
         if (input::Keyboard::KeyDown(BASED_INPUT_KEY_RIGHT)) xKeyOffset += keySpeed * 100;
+
+        if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
+        {
+            mTexture = mTexture2;
+        }
 
         if (input::Joystick::IsJoystickAvailable(0))
         {
@@ -131,9 +159,7 @@ public:
 
     void Render() override
     {
-        auto rc = std::make_unique < graphics::rendercommands::RenderMesh>(mMesh, mShader);
-        Engine::Instance().GetRenderManager().Submit(std::move(rc));
-        Engine::Instance().GetRenderManager().Flush();
+        Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderMeshTextured, mMesh, mTexture, mShader));
     }
 
     void ImguiRender() override

@@ -1,6 +1,10 @@
 import globals, os, subprocess, sys
 
-CONFIG = "debug"
+args = globals.ProcessArguments(sys.argv)
+CONFIG = globals.GetArgumentValue(args, "config", "debug")
+
+print("Building config: " + CONFIG)
+print("\n")
 ret = 0
 
 if globals.IsWindows():

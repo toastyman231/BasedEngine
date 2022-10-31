@@ -3,21 +3,34 @@ import subprocess
 
 TOOLS_DIR = "tools"
 
-def RunCommand(cmd):
+def RunCommand(cmds):
     ret = 0
-    script = "{}/{}/{}.py".format(os.getcwd(), TOOLS_DIR, cmd)
+    cmds[0] = "{}/{}/{}.py".format(os.getcwd(), TOOLS_DIR, cmds[0])
 
-    if (os.path.exists(script)):
-        print("Executing: ", cmd)
-        ret = subprocess.call(["python3", script])
+    if (os.path.exists(cmds[0])):
+        cmds.insert(0, "python3")
+        ret = subprocess.call(cmds)
     else:
-        print("Invalid Command: ", cmd)
+        print("Invalid Command: ", cmds[0])
         ret = -1
     return ret
 
-for i in range(1, len(sys.argv)):
-    cmd = sys.argv[i]
+# ----- Main Entry Point ----- #
+argc = len(sys.argv)
+i = 1
+while(i < argc):
+    cmds = [sys.argv[i]]
     
-    print("\n--------------------------")
+    while True:
+        if i < argc - 1 and sys.argv[i+1][0] == "-":
+            cmds.append(sys.argv[i+1][1:])
+            i = i + 1
+        else:
+            break;
 
-    if RunCommand(cmd) != 0: break
+    print("\n--------------------------")
+    print("Executing: ", cmds[0])
+    if (len(cmds) > 1):
+        print("With arguments: {}".format(", ".join(cmds[1:])))
+    if RunCommand(cmds) != 0: break
+    i = i + 1

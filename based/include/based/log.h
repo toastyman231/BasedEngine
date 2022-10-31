@@ -28,4 +28,5 @@
 #define BASED_WARN(...) (void)0
 #define BASED_ERROR(...) (void)0
 #define BASED_FATAL(...) (void)0
+#define BASED_ASSERT(x, msg) (void)0
 #endif

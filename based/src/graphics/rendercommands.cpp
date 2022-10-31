@@ -3,6 +3,7 @@
 #include "log.h"
 
 #include "graphics/mesh.h"
+#include "graphics/texture.h"
 #include "graphics/shader.h"
 #include "graphics/helpers.h"
 #include "graphics/framebuffer.h"
@@ -30,6 +31,36 @@ namespace based::graphics::rendercommands
 			}
 
 			shader->Unbind();
+			mesh->Unbind();
+		}
+		else
+		{
+			BASED_WARN("Attempting to execute RenderMesh with invalid data");
+		}
+	}
+
+	void RenderMeshTextured::Execute()
+	{
+		std::shared_ptr<Mesh> mesh = mMesh.lock();
+		std::shared_ptr<Texture> texture = mTexture.lock();
+		std::shared_ptr<Shader> shader = mShader.lock();
+		if (mesh && shader)
+		{
+			mesh->Bind();
+			texture->Bind();
+			shader->Bind();
+
+			if (mesh->GetElementCount() > 0)
+			{
+				glDrawElements(GL_TRIANGLES, mesh->GetElementCount(), GL_UNSIGNED_INT, 0);
+			}
+			else
+			{
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, mesh->GetVertexCount()); BASED_CHECK_GL_ERROR;
+			}
+
+			shader->Unbind();
+			texture->Unbind();
 			mesh->Unbind();
 		}
 		else
