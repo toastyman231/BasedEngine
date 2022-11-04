@@ -3,7 +3,7 @@
 #include "based/engine.h"
 #include "based/main.h"
 
-#include "based/graphics/mesh.h"
+#include "based/graphics/vertex.h"
 #include "based/graphics/shader.h"
 #include "based/graphics/framebuffer.h"
 #include "based/graphics/texture.h"
@@ -22,7 +22,7 @@ using namespace based;
 class Editor : public based::App
 {
 private:
-    std::shared_ptr<graphics::Mesh> mMesh;
+    std::shared_ptr<graphics::VertexArray> mVa;
     std::shared_ptr<graphics::Shader> mShader;
     std::shared_ptr<graphics::Texture> mTexture;
     std::shared_ptr<graphics::Texture> mTexture2;
@@ -45,39 +45,44 @@ public:
 
     void Initialize() override
     {
-        // Test mesh
-        float vertices[]
+        mVa = std::make_shared<graphics::VertexArray>();
+
         {
-             0.5,  0.5f, 0.f,
-             0.5, -0.5f, 0.f,
-            -0.5, -0.5f, 0.f,
-            -0.5,  0.5f, 0.f,
-        };
-        uint32_t elements[]
+            BASED_CREATE_VERTEX_BUFFER(vb, float);
+            vb->PushVertex({ 0.5f, 0.5, 0.f, 1.f, 1.f, 1.f });
+            vb->PushVertex({ 0.5f, -0.5, 0.f, 1.f, 0.f, 1.f });
+            vb->PushVertex({ -0.5f, -0.5, 0.f, 0.f, 1.f, 1.f });
+            vb->PushVertex({ -0.5f, 0.5, 0.f, 0.f, 1.f, 0.f });
+            vb->SetLayout({ 3, 3 });
+            mVa->PushBuffer(std::move(vb));
+        }
         {
-            0, 3, 1,
-            1, 3, 2
-        };
-        float texcoords[]
-        {
-            1.f, 1.f,
-            1.f, 0.f,
-            0.f, 0.f,
-            0.f, 1.f
-        };
-        mMesh = std::make_shared<graphics::Mesh>(&vertices[0], 4, 3, &texcoords[0], &elements[0], 6);
+            BASED_CREATE_VERTEX_BUFFER(vb, short);
+            vb->PushVertex({ 1, 1 });
+            vb->PushVertex({ 1, 0 });
+            vb->PushVertex({ 0, 0 });
+            vb->PushVertex({ 0, 1 });
+            vb->SetLayout({ 2 });
+            mVa->PushBuffer(std::move(vb));
+        }
+        
+        mVa->SetElements({ 0, 3, 1, 1, 3, 2 });
+        mVa->Upload();
 
         // Test shader
         const char* vertexShader = R"(
                     #version 410 core
                     layout (location = 0) in vec3 position;
-                    layout (location = 1) in vec2 texcoords;
+                    layout (location = 1) in vec3 color;
+                    layout (location = 2) in vec2 texcoords;
                     out vec3 vpos;
+                    out vec3 col;
                     out vec2 uvs;
                     uniform vec2 offset = vec2(0.5);
                     uniform mat4 model = mat4(1.0);
                     void main()
                     {
+                        col = color;
                         uvs = texcoords;
                         vpos = position + vec3(offset, 0);
                         gl_Position = model * vec4(position, 1.0);
@@ -87,6 +92,7 @@ public:
                     #version 410 core
                     out vec4 outColor;
                     in vec3 vpos;
+                    in vec3 col;
                     in vec2 uvs;
 
                     uniform vec3 color = vec3(0.0);
@@ -95,7 +101,7 @@ public:
                     void main()
                     {
                         //outColor = vec4(vpos.xy, blue, 1.0);
-                        outColor = texture(tex, uvs);
+                        outColor = texture(tex, uvs) + vec4(col, 1.0);
                     }
                 )";
         mShader = std::make_shared<graphics::Shader>(vertexShader, fragmentShader);
@@ -159,7 +165,7 @@ public:
 
     void Render() override
     {
-        Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderMeshTextured, mMesh, mTexture, mShader));
+        Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayTextured, mVa, mTexture, mShader));
     }
 
     void ImguiRender() override

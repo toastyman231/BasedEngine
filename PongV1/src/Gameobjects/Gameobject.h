@@ -1,6 +1,6 @@
 #pragma once
 
-#include "based/graphics/mesh.h"
+#include "based/graphics/vertex.h"
 #include "based/graphics/shader.h"
 
 #include "external/glm/glm.hpp"
@@ -10,10 +10,10 @@
 class Gameobject
 {
 public:
-	Gameobject(std::shared_ptr<based::graphics::Mesh> mesh,
+	Gameobject(std::shared_ptr<based::graphics::VertexArray> va,
 		std::shared_ptr<based::graphics::Shader> shader,
 		const glm::vec2& pos, const glm::vec2& size) 
-		: mMesh(mesh)
+		: mVertexArray(va)
 		, mShader(shader)
 		, mPos(pos)
 		, mSize(size)
@@ -28,7 +28,7 @@ public:
 	void Update();
 	void Render();
 private:
-	std::shared_ptr<based::graphics::Mesh> mMesh;
+	std::shared_ptr<based::graphics::VertexArray> mVertexArray;
 	std::shared_ptr<based::graphics::Shader> mShader;
 
 	glm::vec2 mPos;

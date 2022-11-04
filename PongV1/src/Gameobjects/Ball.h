@@ -5,10 +5,10 @@
 class Ball : public Gameobject
 {
 public:
-	Ball(std::shared_ptr<based::graphics::Mesh> mesh,
+	Ball(std::shared_ptr<based::graphics::VertexArray> va,
 		std::shared_ptr<based::graphics::Shader> shader,
 		const glm::vec2& pos, const glm::vec2& size)
-		: Gameobject(mesh, shader, pos, size)
+		: Gameobject(va, shader, pos, size)
 		, mVel(0.f)
 	{}
 

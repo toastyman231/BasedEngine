@@ -2,7 +2,7 @@
 #include "engine.h"
 #include "log.h"
 
-#include "graphics/mesh.h"
+#include "graphics/vertex.h"
 #include "graphics/texture.h"
 #include "graphics/shader.h"
 #include "graphics/helpers.h"
@@ -12,60 +12,68 @@
 
 namespace based::graphics::rendercommands
 {
-	void RenderMesh::Execute()
+	void RenderVertexArray::Execute()
 	{
-		std::shared_ptr<Mesh> mesh = mMesh.lock();
+		std::shared_ptr<VertexArray> va = mVertexArray.lock();
 		std::shared_ptr<Shader> shader = mShader.lock();
-		if (mesh && shader)
+		if (va && shader)
 		{
-			mesh->Bind();
-			shader->Bind();
-
-			if (mesh->GetElementCount() > 0)
+			BASED_ASSERT(va->IsValid(), "Attempting to execute invalid RenderVertexArray - did you forget to call VertexArray::Upload()?");
+			if (va->IsValid())
 			{
-				glDrawElements(GL_TRIANGLES, mesh->GetElementCount(), GL_UNSIGNED_INT, 0);
-			}
-			else
-			{
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, mesh->GetVertexCount()); BASED_CHECK_GL_ERROR;
-			}
+				va->Bind();
+				shader->Bind();
 
-			shader->Unbind();
-			mesh->Unbind();
+				if (va->GetElementCount() > 0)
+				{
+					glDrawElements(GL_TRIANGLES, va->GetElementCount(), GL_UNSIGNED_INT, 0);
+				}
+				else
+				{
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, va->GetVertexCount()); BASED_CHECK_GL_ERROR;
+				}
+
+				shader->Unbind();
+				va->Unbind();
+			}
 		}
 		else
 		{
-			BASED_WARN("Attempting to execute RenderMesh with invalid data");
+			BASED_WARN("Attempting to execute RenderVertexArray with invalid data");
 		}
 	}
 
-	void RenderMeshTextured::Execute()
+	void RenderVertexArrayTextured::Execute()
 	{
-		std::shared_ptr<Mesh> mesh = mMesh.lock();
+		std::shared_ptr<VertexArray> va = mVertexArray.lock();
 		std::shared_ptr<Texture> texture = mTexture.lock();
 		std::shared_ptr<Shader> shader = mShader.lock();
-		if (mesh && shader)
+		if (va && texture && shader)
 		{
-			mesh->Bind();
-			texture->Bind();
-			shader->Bind();
-
-			if (mesh->GetElementCount() > 0)
+			BASED_ASSERT(va->IsValid(), "Attempting to execute invalid RenderVertexArrayTextured - did you forget to call VertexArray::Upload()?");
+			if (va->IsValid())
 			{
-				glDrawElements(GL_TRIANGLES, mesh->GetElementCount(), GL_UNSIGNED_INT, 0);
-			}
-			else
-			{
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, mesh->GetVertexCount()); BASED_CHECK_GL_ERROR;
-			}
+				va->Bind();
+				texture->Bind();
+				shader->Bind();
 
-			shader->Unbind();
-			texture->Unbind();
-			mesh->Unbind();
+				if (va->GetElementCount() > 0)
+				{
+					glDrawElements(GL_TRIANGLES, va->GetElementCount(), GL_UNSIGNED_INT, 0);
+				}
+				else
+				{
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, va->GetVertexCount()); BASED_CHECK_GL_ERROR;
+				}
+
+				shader->Unbind();
+				texture->Unbind();
+				va->Unbind();
+			}
 		}
 		else
 		{
-			BASED_WARN("Attempting to execute RenderMesh with invalid data");
+			BASED_WARN("Attempting to execute RenderVertexArrayTextured with invalid data");
 		}
 	}
 

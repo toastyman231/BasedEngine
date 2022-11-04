@@ -16,5 +16,5 @@ void Gameobject::Render()
 	model = glm::translate(model, { mPos.x, mPos.y, 0.f });
 	model = glm::scale(model, { mSize.x, mSize.y, 1.f });
 	mShader->SetUniformMat4("model", model);
-	based::Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderMesh, mMesh, mShader));
+	based::Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArray, mVertexArray, mShader));
 }
