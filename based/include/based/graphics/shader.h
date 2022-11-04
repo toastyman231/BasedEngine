@@ -12,6 +12,9 @@ namespace based::graphics
 		Shader(const std::string& vertex, const std::string& fragment);
 		~Shader();
 
+		inline const std::string& GetVertexShaderSource() const { return mVertexShader; }
+		inline const std::string& GetFragmentShaderSource() const { return mFragmentShader; }
+
 		void Bind();
 		void Unbind();
 
@@ -27,6 +30,8 @@ namespace based::graphics
 		void SetUniformMat4(const std::string& name, const glm::mat4& mat);
 	private:
 		uint32_t mProgramId;
+		std::string mVertexShader;
+		std::string mFragmentShader;
 
 		std::unordered_map<std::string, int> mUniformLocations;
 

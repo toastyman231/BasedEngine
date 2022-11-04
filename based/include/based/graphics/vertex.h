@@ -5,7 +5,7 @@
 #include <vector>
 #include <type_traits>
 
-#include "log.h"
+#include "../log.h"
 
 #define BASED_CREATE_VERTEX_BUFFER(name, type) std::unique_ptr<based::graphics::VertexBuffer<type>> name = std::make_unique<based::graphics::VertexBuffer<type>>()
 

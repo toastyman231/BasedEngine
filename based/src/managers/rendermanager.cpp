@@ -89,6 +89,7 @@ namespace based::managers
 
 	void RenderManager::PushFramebuffer(std::shared_ptr<graphics::Framebuffer> framebuffer)
 	{
+		BASED_ASSERT(framebuffer, "Framebuffer is null");
 		mFramebuffers.push(framebuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->GetFbo()); BASED_CHECK_GL_ERROR;
 		SetViewport({ 0, 0, framebuffer->GetSize().x, framebuffer->GetSize().y });
@@ -117,5 +118,30 @@ namespace based::managers
 				SetViewport({ 0, 0, window.GetSize().x, window.GetSize().y });
 			}
 		}
+	}
+
+	void RenderManager::PushCamera(std::shared_ptr<graphics::Camera> camera)
+	{
+		BASED_ASSERT(camera, "Camera is null");
+		mCameras.push(camera);
+	}
+
+	void RenderManager::PopCamera()
+	{
+		BASED_ASSERT(mCameras.size() > 0, "RenderManager::PopCamera - empty stack");
+		if (mCameras.size() > 0)
+		{
+			mCameras.pop();
+		}
+	}
+
+	const based::graphics::Camera* RenderManager::GetActiveCamera() const
+	{
+		if (mCameras.size() > 0)
+		{
+			return mCameras.top().get();
+		}
+
+		return nullptr;
 	}
 }

@@ -7,6 +7,8 @@
 namespace based::graphics
 {
 	Shader::Shader(const std::string& vertex, const std::string& fragment)
+		: mVertexShader(vertex)
+		, mFragmentShader(fragment)
 	{
 		mProgramId = glCreateProgram(); BASED_CHECK_GL_ERROR;
 

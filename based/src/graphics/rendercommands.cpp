@@ -2,6 +2,7 @@
 #include "engine.h"
 #include "log.h"
 
+#include "graphics/camera.h"
 #include "graphics/vertex.h"
 #include "graphics/texture.h"
 #include "graphics/shader.h"
@@ -23,6 +24,15 @@ namespace based::graphics::rendercommands
 			{
 				va->Bind();
 				shader->Bind();
+
+				// TODO: Convert camera matrices to leverage UBOs
+				const auto& rm = Engine::Instance().GetRenderManager();
+				const auto& cam = rm.GetActiveCamera();
+				if (cam)
+				{
+					shader->SetUniformMat4("proj", cam->GetProjectionMatrix());
+					shader->SetUniformMat4("view", cam->GetViewMatrix());
+				}
 
 				if (va->GetElementCount() > 0)
 				{
@@ -56,6 +66,15 @@ namespace based::graphics::rendercommands
 				va->Bind();
 				texture->Bind();
 				shader->Bind();
+
+				// TODO: Convert camera matrices to leverage UBOs
+				const auto& rm = Engine::Instance().GetRenderManager();
+				const auto& cam = rm.GetActiveCamera();
+				if (cam)
+				{
+					shader->SetUniformMat4("proj", cam->GetProjectionMatrix());
+					shader->SetUniformMat4("view", cam->GetViewMatrix());
+				}
 
 				if (va->GetElementCount() > 0)
 				{
@@ -93,5 +112,23 @@ namespace based::graphics::rendercommands
 	void PopFramebuffer::Execute()
 	{
 		Engine::Instance().GetRenderManager().PopFramebuffer();
+	}
+
+	void PushCamera::Execute()
+	{
+		std::shared_ptr<Camera> cam = mCamera.lock();
+		if (cam)
+		{
+			Engine::Instance().GetRenderManager().PushCamera(cam);
+		}
+		else
+		{
+			BASED_WARN("Attempting to execute a RenderMesh with invalid data");
+		}
+	}
+
+	void PopCamera::Execute()
+	{
+		Engine::Instance().GetRenderManager().PopCamera();
 	}
 }
