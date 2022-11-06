@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "external/glm/glm.hpp"
 
 namespace based::graphics
 {
@@ -8,6 +9,7 @@ namespace based::graphics
 	class Texture;
 	class Framebuffer;
 	class Camera;
+	class Material;
 
 	namespace rendercommands
 	{
@@ -21,25 +23,30 @@ namespace based::graphics
 		class RenderVertexArray : public RenderCommand
 		{
 		public:
-			RenderVertexArray(std::weak_ptr<VertexArray> vertexArray, std::weak_ptr<Shader> shader)
+			RenderVertexArray(std::weak_ptr<VertexArray> vertexArray, std::weak_ptr<Shader> shader, 
+				const glm::mat4 modelMatrix = glm::mat4(1.f))
 				: mVertexArray(vertexArray)
 				, mShader(shader)
+				, mModelMatrix(modelMatrix)
 			{}
 
 			virtual void Execute() override;
 		private:
 			std::weak_ptr<VertexArray> mVertexArray;
 			std::weak_ptr<Shader> mShader;
+			glm::mat4 mModelMatrix;
 		};
 
 		class RenderVertexArrayTextured : public RenderCommand
 		{
 		public:
 			RenderVertexArrayTextured(std::weak_ptr<VertexArray> vertexArray, 
-				std::weak_ptr<Texture> texture, std::weak_ptr<Shader> shader)
+				std::weak_ptr<Texture> texture, std::weak_ptr<Shader> shader, 
+				const glm::mat4 modelMatrix = glm::mat4(1.f))
 				: mVertexArray(vertexArray)
 				, mTexture(texture)
 				, mShader(shader)
+				, mModelMatrix(modelMatrix)
 			{
 			}
 
@@ -48,6 +55,25 @@ namespace based::graphics
 			std::weak_ptr<VertexArray> mVertexArray;
 			std::weak_ptr<Texture> mTexture;
 			std::weak_ptr<Shader> mShader;
+			glm::mat4 mModelMatrix;
+		};
+
+		class RenderVertexArrayMaterial : public RenderCommand
+		{
+		public:
+			RenderVertexArrayMaterial(std::weak_ptr<VertexArray> vertexArray, std::weak_ptr<Material> material,
+				const glm::mat4 modelMatrix = glm::mat4(1.f))
+				: mVertexArray(vertexArray)
+				, mMaterial(material)
+				, mModelMatrix(modelMatrix)
+			{
+			}
+
+			virtual void Execute() override;
+		private:
+			std::weak_ptr<VertexArray> mVertexArray;
+			std::weak_ptr<Material> mMaterial;
+			glm::mat4 mModelMatrix;
 		};
 
 		class PushFramebuffer : public RenderCommand

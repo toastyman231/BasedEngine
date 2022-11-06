@@ -10,6 +10,8 @@ using SDL_GLContext = void*;
 namespace based::graphics
 {
 	class Framebuffer;
+	class VertexArray;
+	class Shader;
 }
 
 namespace based::core
@@ -20,6 +22,7 @@ namespace based::core
 		int x, y, w, h;
 		int wMin, hMin;
 		int flags;
+		float aspectRatio;
 		glm::vec3 clearColor;
 		ImguiWindowProperties imguiProps;
 
@@ -31,6 +34,8 @@ namespace based::core
 	public:
 		Window();
 		~Window();
+
+		inline void SetShouldRenderToScreen(bool render) { mShouldRenderToScreen = render; }
 
 		bool Create(const WindowProperties& props);
 		void Shutdown();
@@ -45,10 +50,23 @@ namespace based::core
 
 		void BeginRender();
 		void EndRender();
+
+		glm::ivec2 GetSizeInAspectRatio(int width, int height);
 	private:
+		void InitializeScreenRender();
+		void RenderToScreen();
+		void HandleResize(int width, int height);
+
+		WindowProperties mWindowProperties;
 		SDL_Window* mWindow;
 		SDL_GLContext mGLContext;
 		ImguiWindow mImguiWindow;
 		std::shared_ptr<graphics::Framebuffer> mFramebuffer;
+
+		// Screen render
+		bool mShouldRenderToScreen;
+		glm::vec2 mFramebufferSize;
+		std::shared_ptr<graphics::VertexArray> mScreenVA;
+		std::shared_ptr<graphics::Shader> mScreenShader;
 	};
 }
