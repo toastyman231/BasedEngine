@@ -1,0 +1,129 @@
+#include "based/engine.h"
+#include "based/main.h"
+#include "based/log.h"
+
+#include "based/graphics/camera.h"
+#include "based/graphics/framebuffer.h"
+#include "based/graphics/material.h"
+#include "based/graphics/shader.h"
+#include "based/graphics/texture.h"
+#include "based/graphics/vertex.h"
+#include "based/input/keyboard.h"
+
+#include <memory>
+
+#include "based/graphics/defaultassetlibraries.h"
+
+#include "based/core/assetlibrary.h"
+#include "based/input/mouse.h"
+#include "external/imgui/imgui.h"
+#include "external/entt/entt.hpp"
+#include "external/glm/ext/matrix_transform.hpp"
+#include <external/glm/gtx/string_cast.hpp>
+
+#include "based/graphics/defaultassetlibraries.h"
+#include "based/scene/components.h"
+
+using namespace based;
+
+class Sandbox : public based::App
+{
+private:
+	std::shared_ptr<scene::Scene> secondScene;
+public:
+	core::WindowProperties GetWindowProperties() override
+	{
+		core::WindowProperties props;
+		props.w = 1280;
+		props.h = 720;
+		props.imguiProps.IsDockingEnabled = true;
+
+		return props;
+	}
+
+	void Initialize() override
+	{
+		App::Initialize();
+		secondScene = std::make_shared<scene::Scene>();
+		secondScene->SetActiveCamera(GetCurrentScene()->GetActiveCamera());
+		BASED_TRACE("Created entity in second scene");
+		const auto entity = secondScene->GetRegistry().create();
+		secondScene->GetRegistry().emplace<scene::Position>(entity, 0.f, 0.f, 0.f);
+		//BASED_TRACE("Entity created at ({}, {})", x, y);
+		secondScene->GetRegistry().emplace<scene::Scale>(entity, 1.f, 1.f, 0.f);
+		secondScene->GetRegistry().emplace<scene::SpriteRenderer>(entity,
+			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
+			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
+	}
+
+	void Shutdown() override
+	{
+		
+	}
+
+	void Update() override
+	{
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_G))
+		{
+			LoadScene(secondScene);
+		}
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_L))
+		{
+			LoadScene(startScene);
+		}
+
+		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
+		{
+			const auto pos = GetCurrentScene()->GetActiveCamera()->ScreenToWorldPoint(static_cast<float>(input::Mouse::X()),
+				static_cast<float>(input::Mouse::Y()));
+			CreateSquare(pos.x, pos.y);
+		}
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
+		{
+			const auto view = GetCurrentScene()->GetRegistry().view<scene::Position>();
+			
+			for (const auto entity : view)
+			{
+				// TODO: figure out why registry.has doesn't exist
+				//if (!GetCurrentScene()->GetRegistry().has<scene::Velocity>(entity))
+				GetCurrentScene()->GetRegistry().emplace_or_replace<scene::Velocity>(entity, 0.f, -0.002f);
+			}
+		}
+
+		const auto view = GetCurrentScene()->GetRegistry().view<scene::Position, scene::Velocity>();
+
+		for (const auto entity : view)
+		{
+			const float x = GetCurrentScene()->GetRegistry().get<scene::Position>(entity).x;
+			const float y = GetCurrentScene()->GetRegistry().get<scene::Position>(entity).y;
+			const float dx = GetCurrentScene()->GetRegistry().get<scene::Velocity>(entity).dx;
+			const float dy = GetCurrentScene()->GetRegistry().get<scene::Velocity>(entity).dy;
+			GetCurrentScene()->GetRegistry().replace<scene::Position>(entity, x + dx, y + dy, 0.f);
+		}
+	}
+
+	entt::entity CreateSquare(float x, float y, float scaleX = 0.3f, float scaleY = 0.3f)
+	{
+		const auto entity = GetCurrentScene()->GetRegistry().create();
+		
+		GetCurrentScene()->GetRegistry().emplace<scene::Position>(entity, x, y, 0.f);
+		BASED_TRACE("Entity created at ({}, {})", x, y);
+		GetCurrentScene()->GetRegistry().emplace<scene::Scale>(entity, scaleX, scaleY, 0.f);
+		GetCurrentScene()->GetRegistry().emplace<scene::SpriteRenderer>(entity,
+			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
+			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
+
+		return entity;
+	}
+
+	void Render() override
+	{
+	}
+};
+
+based::App* CreateApp()
+{
+	return new Sandbox();
+}

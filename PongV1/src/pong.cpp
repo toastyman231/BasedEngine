@@ -16,7 +16,7 @@ using namespace based;
 class PongV1 : public based::App
 {
 public:
-	core::WindowProperties GetWindowProperties()
+	core::WindowProperties GetWindowProperties() override
 	{
 		core::WindowProperties props;
 		props.w = 800;

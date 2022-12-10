@@ -203,7 +203,7 @@ namespace based::core
 
 	void Window::RenderToScreen()
 	{
-		BASED_ASSERT(mScreenVA->IsValid(), "Attempting to render with invalid VertexArray - did you forget to call VertexArray::Upload()?")
+		BASED_ASSERT(mScreenVA->IsValid(), "Attempting to render with invalid VertexArray - did you forget to call VertexArray::Upload()?");
 		if (mScreenVA->IsValid())
 		{
 			// Black bars

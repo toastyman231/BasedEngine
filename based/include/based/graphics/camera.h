@@ -25,6 +25,8 @@ namespace based::graphics
 
 		const glm::mat4& GetProjectionMatrix() const { return mProjectionMatrix; }
 		const glm::mat4& GetViewMatrix() const { return mViewMatrix; }
+		const glm::vec3 ScreenToWorldPoint(float x, float y) const;
+		const glm::vec3 ScreenToWorldPoint(glm::vec2 point) const;
 	private:
 		float mAspectRatio;
 		float mHeight, mNear, mFar;

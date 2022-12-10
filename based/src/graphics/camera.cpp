@@ -1,4 +1,6 @@
 #include "graphics/camera.h"
+
+#include "engine.h"
 #include "external/glm/gtc/matrix_transform.hpp"
 
 namespace based::graphics
@@ -92,6 +94,28 @@ namespace based::graphics
 		view = glm::inverse(view);
 		SetViewMatrix(view);
 
+	}
+
+	const glm::vec3 Camera::ScreenToWorldPoint(float x, float y) const
+	{
+		// NORMALIZED DEVICE SPACE
+		const double xNorm = 2.0 * x / Engine::Instance().GetWindow().GetSize().x - 1;
+		const double yNorm = 2.0 * y / Engine::Instance().GetWindow().GetSize().y - 1;
+		// HOMOGENEOUS SPACE
+		const glm::vec4 screenPos = glm::vec4(xNorm, -yNorm, 0.f, 1.0f);
+		// Projection/Eye Space
+		const glm::mat4 ProjectView = mProjectionMatrix * mViewMatrix;
+		const float det = glm::determinant(ProjectView);
+		if (det == 0.f) return glm::vec3(0.f);
+
+		const glm::mat4 viewProjectionInverse = inverse(ProjectView);
+		const glm::vec4 worldPos = viewProjectionInverse * screenPos;
+		return glm::vec3(worldPos);
+	}
+
+	const glm::vec3 Camera::ScreenToWorldPoint(glm::vec2 point) const
+	{
+		return ScreenToWorldPoint(point.x, point.y);
 	}
 
 	void Camera::RecalculateProjectionMatrix()

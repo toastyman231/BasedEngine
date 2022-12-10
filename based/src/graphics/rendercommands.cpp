@@ -114,7 +114,7 @@ namespace based::graphics::rendercommands
 
 				Shader* shader = mat->GetShader();
 				Texture* texture = mat->GetTexture();
-				BASED_ASSERT(shader, "Attempting to execute invalid RenderVertexArrayMaterial - shader is nullptr")
+				BASED_ASSERT(shader, "Attempting to execute invalid RenderVertexArrayMaterial - shader is nullptr");
 				if (shader)
 				{
 					mat->UpdateShaderUniforms();

@@ -2,6 +2,7 @@
 
 #include "log.h"
 #include "app.h"
+#include "graphics/defaultassetlibraries.h"
 
 #include "input/mouse.h"
 #include "input/keyboard.h"
@@ -33,6 +34,8 @@ namespace based
     void Engine::Render()
     {
         mWindow.BeginRender();
+
+        mApp->GetCurrentScene()->RenderScene();
 
         mApp->Render();
 
@@ -110,6 +113,9 @@ namespace based
                     // Initialize input
                     input::Mouse::Initialize();
                     input::Keyboard::Initialize();
+
+                    // Initialize Asset Libraries
+                    graphics::DefaultLibraries::InitializeLibraries();
 
                     // Initialize client
                     mApp->Initialize();
