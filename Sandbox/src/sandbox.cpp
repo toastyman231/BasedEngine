@@ -4,10 +4,6 @@
 
 #include "based/graphics/camera.h"
 #include "based/graphics/framebuffer.h"
-#include "based/graphics/material.h"
-#include "based/graphics/shader.h"
-#include "based/graphics/texture.h"
-#include "based/graphics/vertex.h"
 #include "based/input/keyboard.h"
 
 #include <memory>
@@ -48,9 +44,7 @@ public:
 		secondScene->SetActiveCamera(GetCurrentScene()->GetActiveCamera());
 		BASED_TRACE("Created entity in second scene");
 		const auto entity = secondScene->GetRegistry().create();
-		secondScene->GetRegistry().emplace<scene::Position>(entity, 0.f, 0.f, 0.f);
-		//BASED_TRACE("Entity created at ({}, {})", x, y);
-		secondScene->GetRegistry().emplace<scene::Scale>(entity, 1.f, 1.f, 0.f);
+		secondScene->GetRegistry().emplace<scene::Transform>(entity, glm::vec3(0.f));
 		secondScene->GetRegistry().emplace<scene::SpriteRenderer>(entity,
 			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
@@ -75,42 +69,43 @@ public:
 
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
 		{
-			const auto pos = GetCurrentScene()->GetActiveCamera()->ScreenToWorldPoint(static_cast<float>(input::Mouse::X()),
+			const auto pos = GetCurrentScene()->GetActiveCamera()->ScreenToWorldPoint(
+				static_cast<float>(input::Mouse::X()),
 				static_cast<float>(input::Mouse::Y()));
 			CreateSquare(pos.x, pos.y);
 		}
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
 		{
-			const auto view = GetCurrentScene()->GetRegistry().view<scene::Position>();
+			const auto view = GetCurrentScene()->GetRegistry().view<scene::Transform>();
 			
 			for (const auto entity : view)
 			{
 				// TODO: figure out why registry.has doesn't exist
-				//if (!GetCurrentScene()->GetRegistry().has<scene::Velocity>(entity))
 				GetCurrentScene()->GetRegistry().emplace_or_replace<scene::Velocity>(entity, 0.f, -0.002f);
 			}
 		}
 
-		const auto view = GetCurrentScene()->GetRegistry().view<scene::Position, scene::Velocity>();
+		const auto view = GetCurrentScene()->GetRegistry().view<scene::Transform, scene::Velocity>();
 
 		for (const auto entity : view)
 		{
-			const float x = GetCurrentScene()->GetRegistry().get<scene::Position>(entity).x;
-			const float y = GetCurrentScene()->GetRegistry().get<scene::Position>(entity).y;
+			const scene::Transform& trans = GetCurrentScene()->GetRegistry().get<scene::Transform>(entity);
 			const float dx = GetCurrentScene()->GetRegistry().get<scene::Velocity>(entity).dx;
 			const float dy = GetCurrentScene()->GetRegistry().get<scene::Velocity>(entity).dy;
-			GetCurrentScene()->GetRegistry().replace<scene::Position>(entity, x + dx, y + dy, 0.f);
+			GetCurrentScene()->GetRegistry().replace<scene::Transform>(entity, 
+				glm::vec3(trans.Position.x + dx, trans.Position.y + dy, 0.f),
+				glm::vec3(0.f), trans.Scale);
 		}
 	}
 
 	entt::entity CreateSquare(float x, float y, float scaleX = 0.3f, float scaleY = 0.3f)
 	{
 		const auto entity = GetCurrentScene()->GetRegistry().create();
-		
-		GetCurrentScene()->GetRegistry().emplace<scene::Position>(entity, x, y, 0.f);
+
+		GetCurrentScene()->GetRegistry().emplace<scene::Transform>(entity,
+			glm::vec3( x, y, 0.f ), glm::vec3( 0.f, 0.f, 0.f ), glm::vec3( scaleX, scaleY, 0.f ));
 		BASED_TRACE("Entity created at ({}, {})", x, y);
-		GetCurrentScene()->GetRegistry().emplace<scene::Scale>(entity, scaleX, scaleY, 0.f);
 		GetCurrentScene()->GetRegistry().emplace<scene::SpriteRenderer>(entity,
 			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));

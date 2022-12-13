@@ -7,28 +7,17 @@
 
 namespace based::scene
 {
-	struct Position
+	struct Transform
 	{
-		float x;
-		float y;
-		float z;
+		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
-		Position() = default;
-		Position(const Position&) = default;
-		explicit Position(const glm::vec3& pos) : x(pos.x), y(pos.y), z(pos.z) {}
-		Position(float xPos, float yPos, float zPos) : x(xPos), y(yPos), z(zPos) {}
-	};
-
-	struct Scale
-	{
-		float x;
-		float y;
-		float z;
-
-		Scale() = default;
-		Scale(const Scale&) = default;
-		explicit Scale(const glm::vec3& scale) : x(scale.x), y(scale.y), z(scale.z) {}
-		Scale(float scaleX, float scaleY, float scaleZ) : x(scaleX), y(scaleY), z(scaleZ) {}
+		Transform() = default;
+		Transform(const Transform&) = default;
+		Transform(const glm::vec3& pos) : Position(pos) {}
+		Transform(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale)
+		: Position(pos), Rotation(rot), Scale(scale) {}
 	};
 
 	struct Velocity

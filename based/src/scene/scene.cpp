@@ -10,19 +10,16 @@ namespace based::scene
 	void Scene::RenderScene() const
 	{
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera, mActiveCamera));
-		const auto view = mRegistry.view<Position, Scale, SpriteRenderer>();
+		const auto view = mRegistry.view<Transform, SpriteRenderer>();
 
 		for (const auto entity : view)
 		{
 			// TODO: maybe move this to an Entity class?
-			float posX = mRegistry.get<Position>(entity).x;
-			float posY = mRegistry.get<Position>(entity).y;
 			const std::shared_ptr<graphics::VertexArray> va = mRegistry.get<SpriteRenderer>(entity).vertexArray;
 			const std::shared_ptr<graphics::Material> mat = mRegistry.get<SpriteRenderer>(entity).material;
-			const Scale& scale = mRegistry.get<Scale>(entity);
 			auto model = glm::mat4(1.f);
-			model = glm::translate(model, { posX, posY, 0.f });
-			model = glm::scale(model, { scale.x, scale.y, scale.z });
+			model = glm::translate(model, mRegistry.get<Transform>(entity).Position);
+			model = glm::scale(model, mRegistry.get<Transform>(entity).Scale);
 			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, va, mat, model));
 		}
 
