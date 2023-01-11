@@ -28,13 +28,13 @@ namespace based::graphics
 		void SetUniformFloat4(const std::string& name, const glm::vec4& val);
 		void SetUniformMat3(const std::string& name, const glm::mat3& mat);
 		void SetUniformMat4(const std::string& name, const glm::mat4& mat);
+
+		int GetUniformLocation(const std::string& name);
 	private:
 		uint32_t mProgramId;
 		std::string mVertexShader;
 		std::string mFragmentShader;
 
 		std::unordered_map<std::string, int> mUniformLocations;
-
-		int GetUniformLocation(const std::string& name);
 	};
 }

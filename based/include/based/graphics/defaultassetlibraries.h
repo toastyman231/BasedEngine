@@ -125,6 +125,37 @@ namespace based::graphics
                 )";
 				mShaderLibrary.Load("TexturedRect", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));
 			}
+			{
+				auto vertexShader = R"(
+                    #version 410 core
+                    layout (location = 0) in vec4 vertex;
+
+                    out vec2 uvs;
+
+					uniform mat4 projection;
+
+                    void main()
+                    {
+                        gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
+						uvs = vertex.zw;
+                    }
+                )";
+				auto fragmentShader = R"(
+                    #version 410 core
+                    in vec2 uvs;
+				    out vec4 outColor;
+
+					uniform vec3 fontColor;
+                    uniform sampler2D tex;
+
+                    void main()
+                    {
+						vec4 sampled = vec4(1.0, 1.1, 1.0, texture(tex, uvs).r);
+                        outColor = vec4(fontColor, 1.0) * sampled;
+                    }
+                )";
+				mShaderLibrary.Load("Text", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));
+			}
 
 			// Textures
 			{

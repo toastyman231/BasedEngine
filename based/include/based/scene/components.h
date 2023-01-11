@@ -4,6 +4,7 @@
 #include "external/glm/glm.hpp"
 #include "based/graphics/material.h"
 #include "based/graphics/vertex.h"
+#include "based/ui/textentity.h"
 
 namespace based::scene
 {
@@ -42,5 +43,13 @@ namespace based::scene
 			//const std::weak_ptr<graphics::Texture> tex,
 			const std::weak_ptr<graphics::Material> mat) : vertexArray(va), /*texture(tex),*/ material(mat) {}
 		SpriteRenderer(const SpriteRenderer&) = default;
+	};
+
+	struct TextRenderer
+	{
+		//std::shared_ptr<ui::TextEntity> text;
+
+		TextRenderer() = default;
+		//TextRenderer(const std::weak_ptr<ui::TextEntity> textEntity) : text(textEntity) {}
 	};
 }

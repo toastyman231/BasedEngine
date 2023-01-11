@@ -1,23 +1,22 @@
 #include "based/engine.h"
-#include "based/main.h"
 #include "based/log.h"
+#include "based/main.h"
 
 #include "based/graphics/camera.h"
 #include "based/graphics/framebuffer.h"
 #include "based/input/keyboard.h"
+#include "based/ui/textentity.h"
 
 #include <memory>
 
 #include "based/graphics/defaultassetlibraries.h"
 
+#include <external/glm/gtx/string_cast.hpp>
 #include "based/core/assetlibrary.h"
 #include "based/input/mouse.h"
-#include "external/imgui/imgui.h"
 #include "external/entt/entt.hpp"
 #include "external/glm/ext/matrix_transform.hpp"
-#include <external/glm/gtx/string_cast.hpp>
-
-#include "based/graphics/defaultassetlibraries.h"
+#include "external/imgui/imgui.h"
 #include "based/scene/components.h"
 
 using namespace based;
@@ -26,6 +25,7 @@ class Sandbox : public based::App
 {
 private:
 	std::shared_ptr<scene::Scene> secondScene;
+	ui::TextEntity* text;
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -40,6 +40,8 @@ public:
 	void Initialize() override
 	{
 		App::Initialize();
+		text = &ui::TextEntity();
+		//ui::TextEntity::TestRender();
 		secondScene = std::make_shared<scene::Scene>();
 		secondScene->SetActiveCamera(GetCurrentScene()->GetActiveCamera());
 		BASED_TRACE("Created entity in second scene");
@@ -48,15 +50,22 @@ public:
 		secondScene->GetRegistry().emplace<scene::SpriteRenderer>(entity,
 			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
+		BASED_TRACE("Done initializing");
+		//text = ui::TextEntity("This is a test!");
+		//text.SetText("This is a test!");
+		//text.RenderText(glm::vec3(0.f), glm::vec4(1.f), 1.f);
 	}
 
 	void Shutdown() override
 	{
-		
+		//text.DeleteText();
 	}
 
 	void Update() override
 	{
+		//ui::TextEntity text("This is a test!");
+		//text.RenderText(glm::vec3(0.f), glm::vec4(1.f), 1.f);
+
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_G))
 		{
 			LoadScene(secondScene);
@@ -115,6 +124,8 @@ public:
 
 	void Render() override
 	{
+		BASED_TRACE("Rendering")
+		text->RenderText("This is a test!", 0.f, 0.f, glm::vec3(1.f), 1.f);
 	}
 };
 

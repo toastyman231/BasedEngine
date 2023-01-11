@@ -9,6 +9,7 @@
 #include "input/joystick.h"
 
 #include "SDL2/SDL.h"
+#include "ui/textentity.h"
 
 namespace based
 {
@@ -117,6 +118,9 @@ namespace based
                     // Initialize Asset Libraries
                     graphics::DefaultLibraries::InitializeLibraries();
 
+                    // Initialize glText
+                    //ui::TextEntity::Initialize();
+
                     // Initialize client
                     mApp->Initialize();
                 }
@@ -139,6 +143,9 @@ namespace based
 
         // Shutdown client
         mApp->Shutdown();
+
+        // Shutdown glText
+        //ui::TextEntity::Terminate();
 
         // Shutdown input
         input::Joystick::Shutdown();

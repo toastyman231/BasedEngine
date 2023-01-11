@@ -17,6 +17,7 @@ externals["maclibs"] = "external/maclibs"
 externals["sdl2"] = "external/sdl2"
 externals["spdlog"] = "external/spdlog"
 externals["glad"] = "external/glad"
+externals["freetype"] = "external/freetype"
 
 -- Process Glad before anything else
 include "external/glad"
@@ -48,7 +49,8 @@ project "based"
         "%{prj.name}/include/based/core",
         "%{externals.sdl2}/include",
         "%{externals.spdlog}/include",
-        "%{externals.glad}/include"
+        "%{externals.glad}/include",
+        "%{externals.freetype}/include"
     }
 
     flags
@@ -124,7 +126,8 @@ project "basededitor"
     externalincludedirs
     {
         "based/include",
-        "%{externals.spdlog}/include"
+        "%{externals.spdlog}/include",
+        ""
     }
 
     flags
@@ -147,13 +150,15 @@ project "basededitor"
 
         libdirs
         {
-            "%{externals.sdl2}/lib"
+            "%{externals.sdl2}/lib",
+            "%{externals.freetype}/lib"
         }
 
         links
         {
             "SDL2",
-            "glad"
+            "glad",
+            "freetype"
         }
 
     filter {"system:macosx", "configurations:*"}
@@ -174,7 +179,8 @@ project "basededitor"
         links
         {
             "SDL2.framework",
-            "glad"
+            "glad",
+            "freetype"
         }
 
     filter {"system:linux", "configurations:*"}
@@ -187,7 +193,8 @@ project "basededitor"
         {
             "SDL2",
             "glad",
-            "dl"
+            "dl",
+            "freetype"
         }
 
     filter "configurations:Debug"
@@ -241,74 +248,78 @@ project "PongV1"
         }   
     
         filter {"system:windows", "configurations:*"}
-            systemversion "latest"
-    
-            defines
-            {
-                "BASED_PLATFORM_WINDOWS"
-            }
-    
-            libdirs
-            {
-                "%{externals.sdl2}/lib"
-            }
-    
-            links
-            {
-                "SDL2",
-                "glad"
-            }
-    
-        filter {"system:macosx", "configurations:*"}
-            xcodebuildsettings
-            {
-                ["MACOSX_DEPLOYMENT_TARGET"] = "10.15",
-                ["UseModernBuildSystem"] = "NO"
-            }
-    
-            defines
-            {
-                "BASED_PLATFORM_MAC"
-            }
-    
-            abspath = path.getabsolute("%{externals.maclibs}")
-            linkoptions {"-F " .. abspath}
-    
-            links
-            {
-                "SDL2.framework",
-                "glad"
-            }
-    
-        filter {"system:linux", "configurations:*"}
-            defines
-            {
-                "BASED_PLATFORM_LINUX"
-            }
-    
-            links
-            {
-                "SDL2",
-                "glad",
-                "dl"
-            }
-    
-        filter "configurations:Debug"
-            defines
-            {
-                "BASED_CONFIG_DEBUG"
-            }
-            runtime "Debug"
-            symbols "on"
-    
-        filter "configurations:Release"
-            defines
-            {
-                "BASED_CONFIG_RELEASE"
-            }
-            runtime "Release"
-            symbols "off"
-            optimize "on"
+        systemversion "latest"
+
+        defines
+        {
+            "BASED_PLATFORM_WINDOWS"
+        }
+
+        libdirs
+        {
+            "%{externals.sdl2}/lib",
+            "%{externals.freetype}/lib"
+        }
+
+        links
+        {
+            "SDL2",
+            "glad",
+            "freetype"
+        }
+
+    filter {"system:macosx", "configurations:*"}
+        xcodebuildsettings
+        {
+            ["MACOSX_DEPLOYMENT_TARGET"] = "10.15",
+            ["UseModernBuildSystem"] = "NO"
+        }
+
+        defines
+        {
+            "BASED_PLATFORM_MAC"
+        }
+
+        abspath = path.getabsolute("%{externals.maclibs}")
+        linkoptions {"-F " .. abspath}
+
+        links
+        {
+            "SDL2.framework",
+            "glad",
+            "freetype"
+        }
+
+    filter {"system:linux", "configurations:*"}
+        defines
+        {
+            "BASED_PLATFORM_LINUX"
+        }
+
+        links
+        {
+            "SDL2",
+            "glad",
+            "dl",
+            "freetype"
+        }
+
+    filter "configurations:Debug"
+        defines
+        {
+            "BASED_CONFIG_DEBUG"
+        }
+        runtime "Debug"
+        symbols "on"
+
+    filter "configurations:Release"
+        defines
+        {
+            "BASED_CONFIG_RELEASE"
+        }
+        runtime "Release"
+        symbols "off"
+        optimize "on"
 
 project "Sandbox"
     location "Sandbox"
@@ -353,13 +364,15 @@ project "Sandbox"
 
         libdirs
         {
-            "%{externals.sdl2}/lib"
+            "%{externals.sdl2}/lib",
+            "%{externals.freetype}/lib"
         }
 
         links
         {
             "SDL2",
-            "glad"
+            "glad",
+            "freetype"
         }
 
     filter {"system:macosx", "configurations:*"}
@@ -380,7 +393,8 @@ project "Sandbox"
         links
         {
             "SDL2.framework",
-            "glad"
+            "glad",
+            "freetype"
         }
 
     filter {"system:linux", "configurations:*"}
@@ -393,7 +407,8 @@ project "Sandbox"
         {
             "SDL2",
             "glad",
-            "dl"
+            "dl",
+            "freetype"
         }
 
     filter "configurations:Debug"
