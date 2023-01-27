@@ -126,8 +126,7 @@ project "basededitor"
     externalincludedirs
     {
         "based/include",
-        "%{externals.spdlog}/include",
-        ""
+        "%{externals.spdlog}/include"
     }
 
     flags

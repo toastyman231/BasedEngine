@@ -26,7 +26,7 @@ namespace based::ui
 
 	std::map<GLchar, Character> Characters;
 
-	TextEntity::TextEntity()
+	TextEntity::TextEntity(std::string dummyVariable) : VAO(0), VBO(0)
 	{
 		//TODO: bring back entity functionality
 		//mEntity = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().create();
@@ -34,17 +34,20 @@ namespace based::ui
 		//Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().emplace<scene::TextRenderer>(mEntity, mEntity);
 
 		mColor = glm::vec4(1.f);
-		mShader = graphics::DefaultLibraries::GetShaderLibrary().Get("Text");
+		auto lib = graphics::DefaultLibraries::GetShaderLibrary();
+		mShader = lib.Get("Text");
 
 		glEnable(GL_CULL_FACE); BASED_CHECK_GL_ERROR;
 		glEnable(GL_BLEND); BASED_CHECK_GL_ERROR;
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); BASED_CHECK_GL_ERROR;
+		//glDisable(GL_DEPTH_TEST); BASED_CHECK_GL_ERROR;
 
 		//mShader = graphics::DefaultLibraries::GetShaderLibrary().Get("Text");
 		glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Engine::Instance().GetWindow().GetSize().x), 0.0f,
 			static_cast<float>(Engine::Instance().GetWindow().GetSize().y));
 		mShader->Bind();
 		glUniformMatrix4fv(mShader->GetUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glUniform1i(mShader->GetUniformLocation("tex"), 0);
 
 		FT_Library ft;
 		if (FT_Init_FreeType(&ft))
@@ -54,7 +57,10 @@ namespace based::ui
 		}
 
 		FT_Face face;
-		if (FT_New_Face(ft, "res/fonts/arial.ttf", 0, &face))
+		//std::string font_name = std::filesystem::path("res/fonts/arial.ttf");
+		// TODO: Generate font path automatically
+		// TODO: consider switching to msdfgl or freetype-gl
+		if (FT_New_Face(ft, "C:/Users/jmorg/Documents/Repos/BasedEngine/bin/Debug/Sandbox/res/fonts/arial.ttf", 0, &face))
 		{
 			BASED_ERROR("ERROR::FREETYPE: Failed to load font");
 			return;
@@ -106,7 +112,9 @@ namespace based::ui
 		FT_Done_Face(face);
 		FT_Done_FreeType(ft);
 
+		//BASED_TRACE("VAO: " + VAO);
 		glGenVertexArrays(1, &VAO); BASED_CHECK_GL_ERROR;
+		BASED_TRACE("VAO: {}", VAO);
 		glGenBuffers(1, &VBO); BASED_CHECK_GL_ERROR;
 		glBindVertexArray(VAO); BASED_CHECK_GL_ERROR;
 		glBindBuffer(GL_ARRAY_BUFFER, VBO); BASED_CHECK_GL_ERROR;
@@ -116,6 +124,7 @@ namespace based::ui
 		glBindBuffer(GL_ARRAY_BUFFER, 0); BASED_CHECK_GL_ERROR;
 		glBindVertexArray(0); BASED_CHECK_GL_ERROR;
 
+		BASED_TRACE("Text entity setup complete");
 		//RenderText(0.f, 0.f, glm::vec3(1.f), 1.f);
 	}
 
@@ -170,15 +179,15 @@ namespace based::ui
 	void TextEntity::RenderText(std::string text, float x, float y, glm::vec3 color, float scale)
 	{
 		// activate corresponding render state
-		auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("Text");
-		shader->Bind();
-		BASED_TRACE(shader->GetFragmentShaderSource());
-		glUniform3f(shader->GetUniformLocation("fontColor"), color.x, color.y, color.z); BASED_CHECK_GL_ERROR;
+		//auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("Text");
+		mShader->Bind();
+		//BASED_TRACE(mShader->GetFragmentShaderSource());
+		glUniform3f(mShader->GetUniformLocation("fontColor"), color.x, color.y, color.z); BASED_CHECK_GL_ERROR;
 		glActiveTexture(GL_TEXTURE0); BASED_CHECK_GL_ERROR;
+		//BASED_TRACE("VAO: {}", VAO);
 		glBindVertexArray(VAO); BASED_CHECK_GL_ERROR;
 
 		// iterate through all characters
-		// TODO: c is null for some reason
 		std::string::const_iterator c;
 		for (c = text.begin(); c != text.end(); c++)
 		{

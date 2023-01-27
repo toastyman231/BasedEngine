@@ -25,7 +25,7 @@ class Sandbox : public based::App
 {
 private:
 	std::shared_ptr<scene::Scene> secondScene;
-	ui::TextEntity* text;
+	ui::TextEntity text;
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -40,7 +40,7 @@ public:
 	void Initialize() override
 	{
 		App::Initialize();
-		text = &ui::TextEntity();
+		text = ui::TextEntity("Test");
 		//ui::TextEntity::TestRender();
 		secondScene = std::make_shared<scene::Scene>();
 		secondScene->SetActiveCamera(GetCurrentScene()->GetActiveCamera());
@@ -63,9 +63,6 @@ public:
 
 	void Update() override
 	{
-		//ui::TextEntity text("This is a test!");
-		//text.RenderText(glm::vec3(0.f), glm::vec4(1.f), 1.f);
-
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_G))
 		{
 			LoadScene(secondScene);
@@ -124,8 +121,8 @@ public:
 
 	void Render() override
 	{
-		BASED_TRACE("Rendering")
-		text->RenderText("This is a test!", 0.f, 0.f, glm::vec3(1.f), 1.f);
+		//BASED_TRACE("Rendering");
+		text.RenderText("This is a test!", 640.f, 360.f, glm::vec3(1.f), 1.f);
 	}
 };
 

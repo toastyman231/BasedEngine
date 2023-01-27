@@ -18,7 +18,8 @@ namespace based::ui
 
 		unsigned int VAO, VBO;
 	public:
-		TextEntity();
+		TextEntity() = default;
+		TextEntity(std::string dummyVariable);
 		TextEntity(const std::string& text, glm::vec3 pos);
 		~TextEntity();
 

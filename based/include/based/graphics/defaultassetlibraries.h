@@ -155,6 +155,7 @@ namespace based::graphics
                     }
                 )";
 				mShaderLibrary.Load("Text", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));
+				BASED_TRACE("Loaded text shader");
 			}
 
 			// Textures
