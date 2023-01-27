@@ -156,6 +156,7 @@ project "basededitor"
         links
         {
             "SDL2",
+            "SDL2_ttf",
             "glad",
             "freetype"
         }
@@ -191,6 +192,7 @@ project "basededitor"
         links
         {
             "SDL2",
+            "SDL2_ttf",
             "glad",
             "dl",
             "freetype"
@@ -263,6 +265,7 @@ project "PongV1"
         links
         {
             "SDL2",
+            "SDL2_ttf",
             "glad",
             "freetype"
         }
@@ -340,6 +343,7 @@ project "Sandbox"
     externalincludedirs
     {
         "based/include",
+        "%{externals.sdl2}/include",
         "%{externals.spdlog}/include"
     }
 
@@ -370,6 +374,7 @@ project "Sandbox"
         links
         {
             "SDL2",
+            "SDL2_ttf",
             "glad",
             "freetype"
         }

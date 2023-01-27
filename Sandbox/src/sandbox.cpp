@@ -58,7 +58,7 @@ public:
 
 	void Shutdown() override
 	{
-		//text.DeleteText();
+		text.DeleteText();
 	}
 
 	void Update() override
@@ -122,7 +122,9 @@ public:
 	void Render() override
 	{
 		//BASED_TRACE("Rendering");
-		text.RenderText("This is a test!", 640.f, 360.f, glm::vec3(1.f), 1.f);
+		//text.RenderText("This is a test!", 640.f, 360.f, glm::vec3(1.f), 1.f);
+		text.Draw_Font("This is a test!", Engine::Instance().GetWindow().GetSize().x / 2,
+			Engine::Instance().GetWindow().GetSize().y / 2, 74, 32, 32, { 255, 255, 255 });
 	}
 };
 

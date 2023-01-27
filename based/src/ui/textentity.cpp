@@ -6,6 +6,8 @@
 #include "ft2build.h"
 #include FT_FREETYPE_H
 
+#include "SDL2/SDL_ttf.h"
+
 #include "external/glm/ext/matrix_clip_space.hpp"
 #include "external/glm/gtc/type_ptr.hpp"
 
@@ -32,99 +34,103 @@ namespace based::ui
 		//mEntity = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().create();
 		//Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().emplace<scene::Transform>(mEntity, glm::vec3(0.f));
 		//Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().emplace<scene::TextRenderer>(mEntity, mEntity);
+		mRenderer = SDL_CreateRenderer(Engine::Instance().GetWindow().GetSDLWindow(), -1, 0);
 
-		mColor = glm::vec4(1.f);
-		auto lib = graphics::DefaultLibraries::GetShaderLibrary();
-		mShader = lib.Get("Text");
+		/*Draw_Font("This is a test!", Engine::Instance().GetWindow().GetSize().x / 2, 
+			Engine::Instance().GetWindow().GetSize().y / 2, 74, 32, 32, { 255, 255, 255 });*/
 
-		glEnable(GL_CULL_FACE); BASED_CHECK_GL_ERROR;
-		glEnable(GL_BLEND); BASED_CHECK_GL_ERROR;
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); BASED_CHECK_GL_ERROR;
-		//glDisable(GL_DEPTH_TEST); BASED_CHECK_GL_ERROR;
+		//mColor = glm::vec4(1.f);
+		//auto lib = graphics::DefaultLibraries::GetShaderLibrary();
+		//mShader = lib.Get("Text");
 
-		//mShader = graphics::DefaultLibraries::GetShaderLibrary().Get("Text");
-		glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Engine::Instance().GetWindow().GetSize().x), 0.0f,
-			static_cast<float>(Engine::Instance().GetWindow().GetSize().y));
-		mShader->Bind();
-		glUniformMatrix4fv(mShader->GetUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-		glUniform1i(mShader->GetUniformLocation("tex"), 0);
+		//glEnable(GL_CULL_FACE); BASED_CHECK_GL_ERROR;
+		//glEnable(GL_BLEND); BASED_CHECK_GL_ERROR;
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); BASED_CHECK_GL_ERROR;
+		////glDisable(GL_DEPTH_TEST); BASED_CHECK_GL_ERROR;
 
-		FT_Library ft;
-		if (FT_Init_FreeType(&ft))
-		{
-			BASED_ERROR("ERROR::FREETYPE: Could not init FreeType Library");
-			return;
-		}
+		////mShader = graphics::DefaultLibraries::GetShaderLibrary().Get("Text");
+		//glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Engine::Instance().GetWindow().GetSize().x), 0.0f,
+		//	static_cast<float>(Engine::Instance().GetWindow().GetSize().y));
+		//mShader->Bind();
+		//glUniformMatrix4fv(mShader->GetUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		//glUniform1i(mShader->GetUniformLocation("tex"), 0);
 
-		FT_Face face;
-		//std::string font_name = std::filesystem::path("res/fonts/arial.ttf");
-		// TODO: Generate font path automatically
-		// TODO: consider switching to msdfgl or freetype-gl
-		if (FT_New_Face(ft, "C:/Users/jmorg/Documents/Repos/BasedEngine/bin/Debug/Sandbox/res/fonts/arial.ttf", 0, &face))
-		{
-			BASED_ERROR("ERROR::FREETYPE: Failed to load font");
-			return;
-		}
+		//FT_Library ft;
+		//if (FT_Init_FreeType(&ft))
+		//{
+		//	BASED_ERROR("ERROR::FREETYPE: Could not init FreeType Library");
+		//	return;
+		//}
 
-		FT_Set_Pixel_Sizes(face, 0, 48);
+		//FT_Face face;
+		////std::string font_name = std::filesystem::path("res/fonts/arial.ttf");
+		//// TODO: Generate font path automatically
+		//// TODO: consider switching to msdfgl or freetype-gl
+		//if (FT_New_Face(ft, "C:/Users/jmorg/Documents/Repos/BasedEngine/bin/Debug/Sandbox/res/fonts/arial.ttf", 0, &face))
+		//{
+		//	BASED_ERROR("ERROR::FREETYPE: Failed to load font");
+		//	return;
+		//}
 
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1); BASED_CHECK_GL_ERROR; // disable byte-alignment restriction 
+		//FT_Set_Pixel_Sizes(face, 0, 48);
 
-		for (unsigned char c = 0; c < 128; c++)
-		{
-			// load character glyph
-			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-			{
-				BASED_ERROR("ERROR::FREETYTPE: Failed to load Glyph");
-				continue;
-			}
+		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1); BASED_CHECK_GL_ERROR; // disable byte-alignment restriction 
 
-			// generate texture
-			unsigned int texture;
-			glGenTextures(1, &texture); BASED_CHECK_GL_ERROR;
-			glBindTexture(GL_TEXTURE_2D, texture); BASED_CHECK_GL_ERROR;
-			glTexImage2D(
-				GL_TEXTURE_2D,
-				0,
-				GL_RED,
-				face->glyph->bitmap.width,
-				face->glyph->bitmap.rows,
-				0,
-				GL_RED,
-				GL_UNSIGNED_BYTE,
-				face->glyph->bitmap.buffer
-			); BASED_CHECK_GL_ERROR;
-			// set texture options
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); BASED_CHECK_GL_ERROR;
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); BASED_CHECK_GL_ERROR;
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
-			// now store character for later use
-			Character character = {
-				texture,
-				glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-				glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-				face->glyph->advance.x
-			};
-			Characters.insert(std::pair<char, Character>(c, character));
-		}
+		//for (unsigned char c = 0; c < 128; c++)
+		//{
+		//	// load character glyph
+		//	if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+		//	{
+		//		BASED_ERROR("ERROR::FREETYTPE: Failed to load Glyph");
+		//		continue;
+		//	}
 
-		FT_Done_Face(face);
-		FT_Done_FreeType(ft);
+		//	// generate texture
+		//	unsigned int texture;
+		//	glGenTextures(1, &texture); BASED_CHECK_GL_ERROR;
+		//	glBindTexture(GL_TEXTURE_2D, texture); BASED_CHECK_GL_ERROR;
+		//	glTexImage2D(
+		//		GL_TEXTURE_2D,
+		//		0,
+		//		GL_RED,
+		//		face->glyph->bitmap.width,
+		//		face->glyph->bitmap.rows,
+		//		0,
+		//		GL_RED,
+		//		GL_UNSIGNED_BYTE,
+		//		face->glyph->bitmap.buffer
+		//	); BASED_CHECK_GL_ERROR;
+		//	// set texture options
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); BASED_CHECK_GL_ERROR;
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); BASED_CHECK_GL_ERROR;
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
+		//	// now store character for later use
+		//	Character character = {
+		//		texture,
+		//		glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+		//		glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+		//		face->glyph->advance.x
+		//	};
+		//	Characters.insert(std::pair<char, Character>(c, character));
+		//}
 
-		//BASED_TRACE("VAO: " + VAO);
-		glGenVertexArrays(1, &VAO); BASED_CHECK_GL_ERROR;
-		BASED_TRACE("VAO: {}", VAO);
-		glGenBuffers(1, &VBO); BASED_CHECK_GL_ERROR;
-		glBindVertexArray(VAO); BASED_CHECK_GL_ERROR;
-		glBindBuffer(GL_ARRAY_BUFFER, VBO); BASED_CHECK_GL_ERROR;
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW); BASED_CHECK_GL_ERROR;
-		glEnableVertexAttribArray(0); BASED_CHECK_GL_ERROR;
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0); BASED_CHECK_GL_ERROR;
-		glBindBuffer(GL_ARRAY_BUFFER, 0); BASED_CHECK_GL_ERROR;
-		glBindVertexArray(0); BASED_CHECK_GL_ERROR;
+		//FT_Done_Face(face);
+		//FT_Done_FreeType(ft);
 
-		BASED_TRACE("Text entity setup complete");
+		////BASED_TRACE("VAO: " + VAO);
+		//glGenVertexArrays(1, &VAO); BASED_CHECK_GL_ERROR;
+		//BASED_TRACE("VAO: {}", VAO);
+		//glGenBuffers(1, &VBO); BASED_CHECK_GL_ERROR;
+		//glBindVertexArray(VAO); BASED_CHECK_GL_ERROR;
+		//glBindBuffer(GL_ARRAY_BUFFER, VBO); BASED_CHECK_GL_ERROR;
+		//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW); BASED_CHECK_GL_ERROR;
+		//glEnableVertexAttribArray(0); BASED_CHECK_GL_ERROR;
+		//glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0); BASED_CHECK_GL_ERROR;
+		//glBindBuffer(GL_ARRAY_BUFFER, 0); BASED_CHECK_GL_ERROR;
+		//glBindVertexArray(0); BASED_CHECK_GL_ERROR;
+
+		//BASED_TRACE("Text entity setup complete");
 		//RenderText(0.f, 0.f, glm::vec3(1.f), 1.f);
 	}
 
@@ -221,5 +227,21 @@ namespace based::ui
 		}
 		glBindVertexArray(0); BASED_CHECK_GL_ERROR;
 		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
+	}
+
+	void TextEntity::Draw_Font(const char* str, int x, int y, int width, int height, int size,
+		SDL_Color color)
+	{
+		TTF_Font* font = TTF_OpenFont("res/fonts/arial.ttf", size);
+
+		SDL_Surface* message_surf = TTF_RenderText_Solid(font, str, color);
+		SDL_Texture* Message = SDL_CreateTextureFromSurface(mRenderer, message_surf);
+		SDL_Rect Message_rect = { x, y, width, height };
+		SDL_RenderCopy(mRenderer, Message, NULL, &Message_rect);
+		SDL_RenderPresent(mRenderer);
+
+		SDL_DestroyTexture(Message);
+		SDL_FreeSurface(message_surf);
+		TTF_CloseFont(font);
 	}
 }

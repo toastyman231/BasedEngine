@@ -9,6 +9,7 @@
 #include "input/joystick.h"
 
 #include "SDL2/SDL.h"
+#include <SDL2/SDL_ttf.h>
 #include "ui/textentity.h"
 
 namespace based
@@ -97,6 +98,7 @@ namespace based
             }
             else
             {
+                TTF_Init();
                 SDL_version version;
                 SDL_VERSION(&version);
                 BASED_INFO("SDL {}.{}.{}", (int32_t)version.major, (int32_t)version.minor, (int32_t)version.patch);
@@ -155,6 +157,7 @@ namespace based
 
         // Shutdown SDL
         mWindow.Shutdown();
+        TTF_Quit();
         SDL_Quit();
 
         mLogManager.Shutdown();
