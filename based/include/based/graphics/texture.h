@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <SDL2/SDL_surface.h>
 
 namespace based::graphics
 {
@@ -13,6 +14,7 @@ namespace based::graphics
 	{
 	public:
 		Texture(const std::string& path);
+		Texture(const SDL_Surface* surface);
 		~Texture();
 
 		inline uint32_t GetId() const { return mId; }

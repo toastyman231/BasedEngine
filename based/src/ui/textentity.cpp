@@ -3,9 +3,6 @@
 #include "app.h"
 #include "engine.h"
 
-#include "ft2build.h"
-#include FT_FREETYPE_H
-
 #include "SDL2/SDL_ttf.h"
 
 #include "external/glm/ext/matrix_clip_space.hpp"
@@ -28,7 +25,7 @@ namespace based::ui
 
 	std::map<GLchar, Character> Characters;
 
-	TextEntity::TextEntity(std::string dummyVariable) : VAO(0), VBO(0)
+	TextEntity::TextEntity(std::string text) : VAO(0), VBO(0)
 	{
 		//TODO: bring back entity functionality
 		//mEntity = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().create();
@@ -182,66 +179,92 @@ namespace based::ui
 
 	}
 
-	void TextEntity::RenderText(std::string text, float x, float y, glm::vec3 color, float scale)
-	{
-		// activate corresponding render state
-		//auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("Text");
-		mShader->Bind();
-		//BASED_TRACE(mShader->GetFragmentShaderSource());
-		glUniform3f(mShader->GetUniformLocation("fontColor"), color.x, color.y, color.z); BASED_CHECK_GL_ERROR;
-		glActiveTexture(GL_TEXTURE0); BASED_CHECK_GL_ERROR;
-		//BASED_TRACE("VAO: {}", VAO);
-		glBindVertexArray(VAO); BASED_CHECK_GL_ERROR;
+	//void TextEntity::RenderText(std::string text, float x, float y, glm::vec3 color, float scale)
+	//{
+	//	// activate corresponding render state
+	//	//auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("Text");
+	//	mShader->Bind();
+	//	//BASED_TRACE(mShader->GetFragmentShaderSource());
+	//	glUniform3f(mShader->GetUniformLocation("fontColor"), color.x, color.y, color.z); BASED_CHECK_GL_ERROR;
+	//	glActiveTexture(GL_TEXTURE0); BASED_CHECK_GL_ERROR;
+	//	//BASED_TRACE("VAO: {}", VAO);
+	//	glBindVertexArray(VAO); BASED_CHECK_GL_ERROR;
 
-		// iterate through all characters
-		std::string::const_iterator c;
-		for (c = text.begin(); c != text.end(); c++)
-		{
-			Character ch = Characters[*c];
+	//	// iterate through all characters
+	//	std::string::const_iterator c;
+	//	for (c = text.begin(); c != text.end(); c++)
+	//	{
+	//		Character ch = Characters[*c];
 
-			float xpos = x + ch.Bearing.x * scale;
-			float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+	//		float xpos = x + ch.Bearing.x * scale;
+	//		float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
 
-			float w = ch.Size.x * scale;
-			float h = ch.Size.y * scale;
-			// update VBO for each character
-			float vertices[6][4] = {
-				{ xpos,     ypos + h,   0.0f, 0.0f },
-				{ xpos,     ypos,       0.0f, 1.0f },
-				{ xpos + w, ypos,       1.0f, 1.0f },
+	//		float w = ch.Size.x * scale;
+	//		float h = ch.Size.y * scale;
+	//		// update VBO for each character
+	//		float vertices[6][4] = {
+	//			{ xpos,     ypos + h,   0.0f, 0.0f },
+	//			{ xpos,     ypos,       0.0f, 1.0f },
+	//			{ xpos + w, ypos,       1.0f, 1.0f },
 
-				{ xpos,     ypos + h,   0.0f, 0.0f },
-				{ xpos + w, ypos,       1.0f, 1.0f },
-				{ xpos + w, ypos + h,   1.0f, 0.0f }
-			};
-			// render glyph texture over quad
-			glBindTexture(GL_TEXTURE_2D, ch.TextureID); BASED_CHECK_GL_ERROR;
-			// update content of VBO memory
-			glBindBuffer(GL_ARRAY_BUFFER, VBO); BASED_CHECK_GL_ERROR;
-			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); BASED_CHECK_GL_ERROR;
-			glBindBuffer(GL_ARRAY_BUFFER, 0); BASED_CHECK_GL_ERROR;
-			// render quad
-			glDrawArrays(GL_TRIANGLES, 0, 6); BASED_CHECK_GL_ERROR;
-			// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-			x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
-		}
-		glBindVertexArray(0); BASED_CHECK_GL_ERROR;
-		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
-	}
+	//			{ xpos,     ypos + h,   0.0f, 0.0f },
+	//			{ xpos + w, ypos,       1.0f, 1.0f },
+	//			{ xpos + w, ypos + h,   1.0f, 0.0f }
+	//		};
+	//		// render glyph texture over quad
+	//		glBindTexture(GL_TEXTURE_2D, ch.TextureID); BASED_CHECK_GL_ERROR;
+	//		// update content of VBO memory
+	//		glBindBuffer(GL_ARRAY_BUFFER, VBO); BASED_CHECK_GL_ERROR;
+	//		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); BASED_CHECK_GL_ERROR;
+	//		glBindBuffer(GL_ARRAY_BUFFER, 0); BASED_CHECK_GL_ERROR;
+	//		// render quad
+	//		glDrawArrays(GL_TRIANGLES, 0, 6); BASED_CHECK_GL_ERROR;
+	//		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+	//		x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
+	//	}
+	//	glBindVertexArray(0); BASED_CHECK_GL_ERROR;
+	//	glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
+	//}
 
 	void TextEntity::Draw_Font(const char* str, int x, int y, int width, int height, int size,
 		SDL_Color color)
 	{
 		TTF_Font* font = TTF_OpenFont("res/fonts/arial.ttf", size);
 
-		SDL_Surface* message_surf = TTF_RenderText_Solid(font, str, color);
-		SDL_Texture* Message = SDL_CreateTextureFromSurface(mRenderer, message_surf);
+		GLuint texture;
+		SDL_Surface* surface = TTF_RenderText_Blended(font, str, color);
+
+		glEnable(GL_TEXTURE_2D); BASED_CHECK_GL_ERROR;
+		glGenTextures(1, &texture); BASED_CHECK_GL_ERROR;
+		glBindTexture(GL_TEXTURE_2D, texture); BASED_CHECK_GL_ERROR;
+
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
+		BASED_CHECK_GL_ERROR;
+
+		glBegin(GL_QUADS); BASED_CHECK_GL_ERROR;
+		{
+			glTexCoord2d(0, 1); BASED_CHECK_GL_ERROR; glVertex3f(0, 0, 0); BASED_CHECK_GL_ERROR;
+			glTexCoord2d(1, 1); BASED_CHECK_GL_ERROR; glVertex3f(static_cast<float>(0 + surface->w), 0, 0); BASED_CHECK_GL_ERROR;
+			glTexCoord2d(1, 0); BASED_CHECK_GL_ERROR; glVertex3f(static_cast<float>(0 + surface->w), static_cast<float>(0 + surface->h), 0); BASED_CHECK_GL_ERROR;
+			glTexCoord2d(0, 0); BASED_CHECK_GL_ERROR; glVertex3f(0, static_cast<float>(0 + surface->h), 0); BASED_CHECK_GL_ERROR;
+		}
+		glEnd(); BASED_CHECK_GL_ERROR;
+		glDisable(GL_TEXTURE_2D); BASED_CHECK_GL_ERROR;
+
+		TTF_CloseFont(font);
+		SDL_FreeSurface(surface);
+		glDeleteTextures(1, &texture);
+
+		/*SDL_Texture* Message = SDL_CreateTextureFromSurface(mRenderer, message_surf);
 		SDL_Rect Message_rect = { x, y, width, height };
 		SDL_RenderCopy(mRenderer, Message, NULL, &Message_rect);
-		SDL_RenderPresent(mRenderer);
+		SDL_RenderPresent(mRenderer);*/
 
-		SDL_DestroyTexture(Message);
+		/*SDL_DestroyTexture(Message);
 		SDL_FreeSurface(message_surf);
-		TTF_CloseFont(font);
+		TTF_CloseFont(font);*/
 	}
 }

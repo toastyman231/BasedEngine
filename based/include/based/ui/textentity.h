@@ -9,6 +9,15 @@
 
 #include "based/graphics/shader.h"
 
+namespace based
+{
+	namespace graphics
+	{
+		class Material;
+		class Texture;
+	}
+}
+
 namespace based::ui
 {
 	class TextEntity
@@ -34,7 +43,7 @@ namespace based::ui
 		void MoveText(glm::vec3 pos) const;
 		void DeleteText();
 
-		void RenderText(std::string text, float x, float y, glm::vec3 color, float scale);
+		//void RenderText(std::string text, float x, float y, glm::vec3 color, float scale);
 		void Draw_Font(const char* str, int x, int y, int width, int height, int size, SDL_Color color);
 
 		const glm::vec4 inline GetColor() const { return mColor; }

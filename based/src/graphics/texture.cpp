@@ -30,6 +30,17 @@ namespace based::graphics
 		LoadTexture();
 	}
 
+	Texture::Texture(const SDL_Surface* surface)
+		: mPath(nullptr)
+		, mHeight(surface->h)
+		, mWidth(surface->w)
+		, mNumChannels(4)
+		, mPixels((unsigned char*)surface->pixels)
+		, mFilter(TextureFilter::Linear)
+	{
+		LoadTexture();
+	}
+
 	Texture::~Texture()
 	{
 		stbi_image_free(mPixels);
