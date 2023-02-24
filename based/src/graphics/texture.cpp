@@ -15,6 +15,7 @@ namespace based::graphics
 		, mWidth(0)
 		, mNumChannels(0)
 		, mPixels(nullptr)
+		, mStbiTex(true)
 		, mFilter(TextureFilter::Linear)
 	{
 		int width, height, numChannels;
@@ -27,7 +28,7 @@ namespace based::graphics
 			mNumChannels = (uint32_t)numChannels;
 		}
 
-		LoadTexture(mPixels, width, height);
+		LoadTexture();
 	}
 
 	//Texture::Texture(unsigned char* pixels, int width, int height)
@@ -46,26 +47,33 @@ namespace based::graphics
 		, mWidth(width)
 		, mPixels(nullptr)
 		, mNumChannels(4)
+		, mStbiTex(false)
 		, mFilter(TextureFilter::Linear)
 	{
-
+		//TODO: remove
 	}
 
-	Texture::Texture(const SDL_Surface* surface)
-		: mPath(nullptr)
+	Texture::Texture(const SDL_Surface* surface, unsigned int id)
+		: mPath("")
+		, mId(id)
 		, mHeight(surface->h)
 		, mWidth(surface->w)
-		, mNumChannels(4)
+		, mNumChannels(surface->format->BytesPerPixel)
 		, mPixels((unsigned char*)surface->pixels)
-		, mFilter(TextureFilter::Linear)
+		, mStbiTex(false)
+		, mFilter(TextureFilter::Nearest)
+		, mRmask(surface->format->Rmask)
 	{
 		LoadTexture();
 	}
 
 	Texture::~Texture()
 	{
-		if (mPixels) stbi_image_free(mPixels);
-		mPixels = nullptr;
+		if (mStbiTex)
+		{
+			stbi_image_free(mPixels);
+			mPixels = nullptr;
+		}
 	}
 
 	void Texture::Bind()
@@ -97,19 +105,32 @@ namespace based::graphics
 		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
 	}
 
-	void Texture::LoadTexture(void* pixels = nullptr, int width = 0, int height = 0)
+	void Texture::LoadTexture()
 	{
 		glGenTextures(1, &mId); BASED_CHECK_GL_ERROR;
 		glBindTexture(GL_TEXTURE_2D, mId); BASED_CHECK_GL_ERROR;
 
 		GLenum dataFormat = 0;
-		if (mNumChannels == 4)
+
+		switch (mNumChannels)
 		{
-			dataFormat = GL_RGBA;
-		}
-		else if (mNumChannels == 3)
-		{
-			dataFormat = GL_RGB;
+		case 1:
+			dataFormat = GL_ALPHA;
+			break;
+		case 3:     // no alpha channel
+			if (mRmask == 0x000000ff)
+				dataFormat = GL_RGB;
+			else
+				dataFormat = GL_BGR;
+			break;
+		case 4:     // contains an alpha channel
+			if (mRmask == 0x000000ff)
+				dataFormat = GL_RGBA;
+			else
+				dataFormat = GL_BGRA;
+			break;
+		default:
+			break;
 		}
 
 		if (mPixels && dataFormat == 0) BASED_ERROR("Texture format not supported - num channnels: {}", mNumChannels);
@@ -128,7 +149,7 @@ namespace based::graphics
 
 		if (mPixels && dataFormat != 0)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, dataFormat, mWidth, mHeight, 0, dataFormat, GL_UNSIGNED_BYTE, mPixels); BASED_CHECK_GL_ERROR;
+			glTexImage2D(GL_TEXTURE_2D, 0, mNumChannels, mWidth, mHeight, 0, dataFormat, GL_UNSIGNED_BYTE, mPixels); BASED_CHECK_GL_ERROR;
 			SetTextureFilter(mFilter);
 			BASED_TRACE("Loaded {}-channel texture: {}", mNumChannels, mPath.c_str());
 		}

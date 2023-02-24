@@ -124,7 +124,7 @@ public:
 		//BASED_TRACE("Rendering");
 		//text.RenderText("This is a test!", 640.f, 360.f, glm::vec3(1.f), 1.f);
 		text.Draw_Font("This is a test!", Engine::Instance().GetWindow().GetSize().x / 2,
-			Engine::Instance().GetWindow().GetSize().y / 2, 74, 32, 32, { 255, 255, 255 });
+			Engine::Instance().GetWindow().GetSize().y / 2, 74, 32, 32, { 0, 0, 0, 255 });
 		/*float pixels[] = {
 				1.f, 0.f, 1.f,	1.f, 1.f, 1.f,	1.f, 0.f, 1.f,	1.f, 1.f, 1.f,
 				1.f, 1.f, 1.f,	1.f, 0.f, 1.f,	1.f, 1.f, 1.f,	1.f, 0.f, 1.f,
