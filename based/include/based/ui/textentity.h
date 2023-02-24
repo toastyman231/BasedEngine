@@ -8,6 +8,7 @@
 #include "SDL2/SDL_ttf.h"
 
 #include "based/graphics/shader.h"
+#include "based/graphics/texture.h"
 
 namespace based::ui
 {
@@ -16,6 +17,7 @@ namespace based::ui
 	private:
 		entt::entity mEntity;
 		std::shared_ptr<graphics::Shader> mShader;
+		std::shared_ptr<graphics::Texture> mTexture;
 		glm::vec4 mColor;
 		SDL_Renderer* mRenderer;
 

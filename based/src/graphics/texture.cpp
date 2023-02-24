@@ -27,12 +27,33 @@ namespace based::graphics
 			mNumChannels = (uint32_t)numChannels;
 		}
 
-		LoadTexture();
+		LoadTexture(mPixels, width, height);
+	}
+
+	//Texture::Texture(unsigned char* pixels, int width, int height)
+	//	: mHeight(height)
+	//	, mWidth(width)
+	//	, mNumChannels(4)
+	//	, mPixels(pixels)
+	//	, mFilter(TextureFilter::Linear)
+	//{
+	//	LoadTexture(pixels, width, height);
+	//}
+
+	Texture::Texture(unsigned int id, uint32_t height, uint32_t width)
+		: mId((GLuint) id)
+		, mHeight(height)
+		, mWidth(width)
+		, mPixels(nullptr)
+		, mNumChannels(4)
+		, mFilter(TextureFilter::Linear)
+	{
+
 	}
 
 	Texture::~Texture()
 	{
-		stbi_image_free(mPixels);
+		if (mPixels) stbi_image_free(mPixels);
 		mPixels = nullptr;
 	}
 
@@ -65,7 +86,7 @@ namespace based::graphics
 		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
 	}
 
-	void Texture::LoadTexture()
+	void Texture::LoadTexture(void* pixels = nullptr, int width = 0, int height = 0)
 	{
 		glGenTextures(1, &mId); BASED_CHECK_GL_ERROR;
 		glBindTexture(GL_TEXTURE_2D, mId); BASED_CHECK_GL_ERROR;
@@ -81,6 +102,18 @@ namespace based::graphics
 		}
 
 		if (mPixels && dataFormat == 0) BASED_ERROR("Texture format not supported - num channnels: {}", mNumChannels);
+
+		/*if (pixels != nullptr)
+		{
+			mWidth = width;
+			mHeight = height;
+			mNumChannels = 4;
+
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight, 0, GL_RGB, GL_FLOAT, pixels); BASED_CHECK_GL_ERROR;
+			SetTextureFilter(TextureFilter::Nearest);
+			glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
+			return;
+		}*/
 
 		if (mPixels && dataFormat != 0)
 		{
