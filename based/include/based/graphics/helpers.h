@@ -6,6 +6,7 @@
 namespace based::graphics
 {
 	void CheckGLError();
+	unsigned int NextPowerOfTwo(unsigned int v);
 }
 
 #ifndef BASED_CONFIG_RELEASE

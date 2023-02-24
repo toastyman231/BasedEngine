@@ -15,159 +15,86 @@
 
 namespace based::ui
 {
-	struct Character
+	TextEntity::TextEntity(std::string path, std::string text, int fontSize, glm::vec3 pos, SDL_Color color)
+		: setupComplete(false)
 	{
-		unsigned int TextureID;  // ID handle of the glyph texture
-		glm::ivec2   Size;       // Size of glyph
-		glm::ivec2   Bearing;    // Offset from baseline to left/top of glyph
-		long Advance;    // Offset to advance to next glyph
-	};
+		SetFont(path, fontSize);
+		SetText(text);
+		MoveText(pos);
+		SetColor(color);
 
-	std::map<GLchar, Character> Characters;
+		RegenerateTexture();
 
-	TextEntity::TextEntity(std::string text) : VAO(0), VBO(0)
-	{
+		mVA = std::make_shared<graphics::VertexArray>();
+
+		{
+			BASED_CREATE_VERTEX_BUFFER(vb, float);
+			vb->PushVertex({ (mSize.y / mSize.x) / 2, (mSize.y / mSize.x) / 2, 0.f });
+			vb->PushVertex({ (mSize.y / mSize.x) / 2, -((mSize.y / mSize.x) / 2), 0.f });
+			vb->PushVertex({ -((mSize.y / mSize.x) / 2), -((mSize.y / mSize.x) / 2), 0.f });
+			vb->PushVertex({ -((mSize.y / mSize.x) / 2), (mSize.y / mSize.x) / 2, 0.f });
+			vb->SetLayout({ 3 });
+			mVA->PushBuffer(std::move(vb));
+		}
+		{
+			BASED_CREATE_VERTEX_BUFFER(vb, short);
+			vb->PushVertex({ 1, 1 });
+			vb->PushVertex({ 1, 0 });
+			vb->PushVertex({ 0, 0 });
+			vb->PushVertex({ 0, 1 });
+			vb->SetLayout({ 2 });
+			mVA->PushBuffer(std::move(vb));
+		}
+
+		mVA->SetElements({ 0, 3, 1, 1, 3, 2 });
+		mVA->Upload();
+		//mVA = graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect");
+
+		auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect");
+		auto mat = std::make_shared<graphics::Material>(shader, mTexture);
+		mMaterialLibrary.Load("Material", mat);
 		//TODO: bring back entity functionality
 		//mEntity = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().create();
 		//Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().emplace<scene::Transform>(mEntity, glm::vec3(0.f));
 		//Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().emplace<scene::TextRenderer>(mEntity, mEntity);
-		mRenderer = SDL_CreateRenderer(Engine::Instance().GetWindow().GetSDLWindow(), -1, 0);
-
-		/*Draw_Font("This is a test!", Engine::Instance().GetWindow().GetSize().x / 2, 
-			Engine::Instance().GetWindow().GetSize().y / 2, 74, 32, 32, { 255, 255, 255 });*/
-
-		//mColor = glm::vec4(1.f);
-		//auto lib = graphics::DefaultLibraries::GetShaderLibrary();
-		//mShader = lib.Get("Text");
-
-		//glEnable(GL_CULL_FACE); BASED_CHECK_GL_ERROR;
-		//glEnable(GL_BLEND); BASED_CHECK_GL_ERROR;
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); BASED_CHECK_GL_ERROR;
-		////glDisable(GL_DEPTH_TEST); BASED_CHECK_GL_ERROR;
-
-		////mShader = graphics::DefaultLibraries::GetShaderLibrary().Get("Text");
-		//glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Engine::Instance().GetWindow().GetSize().x), 0.0f,
-		//	static_cast<float>(Engine::Instance().GetWindow().GetSize().y));
-		//mShader->Bind();
-		//glUniformMatrix4fv(mShader->GetUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-		//glUniform1i(mShader->GetUniformLocation("tex"), 0);
-
-		//FT_Library ft;
-		//if (FT_Init_FreeType(&ft))
-		//{
-		//	BASED_ERROR("ERROR::FREETYPE: Could not init FreeType Library");
-		//	return;
-		//}
-
-		//FT_Face face;
-		////std::string font_name = std::filesystem::path("res/fonts/arial.ttf");
-		//// TODO: Generate font path automatically
-		//// TODO: consider switching to msdfgl or freetype-gl
-		//if (FT_New_Face(ft, "C:/Users/jmorg/Documents/Repos/BasedEngine/bin/Debug/Sandbox/res/fonts/arial.ttf", 0, &face))
-		//{
-		//	BASED_ERROR("ERROR::FREETYPE: Failed to load font");
-		//	return;
-		//}
-
-		//FT_Set_Pixel_Sizes(face, 0, 48);
-
-		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1); BASED_CHECK_GL_ERROR; // disable byte-alignment restriction 
-
-		//for (unsigned char c = 0; c < 128; c++)
-		//{
-		//	// load character glyph
-		//	if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-		//	{
-		//		BASED_ERROR("ERROR::FREETYTPE: Failed to load Glyph");
-		//		continue;
-		//	}
-
-		//	// generate texture
-		//	unsigned int texture;
-		//	glGenTextures(1, &texture); BASED_CHECK_GL_ERROR;
-		//	glBindTexture(GL_TEXTURE_2D, texture); BASED_CHECK_GL_ERROR;
-		//	glTexImage2D(
-		//		GL_TEXTURE_2D,
-		//		0,
-		//		GL_RED,
-		//		face->glyph->bitmap.width,
-		//		face->glyph->bitmap.rows,
-		//		0,
-		//		GL_RED,
-		//		GL_UNSIGNED_BYTE,
-		//		face->glyph->bitmap.buffer
-		//	); BASED_CHECK_GL_ERROR;
-		//	// set texture options
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); BASED_CHECK_GL_ERROR;
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); BASED_CHECK_GL_ERROR;
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
-		//	// now store character for later use
-		//	Character character = {
-		//		texture,
-		//		glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-		//		glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-		//		face->glyph->advance.x
-		//	};
-		//	Characters.insert(std::pair<char, Character>(c, character));
-		//}
-
-		//FT_Done_Face(face);
-		//FT_Done_FreeType(ft);
-
-		////BASED_TRACE("VAO: " + VAO);
-		//glGenVertexArrays(1, &VAO); BASED_CHECK_GL_ERROR;
-		//BASED_TRACE("VAO: {}", VAO);
-		//glGenBuffers(1, &VBO); BASED_CHECK_GL_ERROR;
-		//glBindVertexArray(VAO); BASED_CHECK_GL_ERROR;
-		//glBindBuffer(GL_ARRAY_BUFFER, VBO); BASED_CHECK_GL_ERROR;
-		//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW); BASED_CHECK_GL_ERROR;
-		//glEnableVertexAttribArray(0); BASED_CHECK_GL_ERROR;
-		//glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0); BASED_CHECK_GL_ERROR;
-		//glBindBuffer(GL_ARRAY_BUFFER, 0); BASED_CHECK_GL_ERROR;
-		//glBindVertexArray(0); BASED_CHECK_GL_ERROR;
-
-		//BASED_TRACE("Text entity setup complete");
-		//RenderText(0.f, 0.f, glm::vec3(1.f), 1.f);
-	}
-
-	TextEntity::TextEntity(const std::string& text, glm::vec3 pos)
-	{
-		//mEntity = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().create();
-		//Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().emplace<scene::Transform>(mEntity, pos);
-		//Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().emplace<scene::TextRenderer>(mEntity, mEntity);
-
-		mColor = glm::vec4(1.f);
+		setupComplete = true;
 	}
 
 	TextEntity::~TextEntity()
 	{
-
+		TTF_CloseFont(mFont);
+		//mTexture->FreeTexture();
+		//SDL_FreeSurface(surface);
+		//glDeleteTextures(1, &texture);
 	}
 
-	bool TextEntity::Initialize()
+	void TextEntity::SetText(std::string& text)
 	{
-		return true;
+		mText = text;
 
+		if (setupComplete) RegenerateTexture();
+		// TODO: regenerate texture
 	}
 
-	void TextEntity::Terminate()
+	void TextEntity::SetFont(std::string& path, int fontSize)
 	{
-
+		mFont = TTF_OpenFont(path.c_str(), fontSize);
+		BASED_ASSERT(mFont, "Error loading font!");
+		mFontSize = fontSize;
+		if (setupComplete) RegenerateTexture();
+		// TODO: regenerate texture
 	}
 
-	void TextEntity::SetText(const std::string& text) const
-	{
-
-	}
-
-	void TextEntity::SetColor(glm::vec4 col)
+	void TextEntity::SetColor(SDL_Color col)
 	{
 		mColor = col;
+		if (setupComplete) RegenerateTexture();
+		// TODO: regenerate texture
 	}
 
 	void TextEntity::MoveText(glm::vec3 pos) const
 	{
+		// TODO: Add this
 		//glm::vec3 oldRot = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().get<scene::Transform>(mEntity).Rotation;
 		//glm::vec3 oldScale = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().get<scene::Transform>(mEntity).Scale;
 		//Engine::Instance().GetApp().GetCurrentScene()->GetRegistry()
@@ -176,71 +103,27 @@ namespace based::ui
 
 	void TextEntity::DeleteText()
 	{
-
+		// TODO: Is this good?
+		delete(this);
 	}
 
-	//void TextEntity::RenderText(std::string text, float x, float y, glm::vec3 color, float scale)
-	//{
-	//	// activate corresponding render state
-	//	//auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("Text");
-	//	mShader->Bind();
-	//	//BASED_TRACE(mShader->GetFragmentShaderSource());
-	//	glUniform3f(mShader->GetUniformLocation("fontColor"), color.x, color.y, color.z); BASED_CHECK_GL_ERROR;
-	//	glActiveTexture(GL_TEXTURE0); BASED_CHECK_GL_ERROR;
-	//	//BASED_TRACE("VAO: {}", VAO);
-	//	glBindVertexArray(VAO); BASED_CHECK_GL_ERROR;
-
-	//	// iterate through all characters
-	//	std::string::const_iterator c;
-	//	for (c = text.begin(); c != text.end(); c++)
-	//	{
-	//		Character ch = Characters[*c];
-
-	//		float xpos = x + ch.Bearing.x * scale;
-	//		float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
-
-	//		float w = ch.Size.x * scale;
-	//		float h = ch.Size.y * scale;
-	//		// update VBO for each character
-	//		float vertices[6][4] = {
-	//			{ xpos,     ypos + h,   0.0f, 0.0f },
-	//			{ xpos,     ypos,       0.0f, 1.0f },
-	//			{ xpos + w, ypos,       1.0f, 1.0f },
-
-	//			{ xpos,     ypos + h,   0.0f, 0.0f },
-	//			{ xpos + w, ypos,       1.0f, 1.0f },
-	//			{ xpos + w, ypos + h,   1.0f, 0.0f }
-	//		};
-	//		// render glyph texture over quad
-	//		glBindTexture(GL_TEXTURE_2D, ch.TextureID); BASED_CHECK_GL_ERROR;
-	//		// update content of VBO memory
-	//		glBindBuffer(GL_ARRAY_BUFFER, VBO); BASED_CHECK_GL_ERROR;
-	//		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); BASED_CHECK_GL_ERROR;
-	//		glBindBuffer(GL_ARRAY_BUFFER, 0); BASED_CHECK_GL_ERROR;
-	//		// render quad
-	//		glDrawArrays(GL_TRIANGLES, 0, 6); BASED_CHECK_GL_ERROR;
-	//		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-	//		x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
-	//	}
-	//	glBindVertexArray(0); BASED_CHECK_GL_ERROR;
-	//	glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
-	//}
-
-	void TextEntity::Draw_Font(const char* str, int x, int y, int width, int height, int size,
-		SDL_Color color)
+	void TextEntity::DrawFont()
 	{
-		TTF_Font* font = TTF_OpenFont("D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\Sandbox\\res\\fonts\\arial.ttf", size);
+		// TODO: Allow user to specify font
+		//mFont = TTF_OpenFont("C:\\Users\\jmorg\\Documents\\Repos\\BasedEngine\\bin\\Debug\\Sandbox\\res\\fonts\\arial.ttf", size);
+		//TTF_Font* font = TTF_OpenFont("C:\\Users\\jmorg\\Documents\\Repos\\BasedEngine\\bin\\Debug\\Sandbox\\res\\fonts\\arial.ttf", mFontSize);
 
-		GLuint texture;
-		SDL_Surface* surface = TTF_RenderUTF8_Blended(font, str, color);
-		BASED_TRACE("{}:{}", surface->w, surface->h);
+		//GLuint texture;
+		//SDL_Surface* surface = TTF_RenderUTF8_Blended(font, mText.c_str(), mColor);
+		//surface = ResizeToPowerOfTwo(surface);
 
-		mTexture = std::make_shared<graphics::Texture>(surface, texture);
-		mTexture->SetTextureFilter(graphics::TextureFilter::Nearest);
-		std::shared_ptr<graphics::Shader> shader = graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect");
+		//// TODO: Don't regenerate texture/VA if the text hasn't changed at all
+		//mTexture = std::make_shared<graphics::Texture>(surface, texture);
+		//mTexture->SetTextureFilter(graphics::TextureFilter::Nearest);
+		//std::shared_ptr<graphics::Shader> shader = graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect");
 		//const std::shared_ptr<graphics::VertexArray> va = graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect");
 
-		auto va = std::make_shared<graphics::VertexArray>();
+		/*auto tempVa = std::make_shared<graphics::VertexArray>();
 		float sWidth = (float)surface->w;
 		float sHeight = (float)surface->h;
 
@@ -251,7 +134,7 @@ namespace based::ui
 			vb->PushVertex({ -((sHeight / sWidth) / 2), -((sHeight / sWidth) / 2), 0.f });
 			vb->PushVertex({ -((sHeight / sWidth) / 2), (sHeight / sWidth) / 2, 0.f });
 			vb->SetLayout({ 3 });
-			va->PushBuffer(std::move(vb));
+			tempVa->PushBuffer(std::move(vb));
 		}
 		{
 			BASED_CREATE_VERTEX_BUFFER(vb, short);
@@ -260,32 +143,139 @@ namespace based::ui
 			vb->PushVertex({ 0, 0 });
 			vb->PushVertex({ 0, 1 });
 			vb->SetLayout({ 2 });
-			va->PushBuffer(std::move(vb));
+			tempVa->PushBuffer(std::move(vb));
 		}
 
-		va->SetElements({ 0, 3, 1, 1, 3, 2 });
-		va->Upload();
+		tempVa->SetElements({ 0, 3, 1, 1, 3, 2 });
+		tempVa->Upload();*/
 
-		graphics::DefaultLibraries::GetVALibrary().Load("TextVA", va);
+		//graphics::DefaultLibraries::GetVALibrary().Load("TextVA", tempVa);
 
-		const std::shared_ptr<graphics::Material> mat = std::make_shared<graphics::Material>(shader, mTexture);
-		graphics::DefaultLibraries::GetMaterialLibrary().Load("TextMat", mat);
+		//std::shared_ptr<graphics::Material> mat = std::make_shared<graphics::Material>(shader, mTexture);
+		//graphics::DefaultLibraries::GetMaterialLibrary().Load("TextMat", mat);
 
 		Engine::Instance().GetRenderManager().Submit(
 			BASED_SUBMIT_RC(PushCamera, Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()));
 		auto model = glm::mat4(1.f);
 		//model = glm::translate(model, glm::vec3(static_cast<float>(x), static_cast<float>(y), 0.f));
-		model = glm::scale(model, glm::vec3(surface->w / size, surface->h / size, 0.f));
-		Engine::Instance().GetRenderManager().Submit(
-			BASED_SUBMIT_RC(RenderVertexArrayMaterial, 
-				graphics::DefaultLibraries::GetVALibrary().Get("TextVA"), 
-				graphics::DefaultLibraries::GetMaterialLibrary().Get("TextMat"), 
-				model));
+		model = glm::scale(model, glm::vec3(mSize.x / mFontSize, mSize.y / mFontSize, 0.f));
+		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, 
+			/*graphics::DefaultLibraries::GetVALibrary().Get("TextVA"),*/mVA, 
+			/*graphics::DefaultLibraries::GetMaterialLibrary().Get("TextMat")*/mMaterialLibrary.Get("Material"),
+			model));
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 
-		TTF_CloseFont(font);
+		/*TTF_CloseFont(font);
 		SDL_FreeSurface(surface);
-		glDeleteTextures(1, &texture);
-		BASED_TRACE("Finished render!");
+		glDeleteTextures(1, &texture);*/
+		//BASED_TRACE("Finished render!");
+	}
+
+	/*
+	* Taken from https://github.com/gpcz/OpenGL-SDL-Code-Warehouse
+	*/
+	SDL_Surface* TextEntity::ResizeToPowerOfTwo(SDL_Surface* surface)
+	{
+		SDL_Surface* theSurface, * convertedSurface;
+		Uint32 rmask, gmask, bmask, amask;
+
+		rmask = 0x000000ff;
+		gmask = 0x0000ff00;
+		bmask = 0x00ff0000;
+		amask = 0xff000000;
+
+		theSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, graphics::NextPowerOfTwo(surface->w), graphics::NextPowerOfTwo(surface->h), 32, rmask, gmask, bmask, amask);
+		SDL_FillRect(theSurface, NULL, SDL_MapRGBA(theSurface->format, 0, 0, 0, 0));
+		convertedSurface = SDL_ConvertSurface(surface, theSurface->format, SDL_SWSURFACE);
+
+		MoveTexture(convertedSurface, theSurface);
+		FlipSurface(theSurface);
+
+		//SDL_FreeSurface(theSurface);
+		SDL_FreeSurface(convertedSurface);
+		return theSurface;
+	}
+
+	void TextEntity::RegenerateTexture()
+	{
+		GLuint texture;
+		SDL_Surface* surface = TTF_RenderUTF8_Blended(mFont, mText.c_str(), mColor);
+		surface = ResizeToPowerOfTwo(surface);
+
+		mSize = { surface->w, surface->h };
+
+		// TODO: Don't regenerate texture/VA if the text hasn't changed at all
+		mTexture = std::make_shared<graphics::Texture>(surface, texture);
+		mTexture->SetTextureFilter(graphics::TextureFilter::Nearest);
+		auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect");
+		mMaterialLibrary.Load("Material", std::make_shared<graphics::Material>(shader, mTexture));
+
+		SDL_FreeSurface(surface);
+		//glDeleteTextures(1, &texture);
+	}
+
+	/*
+	* Solution by https://stackoverflow.com/users/13272497/vvanpelt
+	*/
+	void TextEntity::FlipSurface(SDL_Surface* surface)
+	{
+		SDL_LockSurface(surface);
+
+		int pitch = surface->pitch; // row size
+		char* temp = new char[pitch]; // intermediate buffer
+		char* pixels = (char*)surface->pixels;
+
+		for (int i = 0; i < surface->h / 2; ++i)
+		{
+			// get pointers to the two rows to swap
+			char* row1 = pixels + i * pitch;
+			char* row2 = pixels + (surface->h - i - 1) * pitch;
+
+			// swap rows
+			memcpy(temp, row1, pitch);
+			memcpy(row1, row2, pitch);
+			memcpy(row2, temp, pitch);
+		}
+
+		delete[] temp;
+
+		SDL_UnlockSurface(surface);
+	}
+
+	/*
+	* Taken from https://github.com/gpcz/OpenGL-SDL-Code-Warehouse
+	*/
+	void TextEntity::MoveTexture(SDL_Surface* src, SDL_Surface* dest)
+	{
+		//TODO: Make this center the text in the new surface
+		Sint32 x, y;
+		Uint32* srcPixels, * destPixels;
+
+		if (src && dest)
+		{
+			if (dest->w >= src->w && dest->h >= src->h)
+			{
+				// You need to lock surfaces before handling their raw pixels.
+				SDL_LockSurface(dest);
+				SDL_LockSurface(src);
+				for (y = 0; y < src->h; y++)
+				{
+					// The source's pixels are easy: a row
+					// start is pixels+y*src->w.
+					srcPixels = (Uint32*)src->pixels + y * src->w;
+					// Destination's pixel rowstarts are dest->pixels + y*dest->w.
+					destPixels = (Uint32*)dest->pixels + y * dest->w;
+					for (x = 0; x < src->w; x++)
+					{
+						*destPixels = *srcPixels;
+						destPixels++;
+						srcPixels++;
+					}
+				}
+				// We've done what we need to do.  Time to clean up.
+				SDL_UnlockSurface(src);
+				SDL_UnlockSurface(dest);
+			}
+		}
 	}
 }

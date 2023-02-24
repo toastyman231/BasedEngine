@@ -7,8 +7,11 @@
 #include "SDL2/SDL_render.h"
 #include "SDL2/SDL_ttf.h"
 
+#include "based/core/assetlibrary.h"
+
 #include "based/graphics/shader.h"
 #include "based/graphics/texture.h"
+#include "based/graphics/vertex.h"
 
 namespace based
 {
@@ -25,29 +28,41 @@ namespace based::ui
 	{
 	private:
 		entt::entity mEntity;
-		std::shared_ptr<graphics::Shader> mShader;
+		core::AssetLibrary<graphics::Material> mMaterialLibrary;
 		std::shared_ptr<graphics::Texture> mTexture;
-		glm::vec4 mColor;
-		SDL_Renderer* mRenderer;
+		std::shared_ptr<graphics::VertexArray> mVA;
+		std::string mText;
+		glm::vec2 mSize;
+		TTF_Font* mFont;
+		int mFontSize;
+		SDL_Color mColor;
 
-		unsigned int VAO, VBO;
+		bool setupComplete;
+
+		SDL_Surface* ResizeToPowerOfTwo(SDL_Surface* surface);
+
+		void RegenerateTexture();
+
+		static void FlipSurface(SDL_Surface* surface);
 	public:
 		TextEntity() = default;
-		TextEntity(std::string text);
-		TextEntity(const std::string& text, glm::vec3 pos);
+		TextEntity(std::string path, 
+			std::string text, 
+			int fontSize = 16, 
+			glm::vec3 pos = {0,0,0},
+			SDL_Color color = { 0,0,0,255 });
 		~TextEntity();
 
-		static bool Initialize();
-		static void Terminate();
-
-		void SetText(const std::string& text) const;
-		void SetColor(glm::vec4 col);
+		void SetText(std::string& text);
+		void SetFont(std::string& path, int fontSize = 16);
+		void SetColor(SDL_Color col);
 		void MoveText(glm::vec3 pos) const;
 		void DeleteText();
+		void MoveTexture(SDL_Surface* src, SDL_Surface* dest);
 
 		//void RenderText(std::string text, float x, float y, glm::vec3 color, float scale);
-		void Draw_Font(const char* str, int x, int y, int width, int height, int size, SDL_Color color);
+		void DrawFont();
 
-		const glm::vec4 inline GetColor() const { return mColor; }
+		const SDL_Color inline GetColor() const { return mColor; }
 	};
 }

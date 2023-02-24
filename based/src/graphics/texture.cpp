@@ -86,6 +86,12 @@ namespace based::graphics
 		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
 	}
 
+	void Texture::FreeTexture()
+	{
+		glDeleteTextures(1, &mId);
+		//delete(this);
+	}
+
 	void Texture::SetTextureFilter(TextureFilter filter)
 	{
 		mFilter = filter;
@@ -149,7 +155,9 @@ namespace based::graphics
 
 		if (mPixels && dataFormat != 0)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, mNumChannels, mWidth, mHeight, 0, dataFormat, GL_UNSIGNED_BYTE, mPixels); BASED_CHECK_GL_ERROR;
+			// TODO: Make this use the right enum and not crash
+			BASED_TRACE(dataFormat);
+			glTexImage2D(GL_TEXTURE_2D, 0, dataFormat, mWidth, mHeight, 0, dataFormat, GL_UNSIGNED_BYTE, mPixels); BASED_CHECK_GL_ERROR;
 			SetTextureFilter(mFilter);
 			BASED_TRACE("Loaded {}-channel texture: {}", mNumChannels, mPath.c_str());
 		}

@@ -29,6 +29,8 @@ namespace based::graphics
 		void Bind();
 		void Unbind();
 
+		void FreeTexture();
+
 		void SetTextureFilter(TextureFilter filter);
 	private:
 		TextureFilter mFilter;
