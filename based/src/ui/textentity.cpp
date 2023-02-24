@@ -229,36 +229,53 @@ namespace based::ui
 	void TextEntity::Draw_Font(const char* str, int x, int y, int width, int height, int size,
 		SDL_Color color)
 	{
-		TTF_Font* font = TTF_OpenFont("res/fonts/arial.ttf", size);
+		TTF_Font* font = TTF_OpenFont("C:\\Users\\jmorg\\Documents\\Repos\\BasedEngine\\bin\\Debug\\Sandbox\\res\\fonts\\arial.ttf", size);
 
 		GLuint texture;
 		SDL_Surface* surface = TTF_RenderText_Blended(font, str, color);
 
-		glEnable(GL_TEXTURE_2D); BASED_CHECK_GL_ERROR;
+		//glEnable(GL_TEXTURE_2D); BASED_CHECK_GL_ERROR;
 		glGenTextures(1, &texture); BASED_CHECK_GL_ERROR;
 		glBindTexture(GL_TEXTURE_2D, texture); BASED_CHECK_GL_ERROR;
 
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
+		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
+		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
 		BASED_CHECK_GL_ERROR;
 
-		glBegin(GL_QUADS); BASED_CHECK_GL_ERROR;
-		{
-			glTexCoord2d(0, 1); BASED_CHECK_GL_ERROR; glVertex3f(0, 0, 0); BASED_CHECK_GL_ERROR;
-			glTexCoord2d(1, 1); BASED_CHECK_GL_ERROR; glVertex3f(static_cast<float>(0 + surface->w), 0, 0); BASED_CHECK_GL_ERROR;
-			glTexCoord2d(1, 0); BASED_CHECK_GL_ERROR; glVertex3f(static_cast<float>(0 + surface->w), static_cast<float>(0 + surface->h), 0); BASED_CHECK_GL_ERROR;
-			glTexCoord2d(0, 0); BASED_CHECK_GL_ERROR; glVertex3f(0, static_cast<float>(0 + surface->h), 0); BASED_CHECK_GL_ERROR;
-		}
-		glEnd(); BASED_CHECK_GL_ERROR;
-		glDisable(GL_TEXTURE_2D); BASED_CHECK_GL_ERROR;
+		mTexture = std::make_shared<graphics::Texture>(texture, surface->h, surface->w);
+		/*std::shared_ptr<graphics::Material> charMat = std::make_shared<graphics::Material>(
+			graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect"),
+			charTex
+			);*/
+		std::shared_ptr<graphics::Shader> shader = graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect");
+
+		const std::shared_ptr<graphics::VertexArray> va = graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect");
+		//auto model = glm::mat4(1.f);
+		//model = glm::translate(model, glm::vec3{x, y, 0});
+		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera, Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()));
+		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayTextured, va, mTexture, shader));//BASED_SUBMIT_RC(RenderVertexArrayMaterial, va, charMat, model));
+		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
+
+		//glBegin(GL_QUADS); BASED_CHECK_GL_ERROR;
+		//{
+		//	glTexCoord2d(0, 1); BASED_CHECK_GL_ERROR; glVertex3f(0, 0, 0); BASED_CHECK_GL_ERROR;
+		//	glTexCoord2d(1, 1); BASED_CHECK_GL_ERROR; glVertex3f(static_cast<float>(0 + surface->w), 0, 0); BASED_CHECK_GL_ERROR;
+		//	glTexCoord2d(1, 0); BASED_CHECK_GL_ERROR; glVertex3f(static_cast<float>(0 + surface->w), static_cast<float>(0 + surface->h), 0); BASED_CHECK_GL_ERROR;
+		//	glTexCoord2d(0, 0); BASED_CHECK_GL_ERROR; glVertex3f(0, static_cast<float>(0 + surface->h), 0); BASED_CHECK_GL_ERROR;
+		//}
+		//glEnd(); BASED_CHECK_GL_ERROR;
+		//glDisable(GL_TEXTURE_2D); BASED_CHECK_GL_ERROR;
 
 		TTF_CloseFont(font);
 		SDL_FreeSurface(surface);
 		glDeleteTextures(1, &texture);
+		BASED_TRACE("Finished render!");
+		/*TTF_Font* font = TTF_OpenFont("res/fonts/arial.ttf", size);
 
-		/*SDL_Texture* Message = SDL_CreateTextureFromSurface(mRenderer, message_surf);
+		SDL_Surface* message_surf = TTF_RenderText_Blended(font, str, color);
+		SDL_Texture* Message = SDL_CreateTextureFromSurface(mRenderer, message_surf);
 		SDL_Rect Message_rect = { x, y, width, height };
 		SDL_RenderCopy(mRenderer, Message, NULL, &Message_rect);
 		SDL_RenderPresent(mRenderer);*/

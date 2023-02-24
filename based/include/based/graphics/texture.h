@@ -14,7 +14,8 @@ namespace based::graphics
 	{
 	public:
 		Texture(const std::string& path);
-		Texture(const SDL_Surface* surface);
+		Texture(unsigned int id, uint32_t height, uint32_t width);
+		//Texture(unsigned char* pixels, int width, int height);
 		~Texture();
 
 		inline uint32_t GetId() const { return mId; }
@@ -38,6 +39,6 @@ namespace based::graphics
 
 		unsigned char* mPixels;
 
-		void LoadTexture();
+		void LoadTexture(void* pixels, int width, int height);
 	};
 }

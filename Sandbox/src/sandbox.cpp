@@ -125,6 +125,22 @@ public:
 		//text.RenderText("This is a test!", 640.f, 360.f, glm::vec3(1.f), 1.f);
 		text.Draw_Font("This is a test!", Engine::Instance().GetWindow().GetSize().x / 2,
 			Engine::Instance().GetWindow().GetSize().y / 2, 74, 32, 32, { 255, 255, 255 });
+		/*float pixels[] = {
+				1.f, 0.f, 1.f,	1.f, 1.f, 1.f,	1.f, 0.f, 1.f,	1.f, 1.f, 1.f,
+				1.f, 1.f, 1.f,	1.f, 0.f, 1.f,	1.f, 1.f, 1.f,	1.f, 0.f, 1.f,
+				1.f, 0.f, 1.f,	1.f, 1.f, 1.f,	1.f, 0.f, 1.f,	1.f, 1.f, 1.f,
+				1.f, 1.f, 1.f,	1.f, 0.f, 1.f,	1.f, 1.f, 1.f,	1.f, 0.f, 1.f,
+		};
+
+		std::shared_ptr<graphics::Texture> charTex = std::make_shared<graphics::Texture>((void*)pixels, 4, 4);
+		std::shared_ptr<graphics::Material> charMat = std::make_shared<graphics::Material>(
+			graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect"),
+			charTex
+			);
+
+		const std::shared_ptr<graphics::VertexArray> va = graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect");
+		auto model = glm::mat4(1.f);
+		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, va, charMat, model));*/
 	}
 };
 
