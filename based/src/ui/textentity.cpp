@@ -16,7 +16,7 @@
 namespace based::ui
 {
 	TextEntity::TextEntity(std::string path, std::string text, int fontSize, glm::vec3 pos, SDL_Color color)
-		: setupComplete(false)
+		: setupComplete(false), mShouldRegenerate(false)
 	{
 		SetFont(path, fontSize);
 		SetText(text);
@@ -68,11 +68,11 @@ namespace based::ui
 		//glDeleteTextures(1, &texture);
 	}
 
-	void TextEntity::SetText(std::string& text)
+	void TextEntity::SetText(std::string text)
 	{
 		mText = text;
-
-		if (setupComplete) RegenerateTexture();
+		mShouldRegenerate = true;
+		//if (setupComplete) RegenerateTexture();
 		// TODO: regenerate texture
 	}
 
@@ -81,14 +81,14 @@ namespace based::ui
 		mFont = TTF_OpenFont(path.c_str(), fontSize);
 		BASED_ASSERT(mFont, "Error loading font!");
 		mFontSize = fontSize;
-		if (setupComplete) RegenerateTexture();
+		//if (setupComplete) RegenerateTexture();
 		// TODO: regenerate texture
 	}
 
 	void TextEntity::SetColor(SDL_Color col)
 	{
 		mColor = col;
-		if (setupComplete) RegenerateTexture();
+		//if (setupComplete) RegenerateTexture();
 		// TODO: regenerate texture
 	}
 
@@ -109,7 +109,6 @@ namespace based::ui
 
 	void TextEntity::DrawFont()
 	{
-		// TODO: Allow user to specify font
 		//mFont = TTF_OpenFont("C:\\Users\\jmorg\\Documents\\Repos\\BasedEngine\\bin\\Debug\\Sandbox\\res\\fonts\\arial.ttf", size);
 		//TTF_Font* font = TTF_OpenFont("C:\\Users\\jmorg\\Documents\\Repos\\BasedEngine\\bin\\Debug\\Sandbox\\res\\fonts\\arial.ttf", mFontSize);
 
@@ -153,7 +152,7 @@ namespace based::ui
 
 		//std::shared_ptr<graphics::Material> mat = std::make_shared<graphics::Material>(shader, mTexture);
 		//graphics::DefaultLibraries::GetMaterialLibrary().Load("TextMat", mat);
-
+		// TODO: Set up VA/scaling so that text is the right size
 		Engine::Instance().GetRenderManager().Submit(
 			BASED_SUBMIT_RC(PushCamera, Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()));
 		auto model = glm::mat4(1.f);
@@ -165,6 +164,7 @@ namespace based::ui
 			model));
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 
+		if (mShouldRegenerate) RegenerateTexture();
 		/*TTF_CloseFont(font);
 		SDL_FreeSurface(surface);
 		glDeleteTextures(1, &texture);*/
@@ -204,13 +204,13 @@ namespace based::ui
 
 		mSize = { surface->w, surface->h };
 
-		// TODO: Don't regenerate texture/VA if the text hasn't changed at all
 		mTexture = std::make_shared<graphics::Texture>(surface, texture);
 		mTexture->SetTextureFilter(graphics::TextureFilter::Nearest);
 		auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect");
 		mMaterialLibrary.Load("Material", std::make_shared<graphics::Material>(shader, mTexture));
 
 		SDL_FreeSurface(surface);
+		mShouldRegenerate = false;
 		//glDeleteTextures(1, &texture);
 	}
 

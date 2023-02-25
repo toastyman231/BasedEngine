@@ -31,28 +31,6 @@ namespace based::graphics
 		LoadTexture();
 	}
 
-	//Texture::Texture(unsigned char* pixels, int width, int height)
-	//	: mHeight(height)
-	//	, mWidth(width)
-	//	, mNumChannels(4)
-	//	, mPixels(pixels)
-	//	, mFilter(TextureFilter::Linear)
-	//{
-	//	LoadTexture(pixels, width, height);
-	//}
-
-	Texture::Texture(unsigned int id, uint32_t height, uint32_t width)
-		: mId((GLuint) id)
-		, mHeight(height)
-		, mWidth(width)
-		, mPixels(nullptr)
-		, mNumChannels(4)
-		, mStbiTex(false)
-		, mFilter(TextureFilter::Linear)
-	{
-		//TODO: remove
-	}
-
 	Texture::Texture(const SDL_Surface* surface, unsigned int id)
 		: mPath("")
 		, mId(id)
@@ -84,12 +62,6 @@ namespace based::graphics
 	void Texture::Unbind()
 	{
 		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
-	}
-
-	void Texture::FreeTexture()
-	{
-		glDeleteTextures(1, &mId);
-		//delete(this);
 	}
 
 	void Texture::SetTextureFilter(TextureFilter filter)

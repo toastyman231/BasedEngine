@@ -38,6 +38,7 @@ namespace based::ui
 		SDL_Color mColor;
 
 		bool setupComplete;
+		bool mShouldRegenerate;
 
 		SDL_Surface* ResizeToPowerOfTwo(SDL_Surface* surface);
 
@@ -53,14 +54,13 @@ namespace based::ui
 			SDL_Color color = { 0,0,0,255 });
 		~TextEntity();
 
-		void SetText(std::string& text);
+		void SetText(std::string text);
 		void SetFont(std::string& path, int fontSize = 16);
 		void SetColor(SDL_Color col);
 		void MoveText(glm::vec3 pos) const;
 		void DeleteText();
 		void MoveTexture(SDL_Surface* src, SDL_Surface* dest);
 
-		//void RenderText(std::string text, float x, float y, glm::vec3 color, float scale);
 		void DrawFont();
 
 		const SDL_Color inline GetColor() const { return mColor; }

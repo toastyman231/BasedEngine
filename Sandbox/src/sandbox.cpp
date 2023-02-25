@@ -18,6 +18,7 @@
 #include "external/glm/ext/matrix_transform.hpp"
 #include "external/imgui/imgui.h"
 #include "based/scene/components.h"
+#include "based/scene/entity.h"
 
 #include <filesystem>
 
@@ -55,7 +56,12 @@ public:
 		secondScene->GetRegistry().emplace<scene::SpriteRenderer>(entity,
 			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
+		auto testEnt = scene::Entity::CreateEntity();
+		scene::Entity::AddComponent<scene::SpriteRenderer>(testEnt, graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
+			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
+		BASED_TRACE(testEnt.GetComponent<scene::Transform>().Position.y);
 		BASED_TRACE("Done initializing");
+
 		//text = ui::TextEntity("This is a test!");
 		//text.SetText("This is a test!");
 		//text.RenderText(glm::vec3(0.f), glm::vec4(1.f), 1.f);
@@ -80,7 +86,8 @@ public:
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_B))
 		{
-			text.SetColor({ 255, 0, 0, 255 });
+			//text.SetColor({ 255, 0, 0, 255 });
+			text.SetText("New text!");
 		}
 
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
