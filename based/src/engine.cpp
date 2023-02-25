@@ -87,6 +87,7 @@ namespace based
 
     void Engine::SetIcon(std::string path)
     {
+        // TODO: Add support for icons of different sizes
         if (FILE* file = fopen(path.c_str(), "r"))
         {
             int width = 128, height = 128;

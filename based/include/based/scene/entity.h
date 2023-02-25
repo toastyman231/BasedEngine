@@ -35,6 +35,7 @@ namespace based::scene
 
 		static void DestroyEntity(Entity ent);
 
+		// TODO: Do some testing to make sure adding/removing works even if you already have component or don't have component
 		template<typename Type, typename ...Args>
 		inline void AddComponent(Args &&... args)
 		{
