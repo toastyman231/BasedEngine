@@ -8,6 +8,8 @@
 #include "input/keyboard.h"
 #include "input/joystick.h"
 
+#include "external/stb/stb_image.h"
+
 #include "SDL2/SDL.h"
 #include <SDL2/SDL_ttf.h>
 
@@ -83,6 +85,30 @@ namespace based
         }
     }
 
+    void Engine::SetIcon(std::string path)
+    {
+        if (FILE* file = fopen(path.c_str(), "r"))
+        {
+            int width = 128, height = 128;
+            int numChannels = 4;
+            Uint32 rmask, gmask, bmask, amask;
+
+            rmask = 0x000000ff;
+            gmask = 0x0000ff00;
+            bmask = 0x00ff0000;
+            amask = 0xff000000;
+
+            SDL_Surface* iconSurface = SDL_CreateRGBSurfaceFrom(stbi_load(path.c_str(), &width, &height, &numChannels, 0),
+                width, height, 32, width * numChannels, rmask, gmask, bmask, amask);
+
+            SDL_SetWindowIcon(Engine::Instance().GetWindow().GetSDLWindow(), iconSurface);
+        }
+        else
+        {
+            BASED_WARN("No icon.png image found at path {}", path.c_str());
+        }
+    }
+
     bool Engine::Initialize()
     {
         BASED_ASSERT(!mIsInitialized, "Attempting to call Engine::Initialize() more than once!");
@@ -118,6 +144,9 @@ namespace based
 
                     // Initialize Asset Libraries
                     graphics::DefaultLibraries::InitializeLibraries();
+
+                    // Load window icon
+                    SetIcon("res/icon.png");
 
                     // Initialize client
                     mApp->Initialize();

@@ -38,7 +38,9 @@ namespace based::scene
 		template<typename Type, typename ...Args>
 		inline void AddComponent(Args &&... args)
 		{
-			mRegistry.emplace<Type>(mEntity, args...);
+			// TODO: Should decide whether to make Replace it's own function
+			if (HasComponent<Type>()) return;
+			mRegistry.emplace_or_replace<Type>(mEntity, args...);
 		}
 
 		template<typename Type>
@@ -59,7 +61,7 @@ namespace based::scene
 			return mRegistry.get<Type>(mEntity);
 		}
 
-		bool IsActive() const;
+		inline bool IsActive() { return mIsEnabled; }
 
 		void SetActive(bool active);
 
@@ -68,6 +70,7 @@ namespace based::scene
 		entt::entity mEntity;
 		std::string mEntityName;
 
+		bool mIsEnabled;
 		//static const int mEntityCount = 0;
 	};
 }

@@ -29,6 +29,7 @@ class Sandbox : public based::App
 private:
 	std::shared_ptr<scene::Scene> secondScene;
 	ui::TextEntity text;
+	scene::Entity* testEnt;
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -56,11 +57,12 @@ public:
 		secondScene->GetRegistry().emplace<scene::SpriteRenderer>(entity,
 			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
-		auto testEnt = scene::Entity::CreateEntity();
-		testEnt.AddComponent<scene::SpriteRenderer>(graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
+		testEnt = &scene::Entity::CreateEntity();
+		testEnt->AddComponent<scene::SpriteRenderer>(graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
-		BASED_TRACE("Transform: {}", testEnt.HasComponent<scene::Transform>());
-		BASED_TRACE("Velocity: {}", testEnt.HasComponent<scene::Velocity>());
+		BASED_TRACE("Transform: {}", testEnt->HasComponent<scene::Transform>());
+		BASED_TRACE("Velocity: {}", testEnt->HasComponent<scene::Velocity>());
+		BASED_TRACE("Is Active: {}", testEnt->IsActive());
 		BASED_TRACE("Done initializing");
 
 		//text = ui::TextEntity("This is a test!");
@@ -88,7 +90,11 @@ public:
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_B))
 		{
 			//text.SetColor({ 255, 0, 0, 255 });
-			text.SetText("New text!");
+			//text.SetText("New text!");
+			BASED_TRACE("Is: {}", testEnt->IsActive());
+			BASED_TRACE("Changing to: {}", !testEnt->IsActive());
+			testEnt->SetActive(!testEnt->IsActive());
+			BASED_TRACE("Is Active: {}", testEnt->IsActive());
 		}
 
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))

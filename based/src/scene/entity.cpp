@@ -3,7 +3,7 @@
 namespace based::scene
 {
 	Entity::Entity(entt::registry& registry)
-		: mRegistry(registry)
+		: mRegistry(registry), mIsEnabled(true)
 	{
 		mEntity = mRegistry.create();
 		mEntityName = "New Entity "; //+ mEntityCount++;
@@ -17,12 +17,21 @@ namespace based::scene
 
 	void Entity::SetActive(bool active)
 	{
-		if (active) AddComponent<scene::Enabled>();
-		else RemoveComponent<scene::Enabled>();
+		if (active == mIsEnabled)
+		{
+			BASED_TRACE("Entity is already in this state");
+			return;
+		}
+
+		if (active) mIsEnabled = true;
+		else mIsEnabled = false;
+		BASED_TRACE("New active value: {}", mIsEnabled);
+		//if (active) AddComponent<scene::Enabled>();
+		//else RemoveComponent<scene::Enabled>();
 	}
 
-	bool Entity::IsActive() const
+	/*bool Entity::IsActive() const
 	{
-		return false;
-	}
+		return HasComponent<scene::Enabled>();
+	}*/
 }

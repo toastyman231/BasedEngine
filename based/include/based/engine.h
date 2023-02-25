@@ -14,6 +14,7 @@ namespace based
         ~Engine() {}
 
         void Run(App* app);
+        void SetIcon(std::string path);
         inline void Quit() { mIsRunning = false; }
 
         inline App& GetApp() { return *mApp; }
