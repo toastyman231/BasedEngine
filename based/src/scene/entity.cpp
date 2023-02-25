@@ -14,4 +14,15 @@ namespace based::scene
 		ent.mRegistry.destroy(ent.mEntity);
 		delete(&ent);
 	}
+
+	void Entity::SetActive(bool active)
+	{
+		if (active) AddComponent<scene::Enabled>();
+		else RemoveComponent<scene::Enabled>();
+	}
+
+	bool Entity::IsActive() const
+	{
+		return false;
+	}
 }

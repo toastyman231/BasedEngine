@@ -57,9 +57,10 @@ public:
 			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
 		auto testEnt = scene::Entity::CreateEntity();
-		scene::Entity::AddComponent<scene::SpriteRenderer>(testEnt, graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
+		testEnt.AddComponent<scene::SpriteRenderer>(graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
-		BASED_TRACE(testEnt.GetComponent<scene::Transform>().Position.y);
+		BASED_TRACE("Transform: {}", testEnt.HasComponent<scene::Transform>());
+		BASED_TRACE("Velocity: {}", testEnt.HasComponent<scene::Velocity>());
 		BASED_TRACE("Done initializing");
 
 		//text = ui::TextEntity("This is a test!");

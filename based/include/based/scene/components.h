@@ -52,4 +52,9 @@ namespace based::scene
 		TextRenderer() = default;
 		//TextRenderer(const std::weak_ptr<ui::TextEntity> textEntity) : text(textEntity) {}
 	};
+
+	struct Enabled
+	{
+		Enabled() = default;
+	};
 }

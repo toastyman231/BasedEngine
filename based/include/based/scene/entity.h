@@ -21,7 +21,8 @@ namespace based::scene
 		static inline Entity CreateEntity(Args &&...args)
 		{
 			Entity newEntity = Entity(Engine::Instance().GetApp().GetCurrentScene()->GetRegistry());
-			AddComponent<scene::Transform>(newEntity);
+			newEntity.AddComponent<scene::Transform>();
+			newEntity.SetActive(true);
 
 			// Black magic iterator over the given args
 			([&]
@@ -34,11 +35,22 @@ namespace based::scene
 
 		static void DestroyEntity(Entity ent);
 
-		// TODO: Maybe make this not static?
 		template<typename Type, typename ...Args>
-		static inline void AddComponent(Entity entity, Args &&... args)
+		inline void AddComponent(Args &&... args)
 		{
-			entity.mRegistry.emplace<Type>(entity.mEntity, args...);
+			mRegistry.emplace<Type>(mEntity, args...);
+		}
+
+		template<typename Type>
+		inline void RemoveComponent()
+		{
+			mRegistry.remove<Type>(mEntity);
+		}
+
+		template<typename Type>
+		inline bool HasComponent()
+		{
+			return mRegistry.all_of<Type>(mEntity);
 		}
 
 		template<typename Type>
@@ -46,6 +58,10 @@ namespace based::scene
 		{
 			return mRegistry.get<Type>(mEntity);
 		}
+
+		bool IsActive() const;
+
+		void SetActive(bool active);
 
 	private:
 		entt::registry& mRegistry;
