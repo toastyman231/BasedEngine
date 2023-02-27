@@ -87,11 +87,10 @@ namespace based
 
     void Engine::SetIcon(std::string path)
     {
-        // TODO: Add support for icons of different sizes
         if (FILE* file = fopen(path.c_str(), "r"))
         {
-            int width = 128, height = 128;
-            int numChannels = 4;
+            int width = 0, height = 0;
+            int numChannels = 0;
             Uint32 rmask, gmask, bmask, amask;
 
             rmask = 0x000000ff;
@@ -99,8 +98,10 @@ namespace based
             bmask = 0x00ff0000;
             amask = 0xff000000;
 
-            SDL_Surface* iconSurface = SDL_CreateRGBSurfaceFrom(stbi_load(path.c_str(), &width, &height, &numChannels, 0),
-                width, height, 32, width * numChannels, rmask, gmask, bmask, amask);
+            stbi_set_flip_vertically_on_load(false);
+            unsigned char* pixels = stbi_load(path.c_str(), &width, &height, &numChannels, 0);
+
+            SDL_Surface* iconSurface = SDL_CreateRGBSurfaceFrom(pixels, width, height, 32, width * numChannels, rmask, gmask, bmask, amask);
 
             SDL_SetWindowIcon(Engine::Instance().GetWindow().GetSDLWindow(), iconSurface);
         }

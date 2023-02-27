@@ -33,6 +33,7 @@ namespace based::ui
 		std::shared_ptr<graphics::VertexArray> mVA;
 		std::string mText;
 		glm::vec2 mSize;
+		glm::vec3 mPosition; // TODO: Replace with position from entity
 		TTF_Font* mFont;
 		int mFontSize;
 		SDL_Color mColor;
@@ -57,7 +58,7 @@ namespace based::ui
 		void SetText(std::string text);
 		void SetFont(std::string& path, int fontSize = 16);
 		void SetColor(SDL_Color col);
-		void MoveText(glm::vec3 pos) const;
+		void MoveText(glm::vec3 pos);
 		void DeleteText();
 		void MoveTexture(SDL_Surface* src, SDL_Surface* dest);
 

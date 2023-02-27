@@ -44,11 +44,10 @@ public:
 	void Initialize() override
 	{
 		App::Initialize();
-		//BASED_TRACE(std::filesystem::current_path().c_str());
-		text = ui::TextEntity("res/fonts/arial.ttf", "This is a test!", 32, 
+		text = ui::TextEntity("res/fonts/arial.ttf", "This is a test!", 128, 
 			glm::vec3(Engine::Instance().GetWindow().GetSize().x / 2, Engine::Instance().GetWindow().GetSize().y / 2, 0.f),
 			{ 0, 0, 0, 255 });
-		//ui::TextEntity::TestRender();
+
 		secondScene = std::make_shared<scene::Scene>();
 		secondScene->SetActiveCamera(GetCurrentScene()->GetActiveCamera());
 		BASED_TRACE("Created entity in second scene");
@@ -57,21 +56,24 @@ public:
 		secondScene->GetRegistry().emplace<scene::SpriteRenderer>(entity,
 			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
+		auto texture = std::make_shared<graphics::Texture>("res/icon.png");
+		auto material = std::make_shared<graphics::Material>(graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect"), texture);
+		graphics::DefaultLibraries::GetMaterialLibrary().Load("Test", material);
 		testEnt = &scene::Entity::CreateEntity();
-		testEnt->AddComponent<scene::SpriteRenderer>(graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
-			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
+		//testEnt->AddComponent<scene::SpriteRenderer>(graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"), 
+		//	graphics::DefaultLibraries::GetMaterialLibrary().Get("Test"));
 		BASED_TRACE("Transform: {}", testEnt->HasComponent<scene::Transform>());
 		BASED_TRACE("Velocity: {}", testEnt->HasComponent<scene::Velocity>());
 		BASED_TRACE("Is Active: {}", testEnt->IsActive());
 		BASED_TRACE("Done initializing");
 
-		//text = ui::TextEntity("This is a test!");
-		//text.SetText("This is a test!");
-		//text.RenderText(glm::vec3(0.f), glm::vec4(1.f), 1.f);
+		// TODO: Add sprite class for easy sprite creation, and sort order for layering sprites
+
 	}
 
 	void Shutdown() override
 	{
+		// NOTE: Not calling this causes an OpenGL error on shutdown for some reason
 		text.DeleteText();
 	}
 
@@ -89,8 +91,9 @@ public:
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_B))
 		{
-			//text.SetColor({ 255, 0, 0, 255 });
-			//text.SetText("New text!");
+			//text.MoveText({ 0, 0, 0 }); This works
+			//text.SetColor({ 255, 0, 0, 255 }); This does not
+			//text.SetText("New text!"); This also does not
 			BASED_TRACE("Is: {}", testEnt->IsActive());
 			BASED_TRACE("Changing to: {}", !testEnt->IsActive());
 			testEnt->SetActive(!testEnt->IsActive());
