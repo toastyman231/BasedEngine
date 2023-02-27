@@ -22,6 +22,7 @@ namespace based::ui
 		SetText(text);
 		MoveText(pos);
 		SetColor(color);
+		SetAlignment(Middle);
 
 		RegenerateTexture();
 
@@ -81,6 +82,7 @@ namespace based::ui
 		mFont = TTF_OpenFont(path.c_str(), fontSize);
 		BASED_ASSERT(mFont, "Error loading font!");
 		mFontSize = fontSize;
+		mShouldRegenerate = true;
 		//if (setupComplete) RegenerateTexture();
 		// TODO: regenerate texture
 	}
@@ -88,6 +90,7 @@ namespace based::ui
 	void TextEntity::SetColor(SDL_Color col)
 	{
 		mColor = col;
+		mShouldRegenerate = true;
 		//if (setupComplete) RegenerateTexture();
 		// TODO: regenerate texture
 	}
@@ -100,6 +103,13 @@ namespace based::ui
 		//glm::vec3 oldScale = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().get<scene::Transform>(mEntity).Scale;
 		//Engine::Instance().GetApp().GetCurrentScene()->GetRegistry()
 		//	.replace<scene::Transform>(mEntity, pos, oldRot, oldScale);
+	}
+
+	void TextEntity::SetAlignment(Align alignment)
+	{
+		mAlignment = alignment;
+		mShouldRegenerate = true;
+		//if (setupComplete) RegenerateTexture();
 	}
 
 	void TextEntity::DeleteText()
@@ -201,10 +211,10 @@ namespace based::ui
 
 	/*
 	* Taken from https://github.com/gpcz/OpenGL-SDL-Code-Warehouse
+	* Modified to add alignment offset
 	*/
 	void TextEntity::MoveTexture(SDL_Surface* src, SDL_Surface* dest)
 	{
-		//TODO: Make this center the text in the new surface
 		Sint32 x, y;
 		Uint32* srcPixels, * destPixels;
 
@@ -215,13 +225,31 @@ namespace based::ui
 				// You need to lock surfaces before handling their raw pixels.
 				SDL_LockSurface(dest);
 				SDL_LockSurface(src);
-				for (y = 0; y < src->h; y++)
+
+				// Start adding pixels at the proper row to align the text vertically
+				int yOffset = 0; // Align to the top by default
+				if (mAlignment == 3 || mAlignment == 4 || mAlignment == 5) // Align in the middle
+					yOffset = (dest->h - src->h) / 2;
+				else if (mAlignment == 6 || mAlignment == 7 || mAlignment == 8) // Align to the bottom
+					yOffset = (dest->h - src->h);
+
+				BASED_TRACE("SRC H: {}, DEST H: {}, YOFF: {}", src->h, dest->h, yOffset);
+
+				// Skip any rows before the offset, and only add pixels for as many rows as the original surface has
+				for (y = yOffset; y < yOffset + src->h; y++) 
 				{
+					// Offset the start of each row by however much is needed to align the text properly
+					int xOffset = 0; // Align to the left by default
+					if (mAlignment == 1 || mAlignment == 4 || mAlignment == 7) // Align in the middle
+						xOffset = (dest->w - src->w) / 2;
+					else if (mAlignment == 2 || mAlignment == 5 || mAlignment == 8) // Align to the right
+						xOffset = (dest->w - src->w);
+
 					// The source's pixels are easy: a row
 					// start is pixels+y*src->w.
-					srcPixels = (Uint32*)src->pixels + y * src->w;
+					srcPixels = (Uint32*)src->pixels + (y-yOffset) * src->w; // Subtract yOffset to get row index back in bound of original surf
 					// Destination's pixel rowstarts are dest->pixels + y*dest->w.
-					destPixels = (Uint32*)dest->pixels + y * dest->w;
+					destPixels = (Uint32*)dest->pixels + y * dest->w + xOffset;
 					for (x = 0; x < src->w; x++)
 					{
 						*destPixels = *srcPixels;

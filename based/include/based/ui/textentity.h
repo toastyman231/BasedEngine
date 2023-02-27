@@ -24,6 +24,13 @@ namespace based
 
 namespace based::ui
 {
+	enum Align
+	{
+		TopLeft, TopMiddle, TopRight,
+		MiddleLeft, Middle, MiddleRight,
+		BottomLeft, BottomMiddle, BottomRight
+	};
+
 	class TextEntity
 	{
 	private:
@@ -34,6 +41,7 @@ namespace based::ui
 		std::string mText;
 		glm::vec2 mSize;
 		glm::vec3 mPosition; // TODO: Replace with position from entity
+		Align mAlignment;
 		TTF_Font* mFont;
 		int mFontSize;
 		SDL_Color mColor;
@@ -61,6 +69,7 @@ namespace based::ui
 		void MoveText(glm::vec3 pos);
 		void DeleteText();
 		void MoveTexture(SDL_Surface* src, SDL_Surface* dest);
+		void SetAlignment(Align alignment);
 
 		void DrawFont();
 
