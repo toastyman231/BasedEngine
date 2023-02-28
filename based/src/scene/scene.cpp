@@ -14,7 +14,7 @@ namespace based::scene
 
 		for (const auto entity : view)
 		{
-			//if (!mRegistry.all_of<scene::Enabled>(entity)) continue;
+			if (!mRegistry.all_of<scene::Enabled>(entity)) continue;
 
 			// TODO: maybe move this to an Entity class?
 			// TODO: figure out rotation :(

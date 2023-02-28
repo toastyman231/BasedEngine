@@ -27,7 +27,7 @@ class Sandbox : public based::App
 private:
 	std::shared_ptr<scene::Scene> secondScene;
 	ui::TextEntity text;
-	//scene::Entity* testEnt;
+	scene::Entity* testEnt;
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -55,14 +55,13 @@ public:
 			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
 		auto texture = std::make_shared<graphics::Texture>("res/icon.png");
-		auto material = std::make_shared<graphics::Material>(graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect"), texture);
+		auto material = std::make_shared<graphics::Material>(graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect"), 
+			texture);
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Test", material);
-		//testEnt = &scene::Entity::CreateEntity();
-		//testEnt->AddComponent<scene::SpriteRenderer>(graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"), 
-		//	graphics::DefaultLibraries::GetMaterialLibrary().Get("Test"));
-		//BASED_TRACE("Transform: {}", testEnt.HasComponent<scene::Transform>());
-		//BASED_TRACE("Velocity: {}", testEnt.HasComponent<scene::Velocity>());
-		//BASED_TRACE("Is Active: {}", testEnt.IsActive());
+		testEnt = scene::Entity::CreateEntity();
+		testEnt->AddComponent<scene::SpriteRenderer>(graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"), 
+			graphics::DefaultLibraries::GetMaterialLibrary().Get("Test"));
+
 		BASED_TRACE("Done initializing");
 
 		// TODO: Add sprite class for easy sprite creation, and sort order for layering sprites
@@ -93,10 +92,7 @@ public:
 			//text.MoveText({ 0, 0, 0 }); This works
 			//text.SetColor({ 255, 0, 0, 255 }); This does not
 			//text.SetText("New text!"); This also does not
-			//BASED_TRACE("Is: {}", testEnt.IsActive());
-			//BASED_TRACE("Changing to: {}", !testEnt.IsActive());
-			//testEnt.SetActive(!testEnt.IsActive());
-			//BASED_TRACE("Is Active: {}", testEnt.IsActive());
+			testEnt->SetActive(!testEnt->IsActive());
 		}
 
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))

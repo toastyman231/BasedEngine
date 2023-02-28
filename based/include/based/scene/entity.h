@@ -13,16 +13,16 @@ namespace based::scene
 	class Entity
 	{
 	public:
-		Entity() = default;
+		Entity() = delete;
 		Entity(entt::registry& registry);
 		~Entity() = default;
 
 		template<typename... Args>
-		static inline Entity CreateEntity(Args &&...args)
+		static inline Entity* CreateEntity(Args &&...args)
 		{
-			Entity newEntity = Entity(Engine::Instance().GetApp().GetCurrentScene()->GetRegistry());
-			newEntity.AddComponent<scene::Transform>();
-			newEntity.SetActive(true);
+			Entity* newEntity = new Entity(Engine::Instance().GetApp().GetCurrentScene()->GetRegistry());
+			newEntity->AddComponent<scene::Transform>();
+			newEntity->SetActive(true);
 
 			// Black magic iterator over the given args
 			([&]
@@ -45,13 +45,13 @@ namespace based::scene
 		}
 
 		template<typename Type>
-		inline void RemoveComponent()
+		inline void RemoveComponent() const
 		{
 			mRegistry.remove<Type>(mEntity);
 		}
 
 		template<typename Type>
-		inline bool HasComponent()
+		inline bool HasComponent() const
 		{
 			return mRegistry.all_of<Type>(mEntity);
 		}
@@ -62,7 +62,7 @@ namespace based::scene
 			return mRegistry.get<Type>(mEntity);
 		}
 
-		inline bool IsActive() { return mIsEnabled; }
+		inline bool IsActive() const { return mIsEnabled; }
 
 		void SetActive(bool active);
 
