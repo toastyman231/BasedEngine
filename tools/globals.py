@@ -31,6 +31,7 @@ def ProcessArguments(argv):
         except:
             k = arg
             v = 0
+            print("Error processing argument: {}".format(arg))
         ret[k] = v
     return ret
 

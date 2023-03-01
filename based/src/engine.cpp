@@ -148,7 +148,7 @@ namespace based
                     graphics::DefaultLibraries::InitializeLibraries();
 
                     // Load window icon
-                    SetIcon("res/icon.png");
+                    SetIcon("Assets/icon.png");
 
                     // Initialize client
                     mApp->Initialize();

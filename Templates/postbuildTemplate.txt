@@ -2,7 +2,7 @@ from genericpath import isfile
 import sys, os, subprocess
 
 TOOLS_DIR = "tools"
-sys.path.append("{}/../{}".format(os.getcwd(), TOOLS_DIR))
+sys.path.append("ENGINE_LOCATION\tools")
 import globals
 
 WIN_SOURCE_PATHS = ["PostBuildCopy", "PostBuildCopy_windows", "Assets"]

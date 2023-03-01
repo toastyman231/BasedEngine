@@ -20,6 +20,7 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - Entity-Component System (Custom Entity class exposes entity functionality to the user)
 - Custom window icons (set up automatically if you include an icon.png file in your res folder)
 - Text Rendering/UI (WIP)
+- Toolchain to create projects in directories outside the engine's directory
 
 ## Planned Additions
 - 2D Physics with Box2D
@@ -29,6 +30,7 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - More UI (Buttons, Sliders, Checkboxes, etc)
 - Scene Save/Load (Serialization)
 - 3D Rendering capability with PBR materials
+- GUI to make creating/loading projects easier
 
 ## Thoughts and Concerns
 - ~~Currently I have EnTT fully exposed to the user, but it might be better to hide some of it behind a custom Entity class.~~  
@@ -49,7 +51,8 @@ Feel free to contribute if you feel like it, this is my first large C++ project,
 Just download the source code, open a terminal in the root directory, and run 'python3 based.py gensln' to generate the Visual Studio project files. You will need Python 3 installed on your machine first. Some commands may require you to set up your compiler location.  
 The following commands can be run with 'python3 based.py {command name} {arguments}'
 - gensln: Generates project files. Should work on any OS, but I've only tested it on Windows.
-- buildsln [config=debug|release]: Builds the entire solution in either debug or release configuration.
-- mklink [prj=Your Project Name]: Creates a symlink of the resources folder so that the engine has easier access to it. THIS IS MANDATORY IF YOU ARE USING THE RESOURCES FOLDER!!!!! This command may be a bit buggy, I only used it once.
-- run [config=debug|release] [prj=Your Project Name]: Runs an existing project in debug or release mode. Defaults to debug.
+- buildsln [-config=debug|release]: Builds the entire solution in either debug or release configuration.
+- mkproject [-prj=New Project Name] [-config=Template Name] [-location=Project Location]: Will create a new project from a template at the specified directory. Templates can be found in BasedEngine/Templates.
+- (DEPRECATED) mklink [-prj=Your Project Name]: Creates a symlink of the resources folder so that the engine has easier access to it. THIS IS MANDATORY IF YOU ARE USING THE RESOURCES FOLDER!!!!! This command may be a bit buggy, I only used it once.
+- run [-config=debug|release] [-prj=Your Project Name]: Runs an existing project in debug or release mode. Defaults to debug.
 - version: Prints the current tools version. Pretty useless, it's mostly just for testing.

@@ -60,7 +60,8 @@ project "based"
 
     defines
     {
-        "GLFW_INCLUDE_NONE" -- Ensures glad doesn't include glfw
+        "GLFW_INCLUDE_NONE", -- Ensures glad doesn't include glfw
+        "_CRT_SECURE_NO_WARNINGS"
     }
 
     filter {"system:windows", "configurations:*"}

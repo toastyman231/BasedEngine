@@ -16,7 +16,8 @@
 namespace based::ui
 {
 	TextEntity::TextEntity(std::string path, std::string text, int fontSize, glm::vec3 pos, SDL_Color color)
-		: setupComplete(false), mShouldRegenerate(false)
+		: //Entity(Engine::Instance().GetApp().GetCurrentScene()->GetRegistry()),
+		setupComplete(false), mShouldRegenerate(false)
 	{
 		SetFont(path, fontSize);
 		SetText(text);

@@ -9,9 +9,9 @@
 
 #include "based/core/assetlibrary.h"
 
-#include "based/graphics/shader.h"
 #include "based/graphics/texture.h"
 #include "based/graphics/vertex.h"
+#include "based/scene/entity.h"
 
 namespace based
 {
@@ -31,10 +31,11 @@ namespace based::ui
 		BottomLeft, BottomMiddle, BottomRight
 	};
 
-	class TextEntity
+	class TextEntity //: public scene::Entity
 	{
 	private:
-		entt::entity mEntity;
+		//entt::entity mEntity;
+		//scene::Entity mEntity;
 		core::AssetLibrary<graphics::Material> mMaterialLibrary;
 		std::shared_ptr<graphics::Texture> mTexture;
 		std::shared_ptr<graphics::VertexArray> mVA;

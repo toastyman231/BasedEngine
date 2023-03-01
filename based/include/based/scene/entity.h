@@ -64,6 +64,8 @@ namespace based::scene
 
 		inline bool IsActive() const { return mIsEnabled; }
 
+		inline entt::entity& GetEntityHandle() { return mEntity; }
+
 		void SetActive(bool active);
 
 	private:

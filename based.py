@@ -20,7 +20,7 @@ argc = len(sys.argv)
 i = 1
 while(i < argc):
     cmds = [sys.argv[i]]
-    
+
     while True:
         if i < argc - 1 and sys.argv[i+1][0] == "-":
             cmds.append(sys.argv[i+1][1:])

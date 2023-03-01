@@ -5,7 +5,6 @@
 #include "based/graphics/camera.h"
 #include "based/graphics/framebuffer.h"
 #include "based/input/keyboard.h"
-#include "based/ui/textentity.h"
 
 #include <memory>
 
@@ -19,6 +18,7 @@
 #include "external/imgui/imgui.h"
 #include "based/scene/components.h"
 #include "based/scene/entity.h"
+#include "based/ui/textentity.h"
 
 using namespace based;
 
@@ -26,7 +26,7 @@ class Sandbox : public based::App
 {
 private:
 	std::shared_ptr<scene::Scene> secondScene;
-	ui::TextEntity text;
+	ui::TextEntity* text;
 	scene::Entity* testEnt;
 public:
 	core::WindowProperties GetWindowProperties() override
@@ -42,7 +42,7 @@ public:
 	void Initialize() override
 	{
 		App::Initialize();
-		text = ui::TextEntity("res/fonts/arial.ttf", "This is a test!", 128, 
+		text = new ui::TextEntity("Assets/fonts/arial.ttf", "This is a test!", 128, 
 			glm::vec3(Engine::Instance().GetWindow().GetSize().x / 2, Engine::Instance().GetWindow().GetSize().y / 2, 0.f),
 			{ 0, 0, 0, 255 });
 
@@ -54,7 +54,7 @@ public:
 		secondScene->GetRegistry().emplace<scene::SpriteRenderer>(entity,
 			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
-		auto texture = std::make_shared<graphics::Texture>("res/icon.png");
+		auto texture = std::make_shared<graphics::Texture>("Assets/icon.png");
 		auto material = std::make_shared<graphics::Material>(graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect"), 
 			texture);
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Test", material);
@@ -71,7 +71,7 @@ public:
 	void Shutdown() override
 	{
 		// NOTE: Not calling this causes an OpenGL error on shutdown for some reason
-		text.DeleteText();
+		text->DeleteText();
 	}
 
 	void Update() override
@@ -137,13 +137,14 @@ public:
 		GetCurrentScene()->GetRegistry().emplace<scene::SpriteRenderer>(entity,
 			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
+		GetCurrentScene()->GetRegistry().emplace<scene::Enabled>(entity);
 
 		return entity;
 	}
 
 	void Render() override
 	{
-		text.DrawFont();
+		text->DrawFont();
 	}
 };
 

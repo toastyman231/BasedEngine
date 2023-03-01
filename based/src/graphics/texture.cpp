@@ -113,22 +113,9 @@ namespace based::graphics
 
 		if (mPixels && dataFormat == 0) BASED_ERROR("Texture format not supported - num channnels: {}", mNumChannels);
 
-		/*if (pixels != nullptr)
-		{
-			mWidth = width;
-			mHeight = height;
-			mNumChannels = 4;
-
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight, 0, GL_RGB, GL_FLOAT, pixels); BASED_CHECK_GL_ERROR;
-			SetTextureFilter(TextureFilter::Nearest);
-			glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
-			return;
-		}*/
-
 		if (mPixels && dataFormat != 0)
 		{
 			// TODO: Make this use the right enum and not crash
-			BASED_TRACE(dataFormat);
 			glTexImage2D(GL_TEXTURE_2D, 0, dataFormat, mWidth, mHeight, 0, dataFormat, GL_UNSIGNED_BYTE, mPixels); BASED_CHECK_GL_ERROR;
 			SetTextureFilter(mFilter);
 			BASED_TRACE("Loaded {}-channel texture: {}", mNumChannels, mPath.c_str());
