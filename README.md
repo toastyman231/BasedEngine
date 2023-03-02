@@ -4,7 +4,7 @@ A simple 2D game engine based on tutorials by https://www.youtube.com/c/Progrema
 ## Libraries Used
 - FreeType (Text Rendering, https://freetype.org/)
 - GLAD (OpenGL Rendering, https://glad.dav1d.de/)
-- SDL2 (Window Context, https://www.libsdl.org/)
+- SDL2 (Window Context and Text Rendering, https://www.libsdl.org/)
 - spdlog (Error Logging, https://github.com/gabime/spdlog)
 - EnTT (Entity-Component System, https://github.com/skypjack/entt)
 - GLM (OpenGL Math, https://github.com/g-truc/glm)
@@ -19,7 +19,7 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - Scene System (Currently just determines which entities get rendered or not)
 - Entity-Component System (Custom Entity class exposes entity functionality to the user)
 - Custom window icons (set up automatically if you include an icon.png file in your res folder)
-- Text Rendering/UI (WIP)
+- Text Rendering/UI
 - Toolchain to create projects in directories outside the engine's directory
 
 ## Planned Additions
