@@ -44,7 +44,7 @@ public:
 	void Initialize() override
 	{
 		App::Initialize();
-		text = new ui::TextEntity("Assets/fonts/arial.ttf", "This is a test!", 128, 
+		text = new ui::TextEntity("Assets/fonts/Arimo-Regular.ttf", "This is a test!", 128, 
 			glm::vec3(Engine::Instance().GetWindow().GetSize().x / 2, Engine::Instance().GetWindow().GetSize().y / 2, 0.f),
 			{ 0, 0, 0, 255 });
 
