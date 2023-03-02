@@ -31,28 +31,28 @@ namespace based::ui
 		BottomLeft, BottomMiddle, BottomRight
 	};
 
-	class TextEntity //: public scene::Entity
+	class TextEntity : public scene::Entity
 	{
 	private:
-		//entt::entity mEntity;
-		//scene::Entity mEntity;
 		core::AssetLibrary<graphics::Material> mMaterialLibrary;
+		core::AssetLibrary<graphics::VertexArray> mVALibrary;
 		std::shared_ptr<graphics::Texture> mTexture;
 		std::shared_ptr<graphics::VertexArray> mVA;
 		std::string mText;
+		std::string mFontPath;
 		glm::vec2 mSize;
-		glm::vec3 mPosition; // TODO: Replace with position from entity
 		Align mAlignment;
 		TTF_Font* mFont;
 		int mFontSize;
 		SDL_Color mColor;
 
-		bool setupComplete;
 		bool mShouldRegenerate;
+		bool mShouldRegenVA;
 
 		SDL_Surface* ResizeToPowerOfTwo(SDL_Surface* surface);
 
 		void RegenerateTexture();
+		void RegenerateVertexArray();
 
 		static void FlipSurface(SDL_Surface* surface);
 	public:
@@ -62,17 +62,18 @@ namespace based::ui
 			int fontSize = 16, 
 			glm::vec3 pos = {0,0,0},
 			SDL_Color color = { 0,0,0,255 });
-		~TextEntity();
+		~TextEntity() override;
 
 		void SetText(std::string text);
 		void SetFont(std::string& path, int fontSize = 16);
+		void SetSize(int size);
 		void SetColor(SDL_Color col);
 		void MoveText(glm::vec3 pos);
-		void DeleteText();
+		void Shutdown() override;
 		void MoveTexture(SDL_Surface* src, SDL_Surface* dest);
 		void SetAlignment(Align alignment);
 
-		void DrawFont();
+		static void DrawFont(TextEntity* textEntity);
 
 		const SDL_Color inline GetColor() const { return mColor; }
 	};

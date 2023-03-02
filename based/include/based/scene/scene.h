@@ -11,7 +11,10 @@ namespace based::scene
 		//Scene(std::shared_ptr<graphics::Camera> cam) : mActiveCamera(cam) {}
 		~Scene() = default;
 
+		void InitializeScene() const;
 		void RenderScene() const;
+		void UpdateScene() const;
+		void ShutdownScene() const;
 
 		inline entt::registry& GetRegistry() { return mRegistry; }
 		inline std::shared_ptr<graphics::Camera> GetActiveCamera() const { return mActiveCamera; }

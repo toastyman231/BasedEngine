@@ -11,14 +11,15 @@
 #include "based/graphics/defaultassetlibraries.h"
 
 #include <external/glm/gtx/string_cast.hpp>
+
+#include "TestEntity.h"
 #include "based/core/assetlibrary.h"
 #include "based/input/mouse.h"
-#include "external/entt/entt.hpp"
-#include "external/glm/ext/matrix_transform.hpp"
-#include "external/imgui/imgui.h"
 #include "based/scene/components.h"
 #include "based/scene/entity.h"
 #include "based/ui/textentity.h"
+#include "external/entt/entt.hpp"
+#include "external/imgui/imgui.h"
 
 using namespace based;
 
@@ -28,6 +29,7 @@ private:
 	std::shared_ptr<scene::Scene> secondScene;
 	ui::TextEntity* text;
 	scene::Entity* testEnt;
+	TestEntity* anotherEntity;
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -70,8 +72,6 @@ public:
 
 	void Shutdown() override
 	{
-		// NOTE: Not calling this causes an OpenGL error on shutdown for some reason
-		text->DeleteText();
 	}
 
 	void Update() override
@@ -88,11 +88,20 @@ public:
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_B))
 		{
-			//text.SetAlignment(ui::TopLeft); This does not work
-			//text.MoveText({ 0, 0, 0 }); This works
-			//text.SetColor({ 255, 0, 0, 255 }); This does not
-			//text.SetText("New text!"); This also does not
+			//text->SetAlignment(ui::TopLeft); //This works but causes an unnecessary warning
+			//text->MoveText({ 0, 0, 0 }); This works
+			//text->SetColor({ 255, 0, 0, 255 }); //This works but causes the same warning and looks kinda weird
+			//text->SetText("New text!"); //This works but causes the same warning
+			//text->SetSize(16); // This works but causes the same warning
 			testEnt->SetActive(!testEnt->IsActive());
+			scene::Entity::DestroyEntity(anotherEntity);
+			anotherEntity = new TestEntity();
+		}
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_H))
+		{
+			//text->SetActive(!text->IsActive());
+			if (anotherEntity) anotherEntity->SetActive(!anotherEntity->IsActive());
 		}
 
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
@@ -144,7 +153,6 @@ public:
 
 	void Render() override
 	{
-		text->DrawFont();
 	}
 };
 

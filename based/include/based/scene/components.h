@@ -4,10 +4,25 @@
 #include "external/glm/glm.hpp"
 #include "based/graphics/material.h"
 #include "based/graphics/vertex.h"
-#include "based/ui/textentity.h"
+
+namespace based::ui
+{
+	class TextEntity;
+}
 
 namespace based::scene
 {
+	class Entity;
+
+	struct EntityReference
+	{
+		Entity* entity;
+
+		EntityReference() = default;
+		EntityReference(const EntityReference&) = default;
+		EntityReference(Entity* entityPtr) : entity(entityPtr) {}
+	};
+
 	struct Transform
 	{
 		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
@@ -35,21 +50,21 @@ namespace based::scene
 	struct SpriteRenderer
 	{
 		std::shared_ptr <graphics::VertexArray> vertexArray;
-		//std::shared_ptr<graphics::Texture> texture;
 		std::shared_ptr<graphics::Material> material;
 
 		SpriteRenderer() = default;
 		SpriteRenderer(const std::weak_ptr<graphics::VertexArray> va,
-			//const std::weak_ptr<graphics::Texture> tex,
-			const std::weak_ptr<graphics::Material> mat) : vertexArray(va), /*texture(tex),*/ material(mat) {}
+			const std::weak_ptr<graphics::Material> mat) : vertexArray(va), material(mat) {}
 		SpriteRenderer(const SpriteRenderer&) = default;
 	};
 
 	struct TextRenderer
 	{
+		ui::TextEntity* text;
 		//std::shared_ptr<ui::TextEntity> text;
 
 		TextRenderer() = default;
+		TextRenderer(ui::TextEntity* textPtr) : text(textPtr) {}
 		//TextRenderer(const std::weak_ptr<ui::TextEntity> textEntity) : text(textEntity) {}
 	};
 

@@ -4,9 +4,22 @@
 
 #include "external/glm/ext/matrix_transform.hpp"
 #include "scene/components.h"
+#include "ui/textentity.h"
 
 namespace based::scene
 {
+	void Scene::InitializeScene() const
+	{
+		const auto entityView = mRegistry.view<EntityReference>();
+
+		for (const auto entity : entityView)
+		{
+			scene::Entity* entityPtr = mRegistry.get<EntityReference>(entity).entity;
+			if (!entityPtr->IsActive()) continue;
+			entityPtr->Initialize();
+		}
+	}
+
 	void Scene::RenderScene() const
 	{
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera, mActiveCamera));
@@ -26,19 +39,42 @@ namespace based::scene
 			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, va, mat, model));
 		}
 
-		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
-
-		// TODO: find a better way to render all this shit
-		//Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera, mActiveCamera));
-		/*const auto textView = mRegistry.view<Transform, TextRenderer>();
+		const auto textView = mRegistry.view<Transform, TextRenderer>();
 
 		for (const auto entity : textView)
 		{
-			const auto color = mRegistry.get<TextRenderer>(entity).text->GetColor();
-			const auto transform = mRegistry.get<Transform>(entity);
-			mRegistry.get<TextRenderer>(entity).text->RenderText(transform.Position, color, transform.Scale.x);
-		}*/
+			ui::TextEntity* text = mRegistry.get<TextRenderer>(entity).text;
+			ui::TextEntity::DrawFont(text);
+		}
 
-		//Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
+		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
+	}
+
+	void Scene::UpdateScene() const
+	{
+		const auto entityView = mRegistry.view<EntityReference>();
+
+		for (const auto entity : entityView)
+		{
+			scene::Entity* entityPtr = mRegistry.get<EntityReference>(entity).entity;
+			if (entityPtr)
+			{
+				if (!entityPtr->IsActive()) continue;
+				entityPtr->Update();
+			}
+		}
+	}
+
+	void Scene::ShutdownScene() const
+	{
+		const auto entityView = mRegistry.view<EntityReference>();
+
+		for (const auto entity : entityView)
+		{
+			scene::Entity* entityPtr = mRegistry.get<EntityReference>(entity).entity;
+			if (!entityPtr->IsActive()) continue;
+			entityPtr->Shutdown();
+			//delete(entityPtr);
+		}
 	}
 }

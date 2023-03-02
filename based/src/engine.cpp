@@ -31,6 +31,7 @@ namespace based
     void Engine::Update()
     {
         mWindow.PumpEvents();
+        mApp->GetCurrentScene()->UpdateScene();
         mApp->Update();
     }
 
@@ -152,6 +153,7 @@ namespace based
 
                     // Initialize client
                     mApp->Initialize();
+                    mApp->GetCurrentScene()->InitializeScene();
                 }
             }
 
@@ -171,6 +173,7 @@ namespace based
         mIsInitialized = false;
 
         // Shutdown client
+        mApp->GetCurrentScene()->ShutdownScene();
         mApp->Shutdown();
 
         // Shutdown input

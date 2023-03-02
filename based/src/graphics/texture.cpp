@@ -115,7 +115,6 @@ namespace based::graphics
 
 		if (mPixels && dataFormat != 0)
 		{
-			// TODO: Make this use the right enum and not crash
 			glTexImage2D(GL_TEXTURE_2D, 0, dataFormat, mWidth, mHeight, 0, dataFormat, GL_UNSIGNED_BYTE, mPixels); BASED_CHECK_GL_ERROR;
 			SetTextureFilter(mFilter);
 			BASED_TRACE("Loaded {}-channel texture: {}", mNumChannels, mPath.c_str());

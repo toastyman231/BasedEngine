@@ -16,7 +16,6 @@ dest = "{}/bin/{}/{}".format(os.getcwd(), CONFIG, PROJECT)
 
 if (globals.IsWindows()):
     for source in WIN_SOURCE_PATHS:
-        print(source)
         if source == "res":
             newDest = "{}/res".format(dest)
             if not os.path.exists(newDest):

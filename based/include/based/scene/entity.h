@@ -13,16 +13,14 @@ namespace based::scene
 	class Entity
 	{
 	public:
-		Entity() = delete;
+		Entity();
 		Entity(entt::registry& registry);
-		~Entity() = default;
+		virtual ~Entity();
 
 		template<typename... Args>
 		static inline Entity* CreateEntity(Args &&...args)
 		{
 			Entity* newEntity = new Entity(Engine::Instance().GetApp().GetCurrentScene()->GetRegistry());
-			newEntity->AddComponent<scene::Transform>();
-			newEntity->SetActive(true);
 
 			// Black magic iterator over the given args
 			([&]
@@ -33,14 +31,19 @@ namespace based::scene
 			return newEntity;
 		}
 
-		static void DestroyEntity(Entity ent);
+		static void DestroyEntity(Entity* ent);
 
 		// TODO: Do some testing to make sure adding/removing works even if you already have component or don't have component
 		template<typename Type, typename ...Args>
 		inline void AddComponent(Args &&... args)
 		{
-			// TODO: Should decide whether to make Replace it's own function
 			if (HasComponent<Type>()) return;
+			mRegistry.emplace<Type>(mEntity, args...);
+		}
+
+		template<typename Type, typename ...Args>
+		inline void AddOrReplaceComponent(Args &&... args)
+		{
 			mRegistry.emplace_or_replace<Type>(mEntity, args...);
 		}
 
@@ -68,12 +71,20 @@ namespace based::scene
 
 		void SetActive(bool active);
 
+		virtual void Initialize() {};
+		virtual void Update() {}
+		virtual void Shutdown() {}
+
+		virtual void OnStart() {}
+		virtual void OnEnable() {}
+		virtual void OnDisable() {}
+		virtual void OnDestroy() {}
+
 	private:
 		entt::registry& mRegistry;
 		entt::entity mEntity;
 		std::string mEntityName;
 
 		bool mIsEnabled;
-		//static const int mEntityCount = 0;
 	};
 }
