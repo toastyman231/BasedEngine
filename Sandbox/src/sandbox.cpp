@@ -57,7 +57,8 @@ public:
 			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
 		auto texture = std::make_shared<graphics::Texture>("Assets/icon.png");
-		auto material = std::make_shared<graphics::Material>(graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect"), 
+		auto material = std::make_shared<graphics::Material>(
+			LOAD_SHADER("Assets/shaders/test_vert.vert", "Assets/shaders/test_frag.frag"),
 			texture);
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Test", material);
 		testEnt = scene::Entity::CreateEntity();

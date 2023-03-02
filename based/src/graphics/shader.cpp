@@ -4,6 +4,8 @@
 #include "glad/glad.h"
 #include "external/glm/gtc/type_ptr.hpp"
 
+#include <fstream>
+
 namespace based::graphics
 {
 	Shader::Shader(const std::string& vertex, const std::string& fragment)
@@ -74,6 +76,36 @@ namespace based::graphics
 	{
 		glUseProgram(0); BASED_CHECK_GL_ERROR;
 		glDeleteProgram(mProgramId); BASED_CHECK_GL_ERROR;
+	}
+
+	Shader* Shader::LoadShader(const std::string& vsPath, const std::string& fsPath)
+	{
+		std::ifstream vsFile(vsPath);
+		std::ifstream fsFile(fsPath);
+
+		BASED_ASSERT(vsFile && fsFile, "Could not load shaders! Make sure your path is correct!");
+
+		if (vsFile && fsFile)
+		{
+			std::string temp = "";
+			std::string vertexSource = "";
+			while (std::getline(vsFile, temp))
+			{
+				vertexSource = vertexSource.append(temp).append("\n");
+			}
+			vsFile.close();
+
+			std::string fragSource = "";
+			while (std::getline(fsFile, temp))
+			{
+				fragSource = fragSource.append(temp).append("\n");
+			}
+			fsFile.close();
+
+			return new Shader(vertexSource, fragSource);
+		}
+		
+		return nullptr;
 	}
 
 	void Shader::Bind()

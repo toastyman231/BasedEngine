@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include "external/glm/glm.hpp"
 
+#define LOAD_SHADER(vs, fs) std::shared_ptr<graphics::Shader>(graphics::Shader::LoadShader(vs, fs))
+
 namespace based::graphics
 {
 	class Shader
@@ -11,6 +13,8 @@ namespace based::graphics
 	public:
 		Shader(const std::string& vertex, const std::string& fragment);
 		~Shader();
+
+		static Shader* LoadShader(const std::string& vsPath, const std::string& fsPath);
 
 		inline const std::string& GetVertexShaderSource() const { return mVertexShader; }
 		inline const std::string& GetFragmentShaderSource() const { return mFragmentShader; }
