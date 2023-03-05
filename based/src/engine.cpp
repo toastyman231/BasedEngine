@@ -13,6 +13,8 @@
 #include "SDL2/SDL.h"
 #include <SDL2/SDL_ttf.h>
 
+#include "basedtime.h"
+
 namespace based
 {
     //public
@@ -28,11 +30,11 @@ namespace based
 
     //private
 
-    void Engine::Update()
+    void Engine::Update(float deltaTime)
     {
         mWindow.PumpEvents();
-        mApp->GetCurrentScene()->UpdateScene();
-        mApp->Update();
+        mApp->GetCurrentScene()->UpdateScene(deltaTime);
+        mApp->Update(deltaTime);
     }
 
     void Engine::Render()
@@ -78,7 +80,9 @@ namespace based
             // Core loop
             while (mIsRunning)
             {
-                Update();
+                const float timeDelta = core::Time::GetTime() - core::Time::DeltaTime();
+                core::Time::SetDelta(core::Time::GetTime());
+                Update(timeDelta);
                 Render();
             }
 

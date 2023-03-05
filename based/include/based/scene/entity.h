@@ -72,7 +72,7 @@ namespace based::scene
 		void SetActive(bool active);
 
 		virtual void Initialize() {};
-		virtual void Update() {}
+		virtual void Update(float deltaTime) {}
 		virtual void Shutdown() {}
 
 		virtual void OnStart() {}

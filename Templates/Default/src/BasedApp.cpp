@@ -43,9 +43,9 @@ public:
 		App::Shutdown();
 	}
 
-	void Update() override
+	void Update(float deltaTime) override
 	{
-		App::Update();
+		App::Update(deltaTime);
 	}
 
 	void Render() override

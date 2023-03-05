@@ -50,7 +50,7 @@ namespace based::scene
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 	}
 
-	void Scene::UpdateScene() const
+	void Scene::UpdateScene(float deltaTime) const
 	{
 		const auto entityView = mRegistry.view<EntityReference>();
 
@@ -60,7 +60,7 @@ namespace based::scene
 			if (entityPtr)
 			{
 				if (!entityPtr->IsActive()) continue;
-				entityPtr->Update();
+				entityPtr->Update(deltaTime);
 			}
 		}
 	}

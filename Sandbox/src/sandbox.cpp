@@ -13,6 +13,7 @@
 #include <external/glm/gtx/string_cast.hpp>
 
 #include "TestEntity.h"
+#include "based/core/basedtime.h"
 #include "based/core/assetlibrary.h"
 #include "based/input/mouse.h"
 #include "based/scene/components.h"
@@ -75,8 +76,10 @@ public:
 	{
 	}
 
-	void Update() override
+	void Update(float deltaTime) override
 	{
+		//BASED_TRACE("Time:{}, DeltaTime:{}", core::Time::GetTime(), deltaTime);
+
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_G))
 		{
 			LoadScene(secondScene);
@@ -120,7 +123,7 @@ public:
 			for (const auto entity : view)
 			{
 				// TODO: figure out why registry.has doesn't exist
-				GetCurrentScene()->GetRegistry().emplace_or_replace<scene::Velocity>(entity, 0.f, -0.002f);
+				GetCurrentScene()->GetRegistry().emplace_or_replace<scene::Velocity>(entity, 0.f, -0.8f);
 			}
 		}
 
@@ -129,8 +132,8 @@ public:
 		for (const auto entity : view)
 		{
 			const scene::Transform& trans = GetCurrentScene()->GetRegistry().get<scene::Transform>(entity);
-			const float dx = GetCurrentScene()->GetRegistry().get<scene::Velocity>(entity).dx;
-			const float dy = GetCurrentScene()->GetRegistry().get<scene::Velocity>(entity).dy;
+			const float dx = GetCurrentScene()->GetRegistry().get<scene::Velocity>(entity).dx * deltaTime;
+			const float dy = GetCurrentScene()->GetRegistry().get<scene::Velocity>(entity).dy * deltaTime;
 			GetCurrentScene()->GetRegistry().replace<scene::Transform>(entity, 
 				glm::vec3(trans.Position.x + dx, trans.Position.y + dy, 0.f),
 				glm::vec3(0.f), trans.Scale);

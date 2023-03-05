@@ -35,7 +35,7 @@ namespace based
 		}
 		virtual void Shutdown() {}
 
-		virtual void Update() {}
+		virtual void Update(float deltaTime) {}
 		virtual void Render() {}
 		virtual void ImguiRender() {}
 	private:

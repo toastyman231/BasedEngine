@@ -13,7 +13,7 @@ namespace based::scene
 
 		void InitializeScene() const;
 		void RenderScene() const;
-		void UpdateScene() const;
+		void UpdateScene(float deltaTime) const;
 		void ShutdownScene() const;
 
 		inline entt::registry& GetRegistry() { return mRegistry; }

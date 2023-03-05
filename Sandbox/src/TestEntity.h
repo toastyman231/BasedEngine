@@ -27,7 +27,7 @@ public:
 		BASED_TRACE("I am initializing!");
 	}
 
-	void Update() override
+	void Update(float deltaTime) override
 	{
 		//BASED_TRACE("I am updating!")
 	}

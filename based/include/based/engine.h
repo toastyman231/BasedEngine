@@ -27,7 +27,7 @@ namespace based
 
         [[nodiscard]] bool Initialize();
         void Shutdown();
-        void Update();
+        void Update(float deltaTime);
         void Render();
 
         bool mIsRunning;
