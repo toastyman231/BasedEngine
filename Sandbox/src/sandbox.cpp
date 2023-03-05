@@ -105,7 +105,8 @@ public:
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_H))
 		{
 			//text->SetActive(!text->IsActive());
-			if (anotherEntity) anotherEntity->SetActive(!anotherEntity->IsActive());
+			//if (anotherEntity) anotherEntity->SetActive(!anotherEntity->IsActive());
+			core::Time::SetTimeScale(1.f - core::Time::TimeScale());
 		}
 
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))

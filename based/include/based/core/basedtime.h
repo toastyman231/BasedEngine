@@ -8,6 +8,7 @@ namespace based::core
 	{
 	private:
 		inline static float mDeltaTime = 0.f;
+		inline static float mTimeScale = 1.f;
 	public:
 		Time() = default;
 		~Time() = default;
@@ -22,9 +23,19 @@ namespace based::core
 			return mDeltaTime;
 		}
 
+		static float TimeScale()
+		{
+			return mTimeScale;
+		}
+
 		static void SetDelta(float time)
 		{
 			mDeltaTime = time;
+		}
+
+		static void SetTimeScale(float timeScale)
+		{
+			mTimeScale = timeScale;
 		}
 	};
 }
