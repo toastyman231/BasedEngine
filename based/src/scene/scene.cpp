@@ -25,10 +25,21 @@ namespace based::scene
 	{
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera, mActiveCamera));
 		const auto view = mRegistry.view<Enabled, Transform, SpriteRenderer>();
+		std::vector<graphics::Sprite*> sprites;
 
+		// TODO: Find a better way to sort entities
 		for (const auto entity : view)
 		{
-			graphics::Sprite* sprite = mRegistry.get<SpriteRenderer>(entity).sprite;
+			sprites.push_back(mRegistry.get<SpriteRenderer>(entity).sprite);
+		}
+
+		std::sort(sprites.begin(), sprites.end(), [](const auto& ent1, const auto& ent2)
+			{
+				return static_cast<graphics::Sprite*>(ent1)->GetSortOrder() < static_cast<graphics::Sprite*>(ent2)->GetSortOrder();
+			});
+
+		for (const auto sprite : sprites)
+		{
 			graphics::Sprite::DrawSprite(sprite);
 		}
 

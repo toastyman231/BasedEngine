@@ -8,7 +8,7 @@
 namespace based::graphics
 {
 	Sprite::Sprite(std::shared_ptr<VertexArray> va, std::shared_ptr<Material> mat)
-		: Entity(), mVA(std::move(va)), mMaterial(std::move(mat)), mSize(0.f, 0.f)
+		: Entity(), mVA(std::move(va)), mMaterial(std::move(mat)), mSize(0.f, 0.f), mSortOrder(0)
 	{
 		if (mMaterial->GetTexture())
 		{

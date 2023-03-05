@@ -71,10 +71,12 @@ public:
 
 	void Shutdown() override
 	{
+		App::Shutdown();
 	}
 
 	void Update(float deltaTime) override
 	{
+		App::Update(deltaTime);
 		//BASED_TRACE("Time:{}, DeltaTime:{}", core::Time::GetTime(), deltaTime);
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_G))
@@ -104,7 +106,8 @@ public:
 			//text->SetActive(!text->IsActive());
 			//if (anotherEntity) anotherEntity->SetActive(!anotherEntity->IsActive());
 			//core::Time::SetTimeScale(1.f - core::Time::TimeScale());
-			testEnt->SetSprite(std::make_shared<graphics::Texture>("Assets/tex_test.png"));
+			//testEnt->SetSprite(std::make_shared<graphics::Texture>("Assets/tex_test.png"));
+			//testEnt->SetSortOrder(2);
 		}
 
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
@@ -112,14 +115,14 @@ public:
 			const auto pos = GetCurrentScene()->GetActiveCamera()->ScreenToWorldPoint(
 				static_cast<float>(input::Mouse::X()),
 				static_cast<float>(input::Mouse::Y()));
-			CreateSquare(pos.x, pos.y);
+			scene::Entity* square = CreateSquare(pos.x, pos.y);
 		}
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
 		{
-			scene::Entity::EntityForEach<scene::Transform>([&](scene::Entity* ent)
+			scene::Entity::EntityForEach<scene::Transform, FallingObject>([&](scene::Entity* ent)
 				{
-					ent->AddOrReplaceComponent<scene::Velocity>(0.f, -0.8f);
+					ent->AddOrReplaceComponent<scene::Velocity>(0.f, ent->GetComponent<FallingObject>().speed);
 				});
 		}
 
@@ -142,6 +145,8 @@ public:
 			glm::vec3(0.f), glm::vec3(scaleX, scaleY, 1.f), 
 			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
+		sprite->AddComponent<FallingObject>(-0.8f);
+		sprite->GetComponent<scene::SpriteRenderer>().sprite->SetSortOrder(1);
 
 		return sprite;
 	}
@@ -150,6 +155,14 @@ public:
 	{
 		App::Render();
 	}
+
+	struct FallingObject
+	{
+		float speed;
+
+		FallingObject() = default;
+		FallingObject(float spd) : speed(spd) {}
+	};
 };
 
 based::App* CreateApp()
