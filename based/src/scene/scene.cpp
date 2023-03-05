@@ -5,6 +5,7 @@
 #include "external/glm/ext/matrix_transform.hpp"
 #include "scene/components.h"
 #include "ui/textentity.h"
+#include "graphics/sprite.h"
 
 namespace based::scene
 {
@@ -23,23 +24,15 @@ namespace based::scene
 	void Scene::RenderScene() const
 	{
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera, mActiveCamera));
-		const auto view = mRegistry.view<Transform, SpriteRenderer>();
+		const auto view = mRegistry.view<Enabled, Transform, SpriteRenderer>();
 
 		for (const auto entity : view)
 		{
-			if (!mRegistry.all_of<scene::Enabled>(entity)) continue;
-
-			// TODO: maybe move this to an Entity class?
-			// TODO: figure out rotation :(
-			const std::shared_ptr<graphics::VertexArray> va = mRegistry.get<SpriteRenderer>(entity).vertexArray;
-			const std::shared_ptr<graphics::Material> mat = mRegistry.get<SpriteRenderer>(entity).material;
-			auto model = glm::mat4(1.f);
-			model = glm::translate(model, mRegistry.get<Transform>(entity).Position);
-			model = glm::scale(model, mRegistry.get<Transform>(entity).Scale);
-			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, va, mat, model));
+			graphics::Sprite* sprite = mRegistry.get<SpriteRenderer>(entity).sprite;
+			graphics::Sprite::DrawSprite(sprite);
 		}
 
-		const auto textView = mRegistry.view<Transform, TextRenderer>();
+		const auto textView = mRegistry.view<Enabled, Transform, TextRenderer>();
 
 		for (const auto entity : textView)
 		{
@@ -52,7 +45,7 @@ namespace based::scene
 
 	void Scene::UpdateScene(float deltaTime) const
 	{
-		const auto entityView = mRegistry.view<EntityReference>();
+		const auto entityView = mRegistry.view<Enabled, EntityReference>();
 
 		for (const auto entity : entityView)
 		{

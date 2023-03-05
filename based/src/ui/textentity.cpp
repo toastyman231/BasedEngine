@@ -99,12 +99,17 @@ namespace based::ui
 
 	void TextEntity::DrawFont(TextEntity* textEntity)
 	{
-		if (!textEntity->IsActive()) return;
+		//if (!textEntity->IsActive()) return;
 
 		Engine::Instance().GetRenderManager().Submit(
 			BASED_SUBMIT_RC(PushCamera, Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()));
 		auto model = glm::mat4(1.f);
+		const glm::vec3 rotation = textEntity->GetComponent<scene::Transform>().Rotation;
 		model = glm::translate(model, textEntity->GetComponent<scene::Transform>().Position);
+		// Rotations are passed as degrees and converted to radians here automatically
+		model = glm::rotate(model, rotation.x * 0.0174533f, glm::vec3(1.f, 0.f, 0.f));
+		model = glm::rotate(model, rotation.y * 0.0174533f, glm::vec3(0.f, 1.f, 0.f));
+		model = glm::rotate(model, rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, 
 			textEntity->mVALibrary.Get("VA"),//mVA, 
 			textEntity->mMaterialLibrary.Get("Material"),

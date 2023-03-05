@@ -17,16 +17,18 @@ namespace based::scene
 		Entity(entt::registry& registry);
 		virtual ~Entity();
 
-		template<typename... Args>
-		static inline Entity* CreateEntity(Args &&...args)
+		template<typename Type, typename... Args>
+		static inline Type* CreateEntity(glm::vec3 pos = glm::vec3(0.f),
+			glm::vec3 rot = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), Args &&...args)
 		{
-			Entity* newEntity = new Entity(Engine::Instance().GetApp().GetCurrentScene()->GetRegistry());
+			Type* newEntity = new Type(args...);
 
+			newEntity->SetTransform(pos, rot, scale);
 			// Black magic iterator over the given args
-			([&]
+			/*([&]
 				{
 					AddComponent(newEntity, args);
-				} (), ...);
+				} (), ...);*/
 
 			return newEntity;
 		}
@@ -69,9 +71,26 @@ namespace based::scene
 
 		inline entt::entity& GetEntityHandle() { return mEntity; }
 
+		template<typename ...Types>
+		static void EntityForEach(std::function<void(Entity*)> func)
+		{
+			const auto view = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().view<EntityReference, Types...>();
+
+			for (const auto entity : view)
+			{
+				Entity* ent = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().get<EntityReference>(entity).entity;
+				func(ent);
+			}
+		}
+
 		void SetActive(bool active);
 
-		virtual void Initialize() {};
+		void SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
+		void SetPosition(glm::vec3 pos);
+		void SetRotation(glm::vec3 rot);
+		void SetScale(glm::vec3 scale);
+
+		virtual void Initialize() {}
 		virtual void Update(float deltaTime) {}
 		virtual void Shutdown() {}
 

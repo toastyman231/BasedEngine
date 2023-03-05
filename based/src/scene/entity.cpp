@@ -36,4 +36,27 @@ namespace based::scene
 		if (active) { AddComponent<scene::Enabled>(); OnEnable(); }
 		else { RemoveComponent<scene::Enabled>(); OnDisable(); }
 	}
+
+	void Entity::SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
+	{
+		AddOrReplaceComponent<scene::Transform>(pos, rot, scale);
+	}
+
+	void Entity::SetPosition(glm::vec3 pos)
+	{
+		Transform transform = GetComponent<scene::Transform>();
+		AddOrReplaceComponent<scene::Transform>(pos, transform.Rotation, transform.Scale);
+	}
+
+	void Entity::SetRotation(glm::vec3 rot)
+	{
+		Transform transform = GetComponent<scene::Transform>();
+		AddOrReplaceComponent<scene::Transform>(transform.Position, rot, transform.Scale);
+	}
+
+	void Entity::SetScale(glm::vec3 scale)
+	{
+		Transform transform = GetComponent<scene::Transform>();
+		AddOrReplaceComponent<scene::Transform>(transform.Position, transform.Rotation, scale);
+	}
 }

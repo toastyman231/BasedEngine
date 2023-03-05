@@ -10,6 +10,11 @@ namespace based::ui
 	class TextEntity;
 }
 
+namespace based::graphics
+{
+	class Sprite;
+}
+
 namespace based::scene
 {
 	class Entity;
@@ -49,23 +54,19 @@ namespace based::scene
 
 	struct SpriteRenderer
 	{
-		std::shared_ptr <graphics::VertexArray> vertexArray;
-		std::shared_ptr<graphics::Material> material;
+		graphics::Sprite* sprite;
 
 		SpriteRenderer() = default;
-		SpriteRenderer(const std::weak_ptr<graphics::VertexArray> va,
-			const std::weak_ptr<graphics::Material> mat) : vertexArray(va), material(mat) {}
+		SpriteRenderer(graphics::Sprite* spritePtr) : sprite(spritePtr) {}
 		SpriteRenderer(const SpriteRenderer&) = default;
 	};
 
 	struct TextRenderer
 	{
 		ui::TextEntity* text;
-		//std::shared_ptr<ui::TextEntity> text;
 
 		TextRenderer() = default;
 		TextRenderer(ui::TextEntity* textPtr) : text(textPtr) {}
-		//TextRenderer(const std::weak_ptr<ui::TextEntity> textEntity) : text(textEntity) {}
 	};
 
 	struct Enabled

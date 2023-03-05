@@ -12,12 +12,12 @@ args = globals.ProcessArguments(sys.argv)
 CONFIG = globals.GetArgumentValue(args, "config", "Debug")
 PROJECT = globals.GetArgumentValue(args, "prj", globals.PROJECT_NAME)
 
-dest = "{}/bin/{}/{}".format(os.getcwd(), CONFIG, PROJECT)
+dest = "{}/../bin/{}/{}".format(os.getcwd(), CONFIG, PROJECT)
 
 if (globals.IsWindows()):
     for source in WIN_SOURCE_PATHS:
-        if source == "res":
-            newDest = "{}/res".format(dest)
+        if source == "Assets":
+            newDest = "{}/Assets".format(dest)
             if not os.path.exists(newDest):
                 os.mkdir(newDest)
             subprocess.call(["cmd.exe", "/c", "robocopy", source, newDest, "/E"])
