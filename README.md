@@ -18,6 +18,8 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - Automatic rendering (Any entity with a Renderer component will be rendered automatically)
 - Scene System (Currently just determines which entities get rendered or not)
 - Entity-Component System (Custom Entity class exposes entity functionality to the user)
+- Sprite class with sorting
+- DeltaTime for framerate independence
 - Custom window icons (set up automatically if you include an icon.png file in your res folder)
 - Text Rendering/UI
 - Toolchain to create projects in directories outside the engine's directory

@@ -66,7 +66,7 @@ public:
 
 		BASED_TRACE("Done initializing");
 
-		// TODO: Add sort order for layering sprites
+		// TODO: Fix text rendering behind sprites even when handled last
 	}
 
 	void Shutdown() override
