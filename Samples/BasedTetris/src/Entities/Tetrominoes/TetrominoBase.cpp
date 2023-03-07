@@ -2,6 +2,11 @@
 
 #include "LinePiece.h"
 #include "LPiece.h"
+#include "RevLPiece.h"
+#include "SquarePiece.h"
+#include "ZigZagPiece.h"
+#include "TPiece.h"
+#include "RevZigZagPiece.h"
 
 TetrominoBase* TetrominoBase::SpawnTetromino(int x, int y, TetrominoType type, PlayGrid* grid)
 {
@@ -11,17 +16,22 @@ TetrominoBase* TetrominoBase::SpawnTetromino(int x, int y, TetrominoType type, P
 		currentTetromino = new LinePiece(x, y, grid, {0.19f, 0.78f, 0.94f});
 		break;
 	case L:
-		currentTetromino = new LPiece(x, y, grid, { 0.19f, 0.78f, 0.94f });
+		currentTetromino = new LPiece(x, y, grid, { 0.35f, 0.40f, 0.68f });
 		break;
 	case REVERSEL:
+		currentTetromino = new RevLPiece(x, y, grid, { 0.94f, 0.47f, 0.13f });
 		break;
 	case SQUARE:
+		currentTetromino = new SquarePiece(x, y, grid, { 0.97f, 0.83f, 0.03f });
 		break;
 	case ZIGZAG:
+		currentTetromino = new ZigZagPiece(x, y, grid, { 0.26f, 0.71f, 0.26f });
 		break;
 	case T:
+		currentTetromino = new TPiece(x, y, grid, { 0.68f, 0.30f, 0.61f });
 		break;
 	case REVERSEZIGZAG:
+		currentTetromino = new RevZigZagPiece(x, y, grid, { 0.94f, 0.13f, 0.16f });
 		break;
 	}
 
@@ -75,6 +85,32 @@ float TetrominoBase::Clamp(float min, float max, float value)
 	return (value <= min) ? min : (value >= max) ? max : value;
 }
 
+TetrominoType TetrominoBase::GetRandomTetromino()
+{
+	// TODO: Add random number gen to engine
+	int randomNum = rand() % (6 - 0 + 1);
+
+	switch (randomNum)
+	{
+	default:
+		return LINE;
+	case 0:
+		return LINE;
+	case 1:
+		return L;
+	case 2:
+		return REVERSEL;
+	case 3:
+		return SQUARE;
+	case 4:
+		return ZIGZAG;
+	case 5:
+		return T;
+	case 6:
+		return REVERSEZIGZAG;
+	}
+}
+
 void TetrominoBase::MoveDown()
 {
 	if (!ValidateNewPosition({0, 1})) return;
@@ -118,43 +154,24 @@ void TetrominoBase::Update(float deltaTime)
 	}
 
 	DrawTetromino();
-	BASED_TRACE("Finished drawing tetromino at {},{}", mPosition.x, mPosition.y)
 }
 
 void TetrominoBase::LockTetromino()
 {
 	mLocked = true;
-	const int num = rand() % (1 - 0 + 1) + 0;
-	const auto tetromino = (num == 0) ? LINE : L;
-	SpawnTetromino(4, 0, tetromino, mGrid);
-	// TODO: Spawn a random tetromino
+	SpawnTetromino(4, 0, GetRandomTetromino(), mGrid);
 }
 
 bool TetrominoBase::ValidateNewPosition(glm::ivec2 dir)
 {
-	int width = 1;
-	int height = 1;
-
-	for (const auto tile : mTiles)
-	{
-		width += (tile.x != 0 && tile.y == 0) ? 1 : 0;
-		height += (tile.y != 0) ? 1 : 0;
-	}
-
-	// Maybe have each tetromino return it's own bounds? i.e. x=-1y=-1 to x=1y=0 is the L piece
-	const int xMin = mPosition.x + dir.x;
-	const int xMax = (int)Clamp(0, (float)(mGrid->GetSize().x - 1), (float)(mPosition.x + (width - 1) + dir.x));
-	const int yMin = mPosition.y + dir.y;
-	const int yMax = mPosition.y + (height - 1) + dir.y;
-
-	BASED_TRACE("Info for tetromino at {},{}: Width: {}, Height:{}, xMin-xMax:{}-{}, yMin-yMax:{}-{}",
-		mPosition.x, mPosition.y, width, height, xMin, xMax, yMin, yMax)
-
 	if (mGrid->TileFull(mPosition.x + dir.x, mPosition.y + dir.y) && !IsPartOfCurrentTetromino(mPosition.x + dir.x, mPosition.y + dir.y))
 	{
 		if (dir.y > 0) LockTetromino();
 		return false;
 	}
+
+	if (mPosition.x + dir.x < 0 || mPosition.x + dir.x >= mGrid->GetSize().x || mPosition.y + dir.y < -1 || mPosition.y + dir.y >= mGrid->GetSize().y)
+		return false;
 
 	for (const auto tile : mTiles)
 	{
@@ -164,10 +181,13 @@ bool TetrominoBase::ValidateNewPosition(glm::ivec2 dir)
 			if (dir.y > 0) LockTetromino();
 			return false;
 		}
+
+		if (mPosition.x + tile.x + dir.x < 0 || mPosition.x + tile.x + dir.x >= mGrid->GetSize().x 
+			|| mPosition.y + tile.y + dir.y < -1 || mPosition.y + tile.y + dir.y >= mGrid->GetSize().y)
+			return false;
 	}
 
-	return (xMin >= 0 && xMin < mGrid->GetSize().x && xMax >= 0 && xMax < mGrid->GetSize().x)
-		&& (yMin >= -1 && yMin < mGrid->GetSize().y && yMax >= -1 && yMax < mGrid->GetSize().y);
+	return true;
 }
 
 bool TetrominoBase::IsPartOfCurrentTetromino(int x, int y) const

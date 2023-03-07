@@ -4,6 +4,11 @@
 #include <based/scene/entity.h>
 #include "../PlayGrid.h"
 
+enum TetrominoType
+{
+	LINE, L, REVERSEL, SQUARE, ZIGZAG, T, REVERSEZIGZAG
+};
+
 class TetrominoBase : public based::scene::Entity
 {
 private:
@@ -18,12 +23,8 @@ private:
 
 	void DrawTile(int x, int y) const;
 	static float Clamp(float min, float max, float value);
+	static TetrominoType GetRandomTetromino();
 public:
-	enum TetrominoType
-	{
-		LINE, L, REVERSEL, SQUARE, ZIGZAG, T, REVERSEZIGZAG
-	};
-
 	TetrominoBase(int x, int y, PlayGrid* grid, glm::vec3 color = {1.f, 0.f, 0.f}, float fallTime = 1.f);
 
 	static TetrominoBase* SpawnTetromino(int x, int y, TetrominoType type, PlayGrid* grid);

@@ -30,7 +30,7 @@ public:
 		App::Initialize();
 
 		playGrid = new PlayGrid(10, 16);
-		currentTetromino = TetrominoBase::SpawnTetromino(4, 0, TetrominoBase::LINE, playGrid);
+		currentTetromino = TetrominoBase::SpawnTetromino(4, 0, LINE, playGrid);
 	}
 
 	void Shutdown() override
