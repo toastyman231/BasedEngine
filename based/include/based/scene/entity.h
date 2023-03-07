@@ -80,6 +80,7 @@ namespace based::scene
 
 		void SetActive(bool active);
 
+		scene::Transform& GetTransform() { return GetComponent<scene::Transform>(); }
 		void SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
 		void SetPosition(glm::vec3 pos);
 		void SetRotation(glm::vec3 rot);
