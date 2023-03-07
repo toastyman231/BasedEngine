@@ -118,9 +118,10 @@ namespace based::graphics
                     in vec2 uvs;
 
                     uniform sampler2D tex;
+					uniform vec4 col;
                     void main()
                     {
-                        outColor = texture(tex, uvs);
+                        outColor = texture(tex, uvs) * col;
                     }
                 )";
 				mShaderLibrary.Load("TexturedRect", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));

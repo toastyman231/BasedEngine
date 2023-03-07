@@ -78,18 +78,6 @@ namespace based::scene
 			}
 		}
 
-		/*template<typename ...Types, typename ...Args>
-		static void EntityForEach(std::function<void(Entity*, Args &&...)> func, Args &&... args)
-		{
-			const auto view = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().view<EntityReference, Types...>();
-
-			for (const auto entity : view)
-			{
-				Entity* ent = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().get<EntityReference>(entity).entity;
-				func(ent, std::forward<Args>(args));
-			}
-		}*/
-
 		void SetActive(bool active);
 
 		void SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);

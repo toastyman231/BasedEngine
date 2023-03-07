@@ -126,16 +126,7 @@ public:
 				});
 		}
 
-		auto lambda = [&](scene::Entity* ent)
-		{
-			const auto trans = ent->GetComponent<scene::Transform>();
-			const auto dx = ent->GetComponent<scene::Velocity>().dx * deltaTime;
-			const auto dy = ent->GetComponent<scene::Velocity>().dy * deltaTime;
-			ent->AddOrReplaceComponent<scene::Transform>(
-				glm::vec3(trans.Position.x + dx, trans.Position.y + dy, 0.f),
-				glm::vec3(0.f), trans.Scale);
-		};
-		scene::Entity::EntityForEach<scene::Transform, scene::Velocity>(lambda);
+		TestFall(deltaTime, "Test!");
 	}
 
 	scene::Entity* CreateSquare(float x, float y, float scaleX = 0.3f, float scaleY = 0.3f) const
@@ -151,6 +142,21 @@ public:
 		return sprite;
 	}
 
+	void TestFall(float deltaTime, const std::string& str) const
+	{
+		auto lambda = [deltaTime, str](scene::Entity* ent)
+		{
+			const auto trans = ent->GetComponent<scene::Transform>();
+			const auto dx = ent->GetComponent<scene::Velocity>().dx * deltaTime;
+			const auto dy = ent->GetComponent<scene::Velocity>().dy * deltaTime;
+			ent->AddOrReplaceComponent<scene::Transform>(
+				glm::vec3(trans.Position.x + dx, trans.Position.y + dy, 0.f),
+				glm::vec3(0.f), trans.Scale);
+			BASED_TRACE(str);
+		};
+		scene::Entity::EntityForEach<scene::Transform, scene::Velocity>(lambda);
+	}
+
 	void Render() override
 	{
 		App::Render();
@@ -163,6 +169,11 @@ public:
 		FallingObject() = default;
 		FallingObject(float spd) : speed(spd) {}
 	};
+};
+
+struct Arguments
+{
+	std::string str;
 };
 
 based::App* CreateApp()

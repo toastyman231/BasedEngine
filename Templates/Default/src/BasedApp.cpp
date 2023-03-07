@@ -9,6 +9,7 @@
 
 #include "based/scene/components.h"
 #include "based/scene/entity.h"
+#include "based/graphics/sprite.h"
 
 using namespace based;
 
@@ -33,8 +34,7 @@ public:
 		auto material = std::make_shared<graphics::Material>(graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect"),
 			texture);
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("BasedIcon", material);
-		scene::Entity* testEnt = scene::Entity::CreateEntity();
-		testEnt->AddComponent<scene::SpriteRenderer>(graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
+		auto testEnt = new graphics::Sprite(graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("BasedIcon"));
 	}
 
