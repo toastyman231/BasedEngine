@@ -30,7 +30,7 @@ public:
 		App::Initialize();
 
 		playGrid = new PlayGrid(10, 16);
-		currentTetromino = TetrominoBase::SpawnTetromino(4, 0, LINE, playGrid);
+		currentTetromino = TetrominoBase::SpawnTetromino(5, 0, LINE, playGrid);
 	}
 
 	void Shutdown() override
@@ -51,6 +51,16 @@ public:
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_A))
 		{
 			currentTetromino->MoveOver(-1);
+		}
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_RIGHT))
+		{
+			currentTetromino->RotateCW();
+		}
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_LEFT))
+		{
+			currentTetromino->RotateCCW();
 		}
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))

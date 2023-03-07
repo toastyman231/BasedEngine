@@ -9,6 +9,11 @@ enum TetrominoType
 	LINE, L, REVERSEL, SQUARE, ZIGZAG, T, REVERSEZIGZAG
 };
 
+enum Direction
+{
+	UP, LEFT, RIGHT, DOWN
+};
+
 class TetrominoBase : public based::scene::Entity
 {
 private:
@@ -18,6 +23,13 @@ private:
 	glm::vec3 mColor;
 	glm::ivec2 mPosition;
 	std::vector<glm::ivec2> mTiles;
+	Direction mDirection;
+
+	std::vector<glm::ivec2> mTilesUp;
+	std::vector<glm::ivec2> mTilesLeft;
+	std::vector<glm::ivec2> mTilesRight;
+	std::vector<glm::ivec2> mTilesDown;
+
 	PlayGrid* mGrid;
 	inline static TetrominoBase* currentTetromino = nullptr;
 
@@ -32,6 +44,8 @@ public:
 	static TetrominoBase* GetCurrentTetromino() { return currentTetromino; }
 
 	glm::vec3 GetColor() const { return mColor; }
+	glm::ivec2 GetPosition() const { return mPosition; }
+	Direction GetDirection() const { return mDirection; }
 
 	void DrawTetromino() const;
 	void MoveOver(int dir = 1);
@@ -41,10 +55,13 @@ public:
 	void LockTetromino();
 
 	bool ValidateNewPosition(glm::ivec2 dir = {0, 0});
+	bool ValidateNewRotation(Direction dir);
 	bool IsPartOfCurrentTetromino(int x, int y) const;
 
 	void SetTiles(std::vector<glm::ivec2> tiles) { mTiles = tiles; }
+	void SetRotation(std::vector<glm::ivec2> tiles, Direction dir);
+	void SetPosition(int x, int y);
 
-	virtual void RotateCW() {}
-	virtual void RotateCCW() {}
+	virtual void RotateCW();
+	virtual void RotateCCW();
 };

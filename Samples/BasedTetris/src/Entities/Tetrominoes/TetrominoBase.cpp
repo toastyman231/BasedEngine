@@ -42,6 +42,7 @@ TetrominoBase::TetrominoBase(int x, int y, PlayGrid* grid, glm::vec3 color, floa
 	: mFallInterval(fallTime), mColor(color), mPosition(x, y), mTiles(std::vector<glm::ivec2>()), mGrid(grid)
 {
 	mWaitTime = based::core::Time::GetTime() + mFallInterval;
+	mDirection = UP;
 }
 
 void TetrominoBase::DrawTetromino() const
@@ -167,11 +168,15 @@ bool TetrominoBase::ValidateNewPosition(glm::ivec2 dir)
 	if (mGrid->TileFull(mPosition.x + dir.x, mPosition.y + dir.y) && !IsPartOfCurrentTetromino(mPosition.x + dir.x, mPosition.y + dir.y))
 	{
 		if (dir.y > 0) LockTetromino();
+		BASED_TRACE("Position rejected due to origin full");
 		return false;
 	}
 
 	if (mPosition.x + dir.x < 0 || mPosition.x + dir.x >= mGrid->GetSize().x || mPosition.y + dir.y < -1 || mPosition.y + dir.y >= mGrid->GetSize().y)
+	{
+		BASED_TRACE("Position rejected due to origin position {}, {}, {}, {}", mPosition.x + dir.x, mPosition.y + dir.y, dir.x, dir.y);
 		return false;
+	}
 
 	for (const auto tile : mTiles)
 	{
@@ -179,12 +184,56 @@ bool TetrominoBase::ValidateNewPosition(glm::ivec2 dir)
 			&& !IsPartOfCurrentTetromino(mPosition.x + tile.x + dir.x, mPosition.y + tile.y + dir.y))
 		{
 			if (dir.y > 0) LockTetromino();
+			BASED_TRACE("Position rejected due to tile full");
 			return false;
 		}
 
-		if (mPosition.x + tile.x + dir.x < 0 || mPosition.x + tile.x + dir.x >= mGrid->GetSize().x 
+		if (mPosition.x + tile.x + dir.x < 0 || mPosition.x + tile.x + dir.x >= mGrid->GetSize().x
 			|| mPosition.y + tile.y + dir.y < -1 || mPosition.y + tile.y + dir.y >= mGrid->GetSize().y)
+		{
+			BASED_TRACE("Position rejected due to tile position");
 			return false;
+		}
+	}
+
+	return true;
+}
+
+bool TetrominoBase::ValidateNewRotation(Direction dir)
+{
+	std::vector<glm::ivec2> tempTiles;
+
+	switch (dir)
+	{
+	case UP:
+		tempTiles = mTilesUp;
+		break;
+	case LEFT:
+		tempTiles = mTilesLeft;
+		break;
+	case RIGHT:
+		tempTiles = mTilesRight;
+		break;
+	case DOWN:
+		tempTiles = mTilesDown;
+		break;
+	}
+
+	for (const auto tile : tempTiles)
+	{
+		if (mGrid->TileFull(mPosition.x + tile.x, mPosition.y + tile.y)
+			&& !IsPartOfCurrentTetromino(mPosition.x + tile.x, mPosition.y + tile.y))
+		{
+			BASED_TRACE("Rotation rejected (tile full)");
+			return false;
+		}
+
+		if (mPosition.x + tile.x < 0 || mPosition.x + tile.x >= mGrid->GetSize().x
+			|| mPosition.y + tile.y < -1 || mPosition.y + tile.y >= mGrid->GetSize().y)
+		{
+			BASED_TRACE("Rotation rejected (invalid position)");
+			return false;
+		}
 	}
 
 	return true;
@@ -199,4 +248,126 @@ bool TetrominoBase::IsPartOfCurrentTetromino(int x, int y) const
 		{
 			return (position.x + tile.x == x && position.y + tile.y == y);
 		});
+}
+
+void TetrominoBase::SetRotation(std::vector<glm::ivec2> tiles, Direction dir)
+{
+	switch (dir)
+	{
+	case UP:
+		mTilesUp = tiles;
+		break;
+	case LEFT:
+		mTilesLeft = tiles;
+		break;
+	case RIGHT:
+		mTilesRight = tiles;
+		break;
+	case DOWN:
+		mTilesDown = tiles;
+		break;
+	}
+}
+
+void TetrominoBase::SetPosition(int x, int y)
+{
+	mPosition = { x, y };
+}
+
+void TetrominoBase::RotateCW()
+{
+	auto newDirection = mDirection;
+	switch (mDirection)
+	{
+	case UP:
+		newDirection = LEFT;
+		break;
+	case LEFT:
+		newDirection = DOWN;
+		break;
+	case RIGHT:
+		newDirection = UP;
+		break;
+	case DOWN:
+		newDirection = RIGHT;
+		break;
+	}
+	if (!ValidateNewRotation(newDirection)) return;
+
+	mDirection = newDirection;
+	mGrid->DrawTile(mPosition.x, mPosition.y, { 0.5f, 0.5f, 0.5f });
+
+	for (const auto tile : mTiles)
+	{
+		if (mPosition.x + tile.x >= 0 && mPosition.x + tile.x < mGrid->GetSize().x
+			&& mPosition.y + tile.y >= 0 && mPosition.y + tile.y < mGrid->GetSize().y)
+		{
+			mGrid->DrawTile(mPosition.x + tile.x, mPosition.y + tile.y, { 0.5f, 0.5f, 0.5f });
+		}
+	}
+
+	switch (mDirection)
+	{
+	case UP:
+		mTiles = mTilesUp;
+		break;
+	case LEFT:
+		mTiles = mTilesLeft;
+		break;
+	case RIGHT:
+		mTiles = mTilesRight;
+		break;
+	case DOWN:
+		mTiles = mTilesDown;
+		break;
+	}
+}
+
+void TetrominoBase::RotateCCW()
+{
+	auto newDirection = mDirection;
+	switch (mDirection)
+	{
+	case UP:
+		newDirection = RIGHT;
+		break;
+	case LEFT:
+		newDirection = UP;
+		break;
+	case RIGHT:
+		newDirection = DOWN;
+		break;
+	case DOWN:
+		newDirection = LEFT;
+		break;
+	}
+	if (!ValidateNewRotation(newDirection)) return;
+	mDirection = newDirection;
+
+	mGrid->DrawTile(mPosition.x, mPosition.y, { 0.5f, 0.5f, 0.5f });
+
+	for (const auto tile : mTiles)
+	{
+		if (mPosition.x + tile.x >= 0 && mPosition.x + tile.x < mGrid->GetSize().x
+			&& mPosition.y + tile.y >= 0 && mPosition.y + tile.y < mGrid->GetSize().y)
+		{
+			mGrid->DrawTile(mPosition.x + tile.x, mPosition.y + tile.y, { 0.5f, 0.5f, 0.5f });
+		}
+	}
+
+	switch (mDirection)
+	{
+	case UP:
+		mTiles = mTilesUp;
+		break;
+	case LEFT:
+		mTiles = mTilesLeft;
+		break;
+	case RIGHT:
+		mTiles = mTilesRight;
+		break;
+	case DOWN:
+		mTiles = mTilesDown;
+		break;
+	}
 }
