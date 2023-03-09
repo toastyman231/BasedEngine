@@ -8,13 +8,13 @@ ret = 0;
 
 TEMPLATE_DIR = "{}/Templates/{}".format(os.getcwd(), template);
 
-def CopyBuildFiles():
-    dest = "{}/{}".format(location, prj)
+def CopyBuildFiles(dest, project):
+    ##dest = "{}/{}".format(location, prj)
     try:
         # Copy premake5 template
         premakeFile = open("{}/Templates/premakeTemplate.txt".format(os.getcwd()), "r").read();
         premakeFile = premakeFile.replace("ENGINE_LOCATION", os.getcwd())
-        premakeFile = premakeFile.replace("PROJ_NAME", prj)
+        premakeFile = premakeFile.replace("PROJ_NAME", project)
         premakeFile = premakeFile.replace("\\", "\\\\")
         finalFile = open("{}/premake5.lua".format(dest), "x")
         finalFile.write(premakeFile)
@@ -30,12 +30,13 @@ def CopyBuildFiles():
     except:
         print("Could not find premake build file!")
         ret = 1
+    return
 
 if (os.path.exists(TEMPLATE_DIR) and globals.IsWindows()):
     dest = "{}/{}".format(location, prj)
     os.mkdir(dest)
     ret = subprocess.call(["cmd.exe", "/c", "robocopy", TEMPLATE_DIR, dest, "/E"])
-    CopyBuildFiles()
+    CopyBuildFiles("{}/{}".format(location, prj), prj)
     ret = subprocess.call(["cmd.exe", "/c", "cd", dest, "&&", "{}/premake/premake5".format(os.getcwd()), "vs2019"])
 else:
     print("Could not find specified template or using unsupported OS!")
