@@ -75,7 +75,8 @@ void TetrominoBase::MoveOver(int dir)
 
 void TetrominoBase::DrawTile(int x, int y) const
 {
-	if (x >= 0 && x < mGrid->GetSize().x && y >= 0 && y < mGrid->GetSize().y)
+	if (x >= 0 && x < mGrid->GetSize().x 
+		&& y >= 0 && y < mGrid->GetSize().y && !mGrid->IsClearing())
 	{
 		mGrid->DrawTile(x, y, mColor);
 	}
@@ -154,12 +155,13 @@ void TetrominoBase::Update(float deltaTime)
 		mWaitTime += mFallInterval;
 	}
 
-	DrawTetromino();
+	if (!mLocked) DrawTetromino();
 }
 
 void TetrominoBase::LockTetromino()
 {
 	mLocked = true;
+	mGrid->CheckRows();
 	SpawnTetromino(4, 0, GetRandomTetromino(), mGrid);
 }
 

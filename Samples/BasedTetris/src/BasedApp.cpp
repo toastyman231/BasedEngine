@@ -3,6 +3,7 @@
 
 #include "based/scene/components.h"
 #include "based/scene/entity.h"
+#include "based/ui/textentity.h"
 #include "Entities/PlayGrid.h"
 #include "Entities/Tetrominoes/TetrominoBase.h"
 
@@ -13,6 +14,7 @@ class BasedApp : public based::App
 private:
 	PlayGrid* playGrid = nullptr;
 	TetrominoBase* currentTetromino = nullptr;
+	based::ui::TextEntity* scoreText = nullptr;
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -30,6 +32,8 @@ public:
 		App::Initialize();
 
 		playGrid = new PlayGrid(10, 16);
+		scoreText = new based::ui::TextEntity("Assets/fonts/Arimo-Bold.ttf", "Score: 0", 48,
+			{ 150.f, based::Engine::Instance().GetWindow().GetSize().y / 2, 0.f }, {255, 255, 255, 255});
 		currentTetromino = TetrominoBase::SpawnTetromino(5, 0, LINE, playGrid);
 	}
 
@@ -42,6 +46,7 @@ public:
 	{
 		App::Update(deltaTime);
 		currentTetromino = TetrominoBase::GetCurrentTetromino();
+		scoreText->SetText("Score: " + std::to_string(playGrid->GetScore()));
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_D))
 		{

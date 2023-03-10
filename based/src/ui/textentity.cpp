@@ -29,6 +29,7 @@ namespace based::ui
 
 		auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect");
 		auto mat = std::make_shared<graphics::Material>(shader, mTexture);
+		mat->SetUniformValue("col", glm::vec4{ 1.f, 1.f, 1.f, 1.f });
 		mMaterialLibrary.Load("Material", mat);
 
 		AddComponent<scene::TextRenderer>(this);
@@ -155,7 +156,9 @@ namespace based::ui
 		mTexture = std::make_shared<graphics::Texture>(surface, texture);
 		mTexture->SetTextureFilter(graphics::TextureFilter::Nearest);
 		auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect");
-		mMaterialLibrary.Load("Material", std::make_shared<graphics::Material>(shader, mTexture));
+		auto mat = std::make_shared<graphics::Material>(shader, mTexture);
+		mat->SetUniformValue("col", glm::vec4{ 1.f, 1.f, 1.f, 1.f });
+		mMaterialLibrary.Load("Material", mat);
 
 		SDL_FreeSurface(surface);
 		mShouldRegenerate = false;
