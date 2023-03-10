@@ -55,10 +55,10 @@ project "PROJ_NAME"
 
         libdirs
         {
-            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\bin\\Debug\\based",
-            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\external\\glad\\bin\\Debug\\glad",
-            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\%{externals.sdl2}\\lib",
-            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\%{externals.freetype}\\lib"
+            "ENGINE_LOCATION\bin\Debug\based",
+            "ENGINE_LOCATION\external\glad\bin\Debug\glad",
+            "ENGINE_LOCATION\%{externals.sdl2}\lib",
+            "ENGINE_LOCATION\%{externals.freetype}\lib"
         }
 
         links
@@ -79,10 +79,10 @@ project "PROJ_NAME"
 
         libdirs
         {
-            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\bin\\Release\\based",
-            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\external\\glad\\bin\\Release\\glad",
-            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\%{externals.sdl2}\\lib",
-            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\%{externals.freetype}\\lib"
+            "ENGINE_LOCATION\bin\Release\based",
+            "ENGINE_LOCATION\external\glad\bin\Release\glad",
+            "ENGINE_LOCATION\%{externals.sdl2}\lib",
+            "ENGINE_LOCATION\%{externals.freetype}\lib"
         }
 
         links
