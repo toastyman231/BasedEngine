@@ -45,7 +45,7 @@ project "PROJ_NAME"
         "python3 " .. string.sub(path.getabsolute("%{prj.name}"), 1, string.len(path.getabsolute("%{prj.name}")) - (string.len("%{prj.name}") + 1)) .. "/postbuild.py config=%{cfg.buildcfg} prj=%{prj.name}"
     }   
 
-    filter {"system:windows", "configurations:*"}
+    filter {"system:windows", "configurations:Debug"}
         systemversion "latest"
 
         defines
@@ -55,10 +55,34 @@ project "PROJ_NAME"
 
         libdirs
         {
-            "ENGINE_LOCATION\bin\Debug\based",
-            "ENGINE_LOCATION\external\glad\bin\Debug\glad",
-            "ENGINE_LOCATION\%{externals.sdl2}\lib",
-            "ENGINE_LOCATION\%{externals.freetype}\lib"
+            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\bin\\Debug\\based",
+            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\external\\glad\\bin\\Debug\\glad",
+            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\%{externals.sdl2}\\lib",
+            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\%{externals.freetype}\\lib"
+        }
+
+        links
+        {
+            "SDL2",
+            "SDL2_ttf",
+            "glad",
+            "freetype"
+        }
+
+    filter {"system:windows", "configurations:Release"}
+        systemversion "latest"
+
+        defines
+        {
+            "BASED_PLATFORM_WINDOWS"
+        }
+
+        libdirs
+        {
+            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\bin\\Release\\based",
+            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\external\\glad\\bin\\Release\\glad",
+            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\%{externals.sdl2}\\lib",
+            "D:\\Jake\\Documents\\Github_Repos\\BasedEngine\\%{externals.freetype}\\lib"
         }
 
         links

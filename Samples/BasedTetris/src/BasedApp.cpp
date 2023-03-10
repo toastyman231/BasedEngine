@@ -32,6 +32,8 @@ public:
 	void Initialize() override
 	{
 		App::Initialize();
+		// TODO: Add way to hide console in release config
+		// TODO: Figure out how to stop errors on game shutdown
 
 		playGrid = new PlayGrid(10, 16);
 		pausedText = new ui::TextEntity("Assets/fonts/Arimo-Bold.ttf", "Paused", 48,
