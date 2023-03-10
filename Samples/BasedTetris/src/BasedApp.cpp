@@ -14,7 +14,9 @@ class BasedApp : public based::App
 private:
 	PlayGrid* playGrid = nullptr;
 	TetrominoBase* currentTetromino = nullptr;
-	based::ui::TextEntity* scoreText = nullptr;
+	ui::TextEntity* scoreText = nullptr;
+	ui::TextEntity* gameOverText = nullptr;
+	ui::TextEntity* pausedText = nullptr;
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -32,8 +34,15 @@ public:
 		App::Initialize();
 
 		playGrid = new PlayGrid(10, 16);
-		scoreText = new based::ui::TextEntity("Assets/fonts/Arimo-Bold.ttf", "Score: 0", 48,
-			{ 150.f, based::Engine::Instance().GetWindow().GetSize().y / 2, 0.f }, {255, 255, 255, 255});
+		pausedText = new ui::TextEntity("Assets/fonts/Arimo-Bold.ttf", "Paused", 48,
+			{ 150.f, Engine::Instance().GetWindow().GetSize().y / 2 - 150.f, 0.f }, { 255, 255, 255, 255 });
+		scoreText = new ui::TextEntity("Assets/fonts/Arimo-Bold.ttf", "Score: 0", 48,
+			{ 150.f, Engine::Instance().GetWindow().GetSize().y / 2, 0.f }, {255, 255, 255, 255});
+		gameOverText = new ui::TextEntity("Assets/fonts/Arimo-Bold.ttf", "Game Over!", 48,
+			{150.f, Engine::Instance().GetWindow().GetSize().y / 2 + 150.f, 0.f}, { 255, 255, 255, 255 });
+		gameOverText->SetActive(false);
+		pausedText->SetActive(false);
+		playGrid->SetScoreText(scoreText);
 		currentTetromino = TetrominoBase::SpawnTetromino(5, 0, LINE, playGrid);
 	}
 
@@ -45,8 +54,22 @@ public:
 	void Update(float deltaTime) override
 	{
 		App::Update(deltaTime);
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_ESCAPE))
+		{
+			playGrid->TogglePaused();
+			pausedText->SetActive(playGrid->Paused());
+		}
+
+		if (playGrid->Paused()) return;
+
+		if (playGrid->GameOver())
+		{
+			gameOverText->SetActive(true);
+			return;
+		}
+
 		currentTetromino = TetrominoBase::GetCurrentTetromino();
-		scoreText->SetText("Score: " + std::to_string(playGrid->GetScore()));
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_D))
 		{

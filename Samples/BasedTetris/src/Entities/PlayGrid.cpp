@@ -1,21 +1,27 @@
 #include "PlayGrid.h"
 
+#include <based/core/basedtime.h>
+#include <based/ui/textentity.h>
+
+#include "Tetrominoes/TetrominoBase.h"
+
 PlayGrid::PlayGrid(int x, int y)
-	: mSize(x, y)
+	: mLastRow(16), mTimeToWait(0), mSize(x, y), scoreText(nullptr), mSecondClearing(false), mGameOver(false),
+	  mPaused(false)
 {
 	srand((unsigned)time(NULL));
 	mClearing = false;
 	mScore = 0;
 	mLevel = 1;
 
-	for (int i = 0; i < x*y; i++)
+	for (int i = 0; i < x * y; i++)
 	{
 		auto sprite = new based::graphics::Sprite(glm::vec4(0.5f, 0.5f, 0.5f, 1.f));
 		sprite->SetPivot(based::graphics::Align::TopLeft);
 		mTiles.emplace_back(sprite);
 	}
 
-	mTileSize = ((float)based::Engine::Instance().GetWindow().GetSize().x / 3.f / 
+	mTileSize = ((float)based::Engine::Instance().GetWindow().GetSize().x / 3.f /
 		(float)mSize.x) / ((float)based::Engine::Instance().GetWindow().GetSize().x / 3.f);
 }
 
@@ -51,11 +57,45 @@ void PlayGrid::Update(float deltaTime)
 {
 	Entity::Update(deltaTime);
 
+	if (mGameOver || mPaused) return;
+
+	if (mClearing && based::core::Time::GetTime() >= mTimeToWait)
+	{
+		if (!mSecondClearing)
+		{
+			mClearing = true;
+			for (const auto i : mClearedRows)
+			{
+				ClearRow(i);
+			}
+			AddScore(static_cast<int>(mClearedRows.size()));
+			mSecondClearing = true;
+			mTimeToWait = based::core::Time::GetTime() + 0.5f;
+		}
+		else
+		{
+			mClearing = false;
+			for (int y = mLastRow - 1; y >= 0; y--)
+			{
+				for (int x = 0; x < mSize.x; x++)
+				{
+					if (!TileFull(x, y)) continue;
+
+					int tempY = y;
+					while (tempY + 1 < mSize.y && !TileFull(x, tempY+ 1))
+					{
+						MoveDown(x, tempY++);
+					}
+				}
+			}
+
+			TetrominoBase::SpawnTetromino(4, 0, TetrominoBase::GetRandomTetromino(), this);
+		}
+	}
 }
 
 void PlayGrid::DrawTile(int x, int y, glm::vec3 color) const
 {
-	if (x == 0 && y == 15) BASED_TRACE("Setting color to {} {} {}", color.r, color.g, color.b)
 	mTiles[y * mSize.x + x]->SetColor(glm::vec4(color, 1.f));
 }
 
@@ -70,40 +110,39 @@ void PlayGrid::MoveDown(int x, int y) const
 
 void PlayGrid::CheckRows()
 {
-	int lastRow = mSize.y;
+	mLastRow = mSize.y;
 	int rowsCleared = 0;
+	mClearedRows.clear();
+	mSecondClearing = false;
 
+	mClearing = true;
 	for (int i = 0; i < mSize.y; i++)
 	{
 		if (RowFull(i))
 		{
-			mClearing = true;
-			ClearRow(i);
-			lastRow = i;
+			ClearRow(i, {1.f, 1.f, 1.f});
+			mClearedRows.emplace_back(i);
+			mLastRow = i;
 			rowsCleared++;
 		}
 	}
-	mClearing = false;
-	AddScore(rowsCleared);
-	
-	if (lastRow == mSize.y) return;
 
-	for (int i = 0; i < mSize.x; i++)
+	if (rowsCleared > 0)
 	{
-		for (int j = lastRow - 1; j >= 0; j--)
-		{
-			if (j > lastRow || !TileFull(i, j)) continue;
-
-			MoveDown(i, j);
-		}
+		// TODO: Add timer system or something to make waiting easier
+		mTimeToWait = based::core::Time::GetTime() + 0.5f;
+		return;
 	}
+
+	TetrominoBase::SpawnTetromino(4, 0, TetrominoBase::GetRandomTetromino(), this);
+	mClearing = false;
 }
 
-void PlayGrid::ClearRow(int row)
+void PlayGrid::ClearRow(int row, glm::vec3 color) const
 {
 	for (int i = 0; i < mSize.x; i++)
 	{
-		DrawTile(i, row, { 0.5f, 0.5f, 0.5f });
+		DrawTile(i, row, color);
 	}
 }
 
@@ -134,6 +173,7 @@ void PlayGrid::AddScore(int rowsCleared)
 	}
 
 	mScore += scoreToAdd;
+	scoreText->SetText("Score: " + std::to_string(mScore));
 }
 
 bool PlayGrid::TileFull(int x, int y) const

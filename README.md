@@ -56,7 +56,7 @@ Feel free to contribute if you feel like it, this is my first large C++ project,
 ### Building the project
 Just download the source code, open a terminal in the root directory, and run 'python3 based.py gensln' to generate the Visual Studio project files. You will need Python 3 installed on your machine first. Some commands may require you to set up your compiler location.  
 The following commands can be run with 'python3 based.py {command name} {arguments}'
-- gensln: Generates project files. Should work on any OS, but I've only tested it on Windows.
+- gensln [-prj=Your Project Name] [-location=Project root directory]: Generates project files of the specified project at the specified directory. Should work on any OS, but I've only tested it on Windows.
 - buildsln [-config=debug|release]: Builds the entire solution in either debug or release configuration.
 - mkproject [-prj=New Project Name] [-config=Template Name] [-location=Project Location]: Will create a new project from a template at the specified directory. Templates can be found in BasedEngine/Templates.
 - **(DEPRECATED)** mklink [-prj=Your Project Name]: Creates a symlink of the resources folder so that the engine has easier access to it. The engine can now find the Assets folder without needing a symlink, so this command no longer serves a purpose.

@@ -140,6 +140,7 @@ void TetrominoBase::DropTetromino()
 void TetrominoBase::Update(float deltaTime)
 {
 	Entity::Update(deltaTime);
+	if (mGrid->GameOver() || mGrid->Paused()) return;
 
 	for (const auto tile : mTiles)
 	{
@@ -152,7 +153,7 @@ void TetrominoBase::Update(float deltaTime)
 	if (!mLocked && based::core::Time::GetTime() >= mWaitTime)
 	{
 		MoveDown();
-		mWaitTime += mFallInterval;
+		mWaitTime = based::core::Time::GetTime() + mFallInterval;
 	}
 
 	if (!mLocked) DrawTetromino();
@@ -160,9 +161,15 @@ void TetrominoBase::Update(float deltaTime)
 
 void TetrominoBase::LockTetromino()
 {
+	if (mPosition.y < 0) mGrid->SetGameOver(true);
+
+	for (const auto tile : mTiles)
+	{
+		if (mPosition.y + tile.y < 0) mGrid->SetGameOver(true);
+	}
+
 	mLocked = true;
 	mGrid->CheckRows();
-	SpawnTetromino(4, 0, GetRandomTetromino(), mGrid);
 }
 
 bool TetrominoBase::ValidateNewPosition(glm::ivec2 dir)

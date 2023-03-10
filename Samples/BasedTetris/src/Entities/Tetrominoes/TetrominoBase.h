@@ -35,13 +35,14 @@ private:
 
 	void DrawTile(int x, int y) const;
 	static float Clamp(float min, float max, float value);
-	static TetrominoType GetRandomTetromino();
 public:
 	TetrominoBase(int x, int y, PlayGrid* grid, glm::vec3 color = {1.f, 0.f, 0.f}, float fallTime = 1.f);
 
 	static TetrominoBase* SpawnTetromino(int x, int y, TetrominoType type, PlayGrid* grid);
 
 	static TetrominoBase* GetCurrentTetromino() { return currentTetromino; }
+
+	static TetrominoType GetRandomTetromino();
 
 	glm::vec3 GetColor() const { return mColor; }
 	glm::ivec2 GetPosition() const { return mPosition; }
