@@ -16,6 +16,8 @@ namespace based::graphics
 		{
 			mSize = glm::vec2(mMaterial->GetTexture()->GetWidth(), mMaterial->GetTexture()->GetHeight());
 		}
+
+		mAlignment = Middle;
 		mMaterial->SetUniformValue("col", mColor);
 		AddComponent<scene::SpriteRenderer>(this);
 	}
@@ -28,6 +30,7 @@ namespace based::graphics
 		const auto mat = std::make_shared<Material>(DefaultLibraries::GetShaderLibrary().Get("Rect"));
 		mat->SetUniformValue("col", mColor);
 
+		mAlignment = Middle;
 		mMaterial = mat;
 		AddComponent<scene::SpriteRenderer>(this);
 	}
@@ -66,8 +69,38 @@ namespace based::graphics
 		mMaterial->SetUniformValue("col", mColor);
 	}
 
+	void Sprite::SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
+	{
+		Entity::SetTransform(pos, rot, scale);
+
+		SetPivot(mAlignment);
+	}
+
+	void Sprite::SetPosition(glm::vec3 pos)
+	{
+		Entity::SetPosition(pos);
+
+		SetPivot(mAlignment);
+	}
+
+	void Sprite::SetRotation(glm::vec3 rot)
+	{
+		Entity::SetRotation(rot);
+
+		SetPivot(mAlignment);
+	}
+
+	void Sprite::SetScale(glm::vec3 scale)
+	{
+		Entity::SetScale(scale);
+
+		SetPivot(mAlignment);
+	}
+
 	void Sprite::SetPivot(Align alignment)
 	{
+		mAlignment = alignment;
+
 		switch (alignment)
 		{
 		case Align::TopLeft:

@@ -19,6 +19,7 @@ namespace based::graphics
 		glm::vec4 mColor;
 		glm::vec2 mSize;
 		glm::vec2 mPivot;
+		Align mAlignment;
 		int mSortOrder;
 
 		void RegenerateVA();
@@ -34,6 +35,11 @@ namespace based::graphics
 		void SetShader(std::shared_ptr<Shader> shader) const;
 		void SetMaterial(std::shared_ptr<Material> material);
 		void SetColor(glm::vec4 color);
+
+		void SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) override;
+		void SetPosition(glm::vec3 pos) override;
+		void SetRotation(glm::vec3 rot) override;
+		void SetScale(glm::vec3 scale) override;
 
 		void SetPivot(Align alignment);
 		glm::vec2 GetPivot() const { return mPivot; }

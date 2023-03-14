@@ -31,9 +31,7 @@ void PlayGrid::SetupTiles() const
 	{
 		for (int j = 0; j < mSize.y; j++)
 		{
-			// TODO: Make it so you don't need to reset pivot after scaling
 			mTiles[j * mSize.x + i]->SetScale({ mTileSize, mTileSize, 1.f });
-			mTiles[j * mSize.x + i]->SetPivot(based::graphics::Align::TopLeft);
 
 			const float gridWidth = (float)based::Engine::Instance().GetWindow().GetSize().x / 3.f;
 
