@@ -84,8 +84,8 @@ void TetrominoBase::DrawTile(int x, int y) const
 
 TetrominoType TetrominoBase::GetRandomTetromino()
 {
-	// TODO: Add random number gen to engine
-	int randomNum = rand() % (6 - 0 + 1);
+	// TODO: Get a random tetromino more like how Tetris actually does it
+	int randomNum = based::math::RandomRange(0, 6);
 
 	switch (randomNum)
 	{
