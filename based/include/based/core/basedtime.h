@@ -6,7 +6,9 @@ namespace based::core
 {
 	class Time
 	{
+		friend class Engine;
 	private:
+		inline static float mLastFrameTime = 0.f;
 		inline static float mDeltaTime = 0.f;
 		inline static float mTimeScale = 1.f;
 	public:
@@ -15,7 +17,7 @@ namespace based::core
 
 		static float GetTime()
 		{
-			return SDL_GetTicks64() / 1000.f;
+			return SDL_GetTicks64() / 1000.f * mTimeScale;
 		}
 
 		static float DeltaTime()
@@ -28,9 +30,10 @@ namespace based::core
 			return mTimeScale;
 		}
 
-		static void SetDelta(float time)
+		static void SetDelta(float time, float delta)
 		{
-			mDeltaTime = time;
+			mLastFrameTime = time;
+			mDeltaTime = delta;
 		}
 
 		static void SetTimeScale(float timeScale)

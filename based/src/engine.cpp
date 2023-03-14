@@ -80,8 +80,8 @@ namespace based
             // Core loop
             while (mIsRunning)
             {
-                const float timeDelta = (core::Time::GetTime() - core::Time::DeltaTime()) * core::Time::TimeScale();
-                core::Time::SetDelta(core::Time::GetTime());
+                const float timeDelta = (core::Time::GetTime() - core::Time::mLastFrameTime) * core::Time::TimeScale();
+                core::Time::SetDelta(core::Time::GetTime(), timeDelta);
                 Update(timeDelta);
                 Render();
             }

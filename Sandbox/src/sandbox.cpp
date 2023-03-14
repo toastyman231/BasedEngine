@@ -77,7 +77,7 @@ public:
 	void Update(float deltaTime) override
 	{
 		App::Update(deltaTime);
-		//BASED_TRACE("Time:{}, DeltaTime:{}", core::Time::GetTime(), deltaTime);
+		//BASED_TRACE("Time:{}, DeltaTime:{}, GetDelta:{}", core::Time::GetTime(), deltaTime, core::Time::DeltaTime());
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_G))
 		{
