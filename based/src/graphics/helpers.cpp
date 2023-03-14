@@ -26,24 +26,4 @@ namespace based::graphics
 		}
 		
 	}
-
-	/**
-	 * \brief Finds the next power of two for an integer.
-	 * \param v The integer to find the next power of two for.
-	 * \return The next power of two of v.
-	 *
-	 * This code is directly copy/pasted from:
-	 * http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-	*/
-	unsigned int NextPowerOfTwo(unsigned int v)
-	{
-		v--;
-		v |= v >> 1;
-		v |= v >> 2;
-		v |= v >> 4;
-		v |= v >> 8;
-		v |= v >> 16;
-		v++;
-		return v;
-	}
 }

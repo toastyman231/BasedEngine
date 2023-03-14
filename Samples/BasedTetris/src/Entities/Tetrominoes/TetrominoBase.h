@@ -34,7 +34,6 @@ private:
 	inline static TetrominoBase* currentTetromino = nullptr;
 
 	void DrawTile(int x, int y) const;
-	static float Clamp(float min, float max, float value);
 public:
 	TetrominoBase(int x, int y, PlayGrid* grid, glm::vec3 color = {1.f, 0.f, 0.f}, float fallTime = 1.f);
 

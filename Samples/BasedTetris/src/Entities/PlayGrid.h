@@ -6,6 +6,7 @@
 #include <based/graphics/sprite.h>
 #include <based/graphics/defaultassetlibraries.h>
 #include <based/input/keyboard.h>
+#include <based/math/basedmath.h>
 
 class PlayGrid : public based::scene::Entity
 {
@@ -52,6 +53,4 @@ private:
 	bool mSecondClearing;
 	bool mGameOver;
 	bool mPaused;
-
-	static float Lerp(float a, float b, float t);
 };

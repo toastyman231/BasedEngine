@@ -11,6 +11,8 @@
 #include "graphics/defaultassetlibraries.h"
 #include "graphics/helpers.h"
 
+#include "math/basedmath.h"
+
 namespace based::ui
 {
 	TextEntity::TextEntity(std::string path, std::string text, int fontSize, glm::vec3 pos, SDL_Color color)
@@ -134,7 +136,7 @@ namespace based::ui
 		amask = 0xff000000;
 
 		theSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, 
-			graphics::NextPowerOfTwo(surface->w), graphics::NextPowerOfTwo(surface->h), 32, rmask, gmask, bmask, amask);
+			math::NextPowerOfTwo(surface->w), math::NextPowerOfTwo(surface->h), 32, rmask, gmask, bmask, amask);
 		SDL_FillRect(theSurface, NULL, SDL_MapRGBA(theSurface->format, 0, 0, 0, 0));
 		convertedSurface = SDL_ConvertSurface(surface, theSurface->format, SDL_SWSURFACE);
 

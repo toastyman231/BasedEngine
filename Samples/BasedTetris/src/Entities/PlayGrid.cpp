@@ -35,8 +35,8 @@ void PlayGrid::SetupTiles() const
 
 			const float gridWidth = (float)based::Engine::Instance().GetWindow().GetSize().x / 3.f;
 
-			float xPos = Lerp(gridWidth, gridWidth + gridWidth, (float)i / (float)mSize.x);
-			float yPos = Lerp(5.f, (float)based::Engine::Instance().GetWindow().GetSize().y, (float)j / (float)mSize.y);
+			float xPos = based::math::Lerp(gridWidth, gridWidth + gridWidth, (float)i / (float)mSize.x);
+			float yPos = based::math::Lerp(5.f, (float)based::Engine::Instance().GetWindow().GetSize().y, (float)j / (float)mSize.y);
 
 			mTiles[j * mSize.x + i]->SetPosition(
 				based::Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->ScreenToWorldPoint({xPos, yPos}));
@@ -204,10 +204,4 @@ bool PlayGrid::PerfectClear() const
 	}
 
 	return true;
-}
-
-// TODO: Make this part of the engine
-float PlayGrid::Lerp(float a, float b, float t)
-{
-	return a + (b - a) * t;
 }

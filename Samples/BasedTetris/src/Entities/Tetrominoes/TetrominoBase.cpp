@@ -82,11 +82,6 @@ void TetrominoBase::DrawTile(int x, int y) const
 	}
 }
 
-float TetrominoBase::Clamp(float min, float max, float value)
-{
-	return (value <= min) ? min : (value >= max) ? max : value;
-}
-
 TetrominoType TetrominoBase::GetRandomTetromino()
 {
 	// TODO: Add random number gen to engine
