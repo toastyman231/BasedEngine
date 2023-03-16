@@ -1,5 +1,5 @@
 # BasedEngine
-A simple 2D game engine based on tutorials by https://www.youtube.com/c/Progrematic. Some inspiration was also taken from Hazel Engine by Yan Chernikov.
+A simple 2D game engine based on tutorials by https://www.youtube.com/c/Progrematic. Some inspiration was also taken from Hazel Engine by Yan Chernikov. The Samples folder contains a few finished games I've made using the engine, such as Tetris.  
 
 ## Libraries Used
 - FreeType (Text Rendering, https://freetype.org/)
@@ -10,6 +10,7 @@ A simple 2D game engine based on tutorials by https://www.youtube.com/c/Progrema
 - GLM (OpenGL Math, https://github.com/g-truc/glm)
 - ImGUI (GUI Rendering, https://github.com/ocornut/imgui/tree/docking)
 - STB (Image Loading, https://github.com/nothings/stb)
+- Miniaudio (Audio playback, https://github.com/mackron/miniaudio)  
 
 ## My Additions
 The bulk of the engine design and implentation was done by Progrematic, if something is not listed below, it was probably done by him. You can find his original engine here: https://github.com/progrematic/hippo.
@@ -23,10 +24,11 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - Custom window icons (set up automatically if you include an icon.png file in your res folder)
 - Text Rendering/UI
 - Toolchain to create projects in directories outside the engine's directory
+- Simple audio system using miniaudio
 
 ## Planned Additions
 - 2D Physics with Box2D
-- Audio capabilities (maybe ffmpeg?)
+- ~~Audio capabilities (maybe ffmpeg?)~~ Complete!
 - Animation System
 - ~~Load shaders from file (They are hardcoded currently)~~ Complete!  
 - More UI (Buttons, Sliders, Checkboxes, etc)
@@ -48,6 +50,7 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - ~~The build system is a bit complicated, everything is kind of just all shoved into one giant premake file. If I add more libraries that need to be linked, but I don't add the include paths to all existing projects, the ones that should work will not compile. A way to separate projects so they only care about themselves and the engine would be nice. I might be able to include them the same way I include GLAD's project.~~  
     - The mkproject command mentioned above takes care of this concern as well.
 - A GUI editor would be nice to have at some point, but it's a lot of effort to make that I could be using to make actual games (or just improving the engine in general).
+- LoadScene cannot reload an already loaded scene, because all LoadScene really does is swap which scene is currently being rendered. I will need to have some way to load a scene by reading from a file of some sort to get all of it's entities, then on load create each of those entities and destroy all entities in the current scene
 - I've only tested it on Windows, theoretically it should work on Mac and Linux, but your mileage will probably vary.
 
 ## Contributing
