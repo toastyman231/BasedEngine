@@ -91,7 +91,7 @@ namespace based::ui
 	void TextEntity::Shutdown()
 	{
 		Entity::Shutdown();
-		delete(this);
+		//delete(this);
 	}
 
 	void TextEntity::SetAlignment(Align alignment)

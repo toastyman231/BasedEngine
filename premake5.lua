@@ -18,6 +18,7 @@ externals["sdl2"] = "external/sdl2"
 externals["spdlog"] = "external/spdlog"
 externals["glad"] = "external/glad"
 externals["freetype"] = "external/freetype"
+externals["miniaudio"] = "external/miniaudio"
 
 -- Process Glad before anything else
 include "external/glad"
@@ -50,7 +51,8 @@ project "based"
         "%{externals.sdl2}/include",
         "%{externals.spdlog}/include",
         "%{externals.glad}/include",
-        "%{externals.freetype}/include"
+        "%{externals.freetype}/include",
+        "%{externals.miniaudio}"
     }
 
     flags
@@ -345,7 +347,8 @@ project "Sandbox"
     {
         "based/include",
         "%{externals.sdl2}/include",
-        "%{externals.spdlog}/include"
+        "%{externals.spdlog}/include",
+        "%{externals.miniaudio}"
     }
 
     flags

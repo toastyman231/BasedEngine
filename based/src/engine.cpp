@@ -12,6 +12,7 @@
 
 #include "SDL2/SDL.h"
 #include <SDL2/SDL_ttf.h>
+#include "scene/audio.h"
 
 #include "basedtime.h"
 
@@ -155,9 +156,11 @@ namespace based
                     // Load window icon
                     SetIcon("Assets/icon.png");
 
+                    //Initialize miniaudio
+                    scene::Audio::InitEngine();
+
                     // Initialize client
                     mApp->Initialize();
-                    mApp->GetCurrentScene()->InitializeScene();
                 }
             }
 
@@ -179,6 +182,9 @@ namespace based
         // Shutdown client
         mApp->GetCurrentScene()->ShutdownScene();
         mApp->Shutdown();
+
+        // Shutdown Audio
+        scene::Audio::ShutdownEngine();
 
         // Shutdown input
         input::Joystick::Shutdown();

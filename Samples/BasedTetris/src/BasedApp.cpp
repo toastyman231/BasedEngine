@@ -3,6 +3,7 @@
 
 #include "based/scene/components.h"
 #include "based/scene/entity.h"
+#include "based/scene/audio.h"
 #include "based/ui/textentity.h"
 #include "Entities/PlayGrid.h"
 #include "Entities/Tetrominoes/TetrominoBase.h"
@@ -17,6 +18,9 @@ private:
 	ui::TextEntity* scoreText = nullptr;
 	ui::TextEntity* gameOverText = nullptr;
 	ui::TextEntity* pausedText = nullptr;
+	scene::Audio* tetrisTheme = nullptr;
+
+	bool firstTime = true;
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -35,7 +39,9 @@ public:
 		// TODO: Add way to hide console in release config
 		// TODO: Figure out how to stop errors on game shutdown
 
-		playGrid = new PlayGrid(10, 16);
+		playGrid = scene::Entity::CreateEntity<PlayGrid>(
+			glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f),
+			10, 16);
 		pausedText = new ui::TextEntity("Assets/fonts/Arimo-Bold.ttf", "Paused", 48,
 			{ 150.f, Engine::Instance().GetWindow().GetSize().y / 2 - 150.f, 0.f }, { 255, 255, 255, 255 });
 		scoreText = new ui::TextEntity("Assets/fonts/Arimo-Bold.ttf", "Score: 0", 48,
@@ -46,6 +52,9 @@ public:
 		pausedText->SetActive(false);
 		playGrid->SetScoreText(scoreText);
 		currentTetromino = TetrominoBase::SpawnTetromino(5, 0, LINE, playGrid);
+
+		tetrisTheme = new scene::Audio(std::string("Assets/sounds/tetris.mp3"), 0.5f, true);
+		tetrisTheme->Play();
 	}
 
 	void Shutdown() override
@@ -67,7 +76,18 @@ public:
 
 		if (playGrid->GameOver())
 		{
+			if (!firstTime) 
+			{
+				if (input::Keyboard::KeyDown(BASED_INPUT_KEY_R))
+				{
+					LoadScene(startScene);
+				}
+				return;
+			}
+			tetrisTheme->Stop();
+			scene::Audio::PlayAudio(std::string("Assets/sounds/gameover.mp3"));
 			gameOverText->SetActive(true);
+			firstTime = false;
 			return;
 		}
 
@@ -96,6 +116,15 @@ public:
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
 		{
 			currentTetromino->DropTetromino();
+		}
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_P))
+		{
+			if (tetrisTheme->IsPlaying())
+			{
+				tetrisTheme->Pause();
+			}
+			else tetrisTheme->Play();
 		}
 	}
 

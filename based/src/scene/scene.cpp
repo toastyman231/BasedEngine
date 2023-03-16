@@ -78,7 +78,6 @@ namespace based::scene
 			scene::Entity* entityPtr = mRegistry.get<EntityReference>(entity).entity;
 			if (!entityPtr->IsActive()) continue;
 			entityPtr->Shutdown();
-			//delete(entityPtr);
 		}
 	}
 }

@@ -8,7 +8,6 @@ namespace based::scene
 	{
 	public:
 		Scene() = default;
-		//Scene(std::shared_ptr<graphics::Camera> cam) : mActiveCamera(cam) {}
 		~Scene() = default;
 
 		void InitializeScene() const;

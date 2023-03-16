@@ -24,6 +24,7 @@ namespace based::scene
 			Type* newEntity = new Type(args...);
 
 			newEntity->SetTransform(pos, rot, scale);
+			newEntity->Initialize();
 
 			return newEntity;
 		}

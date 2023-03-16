@@ -18,7 +18,11 @@ namespace based
 
 		virtual core::WindowProperties GetWindowProperties() { return core::WindowProperties(); }
 		inline const std::shared_ptr<scene::Scene> GetCurrentScene() const { return mCurrentScene; }
-		inline void LoadScene(std::shared_ptr<scene::Scene> newScene) { mCurrentScene = std::move(newScene); }
+		inline void LoadScene(std::shared_ptr<scene::Scene> newScene) 
+		{
+			mCurrentScene = std::move(newScene);
+			mCurrentScene->InitializeScene();
+		}
 
 		virtual void Initialize()
 		{

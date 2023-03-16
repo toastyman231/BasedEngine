@@ -20,6 +20,7 @@
 #include "based/scene/components.h"
 #include "based/scene/entity.h"
 #include "based/ui/textentity.h"
+#include "based/scene/audio.h"
 #include "external/entt/entt.hpp"
 #include "external/imgui/imgui.h"
 
@@ -107,7 +108,7 @@ public:
 			//if (anotherEntity) anotherEntity->SetActive(!anotherEntity->IsActive());
 			//core::Time::SetTimeScale(1.f - core::Time::TimeScale());
 			//testEnt->SetSprite(std::make_shared<graphics::Texture>("Assets/tex_test.png"));
-			//testEnt->SetSortOrder(2);
+			testEnt->SetSortOrder(2);
 		}
 
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
@@ -134,10 +135,10 @@ public:
 		const auto sprite = scene::Entity::CreateEntity<graphics::Sprite>(
 			glm::vec3(x, y, 0.f),
 			glm::vec3(0.f), glm::vec3(scaleX, scaleY, 1.f), 
-			graphics::DefaultLibraries::GetVALibrary().Get("Rect"),
-			graphics::DefaultLibraries::GetMaterialLibrary().Get("RectGreen"));
+			glm::vec4(0.f, 1.f, 0.f, 1.f));
 		sprite->AddComponent<FallingObject>(-0.8f);
 		sprite->GetComponent<scene::SpriteRenderer>().sprite->SetSortOrder(1);
+		scene::Audio::PlayAudio(std::string("Assets/sounds/TestSound.wav"));
 
 		return sprite;
 	}
