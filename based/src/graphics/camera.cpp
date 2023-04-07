@@ -11,6 +11,9 @@ namespace based::graphics
 		, mNear(0.01f)
 		, mFar(1000.f)
 		, mFOV(60.f)
+		, mPosition(0.f, 0.f, 1.5f)
+		, mTarget(0.f, 0.f, -1.f)
+		, mUp(0.f, 1.f, 0.f)
 		, mProjectionMatrix(1.f)
 		, mViewMatrix(1.f)
 	{
@@ -47,20 +50,20 @@ namespace based::graphics
 		}
 	}
 
-	void Camera::SetNear(float near)
+	void Camera::SetNear(float nearPlane)
 	{
-		if (mNear != near)
+		if (mNear != nearPlane)
 		{
-			mNear = near;
+			mNear = nearPlane;
 			RecalculateProjectionMatrix();
 		}
 	}
 
-	void Camera::SetFar(float far)
+	void Camera::SetFar(float farPlane)
 	{
-		if (mFar != far)
+		if (mFar != farPlane)
 		{
-			mFar = far;
+			mFar = farPlane;
 			RecalculateProjectionMatrix();
 		}
 	}
@@ -77,7 +80,7 @@ namespace based::graphics
 		RecalculateProjectionMatrix();
 	}
 
-	void Camera::SetOrtho(float height, float near, float far)
+	void Camera::SetOrtho(float height, float nearPlane, float farPlane)
 	{
 		bool shouldRecalculate = false;
 
@@ -86,39 +89,14 @@ namespace based::graphics
 			mHeight = height;
 			shouldRecalculate = true;
 		}
-		if (mNear != near)
+		if (mNear != nearPlane)
 		{
-			mNear = near;
+			mNear = nearPlane;
 			shouldRecalculate = true;
 		}
-		if (mFar != far)
+		if (mFar != farPlane)
 		{
-			mFar = far;
-			shouldRecalculate = true;
-		}
-		if (shouldRecalculate)
-		{
-			RecalculateProjectionMatrix();
-		}
-	}
-
-	void Camera::SetPerspective(float fov, float near, float far)
-	{
-		bool shouldRecalculate = false;
-
-		if (mFOV != fov)
-		{
-			mFOV = fov;
-			shouldRecalculate = true;
-		}
-		if (mNear != near)
-		{
-			mNear = near;
-			shouldRecalculate = true;
-		}
-		if (mFar != far)
-		{
-			mFar = far;
+			mFar = farPlane;
 			shouldRecalculate = true;
 		}
 		if (shouldRecalculate)
@@ -142,6 +120,47 @@ namespace based::graphics
 		glm::mat4 view = glm::mat4(1.f);
 		view = glm::lookAt(pos, pos + front, up);
 		SetViewMatrix(view);
+	}
+
+	void Camera::SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
+	{
+		//mPosition = pos;
+		//mTarget = rot;
+		mTransform.Position = pos;
+		mTransform.Rotation = rot;
+		mTransform.Scale = scale;
+
+		glm::mat4 view = glm::mat4(1.f);
+		view = glm::translate(view, pos);
+		view = glm::rotate(view, glm::radians(rot.x), glm::vec3(1, 0, 0));
+		view = glm::rotate(view, glm::radians(rot.y), glm::vec3(0, 1, 0));
+		view = glm::rotate(view, glm::radians(rot.z), glm::vec3(0, 0, 1));
+		view = glm::scale(view, glm::vec3(1.f));
+		view = glm::inverse(view);
+
+		SetViewMatrix(view);
+		//const glm::vec3 forward = glm::normalize(glm::vec3(view[2]));
+		//const glm::vec3 up = glm::vec3(view[0], view[4], view[8]);
+
+		//SetViewMatrix(mPosition, mTarget, mUp);
+	}
+
+	void Camera::SetPosition(glm::vec3 pos)
+	{
+		SetTransform(pos, mTransform.Rotation, mTransform.Scale);
+		//mPosition = pos * mTarget;
+
+		//SetViewMatrix(mPosition, mTarget, mUp);
+	}
+
+	void Camera::SetRotation(glm::vec3 rot)
+	{
+		SetTransform(mTransform.Position, rot, mTransform.Scale);
+	}
+
+	void Camera::SetScale(glm::vec3 scale)
+	{
+		SetTransform(mTransform.Position, mTransform.Rotation, scale);
 	}
 
 	const glm::vec3 Camera::ScreenToWorldPoint(float x, float y) const

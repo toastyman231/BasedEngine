@@ -31,7 +31,14 @@ namespace based
 
 			mCamera = std::make_shared<graphics::Camera>();
 			mCamera->SetHeight(2.f);
-			mCamera->SetViewMatrix(glm::vec3(0.f), 0.f);
+
+			//mCameraEntity = new scene::Entity();
+			/*mCameraEntity = scene::Entity::CreateEntity<scene::Entity>(
+				glm::vec3(0.f, 0.f, 1.5f), 
+				glm::vec3(0.f), 
+				glm::vec3(1.f));*/
+			//mCameraEntity->AddComponent<scene::Camera>(mCamera);
+			//mCamera->SetViewMatrix(glm::vec3(0.f), 0.f)
 
 			startScene = std::make_shared<scene::Scene>();
 			startScene->SetActiveCamera(mCamera);
@@ -43,7 +50,6 @@ namespace based
 		virtual void Render() {}
 		virtual void ImguiRender() {}
 	private:
-		//std::shared_ptr<scene::Scene> startScene;
 		std::shared_ptr<graphics::Camera> mCamera;
 		std::shared_ptr<scene::Scene> mCurrentScene;
 	};
