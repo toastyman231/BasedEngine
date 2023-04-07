@@ -77,16 +77,16 @@ namespace based::graphics
 					// Positions
 
 					// Front
-					vb->PushVertex({ .5f, .5f, .5f });
-					vb->PushVertex({ -.5f, .5f, .5f });
-					vb->PushVertex({ -.5f,-.5f, .5f });
-					vb->PushVertex({ .5f,-.5f, .5f });
+					vb->PushVertex({ 0.5f, 0.5f, 0.5f });
+					vb->PushVertex({ -0.5f, 0.5f, 0.5f });
+					vb->PushVertex({ -0.5f, -0.5f, 0.5f });
+					vb->PushVertex({ 0.5f, -0.5f, 0.5f });
 
 					// Right
-					vb->PushVertex({ .5f, .5f, .5f });
-					vb->PushVertex({ .5f,-.5f, .5f });
-					vb->PushVertex({ .5f,-.5f,-.5f });
-					vb->PushVertex({ .5f, .5f,-.5f });
+					vb->PushVertex({ 0.5f, 0.5f, 0.5f });
+					vb->PushVertex({ 0.5f, -0.5f, 0.5f });
+					vb->PushVertex({ 0.5f, -0.5f, -0.5f });
+					vb->PushVertex({ 0.5f, 0.5f, -0.5f });
 
 					// Top
 					vb->PushVertex({ .5f, .5f, .5f });
@@ -116,44 +116,44 @@ namespace based::graphics
 					va->PushBuffer(std::move(vb));
 				}
 				{
-					BASED_CREATE_VERTEX_BUFFER(vb, short);
+					BASED_CREATE_VERTEX_BUFFER(vb, float);
 					// UVs
 
 					// Front
-					vb->PushVertex({ 1, 0 });
-					vb->PushVertex({ 0, 0 });
-					vb->PushVertex({ 0, 1 });
-					vb->PushVertex({ 1, 1 });
+					vb->PushVertex({ GetAdjustedUV(1, 1, 4), GetAdjustedUV(1, 0, 3) });
+					vb->PushVertex({ GetAdjustedUV(1, 0, 4), GetAdjustedUV(1, 0, 3) });
+					vb->PushVertex({ GetAdjustedUV(1,0, 4), GetAdjustedUV(1, 1, 3) });
+					vb->PushVertex({ GetAdjustedUV(1, 1, 4), GetAdjustedUV(1, 1, 3) });
 
 					// Right
-					vb->PushVertex({ 0, 0 });
-					vb->PushVertex({ 0, 1 });
-					vb->PushVertex({ 1, 1 });
-					vb->PushVertex({ 1, 0 });
+					vb->PushVertex({ GetAdjustedUV(2, 0, 4), GetAdjustedUV(1, 0, 3) });
+					vb->PushVertex({ GetAdjustedUV(2, 0, 4), GetAdjustedUV(1, 1, 3) });
+					vb->PushVertex({ GetAdjustedUV(2, 1, 4), GetAdjustedUV(1, 1, 3) });
+					vb->PushVertex({ GetAdjustedUV(2, 1, 4), GetAdjustedUV(1, 0, 3) });
 
 					// Top
-					vb->PushVertex({ 1, 1 });
-					vb->PushVertex({ 1, 0 });
-					vb->PushVertex({ 0, 0 });
-					vb->PushVertex({ 0, 1 });
+					vb->PushVertex({ GetAdjustedUV(1, 1, 4), GetAdjustedUV(0, 1, 3) });
+					vb->PushVertex({ GetAdjustedUV(1, 1, 4), GetAdjustedUV(0, 0, 3) });
+					vb->PushVertex({ GetAdjustedUV(1, 0, 4), GetAdjustedUV(0, 0, 3) });
+					vb->PushVertex({ GetAdjustedUV(1, 0, 4), GetAdjustedUV(0, 1, 3) });
 
 					// Left
-					vb->PushVertex({ 1, 0 });
-					vb->PushVertex({ 0, 0 });
-					vb->PushVertex({ 0, 1 });
-					vb->PushVertex({ 1, 1 });
+					vb->PushVertex({ GetAdjustedUV(0, 1, 4), GetAdjustedUV(1, 0, 3) });
+					vb->PushVertex({ GetAdjustedUV(0, 0, 4), GetAdjustedUV(1, 0, 3) });
+					vb->PushVertex({ GetAdjustedUV(0, 0, 4), GetAdjustedUV(1, 1, 3) });
+					vb->PushVertex({ GetAdjustedUV(0, 1, 4), GetAdjustedUV(1, 1, 3) });
 
 					// Bottom
-					vb->PushVertex({ 0, 1 });
-					vb->PushVertex({ 1, 1 });
-					vb->PushVertex({ 1, 0 });
-					vb->PushVertex({ 0, 0 });
+					vb->PushVertex({ GetAdjustedUV(1, 0, 4), GetAdjustedUV(2, 1, 3) });
+					vb->PushVertex({ GetAdjustedUV(1, 1, 4), GetAdjustedUV(2, 1, 3) });
+					vb->PushVertex({ GetAdjustedUV(1, 1, 4), GetAdjustedUV(2, 0, 3) });
+					vb->PushVertex({ GetAdjustedUV(1, 0, 4), GetAdjustedUV(2, 0, 3) });
 
 					// Back
-					vb->PushVertex({ 0, 1 });
-					vb->PushVertex({ 1, 1 });
-					vb->PushVertex({ 1, 0 });
-					vb->PushVertex({ 0, 0 });
+					vb->PushVertex({ GetAdjustedUV(3, 0, 4), GetAdjustedUV(1, 1, 3) });
+					vb->PushVertex({ GetAdjustedUV(3, 1, 4), GetAdjustedUV(1, 1, 3) });
+					vb->PushVertex({ GetAdjustedUV(3, 1, 4), GetAdjustedUV(1, 0, 3) });
+					vb->PushVertex({ GetAdjustedUV(3, 0, 4), GetAdjustedUV(1, 0, 3) });
 
 					vb->SetLayout({ 2 });
 					va->PushBuffer(std::move(vb));
@@ -254,6 +254,11 @@ namespace based::graphics
 				mat->SetUniformValue("col", glm::vec4(0, 1, 0, 1));
 				mMaterialLibrary.Load("RectGreen", mat);
 			}
+		}
+
+		static float GetAdjustedUV(int i, int x, int size)
+		{
+			return (float)((i % size) + x) / size;
 		}
 	};
 

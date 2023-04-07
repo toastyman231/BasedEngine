@@ -13,7 +13,7 @@ namespace based::graphics
 	class Texture
 	{
 	public:
-		Texture(const std::string& path);
+		Texture(const std::string& path, bool overrideFlip = false);
 		Texture(const SDL_Surface* surface, unsigned int id);
 		~Texture();
 

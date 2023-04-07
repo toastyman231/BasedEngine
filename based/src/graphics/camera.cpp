@@ -9,7 +9,7 @@ namespace based::graphics
 		: mAspectRatio(16.f / 9.f)
 		, mHeight(1080.f)
 		, mNear(0.01f)
-		, mFar(100.f)
+		, mFar(1000.f)
 		, mFOV(60.f)
 		, mProjectionMatrix(1.f)
 		, mViewMatrix(1.f)

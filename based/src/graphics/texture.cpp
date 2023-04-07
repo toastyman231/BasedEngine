@@ -9,17 +9,18 @@
 
 namespace based::graphics
 {
-	Texture::Texture(const std::string& path)
-		: mPath(path)
-		, mHeight(0)
+	Texture::Texture(const std::string& path, bool overrideFlip)
+		: mFilter(TextureFilter::Linear)
+		, mPath(path)
 		, mWidth(0)
+		, mHeight(0)
 		, mNumChannels(0)
-		, mPixels(nullptr)
 		, mStbiTex(true)
-		, mFilter(TextureFilter::Linear)
+		, mPixels(nullptr)
 	{
 		int width, height, numChannels;
-		stbi_set_flip_vertically_on_load(1);
+		if (overrideFlip) stbi_set_flip_vertically_on_load(0);
+		else stbi_set_flip_vertically_on_load(1);
 		mPixels = stbi_load(path.c_str(), &width, &height, &numChannels, 0);
 		if (mPixels)
 		{
@@ -96,6 +97,7 @@ namespace based::graphics
 			dataFormat = GL_ALPHA;
 			break;
 		case 3:     // no alpha channel
+			// TODO: Figure out a better way to determine RGB vs BGR
 			/*if (mRmask == 0x000000ff)
 				dataFormat = GL_RGB;
 			else
@@ -103,10 +105,11 @@ namespace based::graphics
 			dataFormat = GL_RGB;
 			break;
 		case 4:     // contains an alpha channel
-			if (mRmask == 0x000000ff)
+			/*if (mRmask == 0x000000ff)
 				dataFormat = GL_RGBA;
 			else
-				dataFormat = GL_BGRA;
+				dataFormat = GL_BGRA;*/
+			dataFormat = GL_RGBA;
 			break;
 		default:
 			break;

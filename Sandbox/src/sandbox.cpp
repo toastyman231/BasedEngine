@@ -40,6 +40,7 @@ private:
 	float pitch = 0.0f;
 	float sensitivity = 0.1f;
 	glm::vec3 camPos;
+	glm::vec3 camRot = glm::vec3(0.f);
 	glm::vec3 camFront = glm::vec3(0.f, 0.f, -1.f);
 	glm::vec3 camUp = glm::vec3(0.f, 1.f, 0.f);
 	glm::vec3 spriteRot;
@@ -70,7 +71,7 @@ public:
 		camPos = glm::vec3(0.f, 0.f, 1.5f);
 		cubePos = glm::vec3(0.f);
 		cubeRot = glm::vec3(0.f);
-		cubeScale = glm::vec3(1.f);
+		cubeScale = glm::vec3(500.f);
 		startScene->GetActiveCamera()->SetProjection(based::graphics::PERSPECTIVE);
 
 		// TODO: Reset view matrix automatically when projection changes
@@ -101,6 +102,12 @@ public:
 			LOAD_SHADER("Assets/shaders/test_vert.vert", "Assets/shaders/test_frag.frag"),
 			crateTex);
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Crate", crateMat);
+
+		auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
+		auto skybox = std::make_shared<graphics::Material>(
+			LOAD_SHADER("Assets/shaders/test_vert.vert", "Assets/shaders/test_frag.frag"),
+			skyboxTex);
+		graphics::DefaultLibraries::GetMaterialLibrary().Load("Sky", skybox);
 
 		BASED_TRACE("Done initializing");
 
@@ -135,7 +142,7 @@ public:
 			camPos += glm::normalize(glm::cross(camFront, camUp)) * speed * deltaTime;
 		}
 
-		float xoffset = static_cast<float>(input::Mouse::DX());
+		/*float xoffset = static_cast<float>(input::Mouse::DX());
 		float yoffset = static_cast<float>(-input::Mouse::DY());
 		xoffset *= sensitivity;
 		yoffset *= sensitivity;
@@ -152,7 +159,7 @@ public:
 		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 		direction.y = sin(glm::radians(pitch));
 		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-		camFront = glm::normalize(direction);
+		camFront = glm::normalize(direction);*/
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_G))
 		{
@@ -245,7 +252,7 @@ public:
 		model = glm::rotate(model, cubeRot.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, cubeScale);
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, 
-			graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), graphics::DefaultLibraries::GetMaterialLibrary().Get("Crate"), 
+			graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), graphics::DefaultLibraries::GetMaterialLibrary().Get("Sky"), 
 			model));
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 	}
@@ -288,12 +295,19 @@ public:
 			ImGui::DragFloat("Near", &nearPlane, 0.5f);
 			startScene->GetActiveCamera()->SetNear(nearPlane);
 
+			float farPlane = startScene->GetActiveCamera()->GetFar();
+			ImGui::DragFloat("Far", &farPlane, 0.5f);
+			startScene->GetActiveCamera()->SetFar(farPlane);
+
 			ImGui::DragFloat3("Camera Pos", glm::value_ptr(camPos), 0.01f);
 			startScene->GetActiveCamera()->SetViewMatrix(camPos, 0.f);
 
-			spriteRot = testEnt->GetTransform().Rotation;
+			ImGui::DragFloat3("Camera Rot", glm::value_ptr(camRot), 0.01f);
+			startScene->GetActiveCamera()->SetViewMatrix(camPos, camFront, camRot);
+
+			/*spriteRot = testEnt->GetTransform().Rotation;
 			ImGui::DragFloat3("Sprite Rotation", glm::value_ptr(spriteRot), 0.01f);
-			testEnt->SetRotation(spriteRot);
+			testEnt->SetRotation(spriteRot);*/
 
 			ImGui::DragFloat3("Cube Position", glm::value_ptr(cubePos), 0.01f);
 			ImGui::DragFloat3("Cube Rotation", glm::value_ptr(cubeRot), 0.01f);
