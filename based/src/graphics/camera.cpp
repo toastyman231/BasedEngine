@@ -12,6 +12,7 @@ namespace based::graphics
 		, mHeight(1080.f)
 		, mNear(0.f)
 		, mFar(100.f)
+		, mFOV(60.f)
 	{
 		RecalculateProjectionMatrix();
 	}
@@ -21,6 +22,7 @@ namespace based::graphics
 		, mHeight(other.mHeight)
 		, mNear(other.mNear)
 		, mFar(other.mFar)
+		, mFOV(60.f)
 	{
 		RecalculateProjectionMatrix();
 	}
@@ -36,6 +38,8 @@ namespace based::graphics
 
 	void Camera::SetHeight(float height)
 	{
+		if (projection != ORTHOGRAPHIC) return;
+
 		if (mHeight != height)
 		{
 			mHeight = height;
@@ -61,6 +65,18 @@ namespace based::graphics
 		}
 	}
 
+	void Camera::SetFOV(float fov)
+	{
+		mFOV = fov;
+		RecalculateProjectionMatrix();
+	}
+
+	void Camera::SetProjection(Projection newProjection)
+	{
+		projection = newProjection;
+		RecalculateProjectionMatrix();
+	}
+
 	void Camera::SetOrtho(float height, float near, float far)
 	{
 		bool shouldRecalculate = false;
@@ -68,6 +84,31 @@ namespace based::graphics
 		if (mHeight != height)
 		{
 			mHeight = height;
+			shouldRecalculate = true;
+		}
+		if (mNear != near)
+		{
+			mNear = near;
+			shouldRecalculate = true;
+		}
+		if (mFar != far)
+		{
+			mFar = far;
+			shouldRecalculate = true;
+		}
+		if (shouldRecalculate)
+		{
+			RecalculateProjectionMatrix();
+		}
+	}
+
+	void Camera::SetPerspective(float fov, float near, float far)
+	{
+		bool shouldRecalculate = false;
+
+		if (mFOV != fov)
+		{
+			mFOV = fov;
 			shouldRecalculate = true;
 		}
 		if (mNear != near)
@@ -122,6 +163,15 @@ namespace based::graphics
 	{
 		float halfwidth = mHeight * mAspectRatio * 0.5f;
 		float halfheight = mHeight * 0.5f;
-		mProjectionMatrix = glm::ortho(-halfwidth, halfwidth, -halfheight, halfheight, mNear, mFar);
+
+		switch (projection)
+		{
+		case ORTHOGRAPHIC:
+			mProjectionMatrix = glm::ortho(-halfwidth, halfwidth, -halfheight, halfheight, mNear, mFar);
+			break;
+		case PERSPECTIVE:
+			mProjectionMatrix = glm::perspective(glm::radians(mFOV), mAspectRatio, mNear, mFar);
+			break;
+		}
 	}
 }

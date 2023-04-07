@@ -11,6 +11,7 @@
 #include "based/graphics/defaultassetlibraries.h"
 
 #include <external/glm/gtx/string_cast.hpp>
+#include "external/glm/gtc/type_ptr.hpp"
 
 #include "TestEntity.h"
 #include "based/core/basedtime.h"
@@ -33,6 +34,8 @@ private:
 	ui::TextEntity* text;
 	graphics::Sprite* testEnt;
 	TestEntity* anotherEntity;
+	glm::vec3 camPos;
+	glm::vec3 spriteRot;
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -47,6 +50,11 @@ public:
 	void Initialize() override
 	{
 		App::Initialize();
+		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
+		camPos = glm::vec3(0.f, 0.f, 1.5f);
+		startScene->GetActiveCamera()->SetProjection(based::graphics::PERSPECTIVE);
+		startScene->GetActiveCamera()->SetViewMatrix(camPos, 0.f);
+
 		// Setup text
 		text = new ui::TextEntity("Assets/fonts/Arimo-Regular.ttf", "This is a test!", 128, 
 			glm::vec3(Engine::Instance().GetWindow().GetSize().x / 2, Engine::Instance().GetWindow().GetSize().y / 2, 0.f),
@@ -79,6 +87,7 @@ public:
 	{
 		App::Update(deltaTime);
 		//BASED_TRACE("Time:{}, DeltaTime:{}, GetDelta:{}", core::Time::GetTime(), deltaTime, core::Time::DeltaTime());
+		//testEnt->SetRotation(glm::vec3(testEnt->GetTransform().Rotation.x + 5.f * deltaTime, testEnt->GetTransform().Rotation.y, testEnt->GetTransform().Rotation.z ));
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_G))
 		{
@@ -161,6 +170,48 @@ public:
 	void Render() override
 	{
 		App::Render();
+	}
+
+	void ImguiRender() override
+	{
+		if (ImGui::Begin("GameView"))
+		{
+			if (ImGui::IsWindowHovered())
+			{
+				ImGui::CaptureMouseFromApp(false);
+			}
+
+			auto& window = Engine::Instance().GetWindow();
+
+			ImVec2 winsize = ImGui::GetWindowSize();
+			glm::ivec2 arsize = window.GetSizeInAspectRatio(static_cast<int>(winsize.x) - 15,
+				static_cast<int>(winsize.y) - 35);
+			ImVec2 size = { static_cast<float>(arsize.x), static_cast<float>(arsize.y) };
+			ImVec2 pos = {
+				(winsize.x - size.x) * 0.5f,
+				((winsize.y - size.y) * 0.5f) + 10
+			};
+			ImVec2 uv0 = { 0, 1 };
+			ImVec2 uv1 = { 1, 0 };
+			ImGui::SetCursorPos(pos);
+			ImGui::Image((void*)static_cast<intptr_t>(window.GetFramebuffer()->GetTextureId()), size, uv0, uv1);
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("Settings"))
+		{
+			float fov = startScene->GetActiveCamera()->GetFOV();
+			ImGui::DragFloat("FOV", &fov, 0.5f);
+			startScene->GetActiveCamera()->SetFOV(fov);
+
+			ImGui::DragFloat3("Camera Pos", glm::value_ptr(camPos), 0.01f);
+			startScene->GetActiveCamera()->SetViewMatrix(camPos, 0.f);
+
+			spriteRot = testEnt->GetTransform().Rotation;
+			ImGui::DragFloat3("Sprite Rotation", glm::value_ptr(spriteRot), 0.01f);
+			testEnt->SetRotation(spriteRot);
+		}
+		ImGui::End();
 	}
 
 	struct FallingObject
