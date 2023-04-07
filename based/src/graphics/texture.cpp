@@ -96,10 +96,11 @@ namespace based::graphics
 			dataFormat = GL_ALPHA;
 			break;
 		case 3:     // no alpha channel
-			if (mRmask == 0x000000ff)
+			/*if (mRmask == 0x000000ff)
 				dataFormat = GL_RGB;
 			else
-				dataFormat = GL_BGR;
+				dataFormat = GL_BGR;*/
+			dataFormat = GL_RGB;
 			break;
 		case 4:     // contains an alpha channel
 			if (mRmask == 0x000000ff)

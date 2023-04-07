@@ -3,6 +3,8 @@
 
 #include <algorithm>
 
+#include "engine.h"
+#include "input/keyboard.h"
 #include "SDL2/SDL_mouse.h"
 
 namespace based::input
@@ -31,6 +33,13 @@ namespace based::input
 		{
 			buttons[i] = state & SDL_BUTTON(i + 1);
 		}
+
+#ifdef BASED_CONFIG_DEBUG
+		if (Keyboard::KeyDown(BASED_INPUT_KEY_ESCAPE))
+		{
+			SetCursorLocked(false);
+		}
+#endif
 	}
 
 	bool Mouse::Button(int button)
@@ -70,5 +79,11 @@ namespace based::input
 		{
 			return false;
 		}
+	}
+
+	void Mouse::SetCursorLocked(bool locked)
+	{
+		mCursorLocked = locked;
+		SDL_SetRelativeMouseMode((locked) ? SDL_TRUE : SDL_FALSE);
 	}
 }

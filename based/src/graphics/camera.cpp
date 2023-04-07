@@ -6,13 +6,13 @@
 namespace based::graphics
 {
 	Camera::Camera()
-		: mProjectionMatrix(1.f)
-		, mViewMatrix(1.f)
-		, mAspectRatio(16.f / 9.f)
+		: mAspectRatio(16.f / 9.f)
 		, mHeight(1080.f)
-		, mNear(0.f)
+		, mNear(0.01f)
 		, mFar(100.f)
 		, mFOV(60.f)
+		, mProjectionMatrix(1.f)
+		, mViewMatrix(1.f)
 	{
 		RecalculateProjectionMatrix();
 	}
@@ -135,6 +135,13 @@ namespace based::graphics
 		view = glm::inverse(view);
 		SetViewMatrix(view);
 
+	}
+
+	void Camera::SetViewMatrix(const glm::vec3& pos, const glm::vec3& front, const glm::vec3& up)
+	{
+		glm::mat4 view = glm::mat4(1.f);
+		view = glm::lookAt(pos, pos + front, up);
+		SetViewMatrix(view);
 	}
 
 	const glm::vec3 Camera::ScreenToWorldPoint(float x, float y) const

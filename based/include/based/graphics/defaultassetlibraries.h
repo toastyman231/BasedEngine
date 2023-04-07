@@ -69,6 +69,108 @@ namespace based::graphics
 
 				mVALibrary.Load("TexturedRect", va);
 			}
+			{
+				auto va = std::make_shared<graphics::VertexArray>();
+
+				{
+					BASED_CREATE_VERTEX_BUFFER(vb, float);
+					// Positions
+
+					// Front
+					vb->PushVertex({ .5f, .5f, .5f });
+					vb->PushVertex({ -.5f, .5f, .5f });
+					vb->PushVertex({ -.5f,-.5f, .5f });
+					vb->PushVertex({ .5f,-.5f, .5f });
+
+					// Right
+					vb->PushVertex({ .5f, .5f, .5f });
+					vb->PushVertex({ .5f,-.5f, .5f });
+					vb->PushVertex({ .5f,-.5f,-.5f });
+					vb->PushVertex({ .5f, .5f,-.5f });
+
+					// Top
+					vb->PushVertex({ .5f, .5f, .5f });
+					vb->PushVertex({ .5f, .5f,-.5f });
+					vb->PushVertex({ -.5f, .5f,-.5f });
+					vb->PushVertex({ -.5f, .5f, .5f });
+
+					// Left
+					vb->PushVertex({ -.5f, .5f, .5f });
+					vb->PushVertex({ -.5f, .5f,-.5f });
+					vb->PushVertex({ -.5f,-.5f,-.5f });
+					vb->PushVertex({ -.5f,-.5f, .5f });
+
+					// Bottom
+					vb->PushVertex({ -.5f,-.5f,-.5f });
+					vb->PushVertex({ .5f,-.5f,-.5f });
+					vb->PushVertex({ .5f,-.5f, .5f });
+					vb->PushVertex({ -.5f,-.5f, .5f });
+
+					// Back
+					vb->PushVertex({ .5f,-.5f,-.5f });
+					vb->PushVertex({ -.5f,-.5f,-.5f });
+					vb->PushVertex({ -.5f, .5f,-.5f });
+					vb->PushVertex({ .5f, .5f,-.5f });
+
+					vb->SetLayout({ 3 });
+					va->PushBuffer(std::move(vb));
+				}
+				{
+					BASED_CREATE_VERTEX_BUFFER(vb, short);
+					// UVs
+
+					// Front
+					vb->PushVertex({ 1, 0 });
+					vb->PushVertex({ 0, 0 });
+					vb->PushVertex({ 0, 1 });
+					vb->PushVertex({ 1, 1 });
+
+					// Right
+					vb->PushVertex({ 0, 0 });
+					vb->PushVertex({ 0, 1 });
+					vb->PushVertex({ 1, 1 });
+					vb->PushVertex({ 1, 0 });
+
+					// Top
+					vb->PushVertex({ 1, 1 });
+					vb->PushVertex({ 1, 0 });
+					vb->PushVertex({ 0, 0 });
+					vb->PushVertex({ 0, 1 });
+
+					// Left
+					vb->PushVertex({ 1, 0 });
+					vb->PushVertex({ 0, 0 });
+					vb->PushVertex({ 0, 1 });
+					vb->PushVertex({ 1, 1 });
+
+					// Bottom
+					vb->PushVertex({ 0, 1 });
+					vb->PushVertex({ 1, 1 });
+					vb->PushVertex({ 1, 0 });
+					vb->PushVertex({ 0, 0 });
+
+					// Back
+					vb->PushVertex({ 0, 1 });
+					vb->PushVertex({ 1, 1 });
+					vb->PushVertex({ 1, 0 });
+					vb->PushVertex({ 0, 0 });
+
+					vb->SetLayout({ 2 });
+					va->PushBuffer(std::move(vb));
+				}
+
+				va->SetElements({
+					 0, 1, 2,   2, 3, 0,    // v0-v1-v2, v2-v3-v0 (front)
+					 4, 5, 6,   6, 7, 4,    // v0-v3-v4, v4-v5-v0 (right)
+					 8, 9,10,  10,11, 8,    // v0-v5-v6, v6-v1-v0 (top)
+					12,13,14,  14,15,12,    // v1-v6-v7, v7-v2-v1 (left)
+					16,17,18,  18,19,16,    // v7-v4-v3, v3-v2-v7 (bottom)
+					20,21,22,  22,23,20     // v4-v7-v6, v6-v5-v4 (back)
+				});
+				va->Upload();
+
+				mVALibrary.Load("TexturedCube", va);
+			}
 
 			// Shaders
 			{

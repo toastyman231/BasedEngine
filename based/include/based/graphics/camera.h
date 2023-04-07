@@ -34,6 +34,7 @@ namespace based::graphics
 		void SetOrtho(float height, float near = 0.f, float far = 100.f);
 		void SetPerspective(float fov, float near = 0.f, float far = 100.f);
 		void SetViewMatrix(const glm::vec3& pos, float rot);
+		void SetViewMatrix(const glm::vec3& pos, const glm::vec3& front, const glm::vec3& up);
 
 		const glm::mat4& GetProjectionMatrix() const { return mProjectionMatrix; }
 		const glm::mat4& GetViewMatrix() const { return mViewMatrix; }
@@ -44,8 +45,8 @@ namespace based::graphics
 		float mHeight, mNear, mFar;
 		float mFOV;
 
-		glm::mat4 mProjectionMatrix;
-		glm::mat4 mViewMatrix;
+		glm::mat4 mProjectionMatrix{};
+		glm::mat4 mViewMatrix{};
 
 		void RecalculateProjectionMatrix();
 	};

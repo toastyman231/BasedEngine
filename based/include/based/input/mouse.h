@@ -19,11 +19,16 @@ namespace based::input
 		static bool Button(int button);
 		static bool ButtonDown(int button);
 		static bool ButtonUp(int button);
+
+		static void SetCursorLocked(bool locked);
+
 	private:
-		constexpr static const int ButtonCount = 5; //SDL supports up to 5 mouse buttons
+		constexpr static int ButtonCount = 5; //SDL supports up to 5 mouse buttons
 
 		static int x, xLast;
 		static int y, yLast;
+
+		inline static bool mCursorLocked = false;
 
 		static std::array<bool, ButtonCount> buttons;
 		static std::array<bool, ButtonCount> buttonsLast;
