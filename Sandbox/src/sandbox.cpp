@@ -20,6 +20,7 @@
 #include "based/graphics/sprite.h"
 #include "based/input/mouse.h"
 #include "based/scene/components.h"
+#include "based/math/basedmath.h"
 #include "based/scene/entity.h"
 #include "based/ui/textentity.h"
 #include "based/scene/audio.h"
@@ -35,22 +36,21 @@ private:
 	ui::TextEntity* text;
 	graphics::Sprite* testEnt;
 	TestEntity* anotherEntity;
-	// TODO: Move these camera values to the Camera class
+
+	bool mouseControl = false;
 	float speed = 2.5f;
-	float yaw = 180.f;
+	float yaw = 0.f;
 	float pitch = 0.0f;
-	float sensitivity = 0.1f;
+	float sensitivity = 100.f;
 	glm::vec3 camPos = glm::vec3(0.f, 0.f, 1.5f);
 	glm::vec3 camRot = glm::vec3(0.f);
-	/*glm::vec3 camFront = glm::vec3(0.f, 0.f, -1.f);
-	glm::vec3 camUp = glm::vec3(0.f, 1.f, 0.f);
-	glm::vec3 spriteRot;*/
 
 	glm::vec3 cubePos;
 	glm::vec3 cubeRot;
 	glm::vec3 cubeScale;
 
 	graphics::Mesh* crateMesh;
+	graphics::Mesh* skyboxMesh;
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -71,14 +71,11 @@ public:
 		//SDL_SetWindowGrab(Engine::Instance().GetWindow().GetSDLWindow(), SDL_TRUE);
 		//SDL_CaptureMouse(SDL_TRUE);
 		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
-		//camPos = glm::vec3(0.f, 0.f, 1.5f);
+
 		cubePos = glm::vec3(0.f);
 		cubeRot = glm::vec3(0.f);
 		cubeScale = glm::vec3(1.f);
 		startScene->GetActiveCamera()->SetProjection(based::graphics::PERSPECTIVE);
-
-		// TODO: Reset view matrix automatically when projection changes
-		//startScene->GetActiveCamera()->SetViewMatrix(camPos, 0.f);
 
 		// Setup text
 		text = new ui::TextEntity("Assets/fonts/Arimo-Regular.ttf", "This is a test!", 128, 
@@ -113,6 +110,7 @@ public:
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Sky", skybox);
 
 		crateMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"));
+		skyboxMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("AtlasTextureCube"));
 
 		BASED_TRACE("Done initializing");
 
@@ -128,60 +126,41 @@ public:
 	{
 		App::Update(deltaTime);
 
-		// TODO: Figure out how to make the view matrix update automatically when moving the camera
 		if (input::Keyboard::Key(BASED_INPUT_KEY_W))
 		{
-			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetPosition();
-			GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(
-				transform.Position.x,
-				transform.Position.y, transform.Position.z + speed * deltaTime));
+			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
+			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position + speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetForward());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_S))
 		{
-			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetPosition();
-			GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(
-				transform.Position.x,
-				transform.Position.y, transform.Position.z - speed * deltaTime));
+			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
+			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position - speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetForward());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_A))
 		{
-			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetPosition();
-			GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(
-				transform.Position.x + speed * deltaTime,
-				transform.Position.y, transform.Position.z));
+			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
+			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position + speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetRight());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_D))
 		{
-			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetPosition();
-			GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(
-				transform.Position.x - speed * deltaTime,
-				transform.Position.y, transform.Position.z));
+			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
+			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position - speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetRight());
 		}
 
-		//float xoffset = static_cast<float>(input::Mouse::DX());
-		//float yoffset = static_cast<float>(-input::Mouse::DY());
-		//xoffset *= sensitivity;
-		//yoffset *= sensitivity;
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_P))
+		{
+			mouseControl = !mouseControl;
+		}
 
-		//yaw += xoffset;
-		//pitch += yoffset;
+		if (mouseControl)
+		{
+			pitch += static_cast<float>(-input::Mouse::DX()) * sensitivity * deltaTime;
+			yaw += static_cast<float>(input::Mouse::DY()) * sensitivity * deltaTime;
 
-		//if (pitch > 89.0f)
-		//	pitch = 89.0f;
-		//if (pitch < -89.0f)
-		//	pitch = -89.0f;
+			yaw = based::math::Clamp(yaw, -89.f, 89.f);
 
-		//glm::vec3 direction;
-		///*direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		//direction.y = sin(glm::radians(pitch));
-		//direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));*/
-		//direction.x = yaw;
-		//direction.y = pitch;
-		//direction.z = 0.f;
-		//BASED_TRACE("Yaw: {}, Pitch: {}, x: {}, y: {}, z: {}", yaw, pitch, direction.x, direction.y, direction.z);
-		//GetCurrentScene()->GetActiveCamera()->SetRotation(direction);
-
-		//camFront = glm::normalize(direction);
+			GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(yaw, pitch, GetCurrentScene()->GetActiveCamera()->GetTransform().Rotation.z));
+		}
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_G))
 		{
@@ -214,13 +193,13 @@ public:
 			testEnt->SetSortOrder(2);
 		}
 
-		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
+		/*if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
 		{
 			const auto pos = GetCurrentScene()->GetActiveCamera()->ScreenToWorldPoint(
 				static_cast<float>(input::Mouse::X()),
 				static_cast<float>(input::Mouse::Y()));
 			scene::Entity* square = CreateSquare(pos.x, pos.y, pos.z);
-		}
+		}*/
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
 		{
@@ -229,8 +208,6 @@ public:
 					ent->AddOrReplaceComponent<scene::Velocity>(0.f, ent->GetComponent<FallingObject>().speed);
 				});
 		}
-
-		//startScene->GetActiveCamera()->SetViewMatrix(camPos, camFront, camUp);
 
 		TestFall(deltaTime, "Test!");
 	}
@@ -265,19 +242,9 @@ public:
 
 	void Render() override
 	{
-		//Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera, startScene->GetActiveCamera()));
-		//auto model = glm::mat4(1.f);
-		//model = glm::translate(model, cubePos);
-		//// Rotations are passed as degrees and converted to radians here automatically
-		//model = glm::rotate(model, cubeRot.x * 0.0174533f, glm::vec3(1.f, 0.f, 0.f));
-		//model = glm::rotate(model, cubeRot.y * 0.0174533f, glm::vec3(0.f, 1.f, 0.f));
-		//model = glm::rotate(model, cubeRot.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
-		//model = glm::scale(model, cubeScale);
-		//Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, 
-		//	graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), graphics::DefaultLibraries::GetMaterialLibrary().Get("Sky"), 
-		//	model));
-		//Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
+		// TODO: Make meshes render automatically
 		crateMesh->Draw(cubePos, cubeRot, cubeScale, graphics::DefaultLibraries::GetMaterialLibrary().Get("Crate"));
+		skyboxMesh->Draw({ 0.f, 0.f, 0.f }, { 180.f, 0.f, 0.f }, { 500.f, 500.f, 500.f }, graphics::DefaultLibraries::GetMaterialLibrary().Get("Sky"));
 	}
 
 	void ImguiRender() override
@@ -314,6 +281,8 @@ public:
 			ImGui::DragFloat("FOV", &fov, 0.5f);
 			startScene->GetActiveCamera()->SetFOV(fov);
 
+			ImGui::DragFloat("Sensitivity", &sensitivity, 0.5f);
+
 			float nearPlane = startScene->GetActiveCamera()->GetNear();
 			ImGui::DragFloat("Near", &nearPlane, 0.5f);
 			startScene->GetActiveCamera()->SetNear(nearPlane);
@@ -322,17 +291,13 @@ public:
 			ImGui::DragFloat("Far", &farPlane, 0.5f);
 			startScene->GetActiveCamera()->SetFar(farPlane);
 
-			//glm::vec3 pos = startScene->GetActiveCamera()->GetPosition().Position;
-			ImGui::DragFloat3("Camera Pos", glm::value_ptr(camPos), 0.01f);
-			startScene->GetActiveCamera()->SetPosition(camPos);//SetViewMatrix(camPos, 0.f);
+			glm::vec3 pos = startScene->GetActiveCamera()->GetTransform().Position;
+			ImGui::DragFloat3("Camera Pos", glm::value_ptr(pos), 0.01f);
+			//startScene->GetActiveCamera()->SetPosition(camPos);//SetViewMatrix(camPos, 0.f);
 
-			//glm::vec3 rot = startScene->GetActiveCamera()->GetPosition().Rotation;
-			ImGui::DragFloat3("Camera Rot", glm::value_ptr(camRot), 0.01f);
-			startScene->GetActiveCamera()->SetRotation(camRot);//SetViewMatrix(camPos, camFront, camRot);
-
-			/*spriteRot = testEnt->GetTransform().Rotation;
-			ImGui::DragFloat3("Sprite Rotation", glm::value_ptr(spriteRot), 0.01f);
-			testEnt->SetRotation(spriteRot);*/
+			glm::vec3 rot = startScene->GetActiveCamera()->GetTransform().Rotation;
+			ImGui::DragFloat3("Camera Rot", glm::value_ptr(rot), 0.01f);
+			if (!mouseControl) startScene->GetActiveCamera()->SetRotation(rot);
 
 			ImGui::DragFloat3("Cube Position", glm::value_ptr(cubePos), 0.01f);
 			ImGui::DragFloat3("Cube Rotation", glm::value_ptr(cubeRot), 0.01f);

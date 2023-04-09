@@ -28,7 +28,7 @@ namespace based::input
 		xLast = x;
 		yLast = y;
 		buttonsLast = buttons;
-		Uint32 state = SDL_GetMouseState(&x, &y);
+		Uint32 state = SDL_GetGlobalMouseState(&x, &y);
 		for (int i = 0; i < ButtonCount; i++)
 		{
 			buttons[i] = state & SDL_BUTTON(i + 1);

@@ -25,10 +25,7 @@ namespace based::graphics
 		inline float GetFar() const { return mFar; }
 		inline float GetFOV() const { return mFOV; }
 		inline void SetViewMatrix(const glm::mat4& matrix) { mViewMatrix = matrix; }
-		inline scene::Transform GetPosition() const
-		{
-			return mTransform;
-		}//return mPosition; }
+		inline scene::Transform GetTransform() const { return mTransform; }
 
 		void SetAspectRatio(float aspectRatio);
 		void SetHeight(float height);
@@ -37,7 +34,6 @@ namespace based::graphics
 		void SetFOV(float fov);
 		void SetProjection(Projection newProjection);
 		void SetOrtho(float height, float nearPlane = 0.f, float farPlane = 100.f);
-		//void SetPerspective(float fov, float nearPlane = 0.f, float far = 100.f);
 		void SetViewMatrix(const glm::vec3& pos, float rot);
 		void SetViewMatrix(const glm::vec3& pos, const glm::vec3& front, const glm::vec3& up);
 		void SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
@@ -47,7 +43,9 @@ namespace based::graphics
 
 		const glm::mat4& GetProjectionMatrix() const { return mProjectionMatrix; }
 		const glm::mat4& GetViewMatrix() const { return mViewMatrix; }
-		const glm::vec3 GetForward() { return glm::normalize(glm::vec3(mViewMatrix[2])); }
+		const glm::vec3 GetForward() { return mForward; }
+		const glm::vec3 GetRight() { return mRight; }
+		const glm::vec3 GetUp() { return mUp; }
 		const glm::vec3 ScreenToWorldPoint(float x, float y) const;
 		const glm::vec3 ScreenToWorldPoint(glm::vec2 point) const;
 	private:
@@ -55,8 +53,8 @@ namespace based::graphics
 		float mHeight, mNear, mFar;
 		float mFOV;
 
-		glm::vec3 mPosition;
-		glm::vec3 mTarget;
+		glm::vec3 mForward;
+		glm::vec3 mRight;
 		glm::vec3 mUp;
 
 		scene::Transform mTransform;

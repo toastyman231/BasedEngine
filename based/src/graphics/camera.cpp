@@ -11,8 +11,9 @@ namespace based::graphics
 		, mNear(0.01f)
 		, mFar(1000.f)
 		, mFOV(60.f)
-		, mPosition(0.f, 0.f, 1.5f)
-		, mTarget(0.f, 0.f, -1.f)
+		, mRight(0.f, 0.f, 1.f)
+		//, mPosition(0.f, 0.f, 1.5f)
+		//, mTarget(0.f, 0.f, -1.f)
 		, mUp(0.f, 1.f, 0.f)
 		, mProjectionMatrix(1.f)
 		, mViewMatrix(1.f)
@@ -124,8 +125,6 @@ namespace based::graphics
 
 	void Camera::SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
 	{
-		//mPosition = pos;
-		//mTarget = rot;
 		mTransform.Position = pos;
 		mTransform.Rotation = rot;
 		mTransform.Scale = scale;
@@ -135,22 +134,19 @@ namespace based::graphics
 		view = glm::rotate(view, glm::radians(rot.x), glm::vec3(1, 0, 0));
 		view = glm::rotate(view, glm::radians(rot.y), glm::vec3(0, 1, 0));
 		view = glm::rotate(view, glm::radians(rot.z), glm::vec3(0, 0, 1));
-		view = glm::scale(view, glm::vec3(1.f));
+		view = glm::scale(view, scale);
 		view = glm::inverse(view);
 
-		SetViewMatrix(view);
-		//const glm::vec3 forward = glm::normalize(glm::vec3(view[2]));
-		//const glm::vec3 up = glm::vec3(view[0], view[4], view[8]);
+		mForward = glm::normalize(glm::vec3(view[2]));
+		mRight = glm::normalize(glm::cross(mForward, glm::vec3(0.f, 1.f, 0.f)));
+		mUp = glm::cross(mForward, mRight);
 
-		//SetViewMatrix(mPosition, mTarget, mUp);
+		SetViewMatrix(mTransform.Position, mForward, mUp);
 	}
 
 	void Camera::SetPosition(glm::vec3 pos)
 	{
 		SetTransform(pos, mTransform.Rotation, mTransform.Scale);
-		//mPosition = pos * mTarget;
-
-		//SetViewMatrix(mPosition, mTarget, mUp);
 	}
 
 	void Camera::SetRotation(glm::vec3 rot)
