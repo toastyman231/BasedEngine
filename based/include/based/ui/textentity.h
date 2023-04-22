@@ -1,10 +1,10 @@
 #pragma once
 
-#include "external/entt/entt.hpp"
 #include "external/glm/glm.hpp"
 
 #include <string>
-#include "SDL2/SDL_render.h"
+
+#include "alignment.h"
 #include "SDL2/SDL_ttf.h"
 
 #include "based/core/assetlibrary.h"
@@ -24,13 +24,6 @@ namespace based
 
 namespace based::ui
 {
-	enum Align
-	{
-		TopLeft, TopMiddle, TopRight,
-		MiddleLeft, Middle, MiddleRight,
-		BottomLeft, BottomMiddle, BottomRight
-	};
-
 	class TextEntity : public scene::Entity
 	{
 	private:

@@ -4,8 +4,6 @@
 #include "engine.h"
 
 #include "SDL2/SDL_ttf.h"
-
-#include "external/glm/ext/matrix_clip_space.hpp"
 #include "external/glm/gtc/type_ptr.hpp"
 
 #include "graphics/defaultassetlibraries.h"

@@ -86,6 +86,10 @@ namespace based::scene
 		virtual void SetPosition(glm::vec3 pos);
 		virtual void SetRotation(glm::vec3 rot);
 		virtual void SetScale(glm::vec3 scale);
+		virtual void SetLocalTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
+		virtual void SetLocalPosition(glm::vec3 pos);
+		virtual void SetLocalRotation(glm::vec3 rot);
+		virtual void SetLocalScale(glm::vec3 scale);
 
 		virtual void Initialize() {}
 		virtual void Update(float deltaTime) {}
@@ -95,6 +99,41 @@ namespace based::scene
 		virtual void OnEnable() {}
 		virtual void OnDisable() {}
 		virtual void OnDestroy() {}
+
+		void SetParent(Entity& parentEntity)
+		{
+			Parent = &parentEntity;
+			Parent->Children.emplace_back(this);
+		}
+
+		bool RemoveChild(const Entity* childEntity)
+		{
+			for (const auto child : Children)
+			{
+				if (child->mEntity == childEntity->mEntity)
+				{
+					Children.remove(child);
+					child->Parent = nullptr;
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		Entity* Parent = nullptr;
+
+		std::list<Entity*> Children;
+
+		bool operator==(const Entity& other) const
+		{
+			return mEntity == other.mEntity;
+		}
+
+		bool operator!=(const Entity& other) const
+		{
+			return !(*this == other);
+		}
 
 	private:
 		entt::registry& mRegistry;

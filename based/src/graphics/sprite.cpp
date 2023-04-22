@@ -17,7 +17,7 @@ namespace based::graphics
 			mSize = glm::vec2(mMaterial->GetTexture()->GetWidth(), mMaterial->GetTexture()->GetHeight());
 		}
 
-		mAlignment = Middle;
+		mAlignment = ui::Middle;
 		mMaterial->SetUniformValue("col", mColor);
 		AddComponent<scene::SpriteRenderer>(this);
 	}
@@ -30,7 +30,7 @@ namespace based::graphics
 		const auto mat = std::make_shared<Material>(DefaultLibraries::GetShaderLibrary().Get("Rect"));
 		mat->SetUniformValue("col", mColor);
 
-		mAlignment = Middle;
+		mAlignment = ui::Middle;
 		mMaterial = mat;
 		AddComponent<scene::SpriteRenderer>(this);
 	}
@@ -97,40 +97,40 @@ namespace based::graphics
 		SetPivot(mAlignment);
 	}
 
-	void Sprite::SetPivot(Align alignment)
+	void Sprite::SetPivot(ui::Align alignment)
 	{
 		mAlignment = alignment;
 
 		switch (alignment)
 		{
-		case Align::TopLeft:
+		case ui::Align::TopLeft:
 			mPivot = { (mSize.x * GetComponent<scene::Transform>().Scale.x) / 2.f,
 			-(mSize.y * GetComponent<scene::Transform>().Scale.y) / 2.f };
 			break;
-		case Align::TopMiddle:
+		case ui::Align::TopMiddle:
 			mPivot = { 0.f,-(mSize.y * GetComponent<scene::Transform>().Scale.y) / 2.f };
 			break;
-		case Align::TopRight:
+		case ui::Align::TopRight:
 			mPivot = { -(mSize.x * GetComponent<scene::Transform>().Scale.x) / 2.f,
 			-(mSize.y * GetComponent<scene::Transform>().Scale.y) / 2.f };
 			break;
-		case Align::MiddleLeft:
+		case ui::Align::MiddleLeft:
 			mPivot = { (mSize.x * GetComponent<scene::Transform>().Scale.x) / 2.f, 0.f };
 			break;
-		case Align::Middle:
+		case ui::Align::Middle:
 			mPivot = { 0, 0 };
 			break;
-		case Align::MiddleRight:
+		case ui::Align::MiddleRight:
 			mPivot = { -(mSize.x * GetComponent<scene::Transform>().Scale.x) / 2.f, 0.f };
 			break;
-		case Align::BottomLeft:
+		case ui::Align::BottomLeft:
 			mPivot = { (mSize.x * GetComponent<scene::Transform>().Scale.x) / 2.f,
 			(mSize.y * GetComponent<scene::Transform>().Scale.y) / 2.f };
 			break;
-		case Align::BottomMiddle:
+		case ui::Align::BottomMiddle:
 			mPivot = {0.f, -(mSize.y * GetComponent<scene::Transform>().Scale.y) / 2.f };
 			break;
-		case Align::BottomRight:
+		case ui::Align::BottomRight:
 			mPivot = { -(mSize.x * GetComponent<scene::Transform>().Scale.x) / 2.f,
 			(mSize.y * GetComponent<scene::Transform>().Scale.y) / 2.f };
 			break;
@@ -141,14 +141,31 @@ namespace based::graphics
 	{
 		const std::shared_ptr<VertexArray> va = sprite->GetVA();
 		const std::shared_ptr<Material> mat = sprite->GetMaterial();
-		const glm::vec3 rotation = sprite->GetComponent<scene::Transform>().Rotation;
+
+		glm::vec3 position;
+		glm::vec3 rotation;
+		glm::vec3 scale;
 		auto model = glm::mat4(1.f);
-		model = glm::translate(model, sprite->GetComponent<scene::Transform>().Position + glm::vec3(sprite->mPivot, 0.f));
+
+		if (sprite->Parent)
+		{
+			position = sprite->GetComponent<scene::Transform>().LocalPosition + glm::vec3(sprite->mPivot, 0.f) + sprite->Parent->GetTransform().Position;
+			rotation = sprite->GetComponent<scene::Transform>().LocalRotation + sprite->Parent->GetTransform().Rotation;
+			scale = sprite->GetComponent<scene::Transform>().LocalScale * sprite->Parent->GetTransform().Scale;
+		} else
+		{
+			position = sprite->GetComponent<scene::Transform>().Position + glm::vec3(sprite->mPivot, 0.f);
+			rotation = sprite->GetComponent<scene::Transform>().Rotation;
+			scale = sprite->GetComponent<scene::Transform>().Scale;
+		}
+
+		model = glm::translate(model, position);
 		// Rotations are passed as degrees and converted to radians here automatically
 		model = glm::rotate(model, rotation.x * 0.0174533f, glm::vec3(1.f, 0.f, 0.f));
 		model = glm::rotate(model, rotation.y * 0.0174533f, glm::vec3(0.f, 1.f, 0.f));
 		model = glm::rotate(model, rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
-		model = glm::scale(model, sprite->GetComponent<scene::Transform>().Scale);
+		model = glm::scale(model, scale);
+
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, va, mat, model));
 	}
 

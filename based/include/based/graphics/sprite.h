@@ -2,15 +2,10 @@
 
 #include "based/scene/entity.h"
 
+#include "based/ui/alignment.h"
+
 namespace based::graphics
 {
-	enum Align
-	{
-		TopLeft, TopMiddle, TopRight,
-		MiddleLeft, Middle, MiddleRight,
-		BottomLeft, BottomMiddle, BottomRight
-	};
-
 	class Sprite : public scene::Entity
 	{
 	private:
@@ -19,7 +14,7 @@ namespace based::graphics
 		glm::vec4 mColor;
 		glm::vec2 mSize;
 		glm::vec2 mPivot;
-		Align mAlignment;
+		ui::Align mAlignment;
 		int mSortOrder;
 
 		void RegenerateVA();
@@ -41,7 +36,7 @@ namespace based::graphics
 		void SetRotation(glm::vec3 rot) override;
 		void SetScale(glm::vec3 scale) override;
 
-		void SetPivot(Align alignment);
+		void SetPivot(ui::Align alignment);
 		glm::vec2 GetPivot() const { return mPivot; }
 		glm::vec4 GetColor() const { return mColor; }
 

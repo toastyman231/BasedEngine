@@ -32,7 +32,6 @@ namespace based::scene
 	{
 		if (active) mIsEnabled = true;
 		else mIsEnabled = false;
-		//BASED_TRACE("New active value: {}", mIsEnabled);
 		if (active) { AddComponent<scene::Enabled>(); OnEnable(); }
 		else { RemoveComponent<scene::Enabled>(); OnDisable(); }
 	}
@@ -58,5 +57,28 @@ namespace based::scene
 	{
 		Transform transform = GetComponent<scene::Transform>();
 		AddOrReplaceComponent<scene::Transform>(transform.Position, transform.Rotation, scale);
+	}
+
+	void Entity::SetLocalTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
+	{
+		AddOrReplaceComponent<scene::Transform>(pos, rot, scale, true);
+	}
+
+	void Entity::SetLocalPosition(glm::vec3 pos)
+	{
+		Transform transform = GetComponent<scene::Transform>();
+		AddOrReplaceComponent<scene::Transform>(pos, transform.LocalRotation, transform.LocalScale, true);
+	}
+
+	void Entity::SetLocalRotation(glm::vec3 rot)
+	{
+		Transform transform = GetComponent<scene::Transform>();
+		AddOrReplaceComponent<scene::Transform>(transform.LocalPosition, rot, transform.LocalScale, true);
+	}
+
+	void Entity::SetLocalScale(glm::vec3 scale)
+	{
+		Transform transform = GetComponent<scene::Transform>();
+		AddOrReplaceComponent<scene::Transform>(transform.LocalPosition, transform.LocalRotation, scale, true);
 	}
 }

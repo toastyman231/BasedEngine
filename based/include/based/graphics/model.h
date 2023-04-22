@@ -15,7 +15,7 @@ namespace based::graphics
     class Model
     {
     public:
-        Model(char* path)
+        Model(const char* path)
         {
             LoadModel(path);
         }

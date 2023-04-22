@@ -36,6 +36,7 @@ private:
 	std::shared_ptr<scene::Scene> secondScene;
 	ui::TextEntity* text;
 	graphics::Sprite* testEnt;
+	graphics::Sprite* testSprite;
 	TestEntity* anotherEntity;
 	scene::Entity* modelEntity;
 
@@ -98,7 +99,15 @@ public:
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Test", material);
 		testEnt = new graphics::Sprite(graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
 			graphics::DefaultLibraries::GetMaterialLibrary().Get("Test"));
+
+		testSprite = new graphics::Sprite(graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
+			graphics::DefaultLibraries::GetMaterialLibrary().Get("Test"));
+		testSprite->SetParent(*testEnt);
+
+		testEnt->SetPosition({ 1.f, 0.f, 0.f });
+		testSprite->SetLocalPosition({ 1.f, 0.f, 0.f });
 		testEnt->SetActive(false);
+		testSprite->SetActive(false);
 
 		auto crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
 		auto crateMat = std::make_shared<graphics::Material>(
@@ -106,7 +115,7 @@ public:
 			crateTex);
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Crate", crateMat);
 
-		auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png");
+		auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
 		auto skybox = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/test_vert.vert", "Assets/shaders/test_frag.frag"),
 			skyboxTex);
@@ -168,8 +177,8 @@ public:
 
 		if (mouseControl)
 		{
-			pitch += static_cast<float>(-input::Mouse::DX()) * sensitivity * deltaTime;
-			yaw += static_cast<float>(input::Mouse::DY()) * sensitivity * deltaTime;
+			pitch += static_cast<float>(input::Mouse::DX()) * sensitivity * deltaTime;
+			yaw += static_cast<float>(-input::Mouse::DY()) * sensitivity * deltaTime;
 
 			yaw = based::math::Clamp(yaw, -89.f, 89.f);
 
@@ -204,7 +213,11 @@ public:
 			//if (anotherEntity) anotherEntity->SetActive(!anotherEntity->IsActive());
 			//core::Time::SetTimeScale(1.f - core::Time::TimeScale());
 			//testEnt->SetSprite(std::make_shared<graphics::Texture>("Assets/tex_test.png"));
-			testEnt->SetSortOrder(2);
+			//testEnt->SetSortOrder(2);
+			if (!testEnt->RemoveChild(testSprite))
+			{
+				BASED_TRACE("Could not find child!");
+			}
 		}
 
 		/*if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
@@ -226,6 +239,7 @@ public:
 		TestFall(deltaTime, "Test!");
 
 		modelEntity->SetTransform(glm::vec3(cubePos.x + 2, cubePos.y, cubePos.z), cubeRot, cubeScale);
+		testEnt->SetPosition(cubePos);
 	}
 
 	scene::Entity* CreateSquare(float x, float y, float z, float scaleX = 0.3f, float scaleY = 0.3f) const

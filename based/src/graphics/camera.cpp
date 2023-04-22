@@ -138,7 +138,7 @@ namespace based::graphics
 		view = glm::inverse(view);
 
 		mForward = glm::normalize(glm::vec3(view[2]));
-		mRight = glm::normalize(glm::cross(mForward, glm::vec3(0.f, 1.f, 0.f)));
+		mRight = glm::normalize(glm::cross(glm::vec3(0.f, 1.f, 0.f), mForward));
 		mUp = glm::cross(mForward, mRight);
 
 		SetViewMatrix(mTransform.Position, mForward, mUp);

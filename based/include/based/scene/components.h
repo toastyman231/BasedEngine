@@ -1,9 +1,7 @@
 #pragma once
-#include <memory>
 
 #include "external/glm/glm.hpp"
-#include "based/graphics/material.h"
-#include "based/graphics/vertex.h"
+#include "external/glm/gtx/transform.hpp"
 
 namespace based::ui
 {
@@ -35,11 +33,27 @@ namespace based::scene
 		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
+		glm::vec3 LocalPosition = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 LocalRotation = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 LocalScale = { 1.0f, 1.0f, 1.0f };
+
 		Transform() = default;
 		Transform(const Transform&) = default;
 		Transform(const glm::vec3& pos) : Position(pos) {}
-		Transform(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale)
-		: Position(pos), Rotation(rot), Scale(scale) {}
+		Transform(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale, bool local = false)
+		{
+			if (local)
+			{
+				LocalPosition = pos;
+				LocalRotation = rot;
+				LocalScale = scale;
+			} else
+			{
+				Position = pos;
+				Rotation = rot;
+				Scale = scale;
+			}
+		}
 	};
 
 	struct Velocity
@@ -62,7 +76,6 @@ namespace based::scene
 		SpriteRenderer(const SpriteRenderer&) = default;
 	};
 
-	// TODO: Change this so a "model" is actually a hierarchy of separate mesh objects, which each have a mesh renderer
 	struct ModelRenderer
 	{
 		graphics::Model* model;
