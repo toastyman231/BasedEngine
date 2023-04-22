@@ -2,12 +2,11 @@
 
 namespace based::graphics
 {
-	void Model::Draw(std::shared_ptr<Material> material)
+	void Model::Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
 	{
 		for (unsigned int i = 0; i < meshes.size(); i++)
 		{
-			const scene::Transform trans = GetComponent<scene::Transform>();
-			meshes[i].Draw(trans.Position, trans.Rotation, trans.Scale, material);
+			meshes[i].Draw(position, rotation, scale, mMaterials[i]);
 		}
 	}
 
@@ -87,41 +86,47 @@ namespace based::graphics
 		if (mesh->mMaterialIndex >= 0)
 		{
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-			std::vector<Texture> diffuseMaps = LoadMaterialTextures(material,
+
+			std::shared_ptr<Material> meshMaterial = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+
+			mMaterials.insert(mMaterials.end(), meshMaterial);
+			/*std::vector<Texture> diffuseMaps = LoadMaterialTextures(material,
 				aiTextureType_DIFFUSE, "texture_diffuse");
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 			std::vector<Texture> specularMaps = LoadMaterialTextures(material,
 				aiTextureType_SPECULAR, "texture_specular");
-			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());*/
 		}
 
 		return Mesh(vertices, indices, textures);
 	}
 
-	std::vector<graphics::Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
+	std::shared_ptr<Material> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 	{
-		std::vector<graphics::Texture> textures;
+		std::shared_ptr<Material> material = std::make_shared<Material>(DefaultLibraries::GetShaderLibrary().Get("Model"));
+
+		aiColor4D color(0.f, 0.f, 0.f, 1.f);
+		aiGetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE, &color);
+		material->SetUniformValue("color_diffuse", glm::vec4(color.r, color.g, color.b, color.a));
+
+		// TODO: Add more complicated material support
 
 		if (mat->GetTextureCount(type) <= 0)
 		{
-			BASED_TRACE("No textures found, loading default textures");
-
-			auto tex = Texture("");
-			return { tex };
-		}
-
-		for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+			material->SetUniformValue("textureSample", 0);
+		} else
 		{
-			aiString str;
-			mat->GetTexture(type, i, &str);
-			BASED_TRACE("Texture location: {}", str.C_Str());
-			Texture texture(str.C_Str());
-			//texture.id = TextureFromFile(str.C_Str(), directory);
-			//texture.type = typeName;
-			//texture.path = str;
-			textures.push_back(texture);
+			for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+			{
+				aiString str;
+				mat->GetTexture(type, i, &str);
+				BASED_TRACE("Texture location: {}", str.C_Str());
+				Texture texture(str.C_Str());
+
+				material->SetTexture(std::make_shared<Texture>(texture));
+			}
 		}
 
-		return textures;
+		return material;
 	}
 }

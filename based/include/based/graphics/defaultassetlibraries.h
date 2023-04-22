@@ -392,11 +392,22 @@ namespace based::graphics
 					in vec2 TexCoords;
 
 					uniform sampler2D texture_diffuse1;
-					uniform vec4 col;
+					uniform int textureSample = 1;
+					uniform vec4 color_diffuse = vec4(1.0, 1.0, 1.0, 1.0);
+					uniform vec4 color_specular = vec4(0.0, 0.0, 0.0, 1.0);
+					uniform vec4 color_ambient = vec4(0.0, 0.0, 0.0, 1.0);;
+					uniform vec4 color_emissive = vec4(0.0, 0.0, 0.0, 1.0);;
 
 					void main()
 					{    
-						FragColor = col * texture(texture_diffuse1, TexCoords);
+						vec4 matDiffuseColor = color_diffuse;
+						if (textureSample == 1) 
+						{
+							matDiffuseColor = color_diffuse * texture(texture_diffuse1, TexCoords);
+							// Set other colors here
+						}
+
+						FragColor = matDiffuseColor;
 					}
                 )";
 				mShaderLibrary.Load("Model", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));

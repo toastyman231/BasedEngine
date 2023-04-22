@@ -12,6 +12,7 @@ namespace based::ui
 
 namespace based::graphics
 {
+	class Model;
 	class Sprite;
 }
 
@@ -59,6 +60,16 @@ namespace based::scene
 		SpriteRenderer() = default;
 		SpriteRenderer(graphics::Sprite* spritePtr) : sprite(spritePtr) {}
 		SpriteRenderer(const SpriteRenderer&) = default;
+	};
+
+	// TODO: Change this so a "model" is actually a hierarchy of separate mesh objects, which each have a mesh renderer
+	struct ModelRenderer
+	{
+		graphics::Model* model;
+
+		ModelRenderer() = default;
+		ModelRenderer(graphics::Model* modelPtr) : model(modelPtr) {}
+		ModelRenderer(const ModelRenderer&) = default;
 	};
 
 	struct TextRenderer

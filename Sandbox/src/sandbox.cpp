@@ -37,6 +37,7 @@ private:
 	ui::TextEntity* text;
 	graphics::Sprite* testEnt;
 	TestEntity* anotherEntity;
+	scene::Entity* modelEntity;
 
 	bool mouseControl = false;
 	float speed = 2.5f;
@@ -120,7 +121,10 @@ public:
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Model", modelMat);
 
 		testModel = new graphics::Model("Assets/Models/rotate_cylinder.obj");
-		testModel->SetPosition({ 2, 0, 0 });
+
+		modelEntity = new scene::Entity();
+		modelEntity->AddComponent<scene::ModelRenderer>(testModel);
+		modelEntity->SetPosition({ 2, 0, 0 });
 
 		BASED_TRACE("Done initializing");
 
@@ -220,6 +224,8 @@ public:
 		}
 
 		TestFall(deltaTime, "Test!");
+
+		modelEntity->SetTransform(glm::vec3(cubePos.x + 2, cubePos.y, cubePos.z), cubeRot, cubeScale);
 	}
 
 	scene::Entity* CreateSquare(float x, float y, float z, float scaleX = 0.3f, float scaleY = 0.3f) const
@@ -255,7 +261,6 @@ public:
 		// TODO: Make meshes render automatically
 		crateMesh->Draw(cubePos, cubeRot, cubeScale, graphics::DefaultLibraries::GetMaterialLibrary().Get("Crate"));
 		skyboxMesh->Draw({ 0.f, 0.f, 0.f }, { 0.f, 0.f, 0.f }, { 500.f, 500.f, 500.f }, graphics::DefaultLibraries::GetMaterialLibrary().Get("Sky"));
-		testModel->Draw(graphics::DefaultLibraries::GetMaterialLibrary().Get("Model"));
 	}
 
 	void ImguiRender() override

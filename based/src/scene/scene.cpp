@@ -3,6 +3,7 @@
 #include "based/scene/scene.h"
 
 #include "external/glm/ext/matrix_transform.hpp"
+#include "graphics/model.h"
 #include "scene/components.h"
 #include "ui/textentity.h"
 #include "graphics/sprite.h"
@@ -41,6 +42,14 @@ namespace based::scene
 		for (const auto sprite : sprites)
 		{
 			graphics::Sprite::DrawSprite(sprite);
+		}
+
+		const auto modelView = mRegistry.view<Enabled, Transform, ModelRenderer>();
+
+		for (const auto entity : modelView)
+		{
+			scene::Transform trans = mRegistry.get<Transform>(entity);
+			mRegistry.get<ModelRenderer>(entity).model->Draw(trans.Position, trans.Rotation, trans.Scale);
 		}
 
 		const auto textView = mRegistry.view<Enabled, Transform, TextRenderer>();
