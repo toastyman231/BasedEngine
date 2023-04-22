@@ -19,6 +19,7 @@ externals["spdlog"] = "external/spdlog"
 externals["glad"] = "external/glad"
 externals["freetype"] = "external/freetype"
 externals["miniaudio"] = "external/miniaudio"
+externals["assimp"] = "external/assimp"
 
 -- Process Glad before anything else
 include "external/glad"
@@ -52,7 +53,8 @@ project "based"
         "%{externals.spdlog}/include",
         "%{externals.glad}/include",
         "%{externals.freetype}/include",
-        "%{externals.miniaudio}"
+        "%{externals.miniaudio}",
+        "%{externals.assimp}/include"
     }
 
     flags
@@ -153,7 +155,8 @@ project "basededitor"
         libdirs
         {
             "%{externals.sdl2}/lib",
-            "%{externals.freetype}/lib"
+            "%{externals.freetype}/lib",
+            "%{externals.assimp}/lib"
         }
 
         links
@@ -161,7 +164,8 @@ project "basededitor"
             "SDL2",
             "SDL2_ttf",
             "glad",
-            "freetype"
+            "freetype",
+            "assimp-vc143-mt"
         }
 
     filter {"system:macosx", "configurations:*"}
@@ -348,7 +352,8 @@ project "Sandbox"
         "based/include",
         "%{externals.sdl2}/include",
         "%{externals.spdlog}/include",
-        "%{externals.miniaudio}"
+        "%{externals.miniaudio}",
+        "%{externals.assimp}/include"
     }
 
     flags
@@ -372,7 +377,8 @@ project "Sandbox"
         libdirs
         {
             "%{externals.sdl2}/lib",
-            "%{externals.freetype}/lib"
+            "%{externals.freetype}/lib",
+            "%{externals.assimp}/lib"
         }
 
         links
@@ -380,7 +386,8 @@ project "Sandbox"
             "SDL2",
             "SDL2_ttf",
             "glad",
-            "freetype"
+            "freetype",
+            "assimp-vc143-mt"
         }
 
     filter {"system:macosx", "configurations:*"}

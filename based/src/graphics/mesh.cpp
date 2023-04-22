@@ -41,7 +41,7 @@ namespace based::graphics
 		BASED_CREATE_VERTEX_BUFFER(norm_vb, float);
 		BASED_CREATE_VERTEX_BUFFER(uv_vb, float);
 
-		for (auto vertex : vertices)
+		for (const auto vertex : vertices)
 		{
 			pos_vb->PushVertex({ vertex.Position.x, vertex.Position.y, vertex.Position.z });
 			norm_vb->PushVertex({ vertex.Normal.x, vertex.Normal.y, vertex.Normal.z });

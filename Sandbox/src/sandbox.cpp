@@ -24,6 +24,7 @@
 #include "based/scene/entity.h"
 #include "based/ui/textentity.h"
 #include "based/scene/audio.h"
+#include "based/graphics/model.h"
 #include "external/entt/entt.hpp"
 #include "external/imgui/imgui.h"
 
@@ -51,6 +52,7 @@ private:
 
 	graphics::Mesh* crateMesh;
 	graphics::Mesh* skyboxMesh;
+	graphics::Model* testModel;
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -103,7 +105,7 @@ public:
 			crateTex);
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Crate", crateMat);
 
-		auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
+		auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png");
 		auto skybox = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/test_vert.vert", "Assets/shaders/test_frag.frag"),
 			skyboxTex);
@@ -111,6 +113,14 @@ public:
 
 		crateMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"));
 		skyboxMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("AtlasTextureCube"));
+
+		auto modelMat = std::make_shared<graphics::Material>(graphics::DefaultLibraries::GetShaderLibrary().Get("Model"), 
+			std::make_shared<graphics::Texture>(""));
+		modelMat->SetUniformValue(std::string("col"), glm::vec4{ 1.f, 1.f, 1.f, 1.f });
+		graphics::DefaultLibraries::GetMaterialLibrary().Load("Model", modelMat);
+
+		testModel = new graphics::Model("Assets/Models/rotate_cylinder.obj");
+		testModel->SetPosition({ 2, 0, 0 });
 
 		BASED_TRACE("Done initializing");
 
@@ -244,7 +254,8 @@ public:
 	{
 		// TODO: Make meshes render automatically
 		crateMesh->Draw(cubePos, cubeRot, cubeScale, graphics::DefaultLibraries::GetMaterialLibrary().Get("Crate"));
-		skyboxMesh->Draw({ 0.f, 0.f, 0.f }, { 180.f, 0.f, 0.f }, { 500.f, 500.f, 500.f }, graphics::DefaultLibraries::GetMaterialLibrary().Get("Sky"));
+		skyboxMesh->Draw({ 0.f, 0.f, 0.f }, { 0.f, 0.f, 0.f }, { 500.f, 500.f, 500.f }, graphics::DefaultLibraries::GetMaterialLibrary().Get("Sky"));
+		testModel->Draw(graphics::DefaultLibraries::GetMaterialLibrary().Get("Model"));
 	}
 
 	void ImguiRender() override
