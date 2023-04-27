@@ -11,6 +11,7 @@ A simple 2D game engine based on tutorials by https://www.youtube.com/c/Progrema
 - ImGUI (GUI Rendering, https://github.com/ocornut/imgui/tree/docking)
 - STB (Image Loading, https://github.com/nothings/stb)
 - Miniaudio (Audio playback, https://github.com/mackron/miniaudio)  
+- Assimp (Model importing, https://github.com/assimp/assimp)  
 
 ## My Additions
 The bulk of the engine design and implentation was done by Progrematic, if something is not listed below, it was probably done by him. You can find his original engine here: https://github.com/progrematic/hippo.
@@ -25,6 +26,7 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - Text Rendering/UI
 - Toolchain to create projects in directories outside the engine's directory
 - Simple audio system using miniaudio
+- Simple 3D rendering with assimp for model importing
 
 ## Planned Additions
 - 2D Physics with Box2D
