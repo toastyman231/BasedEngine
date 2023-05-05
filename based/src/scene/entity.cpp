@@ -38,47 +38,136 @@ namespace based::scene
 
 	void Entity::SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
 	{
-		AddOrReplaceComponent<scene::Transform>(pos, rot, scale);
+		SetPosition(pos);
+		SetRotation(rot);
+		SetScale(scale);
 	}
 
 	void Entity::SetPosition(glm::vec3 pos)
 	{
 		Transform transform = GetComponent<scene::Transform>();
-		AddOrReplaceComponent<scene::Transform>(pos, transform.Rotation, transform.Scale);
+		AddOrReplaceComponent<scene::Transform>(pos, transform.LocalPosition,
+			transform.Rotation, transform.LocalRotation,
+			transform.Scale, transform.LocalScale);
+
+		for (auto const& child : Children)
+		{
+			glm::vec3 newAbsolutePosition = pos + child->GetComponent<scene::Transform>().LocalPosition;
+			child->SetPosition(newAbsolutePosition);
+		}
 	}
 
 	void Entity::SetRotation(glm::vec3 rot)
 	{
 		Transform transform = GetComponent<scene::Transform>();
-		AddOrReplaceComponent<scene::Transform>(transform.Position, rot, transform.Scale);
+
+		AddOrReplaceComponent<scene::Transform>(transform.Position, transform.LocalPosition,
+			rot, transform.LocalRotation,
+			transform.Scale, transform.LocalScale);
+
+		for (auto const& child : Children)
+		{
+			glm::vec3 newAbsoluteRotation = rot + child->GetComponent<scene::Transform>().LocalRotation;
+			child->SetRotation(newAbsoluteRotation);
+		}
 	}
 
 	void Entity::SetScale(glm::vec3 scale)
 	{
 		Transform transform = GetComponent<scene::Transform>();
-		AddOrReplaceComponent<scene::Transform>(transform.Position, transform.Rotation, scale);
+
+		AddOrReplaceComponent<scene::Transform>(transform.Position, transform.LocalPosition,
+			transform.Rotation, transform.LocalRotation,
+			scale, transform.LocalScale);
+
+		for (auto const& child : Children)
+		{
+			glm::vec3 newAbsoluteScale = scale * child->GetComponent<scene::Transform>().LocalScale;
+			child->SetScale(newAbsoluteScale);
+		}
 	}
 
 	void Entity::SetLocalTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
 	{
-		AddOrReplaceComponent<scene::Transform>(pos, rot, scale, true);
+		SetLocalPosition(pos);
+		SetLocalRotation(rot);
+		SetLocalScale(scale);
 	}
 
 	void Entity::SetLocalPosition(glm::vec3 pos)
 	{
 		Transform transform = GetComponent<scene::Transform>();
-		AddOrReplaceComponent<scene::Transform>(pos, transform.LocalRotation, transform.LocalScale, true);
+		glm::vec3 newPosition;
+
+		if (Parent)
+		{
+			newPosition = Parent->GetComponent<scene::Transform>().Position + pos;
+		} else
+		{
+			newPosition = pos;
+			pos = glm::vec3(0.f);
+		}
+
+		AddOrReplaceComponent<scene::Transform>(newPosition, pos,
+			transform.Rotation, transform.LocalRotation,
+			transform.Scale, transform.LocalScale);
+
+		for (auto const& child : Children)
+		{
+			glm::vec3 newAbsolutePosition = newPosition + child->GetComponent<scene::Transform>().LocalPosition;
+			child->SetPosition(newAbsolutePosition);
+		}
 	}
 
 	void Entity::SetLocalRotation(glm::vec3 rot)
 	{
 		Transform transform = GetComponent<scene::Transform>();
-		AddOrReplaceComponent<scene::Transform>(transform.LocalPosition, rot, transform.LocalScale, true);
+		glm::vec3 newRotation;
+
+		if (Parent)
+		{
+			newRotation = Parent->GetComponent<scene::Transform>().Rotation + rot;
+		} else
+		{
+			newRotation = rot;
+			rot = glm::vec3(0.f);
+		}
+
+		AddOrReplaceComponent<scene::Transform>(transform.Position, transform.LocalPosition,
+			newRotation, rot,
+			transform.Scale, transform.LocalScale);
+
+		for (auto const& child : Children)
+		{
+			glm::vec3 newAbsoluteRotation = newRotation + child->GetComponent<scene::Transform>().LocalRotation;
+			child->SetRotation(newAbsoluteRotation);
+		}
 	}
 
 	void Entity::SetLocalScale(glm::vec3 scale)
 	{
 		Transform transform = GetComponent<scene::Transform>();
-		AddOrReplaceComponent<scene::Transform>(transform.LocalPosition, transform.LocalRotation, scale, true);
+
+		glm::vec3 newScale;
+
+		if (Parent)
+		{
+			newScale = Parent->GetComponent<scene::Transform>().Scale * scale;
+		}
+		else
+		{
+			newScale = scale;
+			scale = glm::vec3(1.f);
+		}
+
+		AddOrReplaceComponent<scene::Transform>(transform.Position, transform.LocalPosition,
+			transform.Rotation, transform.LocalRotation,
+			newScale, scale);
+
+		for (auto const& child : Children)
+		{
+			glm::vec3 newAbsoluteScale = newScale * child->GetComponent<scene::Transform>().LocalScale;
+			child->SetScale(newAbsoluteScale);
+		}
 	}
 }

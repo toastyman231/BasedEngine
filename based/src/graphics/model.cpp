@@ -6,8 +6,30 @@ namespace based::graphics
 	{
 		for (unsigned int i = 0; i < meshes.size(); i++)
 		{
-			meshes[i].Draw(position, rotation, scale, mMaterials[i]);
+			meshes[i]->Draw(position, rotation, scale, mMaterials[i]);
 		}
+	}
+
+	scene::Entity* Model::CreateModelEntity(const std::string& path)
+	{
+		Model* model = new Model();
+		auto* rootEntity = scene::Entity::CreateEntity<scene::Entity>();
+
+		Assimp::Importer import;
+		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+
+		rootEntity->SetEntityName(std::string(scene->mName.C_Str()));
+
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		{
+			BASED_ERROR("Assimp Error: {}", import.GetErrorString());
+			return rootEntity;
+		}
+		model->directory = path.substr(0, path.find_last_of('/'));
+
+		model->ProcessNodeEntity(rootEntity, scene->mRootNode, scene);
+
+		return rootEntity;
 	}
 
 	void Model::LoadModel(std::string path)
@@ -40,7 +62,30 @@ namespace based::graphics
 		}
 	}
 
-	graphics::Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+	void Model::ProcessNodeEntity(scene::Entity* parent, aiNode* node, const aiScene* scene)
+	{
+		auto* childEntity = scene::Entity::CreateEntity<scene::Entity>();
+		if (node->mNumMeshes > 0) childEntity->SetParent(parent);
+
+		// process all the node's meshes (if any)
+		for (unsigned int i = 0; i < node->mNumMeshes; i++)
+		{
+			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+			childEntity->SetEntityName(std::string(mesh->mName.C_Str()));
+			Mesh* processedMesh = ProcessMesh(mesh, scene);
+			meshes.push_back(processedMesh);
+			meshes.back()->material = std::move(mMaterials.back());
+			childEntity->AddComponent<scene::MeshRenderer>(processedMesh, this);
+		}
+		// then do the same for each of its children
+		for (unsigned int i = 0; i < node->mNumChildren; i++)
+		{
+			if (node->mNumMeshes == 0) ProcessNodeEntity(parent, node->mChildren[i], scene);
+			else ProcessNodeEntity(childEntity, node->mChildren[i], scene);
+		}
+	}
+
+	graphics::Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
@@ -98,7 +143,7 @@ namespace based::graphics
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());*/
 		}
 
-		return Mesh(vertices, indices, textures);
+		return new Mesh(vertices, indices, textures);
 	}
 
 	std::shared_ptr<Material> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)

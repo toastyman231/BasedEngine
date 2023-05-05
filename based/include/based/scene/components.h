@@ -10,6 +10,7 @@ namespace based::ui
 
 namespace based::graphics
 {
+	class Mesh;
 	class Model;
 	class Sprite;
 }
@@ -54,6 +55,17 @@ namespace based::scene
 				Scale = scale;
 			}
 		}
+		Transform(const glm::vec3& pos, const glm::vec3& localPos, 
+			const glm::vec3& rot, const glm::vec3& localRot,
+			const glm::vec3& scale, const glm::vec3& localScale)
+		{
+			LocalPosition = localPos;
+			LocalRotation = localRot;
+			LocalScale = localScale;
+			Position = pos;
+			Rotation = rot;
+			Scale = scale;
+		}
 	};
 
 	struct Velocity
@@ -83,6 +95,17 @@ namespace based::scene
 		ModelRenderer() = default;
 		ModelRenderer(graphics::Model* modelPtr) : model(modelPtr) {}
 		ModelRenderer(const ModelRenderer&) = default;
+	};
+
+	struct MeshRenderer
+	{
+		graphics::Mesh* mesh;
+		graphics::Model* model;
+
+		MeshRenderer() = default;
+		MeshRenderer(graphics::Mesh* meshPtr) : mesh(meshPtr) {}
+		MeshRenderer(graphics::Mesh* meshPtr, graphics::Model* modelPtr) : mesh(meshPtr), model(modelPtr) {}
+		MeshRenderer(const MeshRenderer&) = default;
 	};
 
 	struct TextRenderer

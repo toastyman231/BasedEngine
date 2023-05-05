@@ -13,9 +13,10 @@ namespace based::graphics
 		SetupMesh();
 	}
 
-	Mesh::Mesh(std::shared_ptr<VertexArray> va)
+	Mesh::Mesh(std::shared_ptr<VertexArray> va, std::shared_ptr<Material> mat)
 	{
 		mVA = va;
+		material = mat;
 	}
 
 	void Mesh::Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material)
@@ -31,6 +32,18 @@ namespace based::graphics
 		model = glm::scale(model, scale);
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model));
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
+	}
+
+	void Mesh::Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
+	{
+		if (material)
+		{
+			Draw(position, rotation, scale, material);
+		} else
+		{
+			BASED_ERROR("ERROR: Trying to render mesh with no material set!");
+			// TODO: Replace this with default material
+		}
 	}
 
 	void Mesh::SetupMesh()

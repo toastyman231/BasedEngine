@@ -8,6 +8,8 @@
 
 #include <string>
 
+#include "based/log.h"
+
 namespace based::scene
 {
 	class Entity
@@ -82,6 +84,8 @@ namespace based::scene
 		void SetActive(bool active);
 
 		scene::Transform GetTransform() { return GetComponent<scene::Transform>(); }
+		std::string& GetEntityName() { return mEntityName; }
+		void SetEntityName(const std::string& name) { mEntityName = name; }
 		virtual void SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
 		virtual void SetPosition(glm::vec3 pos);
 		virtual void SetRotation(glm::vec3 rot);
@@ -100,22 +104,31 @@ namespace based::scene
 		virtual void OnDisable() {}
 		virtual void OnDestroy() {}
 
-		void SetParent(Entity& parentEntity)
+		void SetParent(Entity* parentEntity)
 		{
-			Parent = &parentEntity;
+			if (parentEntity == nullptr && Parent)
+			{
+				Parent->RemoveChild(this);
+				return;
+			}
+
+			Parent = parentEntity;
 			Parent->Children.emplace_back(this);
+			BASED_TRACE("Set parent entity");
 		}
 
 		bool RemoveChild(const Entity* childEntity)
 		{
+			int i = 0;
 			for (const auto child : Children)
 			{
 				if (child->mEntity == childEntity->mEntity)
 				{
-					Children.remove(child);
+					Children.erase(Children.begin() + i);//.remove(child);
 					child->Parent = nullptr;
 					return true;
 				}
+				i++;
 			}
 
 			return false;
@@ -123,7 +136,7 @@ namespace based::scene
 
 		Entity* Parent = nullptr;
 
-		std::list<Entity*> Children;
+		std::vector<Entity*> Children;
 
 		bool operator==(const Entity& other) const
 		{

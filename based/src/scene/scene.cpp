@@ -52,6 +52,14 @@ namespace based::scene
 			mRegistry.get<ModelRenderer>(entity).model->Draw(trans.Position, trans.Rotation, trans.Scale);
 		}
 
+		const auto meshView = mRegistry.view<Enabled, Transform, MeshRenderer>();
+
+		for (const auto entity : meshView)
+		{
+			scene::Transform trans = mRegistry.get<Transform>(entity);
+			mRegistry.get<MeshRenderer>(entity).mesh->Draw(trans.Position, trans.Rotation, trans.Scale);
+		}
+
 		const auto textView = mRegistry.view<Enabled, Transform, TextRenderer>();
 
 		for (const auto entity : textView)

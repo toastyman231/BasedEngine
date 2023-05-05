@@ -1,31 +1,21 @@
+#include <memory>
+#include <external/glm/gtx/string_cast.hpp>
+
 #include "based/engine.h"
 #include "based/log.h"
 #include "based/main.h"
-
-#include "based/graphics/camera.h"
-#include "based/graphics/framebuffer.h"
-#include "based/input/keyboard.h"
-
-#include <memory>
-
-#include "based/graphics/defaultassetlibraries.h"
-
-#include <external/glm/gtx/string_cast.hpp>
-#include "external/glm/gtc/type_ptr.hpp"
-
-#include "TestEntity.h"
-#include "based/core/basedtime.h"
 #include "based/core/assetlibrary.h"
+#include "based/graphics/camera.h"
+#include "based/graphics/defaultassetlibraries.h"
+#include "based/graphics/framebuffer.h"
 #include "based/graphics/mesh.h"
-#include "based/graphics/sprite.h"
-#include "based/input/mouse.h"
-#include "based/scene/components.h"
-#include "based/math/basedmath.h"
-#include "based/scene/entity.h"
-#include "based/ui/textentity.h"
-#include "based/scene/audio.h"
 #include "based/graphics/model.h"
-#include "external/entt/entt.hpp"
+#include "based/input/keyboard.h"
+#include "based/input/mouse.h"
+#include "based/math/basedmath.h"
+#include "based/scene/components.h"
+#include "based/scene/entity.h"
+#include "external/glm/gtc/type_ptr.hpp"
 #include "external/imgui/imgui.h"
 
 using namespace based;
@@ -34,11 +24,9 @@ class Sandbox : public based::App
 {
 private:
 	std::shared_ptr<scene::Scene> secondScene;
-	ui::TextEntity* text;
-	graphics::Sprite* testEnt;
-	graphics::Sprite* testSprite;
-	TestEntity* anotherEntity;
 	scene::Entity* modelEntity;
+	scene::Entity* skyEntity;
+	scene::Entity* crateEntity;
 
 	bool mouseControl = false;
 	float speed = 2.5f;
@@ -81,33 +69,7 @@ public:
 		cubeScale = glm::vec3(1.f);
 		startScene->GetActiveCamera()->SetProjection(based::graphics::PERSPECTIVE);
 
-		// Setup text
-		text = new ui::TextEntity("Assets/fonts/Arimo-Regular.ttf", "This is a test!", 128, 
-			glm::vec3(Engine::Instance().GetWindow().GetSize().x / 2, Engine::Instance().GetWindow().GetSize().y / 2, 0.f),
-			{ 0, 0, 0, 255 });
-		text->SetActive(false);
-
-		// Create second scene
-		secondScene = std::make_shared<scene::Scene>();
-		secondScene->SetActiveCamera(GetCurrentScene()->GetActiveCamera());
-
-		// Setup gigachad sprite
-		auto texture = std::make_shared<graphics::Texture>("Assets/icon.png");
-		auto material = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/test_vert.vert", "Assets/shaders/test_frag.frag"),
-			texture);
-		graphics::DefaultLibraries::GetMaterialLibrary().Load("Test", material);
-		testEnt = new graphics::Sprite(graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
-			graphics::DefaultLibraries::GetMaterialLibrary().Get("Test"));
-
-		testSprite = new graphics::Sprite(graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
-			graphics::DefaultLibraries::GetMaterialLibrary().Get("Test"));
-		testSprite->SetParent(*testEnt);
-
-		testEnt->SetPosition({ 1.f, 0.f, 0.f });
-		testSprite->SetLocalPosition({ 1.f, 0.f, 0.f });
-		testEnt->SetActive(false);
-		testSprite->SetActive(false);
+		// TODO: Confirm local transforms work in 2D, scene loading, better UI/Text
 
 		auto crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
 		auto crateMat = std::make_shared<graphics::Material>(
@@ -121,18 +83,16 @@ public:
 			skyboxTex);
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Sky", skybox);
 
-		crateMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"));
-		skyboxMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("AtlasTextureCube"));
+		crateMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), crateMat);
+		skyboxMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("AtlasTextureCube"), skybox);
 
-		auto modelMat = std::make_shared<graphics::Material>(graphics::DefaultLibraries::GetShaderLibrary().Get("Model"), 
-			std::make_shared<graphics::Texture>(""));
-		modelMat->SetUniformValue(std::string("col"), glm::vec4{ 1.f, 1.f, 1.f, 1.f });
-		graphics::DefaultLibraries::GetMaterialLibrary().Load("Model", modelMat);
+		skyEntity = scene::Entity::CreateEntity<scene::Entity>();
+		skyEntity->AddComponent<scene::MeshRenderer>(skyboxMesh);
+		skyEntity->SetScale(glm::vec3(500.f));
+		crateEntity = scene::Entity::CreateEntity<scene::Entity>();
+		crateEntity->AddComponent<scene::MeshRenderer>(crateMesh);
 
-		testModel = new graphics::Model("Assets/Models/rotate_cylinder.obj");
-
-		modelEntity = new scene::Entity();
-		modelEntity->AddComponent<scene::ModelRenderer>(testModel);
+		modelEntity = graphics::Model::CreateModelEntity("Assets/Models/rotate_cylinder.obj");
 		modelEntity->SetPosition({ 2, 0, 0 });
 
 		BASED_TRACE("Done initializing");
@@ -187,94 +147,25 @@ public:
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_G))
 		{
-			LoadScene(secondScene);
+			//LoadScene(secondScene);
 		}
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_L))
 		{
-			LoadScene(startScene);
+			//LoadScene(startScene);
 		}
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_B))
 		{
-			//text->SetAlignment(ui::TopLeft); //This works but causes an unnecessary warning
-			//text->MoveText({ 0, 0, 0 }); This works
-			//text->SetColor({ 255, 0, 0, 255 }); //This works but causes the same warning and looks kinda weird
-			//text->SetText("New text!"); //This works but causes the same warning
-			//text->SetSize(16); // This works but causes the same warning
-			testEnt->SetActive(!testEnt->IsActive());
-			scene::Entity::DestroyEntity(anotherEntity);
-			anotherEntity = new TestEntity();
 		}
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_H))
 		{
-			//text->SetActive(!text->IsActive());
-			//if (anotherEntity) anotherEntity->SetActive(!anotherEntity->IsActive());
-			//core::Time::SetTimeScale(1.f - core::Time::TimeScale());
-			//testEnt->SetSprite(std::make_shared<graphics::Texture>("Assets/tex_test.png"));
-			//testEnt->SetSortOrder(2);
-			if (!testEnt->RemoveChild(testSprite))
-			{
-				BASED_TRACE("Could not find child!");
-			}
 		}
-
-		/*if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
-		{
-			const auto pos = GetCurrentScene()->GetActiveCamera()->ScreenToWorldPoint(
-				static_cast<float>(input::Mouse::X()),
-				static_cast<float>(input::Mouse::Y()));
-			scene::Entity* square = CreateSquare(pos.x, pos.y, pos.z);
-		}*/
-
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
-		{
-			scene::Entity::EntityForEach<scene::Transform, FallingObject>([&](scene::Entity* ent)
-				{
-					ent->AddOrReplaceComponent<scene::Velocity>(0.f, ent->GetComponent<FallingObject>().speed);
-				});
-		}
-
-		TestFall(deltaTime, "Test!");
-
-		modelEntity->SetTransform(glm::vec3(cubePos.x + 2, cubePos.y, cubePos.z), cubeRot, cubeScale);
-		testEnt->SetPosition(cubePos);
-	}
-
-	scene::Entity* CreateSquare(float x, float y, float z, float scaleX = 0.3f, float scaleY = 0.3f) const
-	{
-		const auto sprite = scene::Entity::CreateEntity<graphics::Sprite>(
-			glm::vec3(x, y, z),
-			glm::vec3(0.f), glm::vec3(scaleX, scaleY, 1.f), 
-			glm::vec4(0.f, 1.f, 0.f, 1.f));
-		sprite->AddComponent<FallingObject>(-0.8f);
-		sprite->GetComponent<scene::SpriteRenderer>().sprite->SetSortOrder(1);
-		scene::Audio::PlayAudio(std::string("Assets/sounds/TestSound.wav"));
-
-		return sprite;
-	}
-
-	void TestFall(float deltaTime, const std::string& str) const
-	{
-		auto lambda = [deltaTime, str](scene::Entity* ent)
-		{
-			const auto trans = ent->GetComponent<scene::Transform>();
-			const auto dx = ent->GetComponent<scene::Velocity>().dx * deltaTime;
-			const auto dy = ent->GetComponent<scene::Velocity>().dy * deltaTime;
-			ent->AddOrReplaceComponent<scene::Transform>(
-				glm::vec3(trans.Position.x + dx, trans.Position.y + dy, 0.f),
-				glm::vec3(0.f), trans.Scale);
-			BASED_TRACE(str);
-		};
-		scene::Entity::EntityForEach<scene::Transform, scene::Velocity>(lambda);
 	}
 
 	void Render() override
 	{
-		// TODO: Make meshes render automatically
-		crateMesh->Draw(cubePos, cubeRot, cubeScale, graphics::DefaultLibraries::GetMaterialLibrary().Get("Crate"));
-		skyboxMesh->Draw({ 0.f, 0.f, 0.f }, { 0.f, 0.f, 0.f }, { 500.f, 500.f, 500.f }, graphics::DefaultLibraries::GetMaterialLibrary().Get("Sky"));
 	}
 
 	void ImguiRender() override
@@ -332,22 +223,51 @@ public:
 			ImGui::DragFloat3("Cube Position", glm::value_ptr(cubePos), 0.01f);
 			ImGui::DragFloat3("Cube Rotation", glm::value_ptr(cubeRot), 0.01f);
 			ImGui::DragFloat3("Cube Scale", glm::value_ptr(cubeScale), 0.01f);
+
+			glm::vec3 rootPos = modelEntity->GetComponent<scene::Transform>().Position;
+			bool changed = ImGui::DragFloat3("Root Entity Pos", glm::value_ptr(rootPos));
+			if (changed) modelEntity->SetPosition(rootPos);
+			glm::vec3 rootLocalPos = modelEntity->GetComponent<scene::Transform>().LocalPosition;
+			changed = ImGui::DragFloat3("Root Entity Local Pos", glm::value_ptr(rootLocalPos));
+			if (changed) modelEntity->SetLocalPosition(rootLocalPos);
+
+			glm::vec3 cylinderPos = modelEntity->Children[0]->GetComponent<scene::Transform>().Position;
+			changed = ImGui::DragFloat3("Cylinder Pos", glm::value_ptr(cylinderPos));
+			if (changed) modelEntity->Children[0]->SetPosition(cylinderPos);
+			glm::vec3 cylinderLocalPos = modelEntity->Children[0]->GetComponent<scene::Transform>().LocalPosition;
+			changed = ImGui::DragFloat3("Cylinder Local Pos", glm::value_ptr(cylinderLocalPos));
+			if (changed) modelEntity->Children[0]->SetLocalPosition(cylinderLocalPos);
+
+			glm::vec3 rootRot = modelEntity->GetComponent<scene::Transform>().Rotation;
+			changed = ImGui::DragFloat3("Root Entity Rot", glm::value_ptr(rootRot));
+			if (changed) modelEntity->SetRotation(rootRot);
+			glm::vec3 rootLocalRot = modelEntity->GetComponent<scene::Transform>().LocalRotation;
+			changed = ImGui::DragFloat3("Root Entity Local Rot", glm::value_ptr(rootLocalRot));
+			if (changed) modelEntity->SetLocalRotation(rootLocalRot);
+
+			glm::vec3 cylinderRot = modelEntity->Children[0]->GetComponent<scene::Transform>().Rotation;
+			changed = ImGui::DragFloat3("Cylinder Rot", glm::value_ptr(cylinderRot));
+			if (changed) modelEntity->Children[0]->SetRotation(cylinderRot);
+			glm::vec3 cylinderLocalRot = modelEntity->Children[0]->GetComponent<scene::Transform>().LocalRotation;
+			changed = ImGui::DragFloat3("Cylinder Local Rot", glm::value_ptr(cylinderLocalRot));
+			if (changed) modelEntity->Children[0]->SetLocalRotation(cylinderLocalRot);
+
+			glm::vec3 rootScale = modelEntity->GetComponent<scene::Transform>().Scale;
+			changed = ImGui::DragFloat3("Root Entity Scale", glm::value_ptr(rootScale));
+			if (changed) modelEntity->SetScale(rootScale);
+			glm::vec3 rootLocalScale = modelEntity->GetComponent<scene::Transform>().LocalScale;
+			changed = ImGui::DragFloat3("Root Entity Local Scale", glm::value_ptr(rootLocalScale));
+			if (changed) modelEntity->SetLocalScale(rootLocalScale);
+
+			glm::vec3 cylinderScale = modelEntity->Children[0]->GetComponent<scene::Transform>().Scale;
+			changed = ImGui::DragFloat3("Cylinder Scale", glm::value_ptr(cylinderScale));
+			if (changed) modelEntity->Children[0]->SetScale(cylinderScale);
+			glm::vec3 cylinderLocalScale = modelEntity->Children[0]->GetComponent<scene::Transform>().LocalScale;
+			changed = ImGui::DragFloat3("Cylinder Local Scale", glm::value_ptr(cylinderLocalScale));
+			if (changed) modelEntity->Children[0]->SetLocalScale(cylinderLocalScale);
 		}
 		ImGui::End();
 	}
-
-	struct FallingObject
-	{
-		float speed;
-
-		FallingObject() = default;
-		FallingObject(float spd) : speed(spd) {}
-	};
-};
-
-struct Arguments
-{
-	std::string str;
 };
 
 based::App* CreateApp()

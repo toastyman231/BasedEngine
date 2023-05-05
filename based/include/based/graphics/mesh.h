@@ -31,10 +31,13 @@ namespace based::graphics
         std::vector<Vertex>       vertices;
         std::vector<unsigned int> indices;
         std::vector<Texture>      textures;
+        std::shared_ptr<Material> material;
 
         Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
-        Mesh(std::shared_ptr<VertexArray> va);
+        Mesh(std::shared_ptr<VertexArray> va, std::shared_ptr<Material> mat);
+        ~Mesh() { BASED_TRACE("Destroying mesh!"); }
         void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material);
+        void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
     private:
         //  render data
         //unsigned int VAO, VBO, EBO;
