@@ -130,18 +130,16 @@ namespace based::graphics
 		mTransform.Scale = scale;
 
 		glm::mat4 view = glm::mat4(1.f);
-		view = glm::translate(view, pos);
-		view = glm::rotate(view, glm::radians(rot.x), glm::vec3(1, 0, 0));
-		view = glm::rotate(view, glm::radians(rot.y), glm::vec3(0, 1, 0));
-		view = glm::rotate(view, glm::radians(rot.z), glm::vec3(0, 0, 1));
-		view = glm::scale(view, scale);
-		view = glm::inverse(view);
+		glm::mat4 orient = glm::rotate(glm::mat4(1.f), glm::radians(rot.x), glm::vec3(1, 0, 0)) * glm::rotate(glm::mat4(1.f), glm::radians(rot.y), glm::vec3(0, 1, 0))
+			* glm::rotate(glm::mat4(1.f), glm::radians(rot.z), glm::vec3(0, 0, 1));
 
-		mForward = glm::normalize(glm::vec3(view[2]));
+		view = orient * glm::translate(glm::mat4(1.f), pos);
+
+		mForward = glm::normalize(glm::vec3(view[0][2], view[1][2], view[2][2]));
 		mRight = glm::normalize(glm::cross(glm::vec3(0.f, 1.f, 0.f), mForward));
-		mUp = glm::cross(mForward, mRight);
+		mUp = glm::cross(mRight, -mForward);
 
-		SetViewMatrix(mTransform.Position, mForward, mUp);
+		SetViewMatrix(view);
 	}
 
 	void Camera::SetPosition(glm::vec3 pos)

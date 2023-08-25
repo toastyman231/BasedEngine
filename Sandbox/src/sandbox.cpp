@@ -95,6 +95,9 @@ public:
 		modelEntity = graphics::Model::CreateModelEntity("Assets/Models/rotate_cylinder.obj");
 		modelEntity->SetPosition({ 2, 0, 0 });
 
+		auto axe = graphics::Model::CreateModelEntity("Assets/Models/axe.obj");
+		axe->SetPosition({ -2, 0, 0 });
+
 		BASED_TRACE("Done initializing");
 
 		// TODO: Fix text rendering behind sprites even when handled last
@@ -138,7 +141,7 @@ public:
 		if (mouseControl)
 		{
 			pitch += static_cast<float>(input::Mouse::DX()) * sensitivity * deltaTime;
-			yaw += static_cast<float>(-input::Mouse::DY()) * sensitivity * deltaTime;
+			yaw += static_cast<float>(input::Mouse::DY()) * sensitivity * deltaTime;
 
 			yaw = based::math::Clamp(yaw, -89.f, 89.f);
 
