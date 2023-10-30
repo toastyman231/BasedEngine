@@ -155,42 +155,6 @@ namespace based::graphics
 					vb->PushVertex({ 1, 0 });
 					vb->PushVertex({ 0, 0 });
 
-					//// Front
-					//vb->PushVertex({ GetAdjustedUV(1, 1, 4), GetAdjustedUV(1, 0, 3) });
-					//vb->PushVertex({ GetAdjustedUV(1, 0, 4), GetAdjustedUV(1, 0, 3) });
-					//vb->PushVertex({ GetAdjustedUV(1,0, 4), GetAdjustedUV(1, 1, 3) });
-					//vb->PushVertex({ GetAdjustedUV(1, 1, 4), GetAdjustedUV(1, 1, 3) });
-
-					//// Right
-					//vb->PushVertex({ GetAdjustedUV(2, 0, 4), GetAdjustedUV(1, 0, 3) });
-					//vb->PushVertex({ GetAdjustedUV(2, 0, 4), GetAdjustedUV(1, 1, 3) });
-					//vb->PushVertex({ GetAdjustedUV(2, 1, 4), GetAdjustedUV(1, 1, 3) });
-					//vb->PushVertex({ GetAdjustedUV(2, 1, 4), GetAdjustedUV(1, 0, 3) });
-
-					//// Top
-					//vb->PushVertex({ GetAdjustedUV(1, 1, 4), GetAdjustedUV(0, 1, 3) });
-					//vb->PushVertex({ GetAdjustedUV(1, 1, 4), GetAdjustedUV(0, 0, 3) });
-					//vb->PushVertex({ GetAdjustedUV(1, 0, 4), GetAdjustedUV(0, 0, 3) });
-					//vb->PushVertex({ GetAdjustedUV(1, 0, 4), GetAdjustedUV(0, 1, 3) });
-
-					//// Left
-					//vb->PushVertex({ GetAdjustedUV(0, 1, 4), GetAdjustedUV(1, 0, 3) });
-					//vb->PushVertex({ GetAdjustedUV(0, 0, 4), GetAdjustedUV(1, 0, 3) });
-					//vb->PushVertex({ GetAdjustedUV(0, 0, 4), GetAdjustedUV(1, 1, 3) });
-					//vb->PushVertex({ GetAdjustedUV(0, 1, 4), GetAdjustedUV(1, 1, 3) });
-
-					//// Bottom
-					//vb->PushVertex({ GetAdjustedUV(1, 0, 4), GetAdjustedUV(2, 1, 3) });
-					//vb->PushVertex({ GetAdjustedUV(1, 1, 4), GetAdjustedUV(2, 1, 3) });
-					//vb->PushVertex({ GetAdjustedUV(1, 1, 4), GetAdjustedUV(2, 0, 3) });
-					//vb->PushVertex({ GetAdjustedUV(1, 0, 4), GetAdjustedUV(2, 0, 3) });
-
-					//// Back
-					//vb->PushVertex({ GetAdjustedUV(3, 0, 4), GetAdjustedUV(1, 1, 3) });
-					//vb->PushVertex({ GetAdjustedUV(3, 1, 4), GetAdjustedUV(1, 1, 3) });
-					//vb->PushVertex({ GetAdjustedUV(3, 1, 4), GetAdjustedUV(1, 0, 3) });
-					//vb->PushVertex({ GetAdjustedUV(3, 0, 4), GetAdjustedUV(1, 0, 3) });
-
 					vb->SetLayout({ 2 });
 					va->PushBuffer(std::move(vb));
 				}
@@ -412,6 +376,43 @@ namespace based::graphics
                 )";
 				mShaderLibrary.Load("Model", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));
 			}
+			{
+				auto vertexShader = R"(
+                    #version 410 core
+
+					layout (location = 0) in vec3 position;
+					layout (location = 1) in vec2 texcoords;
+					out vec2 uvs;
+
+					uniform mat4 projection = mat4(1.0);
+					uniform mat4 model = mat4(1.0);
+					void main()
+					{
+					    uvs = texcoords;
+					    gl_Position = projection * model * vec4(position.xy, 0.0, 1.0);
+					    gl_Position = vec4(gl_Position.xy, 0.0, 1.0);
+					}
+                )";
+				auto fragmentShader = R"(
+                    #version 410 core
+
+					out vec4 outColor;
+					in vec2 uvs;
+					
+					uniform int textureSample = 0;
+					uniform sampler2D tex;
+					uniform vec4 bgColor = vec4(1.0, 1.0, 1.0, 1.0);
+					void main()
+					{
+						if (textureSample == 1) {
+							outColor = texture(tex, uvs) * bgColor;
+						} else {
+							outColor = bgColor;
+						}
+					}
+                )";
+				mShaderLibrary.Load("UI", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));
+			}
 
 			// Textures
 			{
@@ -437,6 +438,10 @@ namespace based::graphics
 				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("Rect"));
 				mat->SetUniformValue("col", glm::vec4(0, 1, 0, 1));
 				mMaterialLibrary.Load("RectGreen", mat);
+			}
+			{
+				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("UI"));
+				mMaterialLibrary.Load("UI", mat);
 			}
 		}
 

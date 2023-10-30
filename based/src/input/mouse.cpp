@@ -86,4 +86,12 @@ namespace based::input
 		mCursorLocked = locked;
 		SDL_SetRelativeMouseMode((locked) ? SDL_TRUE : SDL_FALSE);
 	}
+
+	glm::vec2 Mouse::GetMousePosition()
+	{
+		int x;
+		int y;
+		Uint32 state = SDL_GetMouseState(&x, &y);
+		return glm::vec2(x, y);
+	}
 }

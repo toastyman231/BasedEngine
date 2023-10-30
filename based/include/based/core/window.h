@@ -47,6 +47,7 @@ namespace based::core
 		inline SDL_Window* GetSDLWindow() { return mWindow; }
 		inline SDL_GLContext GetGLContext() { return mGLContext; }
 		inline graphics::Framebuffer* GetFramebuffer() { return mFramebuffer.get(); }
+		void SetMaintainAspectRatio(bool newMaintain);
 
 		void BeginRender();
 		void EndRender();
@@ -62,6 +63,7 @@ namespace based::core
 		SDL_GLContext mGLContext;
 		ImguiWindow mImguiWindow;
 		std::shared_ptr<graphics::Framebuffer> mFramebuffer;
+		bool mMaintainAspectRatio = true;
 
 		// Screen render
 		bool mShouldRenderToScreen;

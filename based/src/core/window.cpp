@@ -133,6 +133,12 @@ namespace based::core
 		return glm::ivec2(w, h);
 	}
 
+	void Window::SetMaintainAspectRatio(bool newMaintain)
+	{
+		mMaintainAspectRatio = newMaintain; 
+		HandleResize(GetSize().x, GetSize().y);
+	}
+
 	void Window::BeginRender()
 	{
 		auto& rm = Engine::Instance().GetRenderManager();
@@ -228,7 +234,11 @@ namespace based::core
 
 	void Window::HandleResize(int width, int height)
 	{
-		
+		if (!mMaintainAspectRatio) 
+		{
+			mFramebufferSize = { width, height };
+			return;
+		}
 
 		mFramebufferSize = GetSizeInAspectRatio(width, height);
 	}

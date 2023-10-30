@@ -17,6 +17,7 @@
 #include "based/scene/entity.h"
 #include "external/glm/gtc/type_ptr.hpp"
 #include "external/imgui/imgui.h"
+#include "based/ui/uielement.h"
 
 using namespace based;
 
@@ -29,20 +30,28 @@ private:
 	scene::Entity* crateEntity;
 
 	bool mouseControl = false;
+	bool useTexture = false;
 	float speed = 2.5f;
 	float yaw = 0.f;
 	float pitch = 0.0f;
 	float sensitivity = 100.f;
+	float padding = 0.f;
 	glm::vec3 camPos = glm::vec3(0.f, 0.f, 1.5f);
 	glm::vec3 camRot = glm::vec3(0.f);
 
 	glm::vec3 cubePos;
 	glm::vec3 cubeRot;
 	glm::vec3 cubeScale;
+	glm::vec3 uiScale = glm::vec3{ 100.f, 100.f, 0.f };
+	glm::vec3 uiPos;
+	glm::vec2 alignment;
+	glm::vec2 anchor;
+	glm::mat4 orthoMatrix;
 
 	graphics::Mesh* crateMesh;
 	graphics::Mesh* skyboxMesh;
 	graphics::Model* testModel;
+	std::shared_ptr<graphics::Texture> crateTex;
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -66,16 +75,21 @@ public:
 
 		cubePos = glm::vec3(0.f);
 		cubeRot = glm::vec3(0.f);
+		uiPos = glm::vec3(0.f);
+		uiScale = glm::vec3(100.f);
 		cubeScale = glm::vec3(1.f);
 		startScene->GetActiveCamera()->SetProjection(based::graphics::PERSPECTIVE);
 
 		// TODO: Confirm local transforms work in 2D, scene loading, better UI/Text
 
-		auto crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
+		crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
 		auto crateMat = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/test_vert.vert", "Assets/shaders/test_frag.frag"),
 			crateTex);
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Crate", crateMat);
+
+		auto ui = new ui::Image(0, 0, 100, 100);
+		uiScale = ui->GetTransform()->GetSize();
 
 		auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
 		auto skybox = std::make_shared<graphics::Material>(
@@ -96,7 +110,7 @@ public:
 		modelEntity->SetPosition({ 2, 0, 0 });
 
 		auto axe = graphics::Model::CreateModelEntity("Assets/Models/axe.obj");
-		axe->SetPosition({ -2, 0, 0 });
+		axe->SetPosition({ -2, 0, 0 });	
 
 		BASED_TRACE("Done initializing");
 
@@ -165,6 +179,18 @@ public:
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_H))
 		{
 		}
+
+		crateEntity->SetTransform(cubePos, cubeRot, cubeScale);
+		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->x = uiPos.x;
+		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->y = uiPos.y;
+		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->width = uiScale.x;
+		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->height = uiScale.y;
+		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->alignment = alignment;
+		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->anchorPoint = anchor;
+		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->SetPadding(padding);
+
+		if (useTexture) dynamic_cast<ui::Image*>(ui::UiElement::GetAllUiElements()[0])->SetTexture(crateTex);
+		else dynamic_cast<ui::Image*>(ui::UiElement::GetAllUiElements()[0])->SetTexture(nullptr);
 	}
 
 	void Render() override
@@ -222,6 +248,26 @@ public:
 			glm::vec3 rot = startScene->GetActiveCamera()->GetTransform().Rotation;
 			ImGui::DragFloat3("Camera Rot", glm::value_ptr(rot), 0.01f);
 			if (!mouseControl) startScene->GetActiveCamera()->SetRotation(rot);
+
+			glm::vec3 uiPosition = uiPos;
+			ImGui::DragFloat2("UI Position", glm::value_ptr(uiPosition), 0.5f);
+			uiPos = uiPosition;
+
+			glm::vec3 uiSize = uiScale;
+			ImGui::DragFloat2("UI Scale", glm::value_ptr(uiSize), 0.5f);
+			uiScale = uiSize;
+
+			ImGui::DragFloat("UI Padding", &padding, 0.5f);
+
+			glm::vec2 align = alignment;
+			ImGui::DragFloat2("UI Alignment", glm::value_ptr(align), 0.1f);
+			alignment = align;
+
+			glm::vec2 anchorPoint = anchor;
+			ImGui::DragFloat2("UI Anchor", glm::value_ptr(anchorPoint), 0.1f);
+			anchor = anchorPoint;
+
+			ImGui::Checkbox("Use Texture", &useTexture);
 
 			ImGui::DragFloat3("Cube Position", glm::value_ptr(cubePos), 0.01f);
 			ImGui::DragFloat3("Cube Rotation", glm::value_ptr(cubeRot), 0.01f);

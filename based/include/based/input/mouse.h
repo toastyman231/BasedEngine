@@ -2,6 +2,8 @@
 
 #include <array>
 
+#include "external/glm/glm.hpp"
+
 namespace based::input
 {
 	class Mouse
@@ -21,6 +23,8 @@ namespace based::input
 		static bool ButtonUp(int button);
 
 		static void SetCursorLocked(bool locked);
+
+		static glm::vec2 GetMousePosition();
 
 	private:
 		constexpr static int ButtonCount = 5; //SDL supports up to 5 mouse buttons
