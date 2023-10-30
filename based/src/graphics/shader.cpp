@@ -72,6 +72,10 @@ namespace based::graphics
 		glDeleteShader(fragmentShaderId); BASED_CHECK_GL_ERROR;
 	}
 
+	Shader::Shader(const Shader& other) : Shader(other.mVertexShader, other.mFragmentShader)
+	{
+	}
+
 	Shader::~Shader()
 	{
 		glUseProgram(0); BASED_CHECK_GL_ERROR;

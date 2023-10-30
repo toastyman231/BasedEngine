@@ -1,5 +1,6 @@
 #include "graphics/material.h"
 #include "graphics/shader.h"
+#include "graphics/texture.h"
 #include "log.h"
 
 namespace based::graphics
@@ -13,7 +14,7 @@ namespace based::graphics
 
 	Material::Material(const Material& other)
 	{
-		mShader = other.mShader;
+		mShader = std::make_shared<graphics::Shader>(*other.mShader);
 		mTexture = other.mTexture;
 
 		// Data

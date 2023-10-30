@@ -26,6 +26,7 @@ namespace based::ui {
 		Padding* GetPadding() const { return mTransform->Padding; }
 
 		void SetPadding(Padding* padding) const { mTransform->Padding = padding; }
+		void SetParent(UiElement* p) { parent = p; }
 
 		static std::vector<UiElement*> GetAllUiElements() { return mUiElements; }
 
@@ -36,6 +37,10 @@ namespace based::ui {
 		RectTransform* mTransform;
 		std::shared_ptr<graphics::VertexArray> mVA;
 		std::shared_ptr<graphics::Material> mMaterial;
+
+		glm::vec2 GetRelativeScale() const;
+		glm::vec2 GetAnchorOffset() const;
+		glm::vec2 GetRelativePosition() const;
 
 		inline static std::vector<UiElement*> mUiElements = {};
 	};

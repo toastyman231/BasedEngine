@@ -91,6 +91,24 @@ public:
 		auto ui = new ui::Image(0, 0, 100, 100);
 		uiScale = ui->GetTransform()->GetSize();
 
+		auto ui2 = new ui::Image(0, 0, 50, 50);
+		ui2->SetParent(ui);
+		ui2->GetTransform()->alignment = glm::vec2(0.5f, 1.5f);
+		ui2->SetPadding(new ui::Padding(10.f));
+		ui2->BackgroundColor = glm::vec4{ 1, 0, 0, 1 };
+
+		auto ui3 = new ui::Image(0, 0, 50, 50);
+		ui3->SetParent(ui);
+		ui3->GetTransform()->alignment = glm::vec2(0.5f, 0.5f);
+		ui3->SetPadding(new ui::Padding(5.f));
+		ui3->BackgroundColor = glm::vec4{ 0, 1, 0, 1 };
+
+		auto ui4 = new ui::Image(0, 0, 50, 50);
+		ui4->SetParent(ui);
+		ui4->GetTransform()->alignment = glm::vec2(0.5f, -0.5f);
+		ui4->SetPadding(new ui::Padding(5.f));
+		ui4->BackgroundColor = glm::vec4{ 0, 0, 1, 1 };
+
 		auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
 		auto skybox = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/test_vert.vert", "Assets/shaders/test_frag.frag"),
@@ -188,6 +206,15 @@ public:
 		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->alignment = alignment;
 		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->anchorPoint = anchor;
 		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->SetPadding(padding);
+
+		based::ui::UiElement::GetAllUiElements()[1]->GetTransform()->width = uiScale.x;
+		based::ui::UiElement::GetAllUiElements()[1]->GetTransform()->height = uiScale.y / 3.f;
+
+		based::ui::UiElement::GetAllUiElements()[2]->GetTransform()->width = uiScale.x;
+		based::ui::UiElement::GetAllUiElements()[2]->GetTransform()->height = uiScale.y / 3.f;
+
+		based::ui::UiElement::GetAllUiElements()[3]->GetTransform()->width = uiScale.x;
+		based::ui::UiElement::GetAllUiElements()[3]->GetTransform()->height = uiScale.y / 3.f;
 
 		if (useTexture) dynamic_cast<ui::Image*>(ui::UiElement::GetAllUiElements()[0])->SetTexture(crateTex);
 		else dynamic_cast<ui::Image*>(ui::UiElement::GetAllUiElements()[0])->SetTexture(nullptr);

@@ -15,6 +15,7 @@ namespace based::graphics
 	public:
 		Texture(const std::string& path, bool overrideFlip = false);
 		Texture(const SDL_Surface* surface, unsigned int id);
+		Texture(const Texture& other) = default;
 		Texture() = default;
 		~Texture();
 

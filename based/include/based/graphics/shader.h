@@ -12,6 +12,7 @@ namespace based::graphics
 	{
 	public:
 		Shader(const std::string& vertex, const std::string& fragment);
+		Shader(const Shader& other);
 		~Shader();
 
 		static Shader* LoadShader(const std::string& vsPath, const std::string& fsPath);
