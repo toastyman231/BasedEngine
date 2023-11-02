@@ -26,17 +26,37 @@ namespace based::ui {
 		Padding* GetPadding() const { return mTransform->Padding; }
 
 		void SetPadding(Padding* padding) const { mTransform->Padding = padding; }
-		void SetParent(UiElement* p) { parent = p; }
+		void SetParent(UiElement* p);
+		bool RemoveChild(UiElement* child);
+		bool IsShowing() const { return mIsShowing; }
+		unsigned long long GetChildCount() const { return mChildren.size(); }
+		std::vector<UiElement*> GetAllChildren() const { return mChildren; }
+
+		static void ShowElement(UiElement* elementToShow);
+		static void HideElement(UiElement* elementToHide);
 
 		static std::vector<UiElement*> GetAllUiElements() { return mUiElements; }
+
+		template<typename Type, typename... Args>
+		static inline Type* CreateUiElement(float x, float y, float width, float height, Args &&... args)
+		{
+			Type* newElement = new Type(x, y, width, height, args...);
+
+			newElement->OnCreate();
+
+			return newElement;
+		}
 
 		glm::vec4 BackgroundColor = glm::vec4{ 1, 1, 1, 1 };
 	private:
 		UiElement* parent = nullptr;
+		std::vector<UiElement*> mChildren;
 
 		RectTransform* mTransform;
 		std::shared_ptr<graphics::VertexArray> mVA;
 		std::shared_ptr<graphics::Material> mMaterial;
+
+		bool mIsShowing = false;
 
 		glm::vec2 GetRelativeScale() const;
 		glm::vec2 GetAnchorOffset() const;
@@ -49,15 +69,15 @@ namespace based::ui {
 	{
 	public:
 		Image(float x, float y, float width, float height) : UiElement(x, y, width, height) {}
+		Image(const Image& other) = default;
 		~Image() override = default;
 
+		void SetTexture(std::shared_ptr<graphics::Texture> tex);
 		void OnCreate() override {}
 		void OnShow() override {}
 		void OnHide() override {}
 		void OnDestroy() override {}
 		void Update(float deltaTime) override {}
-
-		void SetTexture(std::shared_ptr<graphics::Texture> tex);
 
 	private:
 		std::shared_ptr<graphics::Texture> mTexture;

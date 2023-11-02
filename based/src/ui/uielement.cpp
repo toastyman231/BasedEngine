@@ -26,8 +26,8 @@ namespace based::ui
 	{
 		auto model = glm::mat4(1.f);
 
-		glm::vec2 parentTransform = (parent != nullptr) ?
-			parent->GetRelativePosition() : glm::vec2{ 0.f, 0.f };
+		const glm::vec2 parentTransform = (parent != nullptr) ?
+			                                  parent->GetRelativePosition() : glm::vec2{ 0.f, 0.f };
 
 		const glm::vec2 scale = GetRelativeScale();
 		const glm::vec2 anchor = GetAnchorOffset();
@@ -40,11 +40,56 @@ namespace based::ui
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, mMaterial, model));
 	}
 
+	void UiElement::SetParent(UiElement* p)
+	{
+		if (p == nullptr && parent)
+		{
+			parent->RemoveChild(this);
+			return;
+		}
+
+		parent = p;
+		parent->mChildren.emplace_back(this);
+	}
+
+	bool UiElement::RemoveChild(UiElement* child)
+	{
+		int i = 0;
+		for (const auto childUi : mChildren)
+		{
+			if (childUi == child)
+			{
+				mChildren.erase(mChildren.begin() + i);
+				childUi->parent = nullptr;
+				return true;
+			}
+			i++;
+		}
+
+		return false;
+	}
+
+	void UiElement::ShowElement(UiElement* elementToShow)
+	{
+		if (!elementToShow || elementToShow->IsShowing()) return;
+
+		elementToShow->mIsShowing = true;
+		elementToShow->OnShow();
+	}
+
+	void UiElement::HideElement(UiElement* elementToHide)
+	{
+		if (!elementToHide || !elementToHide->IsShowing()) return;
+
+		elementToHide->mIsShowing = false;
+		elementToHide->OnHide();
+	}
+
 	glm::vec2 UiElement::GetRelativeScale() const
 	{
 		const float scaleX = mTransform->GetSize().x - (GetPadding()->right * 2.f);
 		const float scaleY = mTransform->GetSize().y - (GetPadding()->bottom * 2.f);
-		return glm::vec2(scaleX, scaleY);
+		return {scaleX, scaleY};
 	}
 
 	glm::vec2 UiElement::GetAnchorOffset() const
@@ -53,7 +98,7 @@ namespace based::ui
 		const float maxY = (parent != nullptr) ? parent->GetRelativeScale().y : 1080.f;
 		const float anchorX = mTransform->anchorPoint.x * maxX;
 		const float anchorY = mTransform->anchorPoint.y * maxY;
-		return glm::vec2(anchorX, anchorY);
+		return {anchorX, anchorY};
 	}
 
 	glm::vec2 UiElement::GetRelativePosition() const
@@ -62,7 +107,7 @@ namespace based::ui
 		const float maxY = (parent != nullptr) ? parent->GetRelativeScale().y : 1080.f;
 		const float xPos = (mTransform->GetCenter().x - (maxX / 2.f)) + GetPadding()->left - (mTransform->width * mTransform->alignment.x);
 		const float yPos = (mTransform->GetCenter().y + (maxY / 2.f - mTransform->height)) + GetPadding()->top + (mTransform->height * mTransform->alignment.y);
-		return glm::vec2(xPos, yPos);
+		return {xPos, yPos};
 	}
 
 	void Image::SetTexture(std::shared_ptr<graphics::Texture> tex)
