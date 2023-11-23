@@ -159,6 +159,55 @@ namespace based::graphics::rendercommands
 		}
 	}
 
+	void RenderVertexArrayUserInterface::Execute()
+	{
+		std::shared_ptr<VertexArray> va = mVertexArray.lock();
+		//std::shared_ptr<Texture> texture = mTexture.lock();
+		std::shared_ptr<Shader> shader = mShader.lock();
+		if (va && shader)
+		{
+			BASED_ASSERT(va->IsValid(), "Attempting to execute invalid RenderVertexArrayUserInterface - did you forget to call VertexArray::Upload()?");
+			if (va->IsValid())
+			{
+				va->Bind();
+				if (mTexture != 0)
+				{
+					glBindTexture(GL_TEXTURE_2D, mTexture); BASED_CHECK_GL_ERROR;
+				}
+				shader->Bind();
+
+				shader->SetUniformMat4("_transform", mTransform);
+				/*BASED_TRACE("Transform \n{} {} {} {}\n{} {} {} {}\n{} {} {} {}\n{} {} {} {}\n", 
+					mTransform[0].x, mTransform[1].x, mTransform[2].x, mTransform[3].x,
+					mTransform[0].y, mTransform[1].y, mTransform[2].y, mTransform[3].y,
+					mTransform[0].z, mTransform[1].z, mTransform[2].z, mTransform[3].z,
+					mTransform[0].w, mTransform[1].w, mTransform[2].w, mTransform[3].w);
+				BASED_TRACE("Translation\n{} {}", mTranslation.x, mTranslation.y);*/
+				shader->SetUniformFloat2("_translate", glm::vec2(mTranslation.x, mTranslation.y));
+
+				if (va->GetElementCount() > 0)
+				{
+					glDrawElements(GL_TRIANGLES, va->GetElementCount(), GL_UNSIGNED_INT, 0);
+				}
+				else
+				{
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, va->GetVertexCount()); BASED_CHECK_GL_ERROR;
+				}
+
+				shader->Unbind();
+				if (mTexture != 0)
+				{
+					glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
+				}
+				va->Unbind();
+			}
+		} else
+		{
+			BASED_WARN("Attempting to execute RenderVertexArrayUserInterface with invalid data");
+		}
+	}
+
+
 	void PushFramebuffer::Execute()
 	{
 		std::shared_ptr<Framebuffer> fb = mFramebuffer.lock();

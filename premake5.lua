@@ -20,6 +20,7 @@ externals["glad"] = "external/glad"
 externals["freetype"] = "external/freetype"
 externals["miniaudio"] = "external/miniaudio"
 externals["assimp"] = "external/assimp"
+externals["rmlui"] = "external/rmlui"
 
 -- Process Glad before anything else
 include "external/glad"
@@ -54,7 +55,8 @@ project "based"
         "%{externals.glad}/include",
         "%{externals.freetype}/include",
         "%{externals.miniaudio}",
-        "%{externals.assimp}/include"
+        "%{externals.assimp}/include",
+        "%{externals.rmlui}/Include"
     }
 
     flags
@@ -65,7 +67,8 @@ project "based"
     defines
     {
         "GLFW_INCLUDE_NONE", -- Ensures glad doesn't include glfw
-        "_CRT_SECURE_NO_WARNINGS"
+        "_CRT_SECURE_NO_WARNINGS"--,
+        --"RMLUI_STATIC_LIB"
     }
 
     filter {"system:windows", "configurations:*"}
@@ -352,8 +355,10 @@ project "Sandbox"
         "based/include",
         "%{externals.sdl2}/include",
         "%{externals.spdlog}/include",
+        "%{externals.glad}/include",
         "%{externals.miniaudio}",
-        "%{externals.assimp}/include"
+        "%{externals.assimp}/include",
+        "%{externals.rmlui}/Include"
     }
 
     flags
@@ -371,14 +376,16 @@ project "Sandbox"
 
         defines
         {
-            "BASED_PLATFORM_WINDOWS"
+            "BASED_PLATFORM_WINDOWS"--,
+            --"RMLUI_STATIC_LIB"
         }
 
         libdirs
         {
             "%{externals.sdl2}/lib",
             "%{externals.freetype}/lib",
-            "%{externals.assimp}/lib"
+            "%{externals.assimp}/lib",
+            "%{externals.rmlui}/Bin/Dynamic-Debug"
         }
 
         links
@@ -387,7 +394,9 @@ project "Sandbox"
             "SDL2_ttf",
             "glad",
             "freetype",
-            "assimp-vc143-mt"
+            "assimp-vc143-mt",
+            "RmlCore",
+            "RmlDebugger"
         }
 
     filter {"system:macosx", "configurations:*"}
@@ -409,7 +418,9 @@ project "Sandbox"
         {
             "SDL2.framework",
             "glad",
-            "freetype"
+            "freetype",
+            "RmlCore",
+            "RmlDebugger"
         }
 
     filter {"system:linux", "configurations:*"}
@@ -423,7 +434,9 @@ project "Sandbox"
             "SDL2",
             "glad",
             "dl",
-            "freetype"
+            "freetype",
+            "RmlCore",
+            "RmlDebugger"
         }
 
     filter "configurations:Debug"

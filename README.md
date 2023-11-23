@@ -12,6 +12,7 @@ A simple 2D game engine based on tutorials by https://www.youtube.com/c/Progrema
 - STB (Image Loading, https://github.com/nothings/stb)
 - Miniaudio (Audio playback, https://github.com/mackron/miniaudio)  
 - Assimp (Model importing, https://github.com/assimp/assimp)  
+- RmlUI (UI Rendering, https://github.com/mikke89/RmlUi)  
 
 ## My Additions
 The bulk of the engine design and implentation was done by Progrematic, if something is not listed below, it was probably done by him. You can find his original engine here: https://github.com/progrematic/hippo.
@@ -27,19 +28,19 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - Toolchain to create projects in directories outside the engine's directory
 - Simple audio system using miniaudio
 - Simple 3D rendering with assimp for model importing
+- Flexible UI system via RmlUI
 
 ## Planned Additions
 - 2D Physics with Box2D
 - ~~Audio capabilities (maybe ffmpeg?)~~ Complete!
 - Animation System
 - ~~Load shaders from file (They are hardcoded currently)~~ Complete!  
-- More UI (Buttons, Sliders, Checkboxes, etc)
+- ~~More UI (Buttons, Sliders, Checkboxes, etc)~~ Complete!
 - Scene Save/Load (Serialization)
 - 3D Rendering capability with PBR materials (In progress!)
 - GUI to make creating/loading projects easier
 
 ## Thoughts and Concerns
-- Currently all UI (just text at the moment) is rendered as an object in the world. At some point I should build a more robust UI system, with support for overlay style UI. The text also has some transparency issues, and will overwrite objects around it.
 - Currently only quads can be rendered, things like lines and circles have to be baked into a texture then rendered on a square or something. Adding dedicated render commands for those types of objects is probably worth it.
 - A GUI editor would be nice to have at some point, but it's a lot of effort to make that I could be using to make actual games (or just improving the engine in general).
 - LoadScene cannot reload an already loaded scene, because all LoadScene really does is swap which scene is currently being rendered. I will need to have some way to load a scene by reading from a file of some sort to get all of it's entities, then on load create each of those entities and destroy all entities in the current scene
@@ -58,6 +59,8 @@ These items used to be grouped with the rest of the Thoughts and Concerns, but s
     - I have done this
 - The build system is a bit complicated, everything is kind of just all shoved into one giant premake file. If I add more libraries that need to be linked, but I don't add the include paths to all existing projects, the ones that should work will not compile. A way to separate projects so they only care about themselves and the engine would be nice. I might be able to include them the same way I include GLAD's project.
     - The mkproject command mentioned above takes care of this concern as well.
+- Currently all UI (just text at the moment) is rendered as an object in the world. At some point I should build a more robust UI system, with support for overlay style UI. The text also has some transparency issues, and will overwrite objects around it.
+    - I added RmlUI, a very flexible UI library, to the project. There is still some optimization and simplification of the API to be done, but it's completely usable as is.
 
 ## Contributing
 Feel free to contribute if you feel like it, this is my first large C++ project, so the codebase probably sucks (the parts made by me anyway). Any feedback is much appreciated.

@@ -1,4 +1,4 @@
-#include <memory>
+﻿#include <memory>
 #include <external/glm/gtx/string_cast.hpp>
 
 #include "based/engine.h"
@@ -15,12 +15,24 @@
 #include "based/math/basedmath.h"
 #include "based/scene/components.h"
 #include "based/scene/entity.h"
-#include "based/ui/linearbox.h"
 #include "external/glm/gtc/type_ptr.hpp"
 #include "external/imgui/imgui.h"
-#include "based/ui/uielement.h"
+#include <RmlUi/Debugger.h>
+#include <RmlUi/Core.h>
+#include "based/ui/uisysteminterface.h"
+#include "based/ui/uirenderinterface.h"
 
 using namespace based;
+
+struct ApplicationData {
+	bool show_text = true;
+	Rml::String animal = "dog";
+} my_data;
+
+void click()
+{
+	BASED_TRACE("CLICKED!");
+}
 
 class Sandbox : public based::App
 {
@@ -43,16 +55,16 @@ private:
 	glm::vec3 cubePos;
 	glm::vec3 cubeRot;
 	glm::vec3 cubeScale;
-	glm::vec3 uiScale = glm::vec3{ 100.f, 100.f, 0.f };
-	glm::vec3 uiPos;
-	glm::vec2 alignment;
-	glm::vec2 anchor;
-	glm::mat4 orthoMatrix;
 
 	graphics::Mesh* crateMesh;
 	graphics::Mesh* skyboxMesh;
 	graphics::Model* testModel;
 	std::shared_ptr<graphics::Texture> crateTex;
+
+	Rml::Context* context;
+	ui::RenderInterface_GL3* renderInterface;
+	Rml::Element* element;
+
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -74,24 +86,58 @@ public:
 		//SDL_CaptureMouse(SDL_TRUE);
 		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
 
+		Rml::SystemInterface* systemInterface = new ui::SystemInterface_SDL();
+		Rml::SetSystemInterface(systemInterface);
+		renderInterface = new ui::RenderInterface_GL3();
+		//renderInterface->SetViewport(GetWindowProperties().w, GetWindowProperties().h);
+		Rml::SetRenderInterface(renderInterface);
+
+		Rml::Initialise();
+
+		context = Rml::CreateContext("main", 
+			Rml::Vector2i(Engine::Instance().GetWindow().GetSize().x, 
+				Engine::Instance().GetWindow().GetSize().y));
+		if (!context)
+		{
+			BASED_ERROR("Error initializing context!");
+		}
+
+		Rml::Debugger::Initialise(context);
+
+		Rml::LoadFontFace("Assets/fonts/Arimo-Regular.ttf");
+
+		if (Rml::DataModelConstructor constructor = context->CreateDataModel("animals"))
+		{
+			constructor.Bind("show_text", &my_data.show_text);
+			constructor.Bind("animal", &my_data.animal);
+		}
+
+		Rml::ElementDocument* document = context->LoadDocument("Assets/ui/my_document.rml");
+		if (!document)
+		{
+			BASED_ERROR("Error loading document!");
+		}
+
+		document->Show();
+
+		element = document->GetElementById("world");
+		element->SetInnerRML("WORLD");
+		element->SetProperty("font-size", "1.5em");
+
+		element = document->GetElementById("input");
+
 		cubePos = glm::vec3(0.f);
 		cubeRot = glm::vec3(0.f);
-		uiPos = glm::vec3(0.f);
-		uiScale = glm::vec3(100.f);
 		cubeScale = glm::vec3(1.f);
 		startScene->GetActiveCamera()->SetProjection(based::graphics::PERSPECTIVE);
 
-		// TODO: Confirm local transforms work in 2D, scene loading, better UI/Text
+		// TODO: Confirm local transforms work in 2D, scene loading
 
 		crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
 		auto crateMat = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/test_vert.vert", "Assets/shaders/test_frag.frag"),
 			crateTex);
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Crate", crateMat);
-
-		auto ui = ui::UiElement::CreateUiElement<ui::LinearBox>(0, 0, 100, 100, ui::LinearBox::VERTICAL);//new ui::LinearBox(0, 0, 100, 100, ui::LinearBox::HORIZONTAL);
-		uiScale = ui->GetTransform()->GetSize();
-		ui::UiElement::ShowElement(ui);
 
 		auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
 		auto skybox = std::make_shared<graphics::Material>(
@@ -117,11 +163,15 @@ public:
 		BASED_TRACE("Done initializing");
 
 		// TODO: Fix text rendering behind sprites even when handled last
+		// TODO: Move UI stuff out to it's own class (automate this stuff), figure out events and interaction
+		// TODO: Optimize UI to not regenerate VAs every single frame
 	}
 
 	void Shutdown() override
 	{
 		App::Shutdown();
+
+		Rml::Shutdown();
 	}
 
 	void Update(float deltaTime) override
@@ -183,20 +233,22 @@ public:
 		}
 
 		crateEntity->SetTransform(cubePos, cubeRot, cubeScale);
-		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->x = uiPos.x;
-		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->y = uiPos.y;
-		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->width = uiScale.x;
-		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->height = uiScale.y;
-		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->alignment = alignment;
-		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->anchorPoint = anchor;
-		based::ui::UiElement::GetAllUiElements()[0]->GetTransform()->SetPadding(padding);
 
-		/*if (useTexture) dynamic_cast<ui::Image*>(ui::UiElement::GetAllUiElements()[0])->SetTexture(crateTex);
-		else dynamic_cast<ui::Image*>(ui::UiElement::GetAllUiElements()[0])->SetTexture(nullptr);*/
+		//RmlSDL::InputEventHandler(context, )
+		context->ProcessMouseMove(input::Mouse::X(), input::Mouse::Y(), 0);
+		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
+		{
+			context->ProcessMouseButtonDown(0, 0);
+		}
+
+		context->Update();
 	}
 
 	void Render() override
 	{
+		renderInterface->BeginFrame();
+		context->Render();
+		renderInterface->EndFrame();
 	}
 
 	void ImguiRender() override
@@ -250,26 +302,6 @@ public:
 			glm::vec3 rot = startScene->GetActiveCamera()->GetTransform().Rotation;
 			ImGui::DragFloat3("Camera Rot", glm::value_ptr(rot), 0.01f);
 			if (!mouseControl) startScene->GetActiveCamera()->SetRotation(rot);
-
-			glm::vec3 uiPosition = uiPos;
-			ImGui::DragFloat2("UI Position", glm::value_ptr(uiPosition), 0.5f);
-			uiPos = uiPosition;
-
-			glm::vec3 uiSize = uiScale;
-			ImGui::DragFloat2("UI Scale", glm::value_ptr(uiSize), 0.5f);
-			uiScale = uiSize;
-
-			ImGui::DragFloat("UI Padding", &padding, 0.5f);
-
-			glm::vec2 align = alignment;
-			ImGui::DragFloat2("UI Alignment", glm::value_ptr(align), 0.1f);
-			alignment = align;
-
-			glm::vec2 anchorPoint = anchor;
-			ImGui::DragFloat2("UI Anchor", glm::value_ptr(anchorPoint), 0.1f);
-			anchor = anchorPoint;
-
-			ImGui::Checkbox("Use Texture", &useTexture);
 
 			ImGui::DragFloat3("Cube Position", glm::value_ptr(cubePos), 0.01f);
 			ImGui::DragFloat3("Cube Rotation", glm::value_ptr(cubeRot), 0.01f);

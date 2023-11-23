@@ -50,10 +50,10 @@ namespace based::ui
 		static void FlipSurface(SDL_Surface* surface);
 	public:
 		TextEntity() = default;
-		TextEntity(std::string path, 
-			std::string text, 
-			int fontSize = 16, 
-			glm::vec3 pos = {0,0,0},
+		TextEntity(std::string path,
+			std::string text,
+			int fontSize = 16,
+			glm::vec3 pos = { 0,0,0 },
 			SDL_Color color = { 0,0,0,255 });
 		~TextEntity() override;
 

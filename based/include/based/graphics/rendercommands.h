@@ -76,6 +76,28 @@ namespace based::graphics
 			glm::mat4 mModelMatrix;
 		};
 
+		class RenderVertexArrayUserInterface : public RenderCommand
+		{
+		public:
+			RenderVertexArrayUserInterface(std::weak_ptr<VertexArray> vertexArray, std::weak_ptr<Shader> shader,
+				uint32_t texture, const glm::mat4 transform, const glm::vec2 translation)
+				: mVertexArray(vertexArray)
+				, mShader(shader)
+				, mTexture(texture)
+				, mTransform(transform)
+				, mTranslation(translation)
+			{
+			}
+
+			virtual void Execute() override;
+		private:
+			std::weak_ptr<VertexArray> mVertexArray;
+			std::weak_ptr<Shader> mShader;
+			uint32_t mTexture;
+			glm::mat4 mTransform;
+			glm::vec2 mTranslation;
+		};
+
 		class PushFramebuffer : public RenderCommand
 		{
 		public:

@@ -106,7 +106,7 @@ namespace based::core
 				case SDL_CONTROLLERDEVICEREMOVED:
 					input::Joystick::OnJoystickDisconnected(e.cdevice);
 					break;
-				case SDL_WINDOWEVENT:
+			case SDL_WINDOWEVENT:
 					if (e.window.event == SDL_WINDOWEVENT_RESIZED)
 					{
 						HandleResize(e.window.data1, e.window.data2);

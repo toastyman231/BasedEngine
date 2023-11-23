@@ -7,7 +7,6 @@
 #include "scene/components.h"
 #include "ui/textentity.h"
 #include "graphics/sprite.h"
-#include "ui/uielement.h"
 
 namespace based::scene
 {
@@ -69,16 +68,6 @@ namespace based::scene
 			ui::TextEntity::DrawFont(text);
 		}
 
-		float halfwidth = 2.f * Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetAspectRatio() * 0.5f;
-		float halfheight = 2.f * 0.5f;
-		auto orthoMatrix = glm::ortho(-halfwidth, halfwidth, -halfheight, halfheight, 0.01f, 1000.f);
-		for (const auto ui : ui::UiElement::GetAllUiElements())
-		{
-			if (!ui->IsShowing()) continue;
-			ui->GetMaterial()->GetShader()->SetUniformMat4("projection", orthoMatrix);
-			ui->Draw();
-		}
-
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 	}
 
@@ -94,12 +83,6 @@ namespace based::scene
 				if (!entityPtr->IsActive()) continue;
 				entityPtr->Update(deltaTime);
 			}
-		}
-
-		for (const auto ui : ui::UiElement::GetAllUiElements())
-		{
-			if (!ui->IsShowing()) continue;
-			ui->Update(deltaTime);
 		}
 	}
 

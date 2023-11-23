@@ -72,7 +72,7 @@ namespace based::ui
 			mShouldRegenVA = true;
 			mShouldRegenerate = true;
 		}
-		
+
 	}
 
 	void TextEntity::SetColor(SDL_Color col)
@@ -111,7 +111,7 @@ namespace based::ui
 		model = glm::rotate(model, rotation.x * 0.0174533f, glm::vec3(1.f, 0.f, 0.f));
 		model = glm::rotate(model, rotation.y * 0.0174533f, glm::vec3(0.f, 1.f, 0.f));
 		model = glm::rotate(model, rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
-		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, 
+		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial,
 			textEntity->mVALibrary.Get("VA"),//mVA, 
 			textEntity->mMaterialLibrary.Get("Material"),
 			model));
@@ -133,7 +133,7 @@ namespace based::ui
 		bmask = 0x00ff0000;
 		amask = 0xff000000;
 
-		theSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, 
+		theSurface = SDL_CreateRGBSurface(SDL_SWSURFACE,
 			math::NextPowerOfTwo(surface->w), math::NextPowerOfTwo(surface->h), 32, rmask, gmask, bmask, amask);
 		SDL_FillRect(theSurface, NULL, SDL_MapRGBA(theSurface->format, 0, 0, 0, 0));
 		convertedSurface = SDL_ConvertSurface(surface, theSurface->format, SDL_SWSURFACE);
@@ -252,7 +252,7 @@ namespace based::ui
 				//BASED_TRACE("SRC H: {}, DEST H: {}, YOFF: {}", src->h, dest->h, yOffset);
 
 				// Skip any rows before the offset, and only add pixels for as many rows as the original surface has
-				for (y = yOffset; y < yOffset + src->h; y++) 
+				for (y = yOffset; y < yOffset + src->h; y++)
 				{
 					// Offset the start of each row by however much is needed to align the text properly
 					int xOffset = 0; // Align to the left by default
@@ -263,7 +263,7 @@ namespace based::ui
 
 					// The source's pixels are easy: a row
 					// start is pixels+y*src->w.
-					srcPixels = (Uint32*)src->pixels + (y-yOffset) * src->w; // Subtract yOffset to get row index back in bound of original surf
+					srcPixels = (Uint32*)src->pixels + (y - yOffset) * src->w; // Subtract yOffset to get row index back in bound of original surf
 					// Destination's pixel rowstarts are dest->pixels + y*dest->w.
 					destPixels = (Uint32*)dest->pixels + y * dest->w + xOffset;
 					for (x = 0; x < src->w; x++)
