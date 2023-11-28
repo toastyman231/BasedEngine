@@ -105,7 +105,7 @@ namespace based::graphics
 		{
 			mStride *= sizeof(T);
 			mSize = sizeof(T) * (uint32_t)mDataVec.size();
-			BASED_TRACE("VertexBuffer::Upload() - mSize: {}, mStride: {}", mSize, mStride);
+			//BASED_TRACE("VertexBuffer::Upload() - mSize: {}, mStride: {}", mSize, mStride);
 			BASED_ASSERT(mSize > 0, "VertexBuffer::Upload() - mSize = 0");
 			mData = &mDataVec[0];
 			RawVertexBuffer::Upload(dynamic);

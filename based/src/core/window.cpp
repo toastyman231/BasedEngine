@@ -11,6 +11,7 @@
 #include "input/mouse.h"
 #include "input/keyboard.h"
 #include "input/joystick.h"
+//#include "managers/uimanager.h"
 
 namespace based::core
 {
@@ -116,6 +117,7 @@ namespace based::core
 					break;
 			}
 
+			Engine::Instance().GetUiManager().ProcessEvents(e);
 			mImguiWindow.HandleSDLEvent(e);
 		}
 

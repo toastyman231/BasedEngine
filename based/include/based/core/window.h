@@ -36,6 +36,7 @@ namespace based::core
 		~Window();
 
 		inline void SetShouldRenderToScreen(bool render) { mShouldRenderToScreen = render; }
+		bool GetShouldRenderToScreen() const { return mShouldRenderToScreen; }
 
 		bool Create(const WindowProperties& props);
 		void Shutdown();

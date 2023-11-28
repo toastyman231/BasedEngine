@@ -3,6 +3,7 @@
 #include "core/window.h"
 #include "managers/logmanager.h"
 #include "managers/rendermanager.h"
+#include "based/managers/uimanager.h"
 
 namespace based
 {
@@ -22,6 +23,7 @@ namespace based
 
         // Managers
         inline managers::RenderManager& GetRenderManager() { return mRenderManager; }
+        inline managers::UiManager& GetUiManager() { return mUiManager; }
     private:
         void GetInfo();
 
@@ -39,6 +41,7 @@ namespace based
         // Managers
         managers::LogManager mLogManager;
         managers::RenderManager mRenderManager;
+        managers::UiManager mUiManager;
 
         // Singleton
         Engine();

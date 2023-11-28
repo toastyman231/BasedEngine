@@ -17,22 +17,30 @@
 #include "based/scene/entity.h"
 #include "external/glm/gtc/type_ptr.hpp"
 #include "external/imgui/imgui.h"
-#include <RmlUi/Debugger.h>
 #include <RmlUi/Core.h>
-#include "based/ui/uisysteminterface.h"
-#include "based/ui/uirenderinterface.h"
 
 using namespace based;
 
 struct ApplicationData {
 	bool show_text = true;
 	Rml::String animal = "dog";
+	float my_value = 0.f;
 } my_data;
 
-void click()
+class MyListener : public Rml::EventListener
 {
-	BASED_TRACE("CLICKED!");
-}
+public:
+	MyListener(Rml::String value) : val(std::move(value)) {}
+	void ProcessEvent(Rml::Event& event) override
+	{
+		if (val == "button")
+		{
+			BASED_TRACE("CLICKED!");
+		}
+	}
+private:
+	std::string val;
+};
 
 class Sandbox : public based::App
 {
@@ -61,9 +69,7 @@ private:
 	graphics::Model* testModel;
 	std::shared_ptr<graphics::Texture> crateTex;
 
-	Rml::Context* context;
-	ui::RenderInterface_GL3* renderInterface;
-	Rml::Element* element;
+	Rml::ElementDocument* document;
 
 public:
 	core::WindowProperties GetWindowProperties() override
@@ -84,47 +90,28 @@ public:
 		//SDL_SetRelativeMouseMode(SDL_TRUE);
 		//SDL_SetWindowGrab(Engine::Instance().GetWindow().GetSDLWindow(), SDL_TRUE);
 		//SDL_CaptureMouse(SDL_TRUE);
-		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
+		Engine::Instance().GetWindow().SetShouldRenderToScreen(true);
 
-		Rml::SystemInterface* systemInterface = new ui::SystemInterface_SDL();
-		Rml::SetSystemInterface(systemInterface);
-		renderInterface = new ui::RenderInterface_GL3();
-		//renderInterface->SetViewport(GetWindowProperties().w, GetWindowProperties().h);
-		Rml::SetRenderInterface(renderInterface);
-
-		Rml::Initialise();
-
-		context = Rml::CreateContext("main", 
-			Rml::Vector2i(Engine::Instance().GetWindow().GetSize().x, 
-				Engine::Instance().GetWindow().GetSize().y));
-		if (!context)
-		{
-			BASED_ERROR("Error initializing context!");
-		}
-
-		Rml::Debugger::Initialise(context);
-
-		Rml::LoadFontFace("Assets/fonts/Arimo-Regular.ttf");
+		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main", 
+			Engine::Instance().GetWindow().GetSize());
 
 		if (Rml::DataModelConstructor constructor = context->CreateDataModel("animals"))
 		{
 			constructor.Bind("show_text", &my_data.show_text);
 			constructor.Bind("animal", &my_data.animal);
+			constructor.Bind("my_value", &my_data.my_value);
 		}
 
-		Rml::ElementDocument* document = context->LoadDocument("Assets/ui/my_document.rml");
-		if (!document)
-		{
-			BASED_ERROR("Error loading document!");
-		}
+		Engine::Instance().GetUiManager().SetPathPrefix("Assets/ui/");
 
-		document->Show();
+		document = Engine::Instance().GetUiManager().LoadWindow("my_document", context);
 
-		element = document->GetElementById("world");
+		Rml::Element* element = document->GetElementById("world");
 		element->SetInnerRML("WORLD");
 		element->SetProperty("font-size", "1.5em");
 
-		element = document->GetElementById("input");
+		element = document->GetElementById("button");
+		element->AddEventListener("mousedown", new MyListener("button"));
 
 		cubePos = glm::vec3(0.f);
 		cubeRot = glm::vec3(0.f);
@@ -163,15 +150,13 @@ public:
 		BASED_TRACE("Done initializing");
 
 		// TODO: Fix text rendering behind sprites even when handled last
-		// TODO: Move UI stuff out to it's own class (automate this stuff), figure out events and interaction
 		// TODO: Optimize UI to not regenerate VAs every single frame
+		// TODO: Figure out why radio buttons don't uncheck
 	}
 
 	void Shutdown() override
 	{
 		App::Shutdown();
-
-		Rml::Shutdown();
 	}
 
 	void Update(float deltaTime) override
@@ -226,6 +211,8 @@ public:
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_B))
 		{
+			if (document->IsVisible()) document->Hide();
+			else document->Show();
 		}
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_H))
@@ -233,27 +220,15 @@ public:
 		}
 
 		crateEntity->SetTransform(cubePos, cubeRot, cubeScale);
-
-		//RmlSDL::InputEventHandler(context, )
-		context->ProcessMouseMove(input::Mouse::X(), input::Mouse::Y(), 0);
-		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
-		{
-			context->ProcessMouseButtonDown(0, 0);
-		}
-
-		context->Update();
 	}
 
 	void Render() override
 	{
-		renderInterface->BeginFrame();
-		context->Render();
-		renderInterface->EndFrame();
 	}
 
 	void ImguiRender() override
 	{
-		//return;
+		if (Engine::Instance().GetWindow().GetShouldRenderToScreen()) return;
 
 		if (ImGui::Begin("GameView"))
 		{

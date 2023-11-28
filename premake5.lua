@@ -67,8 +67,7 @@ project "based"
     defines
     {
         "GLFW_INCLUDE_NONE", -- Ensures glad doesn't include glfw
-        "_CRT_SECURE_NO_WARNINGS"--,
-        --"RMLUI_STATIC_LIB"
+        "_CRT_SECURE_NO_WARNINGS"
     }
 
     filter {"system:windows", "configurations:*"}
@@ -134,7 +133,12 @@ project "basededitor"
     externalincludedirs
     {
         "based/include",
-        "%{externals.spdlog}/include"
+        "%{externals.sdl2}/include",
+        "%{externals.spdlog}/include",
+        "%{externals.glad}/include",
+        "%{externals.miniaudio}",
+        "%{externals.assimp}/include",
+        "%{externals.rmlui}/Include"
     }
 
     flags
@@ -159,7 +163,8 @@ project "basededitor"
         {
             "%{externals.sdl2}/lib",
             "%{externals.freetype}/lib",
-            "%{externals.assimp}/lib"
+            "%{externals.assimp}/lib",
+            "%{externals.rmlui}/Bin/Dynamic-Debug"
         }
 
         links
@@ -168,7 +173,9 @@ project "basededitor"
             "SDL2_ttf",
             "glad",
             "freetype",
-            "assimp-vc143-mt"
+            "assimp-vc143-mt",
+            "RmlCore",
+            "RmlDebugger"
         }
 
     filter {"system:macosx", "configurations:*"}
@@ -245,7 +252,12 @@ project "PongV1"
         externalincludedirs
         {
             "based/include",
-            "%{externals.spdlog}/include"
+            "%{externals.sdl2}/include",
+            "%{externals.spdlog}/include",
+            "%{externals.glad}/include",
+            "%{externals.miniaudio}",
+            "%{externals.assimp}/include",
+            "%{externals.rmlui}/Include"
         }
     
         flags
@@ -269,7 +281,9 @@ project "PongV1"
         libdirs
         {
             "%{externals.sdl2}/lib",
-            "%{externals.freetype}/lib"
+            "%{externals.freetype}/lib",
+            "%{externals.assimp}/lib",
+            "%{externals.rmlui}/Bin/Dynamic-Debug"
         }
 
         links
@@ -277,7 +291,10 @@ project "PongV1"
             "SDL2",
             "SDL2_ttf",
             "glad",
-            "freetype"
+            "freetype",
+            "assimp-vc143-mt",
+            "RmlCore",
+            "RmlDebugger"
         }
 
     filter {"system:macosx", "configurations:*"}
@@ -376,8 +393,7 @@ project "Sandbox"
 
         defines
         {
-            "BASED_PLATFORM_WINDOWS"--,
-            --"RMLUI_STATIC_LIB"
+            "BASED_PLATFORM_WINDOWS"
         }
 
         libdirs

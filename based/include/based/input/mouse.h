@@ -24,7 +24,7 @@ namespace based::input
 
 		static void SetCursorLocked(bool locked);
 
-		static glm::vec2 GetMousePosition();
+		static glm::ivec2 GetMousePosition();
 
 	private:
 		constexpr static int ButtonCount = 5; //SDL supports up to 5 mouse buttons

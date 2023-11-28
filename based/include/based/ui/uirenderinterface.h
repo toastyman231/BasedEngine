@@ -8,17 +8,16 @@
 #include <RmlUi/Core/RenderInterface.h>
 #include <RmlUi/Core/Types.h>
 
-#include "based/engine.h"
 #include "based/graphics/vertex.h"
 #include "based/graphics/shader.h"
 #include "glad/glad.h"
 
 namespace based::ui
 {
-	class RenderInterface_GL3 : public Rml::RenderInterface {
+	class RenderInterface_GL4 : public Rml::RenderInterface {
 	public:
-		RenderInterface_GL3();
-		~RenderInterface_GL3();
+		RenderInterface_GL4();
+		~RenderInterface_GL4();
 
 		// Sets up OpenGL states for taking rendering commands from RmlUi.
 		void BeginFrame();

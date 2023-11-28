@@ -3,6 +3,7 @@
 #include "app.h"
 #include "graphics/texture.h"
 #include "graphics/defaultassetlibraries.h"
+#include "engine.h"
 
 static const char* shader_main_vertex = R"(
 	#version 410 core
@@ -58,19 +59,19 @@ static const char* shader_main_fragment_color = R"(
 
 namespace based::ui
 {
-	RenderInterface_GL3::RenderInterface_GL3()
+	RenderInterface_GL4::RenderInterface_GL4()
 	{
 		// Create shaders
 		mFragColor = std::make_shared<graphics::Shader>(shader_main_vertex, shader_main_fragment_color);
 		mFragTexture = std::make_shared<graphics::Shader>(shader_main_vertex, shader_main_fragment_texture);
 	}
 
-	RenderInterface_GL3::~RenderInterface_GL3()
+	RenderInterface_GL4::~RenderInterface_GL4()
 	{
 		// Release shaders
 	}
 
-	void RenderInterface_GL3::BeginFrame()
+	void RenderInterface_GL4::BeginFrame()
 	{
 		mVAs.clear();
 		mProjection = glm::ortho(0.f,
@@ -81,11 +82,11 @@ namespace based::ui
 		SetTransform(nullptr);
 	}
 
-	void RenderInterface_GL3::EndFrame()
+	void RenderInterface_GL4::EndFrame()
 	{
 	}
 
-	void RenderInterface_GL3::RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices,
+	void RenderInterface_GL4::RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices,
 	                                         Rml::TextureHandle texture, const Rml::Vector2f& translation)
 	{
 		// Build and upload vertex array
@@ -128,7 +129,7 @@ namespace based::ui
 		}
 	}
 
-	void RenderInterface_GL3::EnableScissorRegion(bool enable)
+	void RenderInterface_GL4::EnableScissorRegion(bool enable)
 	{
 		ScissoringState new_state = ScissoringState::Disable;
 
@@ -153,7 +154,7 @@ namespace based::ui
 		}
 	}
 
-	void RenderInterface_GL3::SetScissorRegion(int x, int y, int width, int height)
+	void RenderInterface_GL4::SetScissorRegion(int x, int y, int width, int height)
 	{
 		if (transform_active)
 		{
@@ -206,7 +207,7 @@ namespace based::ui
 	// Restore packing
 #pragma pack()
 
-	bool RenderInterface_GL3::LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions,
+	bool RenderInterface_GL4::LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions,
 		const Rml::String& source)
 	{
 		Rml::FileInterface* file_interface = Rml::GetFileInterface();
@@ -307,7 +308,7 @@ namespace based::ui
 		return success;
 	}
 
-	bool RenderInterface_GL3::GenerateTexture(Rml::TextureHandle& texture_handle, const Rml::byte* source,
+	bool RenderInterface_GL4::GenerateTexture(Rml::TextureHandle& texture_handle, const Rml::byte* source,
 		const Rml::Vector2i& source_dimensions)
 	{
 		GLuint texture_id = 0;
@@ -333,12 +334,12 @@ namespace based::ui
 		return true;
 	}
 
-	void RenderInterface_GL3::ReleaseTexture(Rml::TextureHandle texture_handle)
+	void RenderInterface_GL4::ReleaseTexture(Rml::TextureHandle texture_handle)
 	{
 		glDeleteTextures(1, (GLuint*)&texture_handle);
 	}
 
-	void RenderInterface_GL3::SetTransform(const Rml::Matrix4f* transform)
+	void RenderInterface_GL4::SetTransform(const Rml::Matrix4f* transform)
 	{
 		glm::mat4 trans = glm::mat4(1.0f);
 		if (transform)

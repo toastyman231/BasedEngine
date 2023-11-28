@@ -34,6 +34,7 @@ namespace based
     void Engine::Update(float deltaTime)
     {
         mWindow.PumpEvents();
+        mUiManager.Update();
         mApp->GetCurrentScene()->UpdateScene(deltaTime);
         mApp->Update(deltaTime);
     }
@@ -41,6 +42,8 @@ namespace based
     void Engine::Render()
     {
         mWindow.BeginRender();
+
+        mUiManager.Render();
 
         mApp->GetCurrentScene()->RenderScene();
 
@@ -153,6 +156,9 @@ namespace based
                     // Initialize Asset Libraries
                     graphics::DefaultLibraries::InitializeLibraries();
 
+                    // Initialize UI after input and rendering is initialized
+                    mUiManager.Initialize();
+
                     // Load window icon
                     SetIcon("Assets/icon.png");
 
@@ -185,6 +191,9 @@ namespace based
 
         // Shutdown Audio
         scene::Audio::ShutdownEngine();
+
+        // Shutdown UI
+        mUiManager.Shutdown();
 
         // Shutdown input
         input::Joystick::Shutdown();

@@ -114,7 +114,6 @@ namespace based::scene
 
 			Parent = parentEntity;
 			Parent->Children.emplace_back(this);
-			BASED_TRACE("Set parent entity");
 		}
 
 		bool RemoveChild(const Entity* childEntity)
