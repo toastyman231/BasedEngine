@@ -2,6 +2,7 @@
 
 #include "engine.h"
 #include "external/glm/gtc/matrix_transform.hpp"
+#include "based/core/profiler.h"
 
 namespace based::graphics
 {
@@ -125,6 +126,7 @@ namespace based::graphics
 
 	void Camera::SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
 	{
+		PROFILE_FUNCTION();
 		mTransform.Position = pos;
 		mTransform.Rotation = rot;
 		mTransform.Scale = scale;
@@ -159,6 +161,7 @@ namespace based::graphics
 
 	const glm::vec3 Camera::ScreenToWorldPoint(float x, float y) const
 	{
+		PROFILE_FUNCTION();
 		// NORMALIZED DEVICE SPACE
 		const double xNorm = 2.0 * x / Engine::Instance().GetWindow().GetSize().x - 1;
 		const double yNorm = 2.0 * y / Engine::Instance().GetWindow().GetSize().y - 1;
@@ -181,6 +184,7 @@ namespace based::graphics
 
 	void Camera::RecalculateProjectionMatrix()
 	{
+		PROFILE_FUNCTION();
 		float halfwidth = mHeight * mAspectRatio * 0.5f;
 		float halfheight = mHeight * 0.5f;
 

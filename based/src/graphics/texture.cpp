@@ -6,6 +6,7 @@
 
 #include "glad/glad.h"
 #include "log.h"
+#include "based/core/profiler.h"
 
 namespace based::graphics
 {
@@ -86,6 +87,7 @@ namespace based::graphics
 
 	void Texture::LoadTexture()
 	{
+		PROFILE_FUNCTION();
 		glGenTextures(1, &mId); BASED_CHECK_GL_ERROR;
 		glBindTexture(GL_TEXTURE_2D, mId); BASED_CHECK_GL_ERROR;
 

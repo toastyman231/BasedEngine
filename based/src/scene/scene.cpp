@@ -8,10 +8,13 @@
 #include "ui/textentity.h"
 #include "graphics/sprite.h"
 
+#include "based/core/profiler.h"
+
 namespace based::scene
 {
 	void Scene::InitializeScene() const
 	{
+		PROFILE_FUNCTION();
 		const auto entityView = mRegistry.view<EntityReference>();
 
 		for (const auto entity : entityView)
@@ -24,6 +27,7 @@ namespace based::scene
 
 	void Scene::RenderScene() const
 	{
+		PROFILE_FUNCTION();
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera, mActiveCamera));
 		const auto view = mRegistry.view<Enabled, Transform, SpriteRenderer>();
 		std::vector<graphics::Sprite*> sprites;
@@ -73,6 +77,7 @@ namespace based::scene
 
 	void Scene::UpdateScene(float deltaTime) const
 	{
+		PROFILE_FUNCTION();
 		const auto entityView = mRegistry.view<Enabled, EntityReference>();
 
 		for (const auto entity : entityView)
@@ -88,6 +93,7 @@ namespace based::scene
 
 	void Scene::ShutdownScene() const
 	{
+		PROFILE_FUNCTION();
 		const auto entityView = mRegistry.view<EntityReference>();
 
 		for (const auto entity : entityView)

@@ -4,11 +4,13 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 
 #include <memory>
+#include "based/core/profiler.h"
 
 namespace based::managers
 {
 	void LogManager::Initialize()
 	{
+		PROFILE_FUNCTION();
 		auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 		consoleSink->set_pattern("%^[%Y-%m-%d %H:%M:%S.%e] %v%$");
 
@@ -21,6 +23,7 @@ namespace based::managers
 
 	void LogManager::Shutdown()
 	{
+		PROFILE_FUNCTION();
 		spdlog::shutdown();
 	}
 }

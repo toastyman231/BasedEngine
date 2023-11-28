@@ -4,6 +4,8 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
 
+#include "based/core/profiler.h"
+
 namespace based::scene
 {
 	static ma_engine* mEngine = (ma_engine*) malloc(sizeof(*mEngine));
@@ -19,6 +21,7 @@ namespace based::scene
 	public:
 		static void AudioImpl::InitEngine()
 		{
+			PROFILE_FUNCTION();
 			ma_result result = ma_engine_init(NULL, mEngine);
 			if (result != MA_SUCCESS)
 			{
@@ -28,17 +31,20 @@ namespace based::scene
 
 		static void AudioImpl::ShutdownEngine()
 		{
+			PROFILE_FUNCTION();
 			ma_engine_uninit(mEngine);
 		}
 
 		static void AudioImpl::PlayAudio(std::string& path, float volume)
 		{
+			PROFILE_FUNCTION();
 			ma_engine_set_volume(mEngine, volume);
 			ma_engine_play_sound(mEngine, path.c_str(), NULL);
 		}
 
 		AudioImpl(std::string& path, float volume, bool loops) : mVolume(volume), mLoops(loops), mMuted(false)
 		{
+			PROFILE_FUNCTION();
 			ma_result result = ma_sound_init_from_file(mEngine, path.c_str(), 0, NULL, NULL, &mSound);
 			if (result != MA_SUCCESS)
 			{

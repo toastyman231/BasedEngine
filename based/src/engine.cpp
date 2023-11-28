@@ -15,6 +15,7 @@
 #include "scene/audio.h"
 
 #include "basedtime.h"
+#include "core/profiler.h"
 
 namespace based
 {
@@ -84,6 +85,7 @@ namespace based
             // Core loop
             while (mIsRunning)
             {
+                PROFILER_FRAME_MARK();
                 const float timeDelta = (core::Time::GetTime() - core::Time::mLastFrameTime) * core::Time::TimeScale();
                 core::Time::SetDelta(core::Time::GetTime(), timeDelta);
                 Update(timeDelta);

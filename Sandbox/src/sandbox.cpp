@@ -90,7 +90,7 @@ public:
 		//SDL_SetRelativeMouseMode(SDL_TRUE);
 		//SDL_SetWindowGrab(Engine::Instance().GetWindow().GetSDLWindow(), SDL_TRUE);
 		//SDL_CaptureMouse(SDL_TRUE);
-		Engine::Instance().GetWindow().SetShouldRenderToScreen(true);
+		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
 
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main", 
 			Engine::Instance().GetWindow().GetSize());

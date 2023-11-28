@@ -139,6 +139,7 @@ namespace based::graphics
 
 	void Sprite::DrawSprite(Sprite* sprite)
 	{
+		PROFILE_FUNCTION();
 		const std::shared_ptr<VertexArray> va = sprite->GetVA();
 		const std::shared_ptr<Material> mat = sprite->GetMaterial();
 
@@ -171,6 +172,7 @@ namespace based::graphics
 
 	void Sprite::RegenerateVA()
 	{
+		PROFILE_FUNCTION();
 		mVA = std::make_shared<VertexArray>();
 		float objectWidth = mSize.x / Engine::Instance().GetWindow().GetSize().x;
 		float objectHeight = mSize.y / Engine::Instance().GetWindow().GetSize().y;

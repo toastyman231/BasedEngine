@@ -3,10 +3,13 @@
 #include "based/ui/uisysteminterface.h"
 #include "based/ui/uirenderinterface.h"
 
+#include "based/core/profiler.h"
+
 namespace based::managers
 {
 	void UiManager::Initialize()
 	{
+		PROFILE_FUNCTION();
 		mSystemInterface = new ui::SystemInterface_SDL();
 		mRenderInterface = new ui::RenderInterface_GL4();
 
@@ -20,6 +23,7 @@ namespace based::managers
 
 	void UiManager::ProcessEvents(SDL_Event e) const
 	{
+		PROFILE_FUNCTION();
 		for (const auto context : mContexts)
 		{
 			RmlSDL::InputEventHandler(context, e);
@@ -28,6 +32,7 @@ namespace based::managers
 
 	void UiManager::Update() const
 	{
+		PROFILE_FUNCTION();
 		for (const auto context : mContexts)
 		{
 			context->Update();
@@ -36,6 +41,7 @@ namespace based::managers
 
 	void UiManager::Render() const
 	{
+		PROFILE_FUNCTION();
 		dynamic_cast<ui::RenderInterface_GL4*>(mRenderInterface)->BeginFrame();
 		for (const auto context : mContexts)
 		{
@@ -46,11 +52,13 @@ namespace based::managers
 
 	void UiManager::Shutdown()
 	{
+		PROFILE_FUNCTION();
 		Rml::Shutdown();
 	}
 
 	Rml::ElementDocument* UiManager::LoadWindow(const std::string& path, Rml::Context* context) const
 	{
+		PROFILE_FUNCTION();
 		Rml::String documentPath = path + Rml::String(".rml");
 		if (mUsePathPrefix) documentPath = mPathPrefix + documentPath;
 
@@ -71,6 +79,7 @@ namespace based::managers
 
 	Rml::Context* UiManager::CreateContext(const std::string& name, glm::ivec2 size)
 	{
+		PROFILE_FUNCTION();
 		Rml::Context* context = Rml::CreateContext(name, Rml::Vector2i(size.x, size.y));
 		if (!context)
 		{
@@ -84,6 +93,7 @@ namespace based::managers
 
 	void UiManager::RemoveContext(const Rml::Context* context)
 	{
+		PROFILE_FUNCTION();
 		if (context)
 		{
 			mContexts.erase(

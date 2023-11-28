@@ -1,6 +1,7 @@
 #include "graphics/mesh.h"
 
 #include "app.h"
+#include "based/core/profiler.h"
 
 namespace based::graphics
 {
@@ -21,6 +22,7 @@ namespace based::graphics
 
 	void Mesh::Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material)
 	{
+		PROFILE_FUNCTION();
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera, 
 			Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()));
 		auto model = glm::mat4(1.f);
@@ -48,6 +50,7 @@ namespace based::graphics
 
 	void Mesh::SetupMesh()
 	{
+		PROFILE_FUNCTION();
 		auto va = std::make_shared<graphics::VertexArray>();
 
 		BASED_CREATE_VERTEX_BUFFER(pos_vb, float);

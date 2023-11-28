@@ -2,6 +2,7 @@
 #include "graphics/shader.h"
 #include "graphics/texture.h"
 #include "log.h"
+#include "based/core/profiler.h"
 
 namespace based::graphics
 {
@@ -45,6 +46,7 @@ namespace based::graphics
 
 	void Material::UpdateShaderUniforms()
 	{
+		PROFILE_FUNCTION();
 		if (mShader)
 		{
 			for (const auto& it : mUniformInts)

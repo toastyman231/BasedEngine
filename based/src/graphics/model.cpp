@@ -12,6 +12,7 @@ namespace based::graphics
 
 	scene::Entity* Model::CreateModelEntity(const std::string& path)
 	{
+		PROFILE_FUNCTION();
 		Model* model = new Model();
 		auto* rootEntity = scene::Entity::CreateEntity<scene::Entity>();
 
@@ -34,6 +35,7 @@ namespace based::graphics
 
 	void Model::LoadModel(std::string path)
 	{
+		PROFILE_FUNCTION();
 		Assimp::Importer import;
 		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
@@ -49,6 +51,7 @@ namespace based::graphics
 
 	void Model::ProcessNode(aiNode* node, const aiScene* scene)
 	{
+		PROFILE_FUNCTION();
 		// process all the node's meshes (if any)
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
@@ -64,6 +67,7 @@ namespace based::graphics
 
 	void Model::ProcessNodeEntity(scene::Entity* parent, aiNode* node, const aiScene* scene)
 	{
+		PROFILE_FUNCTION();
 		auto* childEntity = scene::Entity::CreateEntity<scene::Entity>();
 		if (node->mNumMeshes > 0) childEntity->SetParent(parent);
 
@@ -87,6 +91,7 @@ namespace based::graphics
 
 	graphics::Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	{
+		PROFILE_FUNCTION();
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
 		std::vector<Texture> textures;
@@ -148,6 +153,7 @@ namespace based::graphics
 
 	std::shared_ptr<Material> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 	{
+		PROFILE_FUNCTION();
 		std::shared_ptr<Material> material = std::make_shared<Material>(DefaultLibraries::GetShaderLibrary().Get("Model"));
 
 		aiColor4D color(0.f, 0.f, 0.f, 1.f);

@@ -36,6 +36,7 @@ namespace based::graphics
 
 	void RawVertexBuffer::Upload(bool dynamic)
 	{
+		PROFILE_FUNCTION();
 		glBindBuffer(GL_ARRAY_BUFFER, mVbo); BASED_CHECK_GL_ERROR;
 		glBufferData(GL_ARRAY_BUFFER, mSize, mData, dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW); BASED_CHECK_GL_ERROR;
 		glBindBuffer(GL_ARRAY_BUFFER, 0); BASED_CHECK_GL_ERROR;
@@ -71,6 +72,7 @@ namespace based::graphics
 
 	void VertexArray::PushBuffer(std::unique_ptr<RawVertexBuffer> vbo)
 	{
+		PROFILE_FUNCTION();
 		if (mVbos.size() > 0)
 		{
 			BASED_ASSERT(mVbos[0]->GetVertexCount() == vbo->GetVertexCount(),
@@ -87,6 +89,7 @@ namespace based::graphics
 
 	void VertexArray::SetElements(const std::vector<uint32_t>& elements)
 	{
+		PROFILE_FUNCTION();
 		mElementCount = (uint32_t)elements.size();
 		glBindVertexArray(mVao); BASED_CHECK_GL_ERROR;
 		glGenBuffers(1, &mEbo); BASED_CHECK_GL_ERROR;
@@ -97,6 +100,7 @@ namespace based::graphics
 
 	void VertexArray::Upload()
 	{
+		PROFILE_FUNCTION();
 		glBindVertexArray(mVao); BASED_CHECK_GL_ERROR;
 		uint32_t attributeCount = 0;
 		for (auto& vbo : mVbos)

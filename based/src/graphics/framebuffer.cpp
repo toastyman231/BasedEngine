@@ -3,6 +3,7 @@
 #include "graphics/helpers.h"
 
 #include "glad/glad.h"
+#include "core/profiler.h"
 
 namespace based::graphics
 {
@@ -13,6 +14,7 @@ namespace based::graphics
 		, mSize({width, height})
 		, mClearColor(1.f)
 	{
+		PROFILE_FUNCTION();
 		glGenFramebuffers(1, &mFbo); BASED_CHECK_GL_ERROR;
 		glBindFramebuffer(GL_FRAMEBUFFER, mFbo); BASED_CHECK_GL_ERROR;
 

@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "SDL2/SDL_keyboard.h"
+#include "based/core/profiler.h"
 
 namespace based::input
 {
@@ -18,6 +19,7 @@ namespace based::input
 
 	void Keyboard::Update()
 	{
+		PROFILE_FUNCTION();
 		keysLast = keys;
 		const Uint8* state = SDL_GetKeyboardState(nullptr);
 		for (int i = BASED_INPUT_KEY_FIRST; i < KeyCount; i++)
@@ -28,6 +30,7 @@ namespace based::input
 
 	bool Keyboard::Key(int key)
 	{
+		PROFILE_FUNCTION();
 		BASED_ASSERT(key >= BASED_INPUT_KEY_FIRST && key < KeyCount, "Invalid keyboard key!");
 		if (key >= BASED_INPUT_KEY_FIRST && key < KeyCount)
 		{
@@ -41,6 +44,7 @@ namespace based::input
 
 	bool Keyboard::KeyDown(int key)
 	{
+		PROFILE_FUNCTION();
 		BASED_ASSERT(key >= BASED_INPUT_KEY_FIRST && key < KeyCount, "Invalid keyboard key!");
 		if (key >= BASED_INPUT_KEY_FIRST && key < KeyCount)
 		{
@@ -54,6 +58,7 @@ namespace based::input
 
 	bool Keyboard::KeyUp(int key)
 	{
+		PROFILE_FUNCTION();
 		BASED_ASSERT(key >= BASED_INPUT_KEY_FIRST && key < KeyCount, "Invalid keyboard key!");
 		if (key >= BASED_INPUT_KEY_FIRST && key < KeyCount)
 		{

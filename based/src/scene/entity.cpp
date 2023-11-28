@@ -1,5 +1,7 @@
 #include "scene/entity.h"
 
+#include "based/core/profiler.h"
+
 namespace based::scene
 {
 	Entity::Entity() : Entity(Engine::Instance().GetApp().GetCurrentScene()->GetRegistry()) {}
@@ -7,6 +9,7 @@ namespace based::scene
 	Entity::Entity(entt::registry& registry)
 		: mRegistry(registry), mIsEnabled(true)
 	{
+		PROFILE_FUNCTION();
 		mEntity = mRegistry.create();
 		mEntityName = "New Entity";
 		AddComponent<Transform>();
@@ -38,6 +41,7 @@ namespace based::scene
 
 	void Entity::SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
 	{
+		PROFILE_FUNCTION();
 		SetPosition(pos);
 		SetRotation(rot);
 		SetScale(scale);
@@ -89,6 +93,7 @@ namespace based::scene
 
 	void Entity::SetLocalTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
 	{
+		PROFILE_FUNCTION();
 		SetLocalPosition(pos);
 		SetLocalRotation(rot);
 		SetLocalScale(scale);

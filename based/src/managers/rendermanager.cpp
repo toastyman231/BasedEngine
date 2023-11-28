@@ -6,11 +6,13 @@
 #include "engine.h"
 #include "log.h"
 #include "glad/glad.h"
+#include "core/profiler.h"
 
 namespace based::managers
 {
 	void RenderManager::Initialize()
 	{
+		PROFILE_FUNCTION();
 		BASED_INFO("OpenGL Info:\n  Vendor:\t{}\n  Renderer:\t{}\n  Version:\t{}",
 			(const char*) glGetString(GL_VENDOR), 
 			(const char*) glGetString(GL_RENDERER),
@@ -33,6 +35,7 @@ namespace based::managers
 
 	void RenderManager::Shutdown()
 	{
+		PROFILE_FUNCTION();
 		while (mRenderCommands.size() > 0)
 		{
 			mRenderCommands.pop();
@@ -41,6 +44,7 @@ namespace based::managers
 
 	void RenderManager::Clear()
 	{
+		PROFILE_FUNCTION();
 		BASED_ASSERT(mRenderCommands.size() == 0, "Unflushed render commands in queue!");
 		while (mRenderCommands.size() > 0)
 		{
@@ -73,11 +77,13 @@ namespace based::managers
 
 	void RenderManager::Submit(std::unique_ptr<graphics::rendercommands::RenderCommand> rc)
 	{
+		PROFILE_FUNCTION();
 		mRenderCommands.push(std::move(rc));
 	}
 
 	void RenderManager::Flush()
 	{
+		PROFILE_FUNCTION();
 		while (mRenderCommands.size() > 0)
 		{
 			auto rc = std::move(mRenderCommands.front());
@@ -89,6 +95,7 @@ namespace based::managers
 
 	void RenderManager::PushFramebuffer(std::shared_ptr<graphics::Framebuffer> framebuffer)
 	{
+		PROFILE_FUNCTION();
 		BASED_ASSERT(framebuffer, "Framebuffer is null");
 		mFramebuffers.push(framebuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->GetFbo()); BASED_CHECK_GL_ERROR;
@@ -101,6 +108,7 @@ namespace based::managers
 
 	void RenderManager::PopFramebuffer()
 	{
+		PROFILE_FUNCTION();
 		BASED_ASSERT(mFramebuffers.size() > 0, "RenderManager::PopFramebuffer - empty stack");
 		if (mFramebuffers.size() > 0)
 		{
@@ -122,12 +130,14 @@ namespace based::managers
 
 	void RenderManager::PushCamera(std::shared_ptr<graphics::Camera> camera)
 	{
+		PROFILE_FUNCTION();
 		BASED_ASSERT(camera, "Camera is null");
 		mCameras.push(camera);
 	}
 
 	void RenderManager::PopCamera()
 	{
+		PROFILE_FUNCTION();
 		BASED_ASSERT(mCameras.size() > 0, "RenderManager::PopCamera - empty stack");
 		if (mCameras.size() > 0)
 		{

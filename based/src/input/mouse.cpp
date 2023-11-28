@@ -6,6 +6,7 @@
 #include "engine.h"
 #include "input/keyboard.h"
 #include "SDL2/SDL_mouse.h"
+#include "based/core/profiler.h"
 
 namespace based::input
 {
@@ -25,6 +26,7 @@ namespace based::input
 
 	void Mouse::Update()
 	{
+		PROFILE_FUNCTION();
 		xLast = x;
 		yLast = y;
 		buttonsLast = buttons;
@@ -44,6 +46,7 @@ namespace based::input
 
 	bool Mouse::Button(int button)
 	{
+		PROFILE_FUNCTION();
 		BASED_ASSERT(button >= BASED_INPUT_MOUSE_FIRST && button <= BASED_INPUT_MOUSE_LAST, "Invalid mouse button!");
 		if (button >= BASED_INPUT_MOUSE_FIRST && button <= BASED_INPUT_MOUSE_LAST)
 		{
@@ -57,6 +60,7 @@ namespace based::input
 
 	bool Mouse::ButtonDown(int button)
 	{
+		PROFILE_FUNCTION();
 		BASED_ASSERT(button >= BASED_INPUT_MOUSE_FIRST && button <= BASED_INPUT_MOUSE_LAST, "Invalid mouse button!");
 		if (button >= BASED_INPUT_MOUSE_FIRST && button <= BASED_INPUT_MOUSE_LAST)
 		{
@@ -70,6 +74,7 @@ namespace based::input
 
 	bool Mouse::ButtonUp(int button)
 	{
+		PROFILE_FUNCTION();
 		BASED_ASSERT(button >= BASED_INPUT_MOUSE_FIRST && button <= BASED_INPUT_MOUSE_LAST, "Invalid mouse button!");
 		if (button >= BASED_INPUT_MOUSE_FIRST && button <= BASED_INPUT_MOUSE_LAST)
 		{

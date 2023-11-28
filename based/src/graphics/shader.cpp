@@ -5,6 +5,7 @@
 #include "external/glm/gtc/type_ptr.hpp"
 
 #include <fstream>
+#include "based/core/profiler.h"
 
 namespace based::graphics
 {
@@ -12,6 +13,7 @@ namespace based::graphics
 		: mVertexShader(vertex)
 		, mFragmentShader(fragment)
 	{
+		PROFILE_FUNCTION();
 		mProgramId = glCreateProgram(); BASED_CHECK_GL_ERROR;
 
 		int status = GL_FALSE;
@@ -84,6 +86,7 @@ namespace based::graphics
 
 	Shader* Shader::LoadShader(const std::string& vsPath, const std::string& fsPath)
 	{
+		PROFILE_FUNCTION();
 		std::ifstream vsFile(vsPath);
 		std::ifstream fsFile(fsPath);
 

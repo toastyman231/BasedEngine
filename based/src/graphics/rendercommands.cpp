@@ -11,11 +11,13 @@
 #include "graphics/material.h"
 
 #include "glad/glad.h"
+#include "based/core/profiler.h"
 
 namespace based::graphics::rendercommands
 {
 	void RenderVertexArray::Execute()
 	{
+		PROFILE_FUNCTION();
 		std::shared_ptr<VertexArray> va = mVertexArray.lock();
 		std::shared_ptr<Shader> shader = mShader.lock();
 		if (va && shader)
@@ -58,6 +60,7 @@ namespace based::graphics::rendercommands
 
 	void RenderVertexArrayTextured::Execute()
 	{
+		PROFILE_FUNCTION();
 		std::shared_ptr<VertexArray> va = mVertexArray.lock();
 		std::shared_ptr<Texture> texture = mTexture.lock();
 		std::shared_ptr<Shader> shader = mShader.lock();
@@ -103,6 +106,7 @@ namespace based::graphics::rendercommands
 
 	void RenderVertexArrayMaterial::Execute()
 	{
+		PROFILE_FUNCTION();
 		std::shared_ptr<VertexArray> va = mVertexArray.lock();
 		std::shared_ptr<Material> mat = mMaterial.lock();
 		if (va && mat)
@@ -161,8 +165,8 @@ namespace based::graphics::rendercommands
 
 	void RenderVertexArrayUserInterface::Execute()
 	{
+		PROFILE_FUNCTION();
 		std::shared_ptr<VertexArray> va = mVertexArray.lock();
-		//std::shared_ptr<Texture> texture = mTexture.lock();
 		std::shared_ptr<Shader> shader = mShader.lock();
 		if (va && shader)
 		{
@@ -177,12 +181,6 @@ namespace based::graphics::rendercommands
 				shader->Bind();
 
 				shader->SetUniformMat4("_transform", mTransform);
-				/*BASED_TRACE("Transform \n{} {} {} {}\n{} {} {} {}\n{} {} {} {}\n{} {} {} {}\n", 
-					mTransform[0].x, mTransform[1].x, mTransform[2].x, mTransform[3].x,
-					mTransform[0].y, mTransform[1].y, mTransform[2].y, mTransform[3].y,
-					mTransform[0].z, mTransform[1].z, mTransform[2].z, mTransform[3].z,
-					mTransform[0].w, mTransform[1].w, mTransform[2].w, mTransform[3].w);
-				BASED_TRACE("Translation\n{} {}", mTranslation.x, mTranslation.y);*/
 				shader->SetUniformFloat2("_translate", glm::vec2(mTranslation.x, mTranslation.y));
 
 				if (va->GetElementCount() > 0)
@@ -210,6 +208,7 @@ namespace based::graphics::rendercommands
 
 	void PushFramebuffer::Execute()
 	{
+		PROFILE_FUNCTION();
 		std::shared_ptr<Framebuffer> fb = mFramebuffer.lock();
 		if (fb)
 		{
@@ -223,11 +222,13 @@ namespace based::graphics::rendercommands
 
 	void PopFramebuffer::Execute()
 	{
+		PROFILE_FUNCTION();
 		Engine::Instance().GetRenderManager().PopFramebuffer();
 	}
 
 	void PushCamera::Execute()
 	{
+		PROFILE_FUNCTION();
 		std::shared_ptr<Camera> cam = mCamera.lock();
 		if (cam)
 		{
@@ -241,6 +242,7 @@ namespace based::graphics::rendercommands
 
 	void PopCamera::Execute()
 	{
+		PROFILE_FUNCTION();
 		Engine::Instance().GetRenderManager().PopCamera();
 	}
 }

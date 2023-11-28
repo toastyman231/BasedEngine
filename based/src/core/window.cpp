@@ -46,6 +46,7 @@ namespace based::core
 
 	bool Window::Create(const WindowProperties& props)
 	{
+		PROFILE_FUNCTION();
 		mWindowProperties = props;
 		mWindow = SDL_CreateWindow(props.title.c_str(), props.x, props.y, props.w, props.h, props.flags);
 		if (!mWindow)
@@ -93,6 +94,7 @@ namespace based::core
 
 	void Window::PumpEvents()
 	{
+		PROFILE_FUNCTION();
 		SDL_Event e;
 		while (SDL_PollEvent(&e))
 		{
@@ -143,6 +145,7 @@ namespace based::core
 
 	void Window::BeginRender()
 	{
+		PROFILE_FUNCTION();
 		auto& rm = Engine::Instance().GetRenderManager();
 		rm.Clear();
 		rm.Submit(BASED_SUBMIT_RC(PushFramebuffer, mFramebuffer));
@@ -150,6 +153,7 @@ namespace based::core
 
 	void Window::EndRender()
 	{
+		PROFILE_FUNCTION();
 		auto& rm = Engine::Instance().GetRenderManager();
 		rm.Submit(BASED_SUBMIT_RC(PopFramebuffer));
 		rm.Flush();
@@ -168,6 +172,7 @@ namespace based::core
 
 	void Window::InitializeScreenRender()
 	{
+		PROFILE_FUNCTION();
 		// VertexArray
 		mScreenVA = std::make_shared<graphics::VertexArray>();
 
@@ -211,6 +216,7 @@ namespace based::core
 
 	void Window::RenderToScreen()
 	{
+		PROFILE_FUNCTION();
 		BASED_ASSERT(mScreenVA->IsValid(), "Attempting to render with invalid VertexArray - did you forget to call VertexArray::Upload()?");
 		if (mScreenVA->IsValid())
 		{

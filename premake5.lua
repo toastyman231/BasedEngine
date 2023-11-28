@@ -21,6 +21,7 @@ externals["freetype"] = "external/freetype"
 externals["miniaudio"] = "external/miniaudio"
 externals["assimp"] = "external/assimp"
 externals["rmlui"] = "external/rmlui"
+externals["tracy"] = "external/tracy"
 
 -- Process Glad before anything else
 include "external/glad"
@@ -56,7 +57,8 @@ project "based"
         "%{externals.freetype}/include",
         "%{externals.miniaudio}",
         "%{externals.assimp}/include",
-        "%{externals.rmlui}/Include"
+        "%{externals.rmlui}/Include",
+        "%{externals.tracy}"
     }
 
     flags
@@ -138,7 +140,8 @@ project "basededitor"
         "%{externals.glad}/include",
         "%{externals.miniaudio}",
         "%{externals.assimp}/include",
-        "%{externals.rmlui}/Include"
+        "%{externals.rmlui}/Include",
+        "%{externals.tracy}"
     }
 
     flags
@@ -257,7 +260,8 @@ project "PongV1"
             "%{externals.glad}/include",
             "%{externals.miniaudio}",
             "%{externals.assimp}/include",
-            "%{externals.rmlui}/Include"
+            "%{externals.rmlui}/Include",
+            "%{externals.tracy}"
         }
     
         flags
@@ -375,7 +379,8 @@ project "Sandbox"
         "%{externals.glad}/include",
         "%{externals.miniaudio}",
         "%{externals.assimp}/include",
-        "%{externals.rmlui}/Include"
+        "%{externals.rmlui}/Include",
+        "%{externals.tracy}"
     }
 
     flags

@@ -6,6 +6,7 @@
 #include <type_traits>
 
 #include "../log.h"
+#include "based/core/profiler.h"
 
 #define BASED_CREATE_VERTEX_BUFFER(name, type) std::unique_ptr<based::graphics::VertexBuffer<type>> name = std::make_unique<based::graphics::VertexBuffer<type>>()
 
@@ -103,6 +104,7 @@ namespace based::graphics
 
 		void Upload(bool dynamic = false) override
 		{
+			PROFILE_FUNCTION();
 			mStride *= sizeof(T);
 			mSize = sizeof(T) * (uint32_t)mDataVec.size();
 			//BASED_TRACE("VertexBuffer::Upload() - mSize: {}, mStride: {}", mSize, mStride);
