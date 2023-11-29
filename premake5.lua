@@ -104,6 +104,7 @@ project "based"
             "BASED_CONFIG_DEBUG"
         }
         runtime "Debug"
+        editandcontinue "off"
         symbols "on"
 
     filter "configurations:Release"

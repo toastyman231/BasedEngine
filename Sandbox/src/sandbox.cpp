@@ -37,6 +37,11 @@ public:
 		{
 			BASED_TRACE("CLICKED!");
 		}
+
+		if (val == "radio")
+		{
+			BASED_TRACE("RADIO!");
+		}
 	}
 private:
 	std::string val;
@@ -90,7 +95,7 @@ public:
 		//SDL_SetRelativeMouseMode(SDL_TRUE);
 		//SDL_SetWindowGrab(Engine::Instance().GetWindow().GetSDLWindow(), SDL_TRUE);
 		//SDL_CaptureMouse(SDL_TRUE);
-		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
+		Engine::Instance().GetWindow().SetShouldRenderToScreen(true);
 
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main", 
 			Engine::Instance().GetWindow().GetSize());
@@ -112,6 +117,7 @@ public:
 
 		element = document->GetElementById("button");
 		element->AddEventListener("mousedown", new MyListener("button"));
+		// NOTE: For radio buttons to automatically uncheck, they must be wrapped in a <form>
 
 		cubePos = glm::vec3(0.f);
 		cubeRot = glm::vec3(0.f);
