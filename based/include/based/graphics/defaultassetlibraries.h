@@ -158,6 +158,49 @@ namespace based::graphics
 					vb->SetLayout({ 2 });
 					va->PushBuffer(std::move(vb));
 				}
+				{
+					BASED_CREATE_VERTEX_BUFFER(vb, float);
+					// Normals
+
+					// Front
+					vb->PushVertex({ 0.0f, 0.0f, -1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, -1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, -1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, -1.0f });
+
+					// Right
+					vb->PushVertex({ 1.0f, 0.0f, 0.0f });
+					vb->PushVertex({ 1.0f, 0.0f, 0.0f });
+					vb->PushVertex({ 1.0f, 0.0f, 0.0f });
+					vb->PushVertex({ 1.0f, 0.0f, 0.0f });
+
+					// Top
+					vb->PushVertex({ 0.0f, 1.0f, 0.0f });
+					vb->PushVertex({ 0.0f, 1.0f, 0.0f });
+					vb->PushVertex({ 0.0f, 1.0f, 0.0f });
+					vb->PushVertex({ 0.0f, 1.0f, 0.0f });
+
+					// Left
+					vb->PushVertex({ -1.0f, 0.0f, 0.0f });
+					vb->PushVertex({ -1.0f, 0.0f, 0.0f });
+					vb->PushVertex({ -1.0f, 0.0f, 0.0f });
+					vb->PushVertex({ -1.0f, 0.0f, 0.0f });
+
+					// Bottom
+					vb->PushVertex({ 0.0f, -1.0f, 0.0f });
+					vb->PushVertex({ 0.0f, -1.0f, 0.0f });
+					vb->PushVertex({ 0.0f, -1.0f, 0.0f });
+					vb->PushVertex({ 0.0f, -1.0f, 0.0f });
+
+					// Back
+					vb->PushVertex({ 0.0f, 0.0f, 1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, 1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, 1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, 1.0f });
+
+					vb->SetLayout({ 3 });
+					va->PushBuffer(std::move(vb));
+				}
 
 				va->SetElements({
 					 0, 1, 2,   2, 3, 0,    // v0-v1-v2, v2-v3-v0 (front)
@@ -331,7 +374,7 @@ namespace based::graphics
 				mShaderLibrary.Load("TexturedRect", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));
 			}
 			{
-				auto vertexShader = R"(
+				/*auto vertexShader = R"(
                     #version 410 core
 					layout (location = 0) in vec3 aPos;
 					layout (location = 1) in vec3 aNormal;
@@ -373,8 +416,8 @@ namespace based::graphics
 
 						FragColor = matDiffuseColor;
 					}
-                )";
-				mShaderLibrary.Load("Model", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));
+                )";*/
+				mShaderLibrary.Load("Model", LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag"));
 			}
 			{
 				auto vertexShader = R"(
@@ -428,8 +471,7 @@ namespace based::graphics
 
 			// Materials
 			{
-				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("Rect"),
-					mTextureLibrary.Get("Bro"));
+				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("Rect"));
 				mat->SetUniformValue("col", glm::vec4(1, 0, 0, 1));
 				mMaterialLibrary.Load("RectRed", mat);
 			}

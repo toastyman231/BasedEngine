@@ -156,16 +156,48 @@ namespace based::graphics
 		PROFILE_FUNCTION();
 		std::shared_ptr<Material> material = std::make_shared<Material>(DefaultLibraries::GetShaderLibrary().Get("Model"));
 
-		aiColor4D color(0.f, 0.f, 0.f, 1.f);
-		aiGetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE, &color);
-		material->SetUniformValue("color_diffuse", glm::vec4(color.r, color.g, color.b, color.a));
-
-		// TODO: Add more complicated material support
-
 		if (mat->GetTextureCount(type) <= 0)
 		{
-			material->SetUniformValue("textureSample", 0);
+			SetMaterialAttribute(mat, material, "$clr.diffuse", "diffuseMat", -1, aiTextureType_UNKNOWN);
+			SetMaterialAttribute(mat, material, "$clr.ambient", "ambientMat", -1, aiTextureType_UNKNOWN);
+			SetMaterialAttribute(mat, material, "$clr.specular", "specularMat", -1, aiTextureType_UNKNOWN);
+			SetMaterialAttribute(mat, material, "$mat.shininess", "shininessMat", -1, aiTextureType_UNKNOWN);
+			SetMaterialAttribute(mat, material, "$clr.emissive", "emissiveMat", -1, aiTextureType_UNKNOWN);
 		} else
+		{
+			SetMaterialAttribute(mat, material, "$clr.diffuse", "diffuseMat", 0, aiTextureType_DIFFUSE);
+			SetMaterialAttribute(mat, material, "$clr.ambient", "ambientMat", 1, aiTextureType_AMBIENT);
+			SetMaterialAttribute(mat, material, "$clr.specular", "specularMat", 2, aiTextureType_SPECULAR);
+			SetMaterialAttribute(mat, material, "none", "normalMat", 3, aiTextureType_NORMALS);
+			SetMaterialAttribute(mat, material, "$mat.shininess", "shininessMat", 4, aiTextureType_SHININESS);
+			SetMaterialAttribute(mat, material, "$clr.emissive", "emissiveMat", 5, aiTextureType_EMISSIVE);
+		}
+
+		return material;
+	}
+
+	void Model::SetMaterialAttribute(aiMaterial* mat, std::shared_ptr<Material> material, const char* key,
+		const std::string& attributeName, int sampler, aiTextureType type)
+	{
+		if (key != "none")
+		{
+			aiColor4D color(0.f, 0.f, 0.f, 1.f);
+			if (attributeName == "shininessMat")
+			{
+				ai_real shininess;
+				mat->Get(AI_MATKEY_SHININESS, shininess);
+				material->SetUniformValue("material." + attributeName + ".color", glm::vec4(shininess, 0.f, 0.f, 0.f));
+			}
+			else
+			{
+				aiGetMaterialColor(mat, key, 0, 0, &color);
+				material->SetUniformValue("material." + attributeName + ".color", 
+					glm::vec4(color.r, color.g, color.b, color.a));
+			}
+		}
+
+		material->SetUniformValue("material." + attributeName + ".useSampler", (sampler != -1) ? 1 : 0);
+		if (sampler != -1) 
 		{
 			for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 			{
@@ -174,10 +206,9 @@ namespace based::graphics
 				BASED_TRACE("Texture location: {}", str.C_Str());
 				Texture texture(str.C_Str());
 
-				material->SetTexture(std::make_shared<Texture>(texture));
+				material->AddTexture(std::make_shared<Texture>(texture));
 			}
+			material->SetUniformValue("material." + attributeName + ".tex", sampler);
 		}
-
-		return material;
 	}
 }

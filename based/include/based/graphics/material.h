@@ -14,15 +14,15 @@ namespace based::graphics
 	class Material
 	{
 	public:
-		Material(std::shared_ptr<Shader> shader, std::shared_ptr<Texture> texture = nullptr);
+		Material(std::shared_ptr<Shader> shader);
 		Material(const Material& other);
 		~Material();
 
 		inline Shader* GetShader() const { return mShader.get(); }
-		inline Texture* GetTexture() const { return mTexture.get(); }
+		inline std::vector<std::shared_ptr<Texture>> GetTextures() const { return mTextures; }
 
 		void SetShader(std::shared_ptr<Shader> shader);
-		void SetTexture(std::shared_ptr<Texture> texture);
+		void AddTexture(std::shared_ptr<Texture> texture);
 		void UpdateShaderUniforms();
 
 #define GETUNIFORMVALUE(mapName, defaultReturn) \
@@ -67,7 +67,7 @@ namespace based::graphics
 		}
 	private:
 		std::shared_ptr<Shader> mShader;
-		std::shared_ptr<Texture> mTexture;
+		std::vector<std::shared_ptr<Texture>> mTextures;
 
 		// Data
 		std::unordered_map<std::string, int> mUniformInts;

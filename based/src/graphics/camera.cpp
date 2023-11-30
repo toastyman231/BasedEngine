@@ -1,6 +1,7 @@
 #include "graphics/camera.h"
 
 #include "engine.h"
+#include "log.h"
 #include "external/glm/gtc/matrix_transform.hpp"
 #include "based/core/profiler.h"
 
@@ -12,7 +13,7 @@ namespace based::graphics
 		, mNear(0.01f)
 		, mFar(1000.f)
 		, mFOV(60.f)
-		, mForward(0.f, 0.f, 1.f)
+		, mForward(0.f, 0.f, -1.f)
 		, mRight(0.f, 0.f, 1.f)
 		, mUp(0.f, 1.f, 0.f)
 		, mProjectionMatrix(1.f)
@@ -131,14 +132,14 @@ namespace based::graphics
 		mTransform.Scale = scale;
 
 		glm::mat4 view = glm::mat4(1.f);
-		glm::mat4 orient = glm::rotate(glm::mat4(1.f), glm::radians(rot.x), glm::vec3(1, 0, 0)) * glm::rotate(glm::mat4(1.f), glm::radians(rot.y), glm::vec3(0, 1, 0))
-			* glm::rotate(glm::mat4(1.f), glm::radians(rot.z), glm::vec3(0, 0, 1));
-
-		view = orient * glm::translate(glm::mat4(1.f), pos);
+		view = glm::rotate(view, glm::radians(rot.z), glm::vec3(0, 0, 1));
+		view = glm::rotate(view, glm::radians(rot.x), glm::vec3(1, 0, 0));
+		view = glm::rotate(view, glm::radians(rot.y), glm::vec3(0, 1, 0));
+		view = glm::translate(view, -pos);
 
 		mForward = glm::normalize(glm::vec3(view[0][2], view[1][2], view[2][2]));
 		mRight = glm::normalize(glm::cross(glm::vec3(0.f, 1.f, 0.f), mForward));
-		mUp = glm::cross(mRight, -mForward);
+		mUp = glm::cross(mForward, mRight);
 
 		SetViewMatrix(view);
 	}

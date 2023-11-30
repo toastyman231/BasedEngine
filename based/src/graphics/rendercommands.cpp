@@ -117,24 +117,20 @@ namespace based::graphics::rendercommands
 				va->Bind();
 
 				Shader* shader = mat->GetShader();
-				Texture* texture = mat->GetTexture();
+				//Texture* texture = mat->GetTexture();
 				BASED_ASSERT(shader, "Attempting to execute invalid RenderVertexArrayMaterial - shader is nullptr");
 				if (shader)
 				{
 					mat->UpdateShaderUniforms();
 					shader->Bind();
-					if (texture)
+					int index = -1;
+					for (const auto& texture : mat->GetTextures())
 					{
+						index++;
+						if (!texture) continue;
+						glActiveTexture(0x84C0 + index); // See GL_TEXTURE macro
+						BASED_CHECK_GL_ERROR;
 						texture->Bind();
-					}
-
-					// TODO: Convert camera matrices to leverage UBOs
-					const auto& rm = Engine::Instance().GetRenderManager();
-					const auto& cam = rm.GetActiveCamera();
-					if (cam)
-					{
-						shader->SetUniformMat4("proj", cam->GetProjectionMatrix());
-						shader->SetUniformMat4("view", cam->GetViewMatrix());
 					}
 
 					shader->SetUniformMat4("model", mModelMatrix);
@@ -148,7 +144,7 @@ namespace based::graphics::rendercommands
 						glDrawArrays(GL_TRIANGLE_STRIP, 0, va->GetVertexCount()); BASED_CHECK_GL_ERROR;
 					}
 
-					if (texture)
+					for (const auto& texture : mat->GetTextures())
 					{
 						texture->Unbind();
 					}

@@ -5,10 +5,18 @@
 #include "external/glm/gtc/type_ptr.hpp"
 
 #include <fstream>
+#include <sstream>
+
+#include "app.h"
+#include "engine.h"
 #include "based/core/profiler.h"
+#include "based/core/basedtime.h"
 
 namespace based::graphics
 {
+	static ShaderGlobals mGlobals;
+	static std::vector<unsigned int> mBufferIds;
+
 	Shader::Shader(const std::string& vertex, const std::string& fragment)
 		: mVertexShader(vertex)
 		, mFragmentShader(fragment)
@@ -70,6 +78,10 @@ namespace based::graphics
 			}
 		}
 
+		unsigned int globalsIndex = glGetUniformBlockIndex(mProgramId, "Globals");
+		if (globalsIndex != GL_INVALID_INDEX)
+			glUniformBlockBinding(mProgramId, globalsIndex, 0); BASED_CHECK_GL_ERROR;
+
 		glDeleteShader(vertexShaderId); BASED_CHECK_GL_ERROR;
 		glDeleteShader(fragmentShaderId); BASED_CHECK_GL_ERROR;
 	}
@@ -82,6 +94,30 @@ namespace based::graphics
 	{
 		glUseProgram(0); BASED_CHECK_GL_ERROR;
 		glDeleteProgram(mProgramId); BASED_CHECK_GL_ERROR;
+	}
+
+	void Shader::InitializeUniformBuffers()
+	{
+		unsigned int globalsUbo;
+		glGenBuffers(1, &globalsUbo); BASED_CHECK_GL_ERROR;
+		glBindBuffer(GL_UNIFORM_BUFFER, globalsUbo); BASED_CHECK_GL_ERROR;
+		glBufferData(GL_UNIFORM_BUFFER, sizeof(ShaderGlobals), NULL, GL_STATIC_DRAW); BASED_CHECK_GL_ERROR;
+		glBindBuffer(GL_UNIFORM_BUFFER, 0); BASED_CHECK_GL_ERROR;
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, globalsUbo); BASED_CHECK_GL_ERROR;
+		mBufferIds.emplace_back(globalsUbo);
+	}
+
+	void Shader::UpdateUniformBuffers()
+	{
+		mGlobals.proj = Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetProjectionMatrix();
+		mGlobals.view = Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetViewMatrix();
+		mGlobals.eyePos = glm::vec4(Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetTransform().Position, 1.f);
+		mGlobals.eyeForward = glm::vec4(Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetForward(), 1.f);
+		mGlobals.time = based::core::Time::GetTime();
+
+		glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[0]); BASED_CHECK_GL_ERROR;
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ShaderGlobals), &mGlobals); BASED_CHECK_GL_ERROR;
+		glBindBuffer(GL_UNIFORM_BUFFER, 0); BASED_CHECK_GL_ERROR;
 	}
 
 	Shader* Shader::LoadShader(const std::string& vsPath, const std::string& fsPath)
@@ -109,10 +145,64 @@ namespace based::graphics
 			}
 			fsFile.close();
 
+			std::set<std::string> alreadyIncluded = {};
+			vertexSource = PreprocessShader(vertexSource, "#include ", "Assets/shaders/", alreadyIncluded);
+			alreadyIncluded = {};
+			fragSource = PreprocessShader(fragSource, "#include ", "Assets/shaders/", alreadyIncluded);
+
 			return new Shader(vertexSource, fragSource);
 		}
 		
 		return nullptr;
+	}
+
+	std::string Shader::PreprocessShader(const std::string source, const std::string includeIdentifier,
+		const std::string includeSearchDir, std::set<std::string>& alreadyIncluded)
+	{
+		// Shader preprocessing code by Grayson Clark: https://github.com/FaultyPine/tiny_engine/blob/master/engine/src/render/shader.cpp
+		static bool isRecursiveCall = false;
+		std::string fullSourceCode = "";
+		std::string lineBuffer;
+		std::istringstream stream = std::istringstream(source);
+		// TODO: custom strings
+		while (std::getline(stream, lineBuffer)) {
+			// if include is in this line
+			if (lineBuffer.find(includeIdentifier) != lineBuffer.npos && lineBuffer.find("//") == lineBuffer.npos) {
+				// Remove the include identifier, this will cause the path to remain
+				lineBuffer.erase(0, includeIdentifier.size());
+				lineBuffer = lineBuffer.erase(0, 1);
+				lineBuffer.erase(lineBuffer.size() - 1, 1); // remove ""
+				// The include path is relative to the current shader file path
+				std::string path = includeSearchDir + lineBuffer;
+				// if we haven't already included this in the compilation unit
+				if (alreadyIncluded.count(path) == 0)
+				{
+					std::string nextFile;
+					if (ReadEntireFile(path.c_str(), nextFile)) {
+						alreadyIncluded.insert(path);
+						// recursively process included file
+						isRecursiveCall = true;
+						std::string recursiveShaderSource = PreprocessShader(nextFile, includeIdentifier, 
+							includeSearchDir, alreadyIncluded);
+						fullSourceCode += recursiveShaderSource;
+					}
+					else {
+						BASED_ERROR("Failed to open shader include: {}", path);
+					}
+				}
+
+				// don't add the actual "#include blah.blah" line in the final source
+				continue;
+			}
+
+			fullSourceCode += lineBuffer + '\n';
+		}
+
+		// null terminate the very end of the file
+		if (!isRecursiveCall)
+			fullSourceCode += '\0';
+
+		return fullSourceCode;
 	}
 
 	void Shader::Bind()

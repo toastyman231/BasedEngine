@@ -95,7 +95,7 @@ public:
 		//SDL_SetRelativeMouseMode(SDL_TRUE);
 		//SDL_SetWindowGrab(Engine::Instance().GetWindow().GetSDLWindow(), SDL_TRUE);
 		//SDL_CaptureMouse(SDL_TRUE);
-		Engine::Instance().GetWindow().SetShouldRenderToScreen(true);
+		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
 
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main", 
 			Engine::Instance().GetWindow().GetSize());
@@ -128,14 +128,19 @@ public:
 
 		crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
 		auto crateMat = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/test_vert.vert", "Assets/shaders/test_frag.frag"),
-			crateTex);
+			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag"));
+		crateMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
+		crateMat->SetUniformValue("material.diffuseMat.useSampler", 1);
+		crateMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f, 0.f, 0.f, 0.f));
+		crateMat->AddTexture(crateTex);
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Crate", crateMat);
 
 		auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
 		auto skybox = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/test_vert.vert", "Assets/shaders/test_frag.frag"),
-			skyboxTex);
+			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"));
+		skybox->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
+		skybox->SetUniformValue("material.diffuseMat.useSampler", 1);
+		skybox->AddTexture(skyboxTex);
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Sky", skybox);
 
 		crateMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), crateMat);
@@ -157,7 +162,8 @@ public:
 
 		// TODO: Fix text rendering behind sprites even when handled last
 		// TODO: Optimize UI to not regenerate VAs every single frame
-		// TODO: Figure out why radio buttons don't uncheck
+
+		// TODO: Implement proper lighting using upgraded materials
 	}
 
 	void Shutdown() override
@@ -172,22 +178,22 @@ public:
 		if (input::Keyboard::Key(BASED_INPUT_KEY_W))
 		{
 			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
-			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position + speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetForward());
+			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position - speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetForward());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_S))
 		{
 			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
-			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position - speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetForward());
+			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position + speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetForward());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_A))
 		{
 			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
-			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position + speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetRight());
+			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position - speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetRight());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_D))
 		{
 			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
-			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position - speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetRight());
+			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position + speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetRight());
 		}
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_P))
@@ -278,7 +284,7 @@ public:
 
 			glm::vec3 pos = startScene->GetActiveCamera()->GetTransform().Position;
 			ImGui::DragFloat3("Camera Pos", glm::value_ptr(pos), 0.01f);
-			//startScene->GetActiveCamera()->SetPosition(camPos);//SetViewMatrix(camPos, 0.f);
+			startScene->GetActiveCamera()->SetPosition(pos);
 
 			glm::vec3 rot = startScene->GetActiveCamera()->GetTransform().Rotation;
 			ImGui::DragFloat3("Camera Rot", glm::value_ptr(rot), 0.01f);

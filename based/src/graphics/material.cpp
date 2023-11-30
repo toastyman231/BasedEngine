@@ -6,9 +6,8 @@
 
 namespace based::graphics
 {
-	Material::Material(std::shared_ptr<Shader> shader, std::shared_ptr<Texture> texture)
+	Material::Material(std::shared_ptr<Shader> shader)
 		: mShader(shader)
-		, mTexture(texture)
 	{
 		BASED_ASSERT(mShader, "Attempting to instantiate a material with a nullptr shader");
 	}
@@ -16,7 +15,7 @@ namespace based::graphics
 	Material::Material(const Material& other)
 	{
 		mShader = std::make_shared<graphics::Shader>(*other.mShader);
-		mTexture = other.mTexture;
+		mTextures = other.mTextures;
 
 		// Data
 		mUniformInts = other.mUniformInts;
@@ -39,9 +38,9 @@ namespace based::graphics
 		}
 	}
 
-	void Material::SetTexture(std::shared_ptr<Texture> texture)
+	void Material::AddTexture(std::shared_ptr<Texture> texture)
 	{
-		mTexture = texture;
+		mTextures.emplace_back(texture);
 	}
 
 	void Material::UpdateShaderUniforms()

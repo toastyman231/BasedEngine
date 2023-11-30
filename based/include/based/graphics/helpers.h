@@ -6,6 +6,7 @@
 namespace based::graphics
 {
 	void CheckGLError();
+	bool ReadEntireFile(const std::string& filename, std::string& str);
 }
 
 #ifndef BASED_CONFIG_RELEASE

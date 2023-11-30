@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <string>
 #include <unordered_map>
 #include "external/glm/glm.hpp"
@@ -8,6 +9,14 @@
 
 namespace based::graphics
 {
+	struct ShaderGlobals
+	{
+		glm::mat4 proj;
+		glm::mat4 view;
+		glm::vec4 eyePos;
+		glm::vec4 eyeForward;
+		float time;
+	};
 	class Shader
 	{
 	public:
@@ -15,7 +24,11 @@ namespace based::graphics
 		Shader(const Shader& other);
 		~Shader();
 
+		static void InitializeUniformBuffers();
+		static void UpdateUniformBuffers();
 		static Shader* LoadShader(const std::string& vsPath, const std::string& fsPath);
+		static std::string PreprocessShader(const std::string source, const std::string includeIdentifier,
+			const std::string includeSearchDir, std::set<std::string>& alreadyIncluded);
 
 		inline const std::string& GetVertexShaderSource() const { return mVertexShader; }
 		inline const std::string& GetFragmentShaderSource() const { return mFragmentShader; }

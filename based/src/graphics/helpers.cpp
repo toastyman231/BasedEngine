@@ -1,5 +1,8 @@
 #include "graphics/helpers.h"
 
+#include <fstream>
+#include <sstream>
+
 namespace based::graphics
 {
 	void CheckGLError()
@@ -25,5 +28,17 @@ namespace based::graphics
 			BASED_ASSERT(!shouldAssert, "OpenGL Error!");
 		}
 		
+	}
+
+	bool ReadEntireFile(const std::string& filename, std::string& str)
+	{
+		std::ifstream f(filename);
+		if (f) {
+			std::ostringstream ss;
+			ss << f.rdbuf();
+			str = ss.str();
+			return true;
+		}
+		return false;
 	}
 }

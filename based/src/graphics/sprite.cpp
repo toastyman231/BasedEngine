@@ -12,9 +12,9 @@ namespace based::graphics
 		: Entity(), mVA(std::move(va)),
 		mMaterial(std::move(mat)), mColor(1.f), mSize(1.f, 1.f), mPivot(0.f, 0.f), mSortOrder(0)
 	{
-		if (mMaterial->GetTexture())
+		if (mMaterial->GetTextures()[0])
 		{
-			mSize = glm::vec2(mMaterial->GetTexture()->GetWidth(), mMaterial->GetTexture()->GetHeight());
+			mSize = glm::vec2(mMaterial->GetTextures()[0]->GetWidth(), mMaterial->GetTextures()[0]->GetHeight());
 		}
 
 		mAlignment = ui::Middle;
@@ -38,9 +38,9 @@ namespace based::graphics
 	Sprite::Sprite(std::shared_ptr<Material> mat)
 		: Entity(), mMaterial(std::move(mat)), mColor(1.f), mSize(1.f), mPivot(0.f), mSortOrder(0)
 	{
-		if (mMaterial->GetTexture())
+		if (mMaterial->GetTextures()[0])
 		{
-			mSize = glm::vec2(mMaterial->GetTexture()->GetWidth(), mMaterial->GetTexture()->GetHeight());
+			mSize = glm::vec2(mMaterial->GetTextures()[0]->GetWidth(), mMaterial->GetTextures()[0]->GetHeight());
 		}
 		mMaterial->SetUniformValue("col", mColor);
 		AddComponent<scene::SpriteRenderer>(this);
@@ -48,8 +48,8 @@ namespace based::graphics
 
 	void Sprite::SetSprite(std::shared_ptr<Texture> texture)
 	{
-		mMaterial->SetTexture(std::move(texture));
-		mSize = glm::vec2(mMaterial->GetTexture()->GetWidth(), mMaterial->GetTexture()->GetHeight());
+		mMaterial->AddTexture(std::move(texture));
+		mSize = glm::vec2(mMaterial->GetTextures()[0]->GetWidth(), mMaterial->GetTextures()[0]->GetHeight());
 		RegenerateVA();
 	}
 

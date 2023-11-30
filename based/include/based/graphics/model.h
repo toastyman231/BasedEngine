@@ -36,5 +36,7 @@ namespace based::graphics
         graphics::Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene);
         std::shared_ptr<Material> LoadMaterialTextures(aiMaterial* mat, aiTextureType type,
             std::string typeName);
+        void SetMaterialAttribute(aiMaterial* mat, std::shared_ptr<Material> material, const char* key, 
+            const std::string& attributeName, int sampler, aiTextureType type);
     };
 }

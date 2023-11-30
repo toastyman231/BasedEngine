@@ -42,6 +42,8 @@ namespace based
 
     void Engine::Render()
     {
+        graphics::Shader::UpdateUniformBuffers();
+
         mWindow.BeginRender();
 
         mUiManager.Render();
@@ -166,6 +168,9 @@ namespace based
 
                     //Initialize miniaudio
                     scene::Audio::InitEngine();
+
+                    // Initialize buffer objects
+                    graphics::Shader::InitializeUniformBuffers();
 
                     // Initialize client
                     mApp->Initialize();

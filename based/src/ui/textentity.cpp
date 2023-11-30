@@ -28,7 +28,8 @@ namespace based::ui
 		RegenerateVertexArray();
 
 		auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect");
-		auto mat = std::make_shared<graphics::Material>(shader, mTexture);
+		auto mat = std::make_shared<graphics::Material>(shader);
+		mat->AddTexture(mTexture);
 		mat->SetUniformValue("col", glm::vec4{ 1.f, 1.f, 1.f, 1.f });
 		mMaterialLibrary.Load("Material", mat);
 
@@ -156,7 +157,8 @@ namespace based::ui
 		mTexture = std::make_shared<graphics::Texture>(surface, texture);
 		mTexture->SetTextureFilter(graphics::TextureFilter::Nearest);
 		auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect");
-		auto mat = std::make_shared<graphics::Material>(shader, mTexture);
+		auto mat = std::make_shared<graphics::Material>(shader);
+		mat->AddTexture(mTexture);
 		mat->SetUniformValue("col", glm::vec4{ 1.f, 1.f, 1.f, 1.f });
 		mMaterialLibrary.Load("Material", mat);
 
