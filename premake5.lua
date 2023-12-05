@@ -168,7 +168,7 @@ project "basededitor"
             "%{externals.sdl2}/lib",
             "%{externals.freetype}/lib",
             "%{externals.assimp}/lib",
-            "%{externals.rmlui}/Bin/Dynamic-Debug"
+            "%{externals.rmlui}/lib"
         }
 
         links
@@ -288,7 +288,7 @@ project "PongV1"
             "%{externals.sdl2}/lib",
             "%{externals.freetype}/lib",
             "%{externals.assimp}/lib",
-            "%{externals.rmlui}/Bin/Dynamic-Debug"
+            "%{externals.rmlui}/lib"
         }
 
         links
@@ -407,7 +407,7 @@ project "Sandbox"
             "%{externals.sdl2}/lib",
             "%{externals.freetype}/lib",
             "%{externals.assimp}/lib",
-            "%{externals.rmlui}/Bin/Dynamic-Debug"
+            "%{externals.rmlui}/lib"
         }
 
         links
