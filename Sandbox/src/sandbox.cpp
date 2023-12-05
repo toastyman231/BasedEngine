@@ -19,6 +19,9 @@
 #include "external/imgui/imgui.h"
 #include <RmlUi/Core.h>
 
+#include "based/core/basedtime.h"
+#include "Models-Surfaces/Generators.h"
+
 using namespace based;
 
 struct ApplicationData {
@@ -53,25 +56,33 @@ private:
 	std::shared_ptr<scene::Scene> secondScene;
 	scene::Entity* modelEntity;
 	scene::Entity* skyEntity;
+	scene::Entity* planeEntity;
 	scene::Entity* crateEntity;
+	scene::Entity* grassEntity;
+	scene::Entity* lightPlaceholder;
 
 	bool mouseControl = false;
-	bool useTexture = false;
 	float speed = 2.5f;
 	float yaw = 0.f;
 	float pitch = 0.0f;
 	float sensitivity = 100.f;
-	float padding = 0.f;
+	float ambientStrength = 0.1f;
+	float R = 100.f;
+	bool useLight = true;
 	glm::vec3 camPos = glm::vec3(0.f, 0.f, 1.5f);
 	glm::vec3 camRot = glm::vec3(0.f);
 
 	glm::vec3 cubePos;
 	glm::vec3 cubeRot;
 	glm::vec3 cubeScale;
+	glm::vec3 lightCol;
+	glm::vec3 lightPosition;
+	glm::ivec2 initialPos;
 
-	graphics::Mesh* crateMesh;
+	graphics::Mesh* planeMesh;
 	graphics::Mesh* skyboxMesh;
-	graphics::Model* testModel;
+	graphics::Mesh* grassMesh;
+	graphics::Mesh* crateMesh;
 	std::shared_ptr<graphics::Texture> crateTex;
 
 	Rml::ElementDocument* document;
@@ -91,12 +102,9 @@ public:
 	{
 		App::Initialize();
 		// TODO: Figure out how to capture the mouse properly
-		//input::Mouse::SetCursorLocked(true);
-		//SDL_SetRelativeMouseMode(SDL_TRUE);
-		//SDL_SetWindowGrab(Engine::Instance().GetWindow().GetSDLWindow(), SDL_TRUE);
-		//SDL_CaptureMouse(SDL_TRUE);
 		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
 
+		// UI Setup, not related to PS05
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main", 
 			Engine::Instance().GetWindow().GetSize());
 
@@ -110,6 +118,7 @@ public:
 		Engine::Instance().GetUiManager().SetPathPrefix("Assets/ui/");
 
 		document = Engine::Instance().GetUiManager().LoadWindow("my_document", context);
+		document->Hide();
 
 		Rml::Element* element = document->GetElementById("world");
 		element->SetInnerRML("WORLD");
@@ -119,22 +128,30 @@ public:
 		element->AddEventListener("mousedown", new MyListener("button"));
 		// NOTE: For radio buttons to automatically uncheck, they must be wrapped in a <form>
 
-		cubePos = glm::vec3(0.f);
+		// Old stuff, plus setting camera to perspective mode
+		cubePos = glm::vec3(2.7f, 1.f, 1.7f);
 		cubeRot = glm::vec3(0.f);
 		cubeScale = glm::vec3(1.f);
 		startScene->GetActiveCamera()->SetProjection(based::graphics::PERSPECTIVE);
 
 		// TODO: Confirm local transforms work in 2D, scene loading
 
+		// Set up crate object and material
 		crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
 		auto crateMat = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag"));
 		crateMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		crateMat->SetUniformValue("material.diffuseMat.useSampler", 1);
-		crateMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f, 0.f, 0.f, 0.f));
 		crateMat->AddTexture(crateTex);
-		graphics::DefaultLibraries::GetMaterialLibrary().Load("Crate", crateMat);
+		crateMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), crateMat);
+		crateEntity = scene::Entity::CreateEntity<scene::Entity>();
+		crateEntity->AddComponent<scene::MeshRenderer>(crateMesh);
+		crateEntity->SetPosition(glm::vec3(-1.f, 0.f, 0.f));
 
+		lightCol = glm::vec3(1, 1, 1);
+		lightPosition = glm::vec3(1, 1.2f, 0.3f);
+
+		// Skybox material setup
 		auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
 		auto skybox = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"));
@@ -143,20 +160,48 @@ public:
 		skybox->AddTexture(skyboxTex);
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Sky", skybox);
 
-		crateMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), crateMat);
+		// Generate plane mesh and skybox cube
+		planeMesh = GeneratePlane(10, 5);
 		skyboxMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("AtlasTextureCube"), skybox);
 
+		// Skybox setup
 		skyEntity = scene::Entity::CreateEntity<scene::Entity>();
 		skyEntity->AddComponent<scene::MeshRenderer>(skyboxMesh);
 		skyEntity->SetScale(glm::vec3(500.f));
-		crateEntity = scene::Entity::CreateEntity<scene::Entity>();
-		crateEntity->AddComponent<scene::MeshRenderer>(crateMesh);
 
-		modelEntity = graphics::Model::CreateModelEntity("Assets/Models/rotate_cylinder.obj");
-		modelEntity->SetPosition({ 2, 0, 0 });
+		// Set up plane material
+		planeEntity = scene::Entity::CreateEntity<scene::Entity>();
+		planeMesh->material = std::make_shared<graphics::Material>(
+			LOAD_SHADER("Assets/shaders/ps05/heightmap.vert", "Assets/shaders/basic_lit.frag"));
+		planeMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
+		planeMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
+		planeMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
+		planeMesh->material->AddTexture(std::make_shared<graphics::Texture>("Assets/heightmap.png"));
+		planeEntity->AddComponent<scene::MeshRenderer>(planeMesh);
 
-		auto axe = graphics::Model::CreateModelEntity("Assets/Models/axe.obj");
-		axe->SetPosition({ -2, 0, 0 });	
+		// Set up grass tester
+		grassEntity = scene::Entity::CreateEntity<scene::Entity>();
+		grassMesh = GenerateGrassBlade(glm::vec3(0.1f, 1.f, 1.f));
+		grassMesh->material = std::make_shared<graphics::Material>(
+			LOAD_SHADER("Assets/shaders/ps05/grass.vert", "Assets/shaders/basic_lit.frag"));
+		grassMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(0.f, 1.f, 0.f, 1.f));
+		grassMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(12.f));
+		grassMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
+		grassEntity->AddComponent<scene::MeshRenderer>(grassMesh);
+
+		// Set up light placeholder
+		auto cubeMat = std::make_shared<graphics::Material>(
+			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"));
+		cubeMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
+		cubeMat->SetUniformValue("material.diffuseMat.useSampler", 0);
+		auto cubeMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), cubeMat);
+		lightPlaceholder = scene::Entity::CreateEntity<scene::Entity>();
+		lightPlaceholder->AddComponent<scene::MeshRenderer>(cubeMesh);
+		lightPlaceholder->SetPosition(lightPosition);
+		lightPlaceholder->SetScale(glm::vec3(0.1f));
+
+		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 1, 4));
+		GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(6, 53, 0));
 
 		BASED_TRACE("Done initializing");
 
@@ -175,6 +220,7 @@ public:
 	{
 		App::Update(deltaTime);
 
+		// Movement input
 		if (input::Keyboard::Key(BASED_INPUT_KEY_W))
 		{
 			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
@@ -196,11 +242,13 @@ public:
 			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position + speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetRight());
 		}
 
+		// Enable/disable mouse control
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_P))
 		{
 			mouseControl = !mouseControl;
 		}
 
+		// Mouse input
 		if (mouseControl)
 		{
 			pitch += static_cast<float>(input::Mouse::DX()) * sensitivity * deltaTime;
@@ -211,27 +259,62 @@ public:
 			GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(yaw, pitch, GetCurrentScene()->GetActiveCamera()->GetTransform().Rotation.z));
 		}
 
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_G))
+		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
 		{
-			//LoadScene(secondScene);
+			initialPos = input::Mouse::GetMousePosition();
 		}
 
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_L))
+		if (input::Mouse::Button(BASED_INPUT_MOUSE_LEFT))
 		{
-			//LoadScene(startScene);
+			// Rolling ball algorithm
+			glm::ivec2 current = input::Mouse::GetMousePosition();
+
+			float dx = static_cast<float>(current.x) - static_cast<float>(initialPos.x);
+			float dy = static_cast<float>(current.y) - static_cast<float>(initialPos.y);
+
+			float dr = glm::length(glm::vec2(dx, dy));
+			glm::vec3 n = glm::vec3(-dy / dr, dx / dr, 0.f);
+			float theta = dr / R;
+
+			glm::vec3 rot = AngleAxisToEuler(glm::normalize(n), theta);
+			if (isnan(rot.x) || isnan(rot.y) || isnan(rot.z)) return;
+
+			cubeRot += rot;
 		}
 
+		// Show/Hide UI (not related to ps05)
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_B))
 		{
 			if (document->IsVisible()) document->Hide();
 			else document->Show();
 		}
 
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_H))
-		{
-		}
+		// Set light position and pass info to shaders
+		lightPosition = glm::vec3(based::math::Sin(based::core::Time::GetTime()) * 4, 
+			lightPosition.y, lightPosition.z);
+
+		lightPlaceholder->SetPosition(lightPosition);
 
 		crateEntity->SetTransform(cubePos, cubeRot, cubeScale);
+
+		planeMesh->material->SetUniformValue("lightColor", lightCol);
+		grassMesh->material->SetUniformValue("lightColor", lightCol);
+		crateMesh->material->SetUniformValue("lightColor", lightCol);
+
+		planeMesh->material->SetUniformValue("lightPos", lightPosition);
+		grassMesh->material->SetUniformValue("lightPos", lightPosition);
+		crateMesh->material->SetUniformValue("lightPos", lightPosition);
+
+		planeMesh->material->SetUniformValue("ambientStrength", ambientStrength);
+		grassMesh->material->SetUniformValue("ambientStrength", ambientStrength);
+		crateMesh->material->SetUniformValue("ambientStrength", ambientStrength);
+
+		if (!useLight)
+		{
+			planeMesh->material->SetUniformValue("ambientStrength", 1.f);
+			grassMesh->material->SetUniformValue("ambientStrength", 1.f);
+			crateMesh->material->SetUniformValue("ambientStrength", 1.f);
+		}
 	}
 
 	void Render() override
@@ -294,49 +377,47 @@ public:
 			ImGui::DragFloat3("Cube Rotation", glm::value_ptr(cubeRot), 0.01f);
 			ImGui::DragFloat3("Cube Scale", glm::value_ptr(cubeScale), 0.01f);
 
-			glm::vec3 rootPos = modelEntity->GetComponent<scene::Transform>().Position;
-			bool changed = ImGui::DragFloat3("Root Entity Pos", glm::value_ptr(rootPos));
-			if (changed) modelEntity->SetPosition(rootPos);
-			glm::vec3 rootLocalPos = modelEntity->GetComponent<scene::Transform>().LocalPosition;
-			changed = ImGui::DragFloat3("Root Entity Local Pos", glm::value_ptr(rootLocalPos));
-			if (changed) modelEntity->SetLocalPosition(rootLocalPos);
+			ImGui::DragFloat3("Light Color", glm::value_ptr(lightCol), 0.01f);
+			ImGui::DragFloat3("Light Position", glm::value_ptr(lightPosition), 0.01f);
 
-			glm::vec3 cylinderPos = modelEntity->Children[0]->GetComponent<scene::Transform>().Position;
-			changed = ImGui::DragFloat3("Cylinder Pos", glm::value_ptr(cylinderPos));
-			if (changed) modelEntity->Children[0]->SetPosition(cylinderPos);
-			glm::vec3 cylinderLocalPos = modelEntity->Children[0]->GetComponent<scene::Transform>().LocalPosition;
-			changed = ImGui::DragFloat3("Cylinder Local Pos", glm::value_ptr(cylinderLocalPos));
-			if (changed) modelEntity->Children[0]->SetLocalPosition(cylinderLocalPos);
+			ImGui::DragFloat("Ambient Strength", &ambientStrength, 0.01f);
+			ImGui::Checkbox("Use Light", &useLight);
 
-			glm::vec3 rootRot = modelEntity->GetComponent<scene::Transform>().Rotation;
-			changed = ImGui::DragFloat3("Root Entity Rot", glm::value_ptr(rootRot));
-			if (changed) modelEntity->SetRotation(rootRot);
-			glm::vec3 rootLocalRot = modelEntity->GetComponent<scene::Transform>().LocalRotation;
-			changed = ImGui::DragFloat3("Root Entity Local Rot", glm::value_ptr(rootLocalRot));
-			if (changed) modelEntity->SetLocalRotation(rootLocalRot);
-
-			glm::vec3 cylinderRot = modelEntity->Children[0]->GetComponent<scene::Transform>().Rotation;
-			changed = ImGui::DragFloat3("Cylinder Rot", glm::value_ptr(cylinderRot));
-			if (changed) modelEntity->Children[0]->SetRotation(cylinderRot);
-			glm::vec3 cylinderLocalRot = modelEntity->Children[0]->GetComponent<scene::Transform>().LocalRotation;
-			changed = ImGui::DragFloat3("Cylinder Local Rot", glm::value_ptr(cylinderLocalRot));
-			if (changed) modelEntity->Children[0]->SetLocalRotation(cylinderLocalRot);
-
-			glm::vec3 rootScale = modelEntity->GetComponent<scene::Transform>().Scale;
-			changed = ImGui::DragFloat3("Root Entity Scale", glm::value_ptr(rootScale));
-			if (changed) modelEntity->SetScale(rootScale);
-			glm::vec3 rootLocalScale = modelEntity->GetComponent<scene::Transform>().LocalScale;
-			changed = ImGui::DragFloat3("Root Entity Local Scale", glm::value_ptr(rootLocalScale));
-			if (changed) modelEntity->SetLocalScale(rootLocalScale);
-
-			glm::vec3 cylinderScale = modelEntity->Children[0]->GetComponent<scene::Transform>().Scale;
-			changed = ImGui::DragFloat3("Cylinder Scale", glm::value_ptr(cylinderScale));
-			if (changed) modelEntity->Children[0]->SetScale(cylinderScale);
-			glm::vec3 cylinderLocalScale = modelEntity->Children[0]->GetComponent<scene::Transform>().LocalScale;
-			changed = ImGui::DragFloat3("Cylinder Local Scale", glm::value_ptr(cylinderLocalScale));
-			if (changed) modelEntity->Children[0]->SetLocalScale(cylinderLocalScale);
+			ImGui::DragFloat("Rolling Ball Scale", &R, 0.01f);
 		}
 		ImGui::End();
+	}
+
+	static glm::vec3 AngleAxisToEuler(glm::vec3 axis, float angle)
+	{
+		const float s = based::math::Sin(angle);
+		const float c = based::math::Cos(angle);
+		const float t = 1 - c;
+
+		float heading;
+		float attitude;
+		float bank;
+
+		if ((axis.x * axis.y * t + axis.z * s) > 0.998)
+		{
+			heading = 2.f * based::math::Atan2(axis.x * based::math::Sin(angle / 2), based::math::Cos(angle / 2));
+			attitude = based::math::PI / 2.f;
+			bank = 0;
+			return {attitude, heading, bank};
+		}
+
+		if ((axis.x * axis.y * t + axis.z * s) < -0.998)
+		{
+			heading = -2.f * based::math::Atan2(axis.x * based::math::Sin(angle / 2), based::math::Cos(angle / 2));
+			attitude = -based::math::PI / 2.f;
+			bank = 0;
+			return {attitude, heading, bank};
+		}
+
+		heading = based::math::Atan2(axis.y * s - axis.x * axis.z * t, 1 - (axis.y * axis.y + axis.z * axis.z) * t);
+		attitude = based::math::Asin(axis.x * axis.y * t + axis.z * s);
+		bank = based::math::Atan2(axis.x * s - axis.y * axis.z * t, 1 - (axis.x * axis.x + axis.z * axis.z) * t);
+		return {attitude, heading, bank};
 	}
 };
 

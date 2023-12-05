@@ -8,13 +8,13 @@ in vec3 fragPos;
 
 #include "material.glsl"
 #include "globals.glsl"
+uniform vec3 lightColor;
+uniform vec3 lightPos;
+uniform float ambientStrength;
 
 void main()
 {
-    vec3 lightColor = vec3(1.0, 1.0, 1.0);
-    vec3 lightPos = vec3(1.2, 1.0, 0.0);
-
-    vec3 ambient = 0.1 * lightColor;
+    vec3 ambient = ambientStrength * lightColor;
 
     vec3 norm = normalize(fragNormal);
     vec3 lightDir = normalize(lightPos - fragPos);

@@ -3,8 +3,10 @@
 out vec4 outColor;
 in vec2 uvs;
 
-uniform sampler2D tex;
+#include "material.glsl"
+#include "globals.glsl"
+
 void main()
 {
-    outColor = texture(tex, uvs);
+    outColor = GetDiffuseMaterial(uvs);
 }

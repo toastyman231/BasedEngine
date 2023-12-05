@@ -68,8 +68,8 @@ namespace based::graphics
 		norm_vb->SetLayout({ 3 });
 		uv_vb->SetLayout({ 2 });
 		va->PushBuffer(std::move(pos_vb));
-		va->PushBuffer(std::move(norm_vb));
 		va->PushBuffer(std::move(uv_vb));
+		va->PushBuffer(std::move(norm_vb));
 
 		va->SetElements(indices);
 		va->Upload();
