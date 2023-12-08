@@ -20,7 +20,9 @@
 #include <RmlUi/Core.h>
 
 #include "based/core/basedtime.h"
+#include "based/math/random.h"
 #include "Models-Surfaces/Generators.h"
+#include "Models-Surfaces/GrassEntity.h"
 
 using namespace based;
 
@@ -58,7 +60,7 @@ private:
 	scene::Entity* skyEntity;
 	scene::Entity* planeEntity;
 	scene::Entity* crateEntity;
-	scene::Entity* grassEntity;
+	std::vector<GrassEntity*> grassEntities;
 	scene::Entity* lightPlaceholder;
 
 	bool mouseControl = false;
@@ -81,7 +83,6 @@ private:
 
 	graphics::Mesh* planeMesh;
 	graphics::Mesh* skyboxMesh;
-	graphics::Mesh* grassMesh;
 	graphics::Mesh* crateMesh;
 	std::shared_ptr<graphics::Texture> crateTex;
 
@@ -141,6 +142,7 @@ public:
 		auto crateMat = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag"));
 		crateMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
+		crateMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
 		crateMat->SetUniformValue("material.diffuseMat.useSampler", 1);
 		crateMat->AddTexture(crateTex);
 		crateMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), crateMat);
@@ -176,18 +178,35 @@ public:
 		planeMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		planeMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
 		planeMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
-		planeMesh->material->AddTexture(std::make_shared<graphics::Texture>("Assets/heightmap.png"));
+		const auto heightMap = std::make_shared<graphics::Texture>("Assets/heightmap.png");
+		planeMesh->material->AddTexture(heightMap);
 		planeEntity->AddComponent<scene::MeshRenderer>(planeMesh);
 
-		// Set up grass tester
-		grassEntity = scene::Entity::CreateEntity<scene::Entity>();
-		grassMesh = GenerateGrassBlade(glm::vec3(0.1f, 1.f, 1.f));
-		grassMesh->material = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/ps05/grass.vert", "Assets/shaders/basic_lit.frag"));
-		grassMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(0.f, 1.f, 0.f, 1.f));
+		auto grassMesh = GenerateGrassBlade(glm::vec3(0.1f, 1.f, 1.f));
+		const auto grassMatBase = std::make_shared<graphics::Material>(
+			LOAD_SHADER("Assets/shaders/ps05/grass.vert", "Assets/shaders/ps05/grass.frag"));
+		grassMesh->material = grassMatBase;
 		grassMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(12.f));
 		grassMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
-		grassEntity->AddComponent<scene::MeshRenderer>(grassMesh);
+
+		constexpr int GRASS_BLADES = 2048;
+		const float GRASS_X = based::math::Sqrt(GRASS_BLADES);
+
+		// Set up grass tester
+		for (int i = 0; i < GRASS_X; i++)
+		{
+			const float x = (static_cast<float>(i) / GRASS_X) - 0.5f;
+			for (int j = 0; j < GRASS_X; j++)
+			{
+				const float y = (static_cast<float>(j) / GRASS_X) - 0.5f;
+				glm::vec3 pos = { x * 10 + based::math::RandomRange(-0.2f, 0.2f), 0,
+					y * 10 + based::math::RandomRange(-0.2f, 0.2f) };
+				glm::vec3 rot = { 0, based::math::RandomRange(0, 360), 0 };
+				auto grass = scene::Entity::CreateEntity<GrassEntity>(pos, rot, glm::vec3(1), 
+					grassMesh, std::make_shared<based::graphics::Material>(*grassMatBase));
+				grassEntities.emplace_back(grass);
+			}
+		}
 
 		// Set up light placeholder
 		auto cubeMat = std::make_shared<graphics::Material>(
@@ -298,22 +317,23 @@ public:
 		crateEntity->SetTransform(cubePos, cubeRot, cubeScale);
 
 		planeMesh->material->SetUniformValue("lightColor", lightCol);
-		grassMesh->material->SetUniformValue("lightColor", lightCol);
 		crateMesh->material->SetUniformValue("lightColor", lightCol);
 
 		planeMesh->material->SetUniformValue("lightPos", lightPosition);
-		grassMesh->material->SetUniformValue("lightPos", lightPosition);
 		crateMesh->material->SetUniformValue("lightPos", lightPosition);
 
 		planeMesh->material->SetUniformValue("ambientStrength", ambientStrength);
-		grassMesh->material->SetUniformValue("ambientStrength", ambientStrength);
 		crateMesh->material->SetUniformValue("ambientStrength", ambientStrength);
 
 		if (!useLight)
 		{
 			planeMesh->material->SetUniformValue("ambientStrength", 1.f);
-			grassMesh->material->SetUniformValue("ambientStrength", 1.f);
 			crateMesh->material->SetUniformValue("ambientStrength", 1.f);
+		}
+
+		for (auto grass : grassEntities)
+		{
+			grass->UpdateShaders(lightCol, lightPosition, useLight, ambientStrength);
 		}
 	}
 
