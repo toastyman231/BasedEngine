@@ -75,8 +75,8 @@ namespace based::graphics
 		PROFILE_FUNCTION();
 		if (mVbos.size() > 0)
 		{
-			BASED_ASSERT(mVbos[0]->GetVertexCount() == vbo->GetVertexCount(),
-				"Attempting to push a VertexBuffer with a different VertexCount");
+			//BASED_ASSERT(mVbos[0]->GetVertexCount() == vbo->GetVertexCount(),
+			//	"Attempting to push a VertexBuffer with a different VertexCount");
 		}
 		BASED_ASSERT(vbo->GetLayout().size() > 0, "VertexBuffer has no layout defined");
 		if (vbo->GetLayout().size() > 0)
@@ -108,7 +108,7 @@ namespace based::graphics
 			if (!vbo->IsUploaded())
 			{
 				vbo->Upload(false);
-			}
+			} 
 			vbo->Bind();
 			uint32_t offset = 0;
 			for (uint32_t count : vbo->GetLayout())
@@ -116,6 +116,7 @@ namespace based::graphics
 				glEnableVertexAttribArray(attributeCount); BASED_CHECK_GL_ERROR;
 				glVertexAttribPointer(attributeCount, count, static_cast<GLenum>(vbo->GetGLType()), GL_FALSE, vbo->GetStride(), (void*)(intptr_t)offset);
 				BASED_CHECK_GL_ERROR;
+				if (vbo->IsInstanced()) glVertexAttribDivisor(attributeCount, 1); BASED_CHECK_GL_ERROR;
 
 				attributeCount++;
 				offset += (count * vbo->GetTypeSize());

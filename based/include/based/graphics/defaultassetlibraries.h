@@ -163,10 +163,10 @@ namespace based::graphics
 					// Normals
 
 					// Front
-					vb->PushVertex({ 0.0f, 0.0f, -1.0f });
-					vb->PushVertex({ 0.0f, 0.0f, -1.0f });
-					vb->PushVertex({ 0.0f, 0.0f, -1.0f });
-					vb->PushVertex({ 0.0f, 0.0f, -1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, 1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, 1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, 1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, 1.0f });
 
 					// Right
 					vb->PushVertex({ 1.0f, 0.0f, 0.0f });
@@ -193,10 +193,10 @@ namespace based::graphics
 					vb->PushVertex({ 0.0f, -1.0f, 0.0f });
 
 					// Back
-					vb->PushVertex({ 0.0f, 0.0f, 1.0f });
-					vb->PushVertex({ 0.0f, 0.0f, 1.0f });
-					vb->PushVertex({ 0.0f, 0.0f, 1.0f });
-					vb->PushVertex({ 0.0f, 0.0f, 1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, -1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, -1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, -1.0f });
+					vb->PushVertex({ 0.0f, 0.0f, -1.0f });
 
 					vb->SetLayout({ 3 });
 					va->PushBuffer(std::move(vb));

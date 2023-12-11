@@ -10,6 +10,7 @@
 #include "external/glm/vec3.hpp"
 #include "external/glm/gtx/transform.hpp"
 #include "based/scene/scene.h"
+#include "based/scene/components.h"
 
 // Taken from learnopengl.com : https://learnopengl.com/Model-Loading/Mesh
 
@@ -36,13 +37,39 @@ namespace based::graphics
         Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
         Mesh(std::shared_ptr<VertexArray> va, std::shared_ptr<Material> mat);
         ~Mesh() { BASED_TRACE("Destroying mesh!"); }
-        void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material);
+        virtual void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material);
         void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
-    private:
+    protected:
         //  render data
         //unsigned int VAO, VBO, EBO;
         std::shared_ptr<VertexArray> mVA;
+        Mesh() = default;
 
-        void SetupMesh();
+        void SetupMesh(bool upload = true);
 	};
+
+    class InstancedMesh : public Mesh
+    {
+    public:
+        InstancedMesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+	        : Mesh(vertices, indices, textures), mInstanceCount(0), mIsDirty(true) {}
+        InstancedMesh(std::shared_ptr<VertexArray> va, std::shared_ptr<Material> mat, int count)
+    		: Mesh(va, mat), mInstanceCount(count), mIsDirty(true) {}
+
+        void SetInstanceTransform(int index, const scene::Transform& transform);
+        int AddInstance(scene::Transform transform);
+        void AddInstances(const std::vector<scene::Transform>& transforms);
+        bool RemoveInstance(int index);
+        bool RemoveInstances(std::vector<int> indices);
+        void ClearInstances();
+        void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material) override;
+
+        int GetInstanceCount() const { return mInstanceCount; }
+    private:
+        int mInstanceCount;
+        std::vector<scene::Transform> mInstanceTransforms;
+        bool mIsDirty;
+
+        void RegenVertexArray();
+    };
 }

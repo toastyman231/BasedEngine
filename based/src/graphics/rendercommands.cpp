@@ -117,7 +117,6 @@ namespace based::graphics::rendercommands
 				va->Bind();
 
 				Shader* shader = mat->GetShader();
-				//Texture* texture = mat->GetTexture();
 				BASED_ASSERT(shader, "Attempting to execute invalid RenderVertexArrayMaterial - shader is nullptr");
 				if (shader)
 				{
@@ -133,15 +132,35 @@ namespace based::graphics::rendercommands
 						texture->Bind();
 					}
 
-					shader->SetUniformMat4("model", mModelMatrix);
+					if (!mInstanced) shader->SetUniformMat4("model", mModelMatrix);
 
 					if (va->GetElementCount() > 0)
 					{
-						glDrawElements(GL_TRIANGLES, va->GetElementCount(), GL_UNSIGNED_INT, 0);
+						if (!mInstanced) 
+						{
+							glDrawElements(GL_TRIANGLES, va->GetElementCount(), GL_UNSIGNED_INT, 0);
+							BASED_CHECK_GL_ERROR;
+						}
+						else 
+						{
+							glDrawElementsInstanced(
+								GL_TRIANGLES, va->GetElementCount(), 
+								GL_UNSIGNED_INT, 0, mInstanceCount);
+							BASED_CHECK_GL_ERROR;
+						}
 					}
 					else
 					{
-						glDrawArrays(GL_TRIANGLE_STRIP, 0, va->GetVertexCount()); BASED_CHECK_GL_ERROR;
+						if (!mInstanced) 
+						{
+							glDrawArrays(GL_TRIANGLE_STRIP, 0, va->GetVertexCount());
+							BASED_CHECK_GL_ERROR;
+						}
+						else 
+						{
+							glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, va->GetVertexCount(), mInstanceCount);
+							BASED_CHECK_GL_ERROR;
+						}
 					}
 
 					for (const auto& texture : mat->GetTextures())

@@ -10,6 +10,11 @@ namespace based::graphics
 		}
 	}
 
+	void Model::SetMaterial(const std::shared_ptr<Material>& mat, int index)
+	{
+		mMaterials[index] = mat;
+	}
+
 	scene::Entity* Model::CreateModelEntity(const std::string& path)
 	{
 		PROFILE_FUNCTION();
@@ -31,6 +36,12 @@ namespace based::graphics
 		model->ProcessNodeEntity(rootEntity, scene->mRootNode, scene);
 
 		return rootEntity;
+	}
+
+	graphics::Mesh* Model::LoadSingleMesh(const std::string& path)
+	{
+		const Model* model = new Model(path.c_str());
+		return model->meshes[0];
 	}
 
 	void Model::LoadModel(std::string path)

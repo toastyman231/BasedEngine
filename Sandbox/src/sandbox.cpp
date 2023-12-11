@@ -22,7 +22,6 @@
 #include "based/core/basedtime.h"
 #include "based/math/random.h"
 #include "Models-Surfaces/Generators.h"
-#include "Models-Surfaces/GrassEntity.h"
 
 using namespace based;
 
@@ -60,8 +59,8 @@ private:
 	scene::Entity* skyEntity;
 	scene::Entity* planeEntity;
 	scene::Entity* crateEntity;
-	std::vector<GrassEntity*> grassEntities;
 	scene::Entity* lightPlaceholder;
+	scene::Entity* grassInstance;
 
 	bool mouseControl = false;
 	float speed = 2.5f;
@@ -70,6 +69,7 @@ private:
 	float sensitivity = 100.f;
 	float ambientStrength = 0.1f;
 	float R = 100.f;
+	float heightCoef = 1.f;
 	bool useLight = true;
 	glm::vec3 camPos = glm::vec3(0.f, 0.f, 1.5f);
 	glm::vec3 camRot = glm::vec3(0.f);
@@ -139,10 +139,10 @@ public:
 
 		// Set up crate object and material
 		crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
-		auto crateMat = std::make_shared<graphics::Material>(
+		const auto crateMat = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag"));
 		crateMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
-		crateMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
+		crateMat->SetUniformValue("material.shininessMat.color", glm::vec4(128.f));
 		crateMat->SetUniformValue("material.diffuseMat.useSampler", 1);
 		crateMat->AddTexture(crateTex);
 		crateMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), crateMat);
@@ -154,8 +154,8 @@ public:
 		lightPosition = glm::vec3(1, 1.2f, 0.3f);
 
 		// Skybox material setup
-		auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
-		auto skybox = std::make_shared<graphics::Material>(
+		const auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
+		const auto skybox = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"));
 		skybox->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		skybox->SetUniformValue("material.diffuseMat.useSampler", 1);
@@ -163,7 +163,7 @@ public:
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Sky", skybox);
 
 		// Generate plane mesh and skybox cube
-		planeMesh = GeneratePlane(10, 5);
+		planeMesh = GeneratePlane(100, 100);
 		skyboxMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("AtlasTextureCube"), skybox);
 
 		// Skybox setup
@@ -173,6 +173,7 @@ public:
 
 		// Set up plane material
 		planeEntity = scene::Entity::CreateEntity<scene::Entity>();
+		planeEntity->SetPosition({-50.f, 0.f, -50.f});
 		planeMesh->material = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/ps05/heightmap.vert", "Assets/shaders/basic_lit.frag"));
 		planeMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
@@ -182,34 +183,40 @@ public:
 		planeMesh->material->AddTexture(heightMap);
 		planeEntity->AddComponent<scene::MeshRenderer>(planeMesh);
 
-		auto grassMesh = GenerateGrassBlade(glm::vec3(0.1f, 1.f, 1.f));
+		// Load grass mesh and set up material
+		const auto grassMesh = graphics::Model::LoadSingleMesh("Assets/Models/grass_highPoly.obj");//GenerateGrassBlade(glm::vec3(0.1f, 1.f, 1.f));
 		const auto grassMatBase = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/ps05/grass.vert", "Assets/shaders/ps05/grass.frag"));
 		grassMesh->material = grassMatBase;
 		grassMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(12.f));
 		grassMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
+		grassMatBase->AddTexture(heightMap);
 
-		constexpr int GRASS_BLADES = 2048;
+		// Set up grass instancing
+		auto grassInstanceMesh = new graphics::InstancedMesh(grassMesh->vertices, grassMesh->indices, grassMesh->textures);
+		grassInstanceMesh->material = grassMatBase;
+		grassInstance = scene::Entity::CreateEntity<scene::Entity>();
+		grassInstance->AddComponent<scene::MeshRenderer>(grassInstanceMesh);
+
+		// Instance a bunch of grass blades in an offset grid
+		constexpr int GRASS_BLADES = 100000;
 		const float GRASS_X = based::math::Sqrt(GRASS_BLADES);
 
-		// Set up grass tester
 		for (int i = 0; i < GRASS_X; i++)
 		{
 			const float x = (static_cast<float>(i) / GRASS_X) - 0.5f;
 			for (int j = 0; j < GRASS_X; j++)
 			{
 				const float y = (static_cast<float>(j) / GRASS_X) - 0.5f;
-				glm::vec3 pos = { x * 10 + based::math::RandomRange(-0.2f, 0.2f), 0,
-					y * 10 + based::math::RandomRange(-0.2f, 0.2f) };
-				glm::vec3 rot = { 0, based::math::RandomRange(0, 360), 0 };
-				auto grass = scene::Entity::CreateEntity<GrassEntity>(pos, rot, glm::vec3(1), 
-					grassMesh, std::make_shared<based::graphics::Material>(*grassMatBase));
-				grassEntities.emplace_back(grass);
+				glm::vec3 pos = { x * 20 + based::math::RandomRange(-0.2f, 0.2f), 0,
+					y * 20 + based::math::RandomRange(-0.2f, 0.2f) };
+				glm::vec3 rot = { 0, based::math::RandomRange(0, 90), 0 };
+				grassInstanceMesh->AddInstance(scene::Transform(pos, rot, glm::vec3(1)));
 			}
 		}
 
 		// Set up light placeholder
-		auto cubeMat = std::make_shared<graphics::Material>(
+		const auto cubeMat = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"));
 		cubeMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		cubeMat->SetUniformValue("material.diffuseMat.useSampler", 0);
@@ -265,6 +272,7 @@ public:
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_P))
 		{
 			mouseControl = !mouseControl;
+			dynamic_cast<graphics::InstancedMesh*>(grassInstance->GetComponent<scene::MeshRenderer>().mesh)->ClearInstances();
 		}
 
 		// Mouse input
@@ -309,8 +317,8 @@ public:
 		}
 
 		// Set light position and pass info to shaders
-		lightPosition = glm::vec3(based::math::Sin(based::core::Time::GetTime()) * 4, 
-			lightPosition.y, lightPosition.z);
+		//lightPosition = glm::vec3(based::math::Sin(based::core::Time::GetTime()) * 4, 
+		//	lightPosition.y, lightPosition.z);
 
 		lightPlaceholder->SetPosition(lightPosition);
 
@@ -325,16 +333,17 @@ public:
 		planeMesh->material->SetUniformValue("ambientStrength", ambientStrength);
 		crateMesh->material->SetUniformValue("ambientStrength", ambientStrength);
 
+		planeMesh->material->SetUniformValue("heightCoef", heightCoef);
+
+
 		if (!useLight)
 		{
 			planeMesh->material->SetUniformValue("ambientStrength", 1.f);
 			crateMesh->material->SetUniformValue("ambientStrength", 1.f);
 		}
 
-		for (auto grass : grassEntities)
-		{
-			grass->UpdateShaders(lightCol, lightPosition, useLight, ambientStrength);
-		}
+		UpdateShaders(grassInstance->GetComponent<scene::MeshRenderer>().mesh, 
+			lightCol, lightPosition, useLight, ambientStrength, heightCoef);
 	}
 
 	void Render() override
@@ -404,6 +413,7 @@ public:
 			ImGui::Checkbox("Use Light", &useLight);
 
 			ImGui::DragFloat("Rolling Ball Scale", &R, 0.01f);
+			ImGui::DragFloat("Height Coefficient", &heightCoef, 0.01f);
 		}
 		ImGui::End();
 	}
@@ -438,6 +448,23 @@ public:
 		attitude = based::math::Asin(axis.x * axis.y * t + axis.z * s);
 		bank = based::math::Atan2(axis.x * s - axis.y * axis.z * t, 1 - (axis.x * axis.x + axis.z * axis.z) * t);
 		return {attitude, heading, bank};
+	}
+
+	void UpdateShaders(graphics::Mesh* mesh, 
+		glm::vec3 lightColor, glm::vec3 lightPosition, bool useLight, float ambientStrength, float height)
+	{
+		mesh->material->SetUniformValue("lightColor", lightColor);
+
+		mesh->material->SetUniformValue("lightPos", lightPosition);
+
+		mesh->material->SetUniformValue("ambientStrength", ambientStrength);
+
+		mesh->material->SetUniformValue("heightCoef", height);
+
+		if (!useLight)
+		{
+			mesh->material->SetUniformValue("ambientStrength", 1.f);
+		}
 	}
 };
 

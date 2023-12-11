@@ -62,10 +62,14 @@ namespace based::graphics
 		{
 		public:
 			RenderVertexArrayMaterial(std::weak_ptr<VertexArray> vertexArray, std::weak_ptr<Material> material,
-				const glm::mat4 modelMatrix = glm::mat4(1.f))
+				const glm::mat4 modelMatrix = glm::mat4(1.f), const bool instanced = false, const int count = 0,
+				const int index = 0)
 				: mVertexArray(vertexArray)
 				, mMaterial(material)
 				, mModelMatrix(modelMatrix)
+				, mInstanced(instanced)
+				, mInstanceCount(count)
+				, mIndex(index)
 			{
 			}
 
@@ -74,6 +78,9 @@ namespace based::graphics
 			std::weak_ptr<VertexArray> mVertexArray;
 			std::weak_ptr<Material> mMaterial;
 			glm::mat4 mModelMatrix;
+			bool mInstanced;
+			int mInstanceCount;
+			int mIndex;
 		};
 
 		class RenderVertexArrayUserInterface : public RenderCommand

@@ -35,25 +35,25 @@ based::graphics::Mesh* GenerateGrassBlade(glm::vec3 scale)
 
 	vertices.insert(vertices.end(), {
 			based::graphics::Vertex { glm::vec3(-0.5f, 0.f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, 1.0f),
+				glm::vec3(0.0f, 0.0f, -1.0f),
 				glm::vec2(0.f, 0.f)},
 			based::graphics::Vertex { glm::vec3(0.5f, 0.f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, 1.0f),
+				glm::vec3(0.0f, 0.0f, -1.0f),
 				glm::vec2(1.f, 0.f)},
 			based::graphics::Vertex { glm::vec3(0.5f, 0.5f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, 1.0f),
+				glm::vec3(0.0f, 0.0f, -1.0f),
 				glm::vec2(1.f, 0.33f)},
 			based::graphics::Vertex { glm::vec3(-0.5f, 0.5f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, 1.0f),
+				glm::vec3(0.0f, 0.0f, -1.0f),
 				glm::vec2(0.f, 0.33f)},
 			based::graphics::Vertex { glm::vec3(0.5f, 1.0f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, 1.0f),
+				glm::vec3(0.0f, 0.0f, -1.0f),
 				glm::vec2(1.f, 0.66f)},
 			based::graphics::Vertex { glm::vec3(-0.5f, 1.0f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, 1.0f),
+				glm::vec3(0.0f, 0.0f, -1.0f),
 				glm::vec2(0.f, 0.66f)},
 			based::graphics::Vertex { glm::vec3(0.0f, 1.5f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, 1.0f),
+				glm::vec3(0.0f, 0.0f, -1.0f),
 				glm::vec2(0.5f, 1.f)}
 		});
 	indices.insert(indices.end(), {

@@ -22,8 +22,10 @@ namespace based::graphics
         }
         ~Model() { BASED_TRACE("Destroying model!"); }
         void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
+        void SetMaterial(const std::shared_ptr<Material>& mat, int index = 0);
 
         static scene::Entity* CreateModelEntity(const std::string& path);
+        static graphics::Mesh* LoadSingleMesh(const std::string& path);
     private:
         // model data
         std::vector<graphics::Mesh*> meshes;

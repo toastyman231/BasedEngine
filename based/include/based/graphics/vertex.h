@@ -5,10 +5,13 @@
 #include <vector>
 #include <type_traits>
 
+#include "helpers.h"
 #include "../log.h"
 #include "based/core/profiler.h"
+#include "external/glm/glm.hpp"
 
 #define BASED_CREATE_VERTEX_BUFFER(name, type) std::unique_ptr<based::graphics::VertexBuffer<type>> name = std::make_unique<based::graphics::VertexBuffer<type>>()
+#define BASED_CREATE_INSTANCED_VERTEX_BUFFER(name, type) std::unique_ptr<based::graphics::InstancedVertexBuffer<type>> name = std::make_unique<based::graphics::InstancedVertexBuffer<type>>()
 
 namespace based::graphics
 {
@@ -30,6 +33,7 @@ namespace based::graphics
 		virtual uint32_t GetTypeSize() const = 0;
 
 		inline bool IsUploaded() const { return mIsUploaded; }
+		virtual bool IsInstanced() const { return false; }
 		inline uint32_t GetId() const { return mVbo; }
 		inline uint32_t GetVertexCount() const { return mVertexCount; }
 		inline uint32_t GetStride() const { return mStride; }
@@ -111,6 +115,69 @@ namespace based::graphics
 			BASED_ASSERT(mSize > 0, "VertexBuffer::Upload() - mSize = 0");
 			mData = &mDataVec[0];
 			RawVertexBuffer::Upload(dynamic);
+		}
+	private:
+		std::vector<T> mDataVec;
+		uint32_t mValueCount;
+	};
+
+	template<typename T>
+	class InstancedVertexBuffer : public RawVertexBuffer
+	{
+		static_assert(
+			std::is_same<T, char>() ||				//GL_BYTE
+			std::is_same<T, unsigned char>() ||		//GL_UNSIGNED_BYTE
+			std::is_same<T, short>() ||				//GL_SHORT
+			std::is_same<T, unsigned short>() ||	//GL_UNSIGNED_SHORT
+			std::is_same<T, int>() ||				//GL_INT
+			std::is_same<T, unsigned int>() ||		//GL_UNSIGNED_INT
+			std::is_same<T, float>() ||				//GL_FLOAT
+			std::is_same<T, double>()				//GL_DOUBLE
+			, "This type is not supported");
+	public:
+		InstancedVertexBuffer()
+			: mValueCount(0)
+		{
+			if constexpr (std::is_same<T, char>()) { mGLType = RawVertexBuffer::GLTypeByte; }
+			if constexpr (std::is_same<T, unsigned char>()) { mGLType = RawVertexBuffer::GLTypeUByte; }
+			if constexpr (std::is_same<T, short>()) { mGLType = RawVertexBuffer::GLTypeShort; }
+			if constexpr (std::is_same<T, unsigned short>()) { mGLType = RawVertexBuffer::GLTypeUShort; }
+			if constexpr (std::is_same<T, int>()) { mGLType = RawVertexBuffer::GLTypeInt; }
+			if constexpr (std::is_same<T, unsigned int>()) { mGLType = RawVertexBuffer::GLTypeUInt; }
+			if constexpr (std::is_same<T, float>()) { mGLType = RawVertexBuffer::GLTypeFloat; }
+			if constexpr (std::is_same<T, double>()) { mGLType = RawVertexBuffer::GLTypeDouble; }
+		}
+
+		~InstancedVertexBuffer() {}
+
+		uint32_t GetTypeSize() const override { return sizeof(T); }
+
+		bool IsInstanced() const override { return true; }
+
+		void PushVertex(const std::vector<T>& vert)
+		{
+			BASED_ASSERT(vert.size() > 0, "No values passed in for vertex");
+			if (mDataVec.size() == 0)
+			{
+				mValueCount = (uint32_t)vert.size();
+			}
+
+			BASED_ASSERT(vert.size() == mValueCount, "InstancedVertexBuffer::PushVertex - Attempting to push a Vertex with an unexpected amount of values");
+			if (vert.size() == mValueCount)
+			{
+				mVertexCount++;
+				mDataVec.insert(mDataVec.end(), vert.begin(), vert.end());
+			}
+		}
+
+		void Upload(bool dynamic = false) override
+		{
+			PROFILE_FUNCTION();
+			mStride *= sizeof(T);
+			glBindBuffer(GL_ARRAY_BUFFER, mVbo); BASED_CHECK_GL_ERROR;
+			glBufferData(GL_ARRAY_BUFFER, (mVertexCount / 4) * sizeof(glm::mat4), &mDataVec[0], dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW); BASED_CHECK_GL_ERROR;
+			glBindBuffer(GL_ARRAY_BUFFER, 0); BASED_CHECK_GL_ERROR;
+			mIsUploaded = true;
 		}
 	private:
 		std::vector<T> mDataVec;
