@@ -282,4 +282,57 @@ namespace based::graphics
 
 		return mUniformLocations[name];
 	}
+
+	void Shader::UpdateShaderPointLighting(Shader* shader, glm::vec3 objectPos)
+	{
+		const entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+		const auto lightsView = registry.view<scene::Enabled, scene::Transform, scene::PointLight>();
+		std::vector<scene::PointLight> pointLights;
+
+		for (const auto entity : lightsView)
+		{
+			scene::Transform trans = registry.get<scene::Transform>(entity);
+			scene::PointLight light = registry.get<scene::PointLight>(entity);
+			light.position = trans.Position;
+			pointLights.emplace_back(light);
+		}
+
+		std::sort(pointLights.begin(), pointLights.end(),
+			[objectPos](const scene::PointLight& lhs, const scene::PointLight& rhs)
+			{
+				return glm::distance(objectPos, lhs.position) < glm::distance(objectPos, rhs.position);
+			}
+		);
+
+		for (int i = 0; i < pointLights.size() && i < 8; i++)
+		{
+			const scene::PointLight light = pointLights[i];
+			shader->SetUniformFloat3("pointLights[" + std::to_string(i) + "].position", light.position);
+			shader->SetUniformFloat("pointLights[" + std::to_string(i) + "].constant", light.constant);
+			shader->SetUniformFloat("pointLights[" + std::to_string(i) + "].linear", light.linear);
+			shader->SetUniformFloat("pointLights[" + std::to_string(i) + "].quadratic", light.quadratic);
+			shader->SetUniformFloat("pointLights[" + std::to_string(i) + "].intensity", light.intensity);
+			shader->SetUniformFloat3("pointLights[" + std::to_string(i) + "].color", light.color);
+		}
+	}
+
+	void Shader::UpdateShaderDirectionalLighting(Shader* shader)
+	{
+		const entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+		const auto lightsView = registry.view<scene::Enabled, scene::Transform, scene::DirectionalLight>();
+
+		// Return if there are no directional lights
+		if (lightsView.begin() == lightsView.end()) return;
+
+		for (const auto entity : lightsView)
+		{
+			scene::Transform trans = registry.get<scene::Transform>(entity);
+			scene::DirectionalLight light = registry.get<scene::DirectionalLight>(entity);
+			light.direction = trans.Rotation;
+
+			shader->SetUniformFloat3("directionalLight.direction", light.direction);
+			shader->SetUniformFloat3("directionalLight.color", light.color);
+			break;
+		}
+	}
 }

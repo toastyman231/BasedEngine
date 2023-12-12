@@ -83,7 +83,7 @@ void main()
     mat3 normalMat = mat3(transpose(inverse(instanceModel)));
     fragNormal = normalize(normalMat * adjustedNormal);
     fragPos = vec3(instanceModel * vec4(position, 1.0));
-    float heightOffset = texture(height, vec2(map(fragPos.x, -100.0, 100.0, 0.0, 1.0), map(fragPos.z, -100.0, 100.0, 0.0, 1.0))).y * heightCoef;
+    float heightOffset = texture(height, vec2(map(fragPos.x, -100.0, 100.0, 0.0, 1.0), map(fragPos.z, -100.0, 100.0, 1.0, 0.0))).y * heightCoef;
     pos.y += heightOffset;
     gl_Position = proj * view * instanceModel * pos;
 }

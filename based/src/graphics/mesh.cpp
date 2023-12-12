@@ -2,6 +2,7 @@
 
 #include "app.h"
 #include "based/core/profiler.h"
+#include "graphics/shader.h"
 
 namespace based::graphics
 {
@@ -32,6 +33,8 @@ namespace based::graphics
 		model = glm::rotate(model, rotation.y * 0.0174533f, glm::vec3(0.f, 1.f, 0.f));
 		model = glm::rotate(model, rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, scale);
+		Shader::UpdateShaderPointLighting(material->GetShader(), position);
+		Shader::UpdateShaderDirectionalLighting(material->GetShader());
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model));
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 	}
@@ -138,6 +141,8 @@ namespace based::graphics
 		model = glm::rotate(model, rotation.y * 0.0174533f, glm::vec3(0.f, 1.f, 0.f));
 		model = glm::rotate(model, rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, scale);
+		Shader::UpdateShaderPointLighting(material->GetShader(), position);
+		Shader::UpdateShaderDirectionalLighting(material->GetShader());
 		Engine::Instance().GetRenderManager().Submit(
 			BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model, true, mInstanceCount));
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));

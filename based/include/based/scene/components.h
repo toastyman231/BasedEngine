@@ -108,6 +108,29 @@ namespace based::scene
 		MeshRenderer(const MeshRenderer&) = default;
 	};
 
+	struct PointLight {
+		glm::vec3 position;
+
+		float constant;
+		float linear;
+		float quadratic;
+		float intensity;
+
+		glm::vec3 color;
+
+		PointLight(float c, float l, float q, glm::vec3 col) : constant(c), linear(l), quadratic(q), intensity(0.5f), color(col) {}
+		PointLight(float c, float l, float q, float i, glm::vec3 col) : constant(c), linear(l), quadratic(q), intensity(i), color(col) {}
+	};
+
+	struct DirectionalLight
+	{
+		glm::vec3 direction;
+		glm::vec3 color;
+
+		DirectionalLight(glm::vec3 dir, glm::vec3 col) : direction(dir), color(col) {}
+		DirectionalLight(glm::vec3 col) : direction(glm::vec3(60.f, 60.f, 0.f)), color(col) {}
+	};
+
 	struct TextRenderer
 	{
 		ui::TextEntity* text;

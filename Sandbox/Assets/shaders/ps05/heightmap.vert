@@ -13,12 +13,19 @@ uniform sampler2D heightmap;
 #include "globals.glsl"
 uniform mat4 model = mat4(1.0);
 uniform float heightCoef = 1.0;
+uniform mat4 normalMat = mat4(1.0);
 
 void main()
 {
+    vec3 off = vec3(0.01, 0.01, 0.0);
+    vec3 offsetHeightR = vec3(position.x + 1.0, position.y + texture(heightmap, uvs + off.xz).y * heightCoef, position.z);
+    vec3 offsetHeightD = vec3(position.x, position.y + texture(heightmap, uvs - off.zy).y * heightCoef, position.z - 1.0);
+
     uvs = texcoords;
-    fragNormal = normal;
     fragPos = vec3(model * vec4(position, 1.0));
     float height = texture(heightmap, uvs).y * heightCoef;
+    vec3 adjustedPos = vec3(position.x, position.y + height, position.z);
+    vec3 adjustedNormal = normalize(cross(offsetHeightR - adjustedPos, offsetHeightD - adjustedPos));
+    fragNormal = normalize(mat3(normalMat) * adjustedNormal);
     gl_Position = proj * view * model * vec4(position.x, position.y + height, position.z, 1.0);
 }

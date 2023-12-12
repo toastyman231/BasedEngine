@@ -61,6 +61,7 @@ private:
 	scene::Entity* crateEntity;
 	scene::Entity* lightPlaceholder;
 	scene::Entity* grassInstance;
+	scene::Entity* sunLight;
 
 	bool mouseControl = false;
 	float speed = 2.5f;
@@ -80,6 +81,7 @@ private:
 	glm::vec3 lightCol;
 	glm::vec3 lightPosition;
 	glm::ivec2 initialPos;
+	glm::vec3 sunDirection;
 
 	graphics::Mesh* planeMesh;
 	graphics::Mesh* skyboxMesh;
@@ -133,6 +135,7 @@ public:
 		cubePos = glm::vec3(2.7f, 1.f, 1.7f);
 		cubeRot = glm::vec3(0.f);
 		cubeScale = glm::vec3(1.f);
+		sunDirection = glm::vec3(60.f, -60.f, 0.f);
 		startScene->GetActiveCamera()->SetProjection(based::graphics::PERSPECTIVE);
 
 		// TODO: Confirm local transforms work in 2D, scene loading
@@ -175,7 +178,7 @@ public:
 		planeEntity = scene::Entity::CreateEntity<scene::Entity>();
 		planeEntity->SetPosition({-50.f, 0.f, -50.f});
 		planeMesh->material = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/ps05/heightmap.vert", "Assets/shaders/basic_lit.frag"));
+			LOAD_SHADER("Assets/shaders/ps05/heightmap.vert", "Assets/shaders/ps05/terrain.frag"));
 		planeMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		planeMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
 		planeMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
@@ -184,10 +187,11 @@ public:
 		planeEntity->AddComponent<scene::MeshRenderer>(planeMesh);
 
 		// Load grass mesh and set up material
-		const auto grassMesh = graphics::Model::LoadSingleMesh("Assets/Models/grass_highPoly.obj");//GenerateGrassBlade(glm::vec3(0.1f, 1.f, 1.f));
+		const auto grassMesh = graphics::Model::LoadSingleMesh("Assets/Models/grass_highPoly.obj");
 		const auto grassMatBase = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/ps05/grass.vert", "Assets/shaders/ps05/grass.frag"));
 		grassMesh->material = grassMatBase;
+		grassMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		grassMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(12.f));
 		grassMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
 		grassMatBase->AddTexture(heightMap);
@@ -210,7 +214,7 @@ public:
 				const float y = (static_cast<float>(j) / GRASS_X) - 0.5f;
 				glm::vec3 pos = { x * 20 + based::math::RandomRange(-0.2f, 0.2f), 0,
 					y * 20 + based::math::RandomRange(-0.2f, 0.2f) };
-				glm::vec3 rot = { 0, based::math::RandomRange(0, 90), 0 };
+				glm::vec3 rot = { 0, based::math::RandomRange(0, 45), 0 };
 				grassInstanceMesh->AddInstance(scene::Transform(pos, rot, glm::vec3(1)));
 			}
 		}
@@ -223,10 +227,22 @@ public:
 		auto cubeMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), cubeMat);
 		lightPlaceholder = scene::Entity::CreateEntity<scene::Entity>();
 		lightPlaceholder->AddComponent<scene::MeshRenderer>(cubeMesh);
+		lightPlaceholder->AddComponent<scene::PointLight>(1.0f, 0.0014f, 0.0007f, glm::vec3(1.f));
 		lightPlaceholder->SetPosition(lightPosition);
 		lightPlaceholder->SetScale(glm::vec3(0.1f));
+		lightPlaceholder->SetEntityName("LIGHT 1");
 
-		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 1, 4));
+		const auto otherLight = scene::Entity::CreateEntity<scene::Entity>();
+		otherLight->AddComponent<scene::MeshRenderer>(cubeMesh);
+		otherLight->AddComponent<scene::PointLight>(1.0f, 0.09f, 0.032f, glm::vec3(1.f));
+		otherLight->SetPosition(glm::vec3(1.8f, 2.4f, 2.2f));
+		otherLight->SetScale(glm::vec3(0.1f));
+		otherLight->SetEntityName("LIGHT 2");
+
+		sunLight = scene::Entity::CreateEntity<scene::Entity>();
+		sunLight->AddComponent<scene::DirectionalLight>(glm::vec3(1.f));
+
+		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 2, 4));
 		GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(6, 53, 0));
 
 		BASED_TRACE("Done initializing");
@@ -317,33 +333,30 @@ public:
 		}
 
 		// Set light position and pass info to shaders
-		//lightPosition = glm::vec3(based::math::Sin(based::core::Time::GetTime()) * 4, 
-		//	lightPosition.y, lightPosition.z);
+		lightPosition = glm::vec3(based::math::Sin(based::core::Time::GetTime()) * 4, 
+			lightPosition.y, lightPosition.z);
 
 		lightPlaceholder->SetPosition(lightPosition);
 
+		sunLight->SetRotation(sunDirection);
+
 		crateEntity->SetTransform(cubePos, cubeRot, cubeScale);
-
-		planeMesh->material->SetUniformValue("lightColor", lightCol);
-		crateMesh->material->SetUniformValue("lightColor", lightCol);
-
-		planeMesh->material->SetUniformValue("lightPos", lightPosition);
-		crateMesh->material->SetUniformValue("lightPos", lightPosition);
 
 		planeMesh->material->SetUniformValue("ambientStrength", ambientStrength);
 		crateMesh->material->SetUniformValue("ambientStrength", ambientStrength);
 
 		planeMesh->material->SetUniformValue("heightCoef", heightCoef);
 
+		const entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+		const auto lights = registry.view<scene::PointLight, scene::EntityReference>();
 
-		if (!useLight)
+		for (const auto light : lights)
 		{
-			planeMesh->material->SetUniformValue("ambientStrength", 1.f);
-			crateMesh->material->SetUniformValue("ambientStrength", 1.f);
+			scene::Entity* ent = registry.get<scene::EntityReference>(light).entity;
+			ent->SetActive(useLight);
 		}
 
-		UpdateShaders(grassInstance->GetComponent<scene::MeshRenderer>().mesh, 
-			lightCol, lightPosition, useLight, ambientStrength, heightCoef);
+		UpdateShaders(grassInstance->GetComponent<scene::MeshRenderer>().mesh, useLight, ambientStrength, heightCoef);
 	}
 
 	void Render() override
@@ -406,14 +419,43 @@ public:
 			ImGui::DragFloat3("Cube Rotation", glm::value_ptr(cubeRot), 0.01f);
 			ImGui::DragFloat3("Cube Scale", glm::value_ptr(cubeScale), 0.01f);
 
-			ImGui::DragFloat3("Light Color", glm::value_ptr(lightCol), 0.01f);
-			ImGui::DragFloat3("Light Position", glm::value_ptr(lightPosition), 0.01f);
+			ImGui::Spacing();
 
-			ImGui::DragFloat("Ambient Strength", &ambientStrength, 0.01f);
 			ImGui::Checkbox("Use Light", &useLight);
 
 			ImGui::DragFloat("Rolling Ball Scale", &R, 0.01f);
 			ImGui::DragFloat("Height Coefficient", &heightCoef, 0.01f);
+
+			entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+
+			if (ImGui::CollapsingHeader("Lights"))
+			{
+				const auto lights = registry.view<scene::PointLight, scene::Transform, scene::EntityReference>();
+
+				int i = 0;
+				for (const auto light : lights)
+				{
+					scene::PointLight lightComponent = registry.get<scene::PointLight>(light);
+					scene::Transform trans = registry.get<scene::Transform>(light);
+
+					glm::vec3 col = lightComponent.color;
+					glm::vec3 position = trans.Position;
+					ImGui::PushID(i);
+					ImGui::Text("Light %d", i);
+					ImGui::DragFloat3("Light Color", glm::value_ptr(col), 0.01f);
+					ImGui::DragFloat3("Light Position", glm::value_ptr(position), 0.01f);
+					ImGui::PopID();
+					registry.patch<scene::Transform>(light, [position](auto& t) {t.Position = position; });
+					registry.patch<scene::PointLight>(light, [col](auto& l) {l.color = col; });
+					i++;
+				}
+
+				ImGui::Text("Sun Controls");
+				ImGui::DragFloat3("Sun Direction", glm::value_ptr(sunDirection), 0.01f);
+
+				ImGui::Text("General");
+				ImGui::DragFloat("Ambient Strength", &ambientStrength, 0.01f);
+			}
 		}
 		ImGui::End();
 	}
@@ -450,13 +492,8 @@ public:
 		return {attitude, heading, bank};
 	}
 
-	void UpdateShaders(graphics::Mesh* mesh, 
-		glm::vec3 lightColor, glm::vec3 lightPosition, bool useLight, float ambientStrength, float height)
+	void UpdateShaders(graphics::Mesh* mesh, bool useLight, float ambientStrength, float height)
 	{
-		mesh->material->SetUniformValue("lightColor", lightColor);
-
-		mesh->material->SetUniformValue("lightPos", lightPosition);
-
 		mesh->material->SetUniformValue("ambientStrength", ambientStrength);
 
 		mesh->material->SetUniformValue("heightCoef", height);

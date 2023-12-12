@@ -10,12 +10,12 @@ out vec3 fragPos;
 
 #include "globals.glsl"
 uniform mat4 model = mat4(1.0);
+uniform mat4 normalMat = mat4(1.0);
 
 void main()
 {
     uvs = texcoords;
-    mat3 normalMat = mat3(transpose(inverse(model))); // Set this on the CPU eventually
-    fragNormal = normalize(normalMat * normal);
+    fragNormal = normalize(mat3(normalMat) * normal);
     fragPos = vec3(model * vec4(position, 1.0));
     gl_Position = proj * view * model * vec4(position, 1.0);
 }

@@ -1,4 +1,6 @@
 #include "graphics/rendercommands.h"
+
+#include "app.h"
 #include "engine.h"
 #include "log.h"
 
@@ -132,7 +134,11 @@ namespace based::graphics::rendercommands
 						texture->Bind();
 					}
 
-					if (!mInstanced) shader->SetUniformMat4("model", mModelMatrix);
+					if (!mInstanced)
+					{
+						shader->SetUniformMat4("model", mModelMatrix);
+						shader->SetUniformMat4("normalMat", glm::transpose(glm::inverse(mModelMatrix)));
+					}
 
 					if (va->GetElementCount() > 0)
 					{

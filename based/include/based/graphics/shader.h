@@ -48,6 +48,9 @@ namespace based::graphics
 		void SetUniformMat4(const std::string& name, const glm::mat4& mat);
 
 		int GetUniformLocation(const std::string& name);
+
+		static void UpdateShaderPointLighting(Shader* shader, glm::vec3 objectPos);
+		static void UpdateShaderDirectionalLighting(Shader* shader);
 	private:
 		uint32_t mProgramId;
 		std::string mVertexShader;
