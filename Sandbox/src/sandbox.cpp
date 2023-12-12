@@ -75,10 +75,7 @@ private:
 	glm::vec3 camPos = glm::vec3(0.f, 0.f, 1.5f);
 	glm::vec3 camRot = glm::vec3(0.f);
 
-	glm::vec3 cubePos;
 	glm::vec3 cubeRot;
-	glm::vec3 cubeScale;
-	glm::vec3 lightCol;
 	glm::vec3 lightPosition;
 	glm::ivec2 initialPos;
 	glm::vec3 sunDirection;
@@ -86,6 +83,7 @@ private:
 	graphics::Mesh* planeMesh;
 	graphics::Mesh* skyboxMesh;
 	graphics::Mesh* crateMesh;
+	graphics::Mesh* boxMesh;
 	std::shared_ptr<graphics::Texture> crateTex;
 
 	Rml::ElementDocument* document;
@@ -107,7 +105,7 @@ public:
 		// TODO: Figure out how to capture the mouse properly
 		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
 
-		// UI Setup, not related to PS05
+		// UI Setup
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main", 
 			Engine::Instance().GetWindow().GetSize());
 
@@ -118,23 +116,13 @@ public:
 			constructor.Bind("my_value", &my_data.my_value);
 		}
 
+		// Load UI
 		Engine::Instance().GetUiManager().SetPathPrefix("Assets/ui/");
 
-		document = Engine::Instance().GetUiManager().LoadWindow("my_document", context);
-		document->Hide();
-
-		Rml::Element* element = document->GetElementById("world");
-		element->SetInnerRML("WORLD");
-		element->SetProperty("font-size", "1.5em");
-
-		element = document->GetElementById("button");
-		element->AddEventListener("mousedown", new MyListener("button"));
-		// NOTE: For radio buttons to automatically uncheck, they must be wrapped in a <form>
+		document = Engine::Instance().GetUiManager().LoadWindow("help_screen", context);
 
 		// Old stuff, plus setting camera to perspective mode
-		cubePos = glm::vec3(2.7f, 1.f, 1.7f);
 		cubeRot = glm::vec3(0.f);
-		cubeScale = glm::vec3(1.f);
 		sunDirection = glm::vec3(60.f, -60.f, 0.f);
 		startScene->GetActiveCamera()->SetProjection(based::graphics::PERSPECTIVE);
 
@@ -151,9 +139,20 @@ public:
 		crateMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), crateMat);
 		crateEntity = scene::Entity::CreateEntity<scene::Entity>();
 		crateEntity->AddComponent<scene::MeshRenderer>(crateMesh);
-		crateEntity->SetPosition(glm::vec3(-1.f, 0.f, 0.f));
+		crateEntity->SetPosition(glm::vec3(2.7f, 1.f, 1.7f));
+		crateEntity->SetEntityName("Crate");
 
-		lightCol = glm::vec3(1, 1, 1);
+		const auto distanceMat = std::make_shared<graphics::Material>(
+			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/custom/cube_distance.frag"));
+		distanceMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
+		distanceMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
+		boxMesh = new graphics::Mesh(
+			graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), distanceMat);
+		const auto boxEntity = scene::Entity::CreateEntity<scene::Entity>();
+		boxEntity->AddComponent<scene::MeshRenderer>(boxMesh);
+		boxEntity->SetPosition(glm::vec3(0.f, 2.f, 0.f));
+		boxEntity->SetEntityName("Box");
+
 		lightPosition = glm::vec3(1, 1.2f, 0.3f);
 
 		// Skybox material setup
@@ -173,23 +172,25 @@ public:
 		skyEntity = scene::Entity::CreateEntity<scene::Entity>();
 		skyEntity->AddComponent<scene::MeshRenderer>(skyboxMesh);
 		skyEntity->SetScale(glm::vec3(500.f));
+		skyEntity->SetEntityName("Skybox");
 
 		// Set up plane material
 		planeEntity = scene::Entity::CreateEntity<scene::Entity>();
 		planeEntity->SetPosition({-50.f, 0.f, -50.f});
 		planeMesh->material = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/ps05/heightmap.vert", "Assets/shaders/ps05/terrain.frag"));
+			LOAD_SHADER("Assets/shaders/custom/heightmap.vert", "Assets/shaders/custom/terrain.frag"));
 		planeMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		planeMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
 		planeMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
 		const auto heightMap = std::make_shared<graphics::Texture>("Assets/heightmap.png");
 		planeMesh->material->AddTexture(heightMap);
 		planeEntity->AddComponent<scene::MeshRenderer>(planeMesh);
+		planeEntity->SetEntityName("Ground");
 
 		// Load grass mesh and set up material
 		const auto grassMesh = graphics::Model::LoadSingleMesh("Assets/Models/grass_highPoly.obj");
 		const auto grassMatBase = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/ps05/grass.vert", "Assets/shaders/ps05/grass.frag"));
+			LOAD_SHADER("Assets/shaders/custom/grass.vert", "Assets/shaders/custom/grass.frag"));
 		grassMesh->material = grassMatBase;
 		grassMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		grassMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(12.f));
@@ -201,6 +202,7 @@ public:
 		grassInstanceMesh->material = grassMatBase;
 		grassInstance = scene::Entity::CreateEntity<scene::Entity>();
 		grassInstance->AddComponent<scene::MeshRenderer>(grassInstanceMesh);
+		grassInstance->SetEntityName("Grass");
 
 		// Instance a bunch of grass blades in an offset grid
 		constexpr int GRASS_BLADES = 100000;
@@ -232,6 +234,7 @@ public:
 		lightPlaceholder->SetScale(glm::vec3(0.1f));
 		lightPlaceholder->SetEntityName("LIGHT 1");
 
+		// Set up second light
 		const auto otherLight = scene::Entity::CreateEntity<scene::Entity>();
 		otherLight->AddComponent<scene::MeshRenderer>(cubeMesh);
 		otherLight->AddComponent<scene::PointLight>(1.0f, 0.09f, 0.032f, glm::vec3(1.f));
@@ -239,8 +242,10 @@ public:
 		otherLight->SetScale(glm::vec3(0.1f));
 		otherLight->SetEntityName("LIGHT 2");
 
+		// Add sun light
 		sunLight = scene::Entity::CreateEntity<scene::Entity>();
 		sunLight->AddComponent<scene::DirectionalLight>(glm::vec3(1.f));
+		sunLight->SetEntityName("Sun");
 
 		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 2, 4));
 		GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(6, 53, 0));
@@ -249,8 +254,6 @@ public:
 
 		// TODO: Fix text rendering behind sprites even when handled last
 		// TODO: Optimize UI to not regenerate VAs every single frame
-
-		// TODO: Implement proper lighting using upgraded materials
 	}
 
 	void Shutdown() override
@@ -285,10 +288,9 @@ public:
 		}
 
 		// Enable/disable mouse control
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_P))
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_R))
 		{
 			mouseControl = !mouseControl;
-			dynamic_cast<graphics::InstancedMesh*>(grassInstance->GetComponent<scene::MeshRenderer>().mesh)->ClearInstances();
 		}
 
 		// Mouse input
@@ -302,6 +304,7 @@ public:
 			GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(yaw, pitch, GetCurrentScene()->GetActiveCamera()->GetTransform().Rotation.z));
 		}
 
+		// Save initial mouse position for rolling ball
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
 		{
 			initialPos = input::Mouse::GetMousePosition();
@@ -325,8 +328,8 @@ public:
 			cubeRot += rot;
 		}
 
-		// Show/Hide UI (not related to ps05)
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_B))
+		// Show/Hide UI
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_H))
 		{
 			if (document->IsVisible()) document->Hide();
 			else document->Show();
@@ -340,13 +343,19 @@ public:
 
 		sunLight->SetRotation(sunDirection);
 
-		crateEntity->SetTransform(cubePos, cubeRot, cubeScale);
+		crateEntity->SetRotation(cubeRot);
+
+		boxMesh->material->SetUniformValue("cratePos", crateEntity->GetTransform().Position);
+		boxMesh->material->SetUniformValue("useLight", static_cast<int>(useLight));
+
+		crateMesh->material->SetUniformValue("ambientStrength", ambientStrength);
+		crateMesh->material->SetUniformValue("useLight", static_cast<int>(useLight));
 
 		planeMesh->material->SetUniformValue("ambientStrength", ambientStrength);
-		crateMesh->material->SetUniformValue("ambientStrength", ambientStrength);
-
 		planeMesh->material->SetUniformValue("heightCoef", heightCoef);
+		planeMesh->material->SetUniformValue("useLight", static_cast<int>(useLight));
 
+		// Disable lights when not using lighting
 		const entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
 		const auto lights = registry.view<scene::PointLight, scene::EntityReference>();
 
@@ -367,6 +376,7 @@ public:
 	{
 		if (Engine::Instance().GetWindow().GetShouldRenderToScreen()) return;
 
+		// Draw rendered frame to an ImGui image to simulate a game view window
 		if (ImGui::Begin("GameView"))
 		{
 			if (ImGui::IsWindowHovered())
@@ -393,6 +403,7 @@ public:
 
 		if (ImGui::Begin("Settings"))
 		{
+			// Camera Settings
 			float fov = startScene->GetActiveCamera()->GetFOV();
 			ImGui::DragFloat("FOV", &fov, 0.5f);
 			startScene->GetActiveCamera()->SetFOV(fov);
@@ -415,12 +426,9 @@ public:
 			ImGui::DragFloat3("Camera Rot", glm::value_ptr(rot), 0.01f);
 			if (!mouseControl) startScene->GetActiveCamera()->SetRotation(rot);
 
-			ImGui::DragFloat3("Cube Position", glm::value_ptr(cubePos), 0.01f);
-			ImGui::DragFloat3("Cube Rotation", glm::value_ptr(cubeRot), 0.01f);
-			ImGui::DragFloat3("Cube Scale", glm::value_ptr(cubeScale), 0.01f);
-
 			ImGui::Spacing();
 
+			// Misc. parameters
 			ImGui::Checkbox("Use Light", &useLight);
 
 			ImGui::DragFloat("Rolling Ball Scale", &R, 0.01f);
@@ -428,6 +436,7 @@ public:
 
 			entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
 
+			// Lighting controls
 			if (ImGui::CollapsingHeader("Lights"))
 			{
 				const auto lights = registry.view<scene::PointLight, scene::Transform, scene::EntityReference>();
@@ -455,6 +464,32 @@ public:
 
 				ImGui::Text("General");
 				ImGui::DragFloat("Ambient Strength", &ambientStrength, 0.01f);
+			}
+
+			if (ImGui::CollapsingHeader("Objects"))
+			{
+				const auto objects = registry.view<
+					scene::Transform, scene::EntityReference>(entt::exclude<scene::PointLight, scene::DirectionalLight>);
+
+				int i = 0;
+				for (const auto obj : objects)
+				{
+					scene::Entity* ent = registry.get<scene::EntityReference>(obj).entity;
+					scene::Transform trans = registry.get<scene::Transform>(obj);
+
+					glm::vec3 position = trans.Position;
+					glm::vec3 rotation = trans.Rotation;
+					glm::vec3 scale = trans.Scale;
+					ImGui::PushID(i);
+					ImGui::Text(ent->GetEntityName().c_str());
+					ImGui::DragFloat3("Position", glm::value_ptr(position), 0.01f);
+					ImGui::DragFloat3("Rotation", glm::value_ptr(rotation), 0.01f);
+					ImGui::DragFloat3("Scale", glm::value_ptr(scale), 0.01f);
+					ImGui::PopID();
+					registry.patch<scene::Transform>(obj, [position, rotation, scale](auto& t) 
+						{ t.Position = position; t.Rotation = rotation; t.Scale = scale; });
+					i++;
+				}
 			}
 		}
 		ImGui::End();
@@ -492,16 +527,13 @@ public:
 		return {attitude, heading, bank};
 	}
 
-	void UpdateShaders(graphics::Mesh* mesh, bool useLight, float ambientStrength, float height)
+	void UpdateShaders(const graphics::Mesh* mesh, const bool useLight, float ambientStrength, float height)
 	{
 		mesh->material->SetUniformValue("ambientStrength", ambientStrength);
 
 		mesh->material->SetUniformValue("heightCoef", height);
 
-		if (!useLight)
-		{
-			mesh->material->SetUniformValue("ambientStrength", 1.f);
-		}
+		mesh->material->SetUniformValue("useLight", static_cast<int>(useLight));
 	}
 };
 
