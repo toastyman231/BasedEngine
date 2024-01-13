@@ -8,6 +8,7 @@ layout (location = 3) in mat4 instanceModel;
 out vec2 uvs;
 out vec3 fragNormal;
 out vec3 fragPos;
+out vec4 fragPosLightSpace;
 out float heightPercent;
 
 uniform sampler2D height;
@@ -15,6 +16,7 @@ uniform sampler2D height;
 #include "noise.glsl"
 uniform float randomLean;
 uniform float heightCoef;
+uniform mat4 lightSpaceMatrix;
 
 mat4 rotateX(float angle) {
     mat4 rotMatrix;
@@ -83,6 +85,7 @@ void main()
     mat3 normalMat = mat3(transpose(inverse(instanceModel)));
     fragNormal = normalize(normalMat * adjustedNormal);
     fragPos = vec3(instanceModel * vec4(position, 1.0));
+    fragPosLightSpace = lightSpaceMatrix * vec4(fragPos, 1.0);
     float heightOffset = texture(height, vec2(map(fragPos.x, -100.0, 100.0, 0.0, 1.0), map(fragPos.z, -100.0, 100.0, 1.0, 0.0))).y * heightCoef;
     pos.y += heightOffset;
     gl_Position = proj * view * instanceModel * pos;

@@ -129,15 +129,19 @@ namespace based::graphics::rendercommands
 					{
 						index++;
 						if (!texture) continue;
-						glActiveTexture(0x84C0 + index); // See GL_TEXTURE macro
+						glActiveTexture(GL_TEXTURE0 + index); // See GL_TEXTURE macro
 						BASED_CHECK_GL_ERROR;
 						texture->Bind();
 					}
+					shader->SetUniformInt("shadowMap", index + 1);
+					glActiveTexture(GL_TEXTURE0 + index + 1); BASED_CHECK_GL_ERROR;
+					glBindTexture(GL_TEXTURE_2D, Engine::Instance().GetWindow().GetShadowMapTextureID()); BASED_CHECK_GL_ERROR;
 
 					if (!mInstanced)
 					{
 						shader->SetUniformMat4("model", mModelMatrix);
 						shader->SetUniformMat4("normalMat", glm::transpose(glm::inverse(mModelMatrix)));
+						shader->SetUniformMat4("lightSpaceMatrix", Engine::Instance().GetRenderManager().lightSpaceMatrix);
 					}
 
 					if (va->GetElementCount() > 0)
@@ -169,10 +173,14 @@ namespace based::graphics::rendercommands
 						}
 					}
 
+					index = 0;
 					for (const auto& texture : mat->GetTextures())
 					{
+						glActiveTexture(GL_TEXTURE0 + index); BASED_CHECK_GL_ERROR;
+						index++;
 						texture->Unbind();
 					}
+					glActiveTexture(GL_TEXTURE0); BASED_CHECK_GL_ERROR;
 					shader->Unbind();
 				}
 				va->Unbind();

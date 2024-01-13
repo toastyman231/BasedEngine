@@ -1,5 +1,6 @@
 #include "managers/rendermanager.h"
 
+#include "app.h"
 #include "graphics/helpers.h"
 #include "graphics/framebuffer.h"
 
@@ -7,6 +8,8 @@
 #include "log.h"
 #include "glad/glad.h"
 #include "core/profiler.h"
+#include "external/glm/ext/matrix_clip_space.hpp"
+#include "external/glm/ext/matrix_transform.hpp"
 
 namespace based::managers
 {
@@ -104,6 +107,8 @@ namespace based::managers
 		auto cc = framebuffer->GetClearColor(); 
 		glClearColor(cc.r, cc.g, cc.b, cc.a); BASED_CHECK_GL_ERROR;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); BASED_CHECK_GL_ERROR;
+
+		ConfigureShaderAndMatrices();
 	}
 
 	void RenderManager::PopFramebuffer()
@@ -143,6 +148,15 @@ namespace based::managers
 		{
 			mCameras.pop();
 		}
+	}
+
+	void RenderManager::ConfigureShaderAndMatrices()
+	{
+		float nearPlane = 1.f;
+		float farPlane = 7.5f;
+		glm::mat4 lightProjection = glm::ortho(-10.f, 10.f, -10.f, 10.f, nearPlane, farPlane);
+		glm::mat4 lightView = glm::lookAt(glm::vec3(-2.f, 4.f, -1.f), glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
+		lightSpaceMatrix = lightProjection * lightView;
 	}
 
 	const based::graphics::Camera* RenderManager::GetActiveCamera() const

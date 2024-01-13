@@ -7,6 +7,7 @@ layout (location = 2) in vec3 normal;
 out vec2 uvs;
 out vec3 fragNormal;
 out vec3 fragPos;
+out vec4 fragPosLightSpace;
 
 uniform sampler2D heightmap;
 
@@ -14,6 +15,7 @@ uniform sampler2D heightmap;
 uniform mat4 model = mat4(1.0);
 uniform float heightCoef = 1.0;
 uniform mat4 normalMat = mat4(1.0);
+uniform mat4 lightSpaceMatrix;
 
 void main()
 {
@@ -23,6 +25,7 @@ void main()
 
     uvs = texcoords;
     fragPos = vec3(model * vec4(position, 1.0));
+    fragPosLightSpace = lightSpaceMatrix * vec4(fragPos, 1.0);
     float height = texture(heightmap, uvs).y * heightCoef;
     vec3 adjustedPos = vec3(position.x, position.y + height, position.z);
     vec3 adjustedNormal = normalize(cross(offsetHeightR - adjustedPos, offsetHeightD - adjustedPos));

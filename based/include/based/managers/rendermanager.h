@@ -41,7 +41,10 @@ namespace based::managers
 		void PushCamera(std::shared_ptr<graphics::Camera> camera);
 		void PopCamera();
 
+		glm::mat4 lightSpaceMatrix;
 	private:
+		void ConfigureShaderAndMatrices();
+
 		std::queue<std::unique_ptr<graphics::rendercommands::RenderCommand>> mRenderCommands;
 		std::stack<std::shared_ptr<graphics::Framebuffer>> mFramebuffers;
 		std::stack<std::shared_ptr<graphics::Camera>> mCameras;

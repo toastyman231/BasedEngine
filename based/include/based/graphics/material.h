@@ -22,7 +22,7 @@ namespace based::graphics
 		inline std::vector<std::shared_ptr<Texture>> GetTextures() const { return mTextures; }
 
 		void SetShader(std::shared_ptr<Shader> shader);
-		void AddTexture(std::shared_ptr<Texture> texture);
+		void AddTexture(std::shared_ptr<Texture> texture, std::string location = "");
 		void UpdateShaderUniforms();
 
 #define GETUNIFORMVALUE(mapName, defaultReturn) \

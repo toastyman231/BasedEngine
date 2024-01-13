@@ -1,5 +1,7 @@
 #pragma once
 #include <cstdint>
+
+#include "texture.h"
 #include "external/glm/glm.hpp"
 
 namespace based::graphics
@@ -8,6 +10,8 @@ namespace based::graphics
 	{
 	public:
 		Framebuffer(uint32_t width, uint32_t height);
+		Framebuffer::Framebuffer(uint32_t width, uint32_t height, int format, int type,
+			graphics::TextureFilter filter, int attachment, bool colorData);
 		~Framebuffer();
 
 		inline uint32_t GetFbo() const { return mFbo; }

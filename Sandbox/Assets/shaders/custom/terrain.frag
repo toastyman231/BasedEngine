@@ -5,6 +5,7 @@ out vec4 outColor;
 in vec2 uvs;
 in vec3 fragNormal;
 in vec3 fragPos;
+in vec4 fragPosLightSpace;
 
 #include "material.glsl"
 #include "globals.glsl"
@@ -19,5 +20,5 @@ void main()
     vec3 diffuseColor = mix(dirtColor, groundColor, mixFactor);
 
     vec3 viewDir = normalize(vec3(eyePos) - fragPos);
-    outColor = vec4(CalculateLighting(material, uvs, fragNormal, fragPos, viewDir) * diffuseColor, 1.0);
+    outColor = vec4(CalculateLighting(material, uvs, fragNormal, fragPos, viewDir, fragPosLightSpace) * diffuseColor, 1.0);
 }

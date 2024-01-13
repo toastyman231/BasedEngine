@@ -103,7 +103,7 @@ public:
 	{
 		App::Initialize();
 		// TODO: Figure out how to capture the mouse properly
-		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
+		Engine::Instance().GetWindow().SetShouldRenderToScreen(true);
 
 		// UI Setup
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main", 
@@ -127,7 +127,7 @@ public:
 		startScene->GetActiveCamera()->SetProjection(based::graphics::PERSPECTIVE);
 
 		// TODO: Confirm local transforms work in 2D, scene loading
-
+		
 		// Set up crate object and material
 		crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
 		const auto crateMat = std::make_shared<graphics::Material>(
@@ -135,13 +135,14 @@ public:
 		crateMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		crateMat->SetUniformValue("material.shininessMat.color", glm::vec4(128.f));
 		crateMat->SetUniformValue("material.diffuseMat.useSampler", 1);
-		crateMat->AddTexture(crateTex);
+		crateMat->AddTexture(crateTex, "material.diffuseMat.tex");
 		crateMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), crateMat);
 		crateEntity = scene::Entity::CreateEntity<scene::Entity>();
 		crateEntity->AddComponent<scene::MeshRenderer>(crateMesh);
 		crateEntity->SetPosition(glm::vec3(2.7f, 1.f, 1.7f));
 		crateEntity->SetEntityName("Crate");
 
+		// Set up second cube object
 		const auto distanceMat = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/custom/cube_distance.frag"));
 		distanceMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
@@ -156,6 +157,7 @@ public:
 		lightPosition = glm::vec3(1, 1.2f, 0.3f);
 
 		// Skybox material setup
+
 		const auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
 		const auto skybox = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"));

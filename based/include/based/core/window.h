@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include "external/glm/glm.hpp"
+#include "graphics/framebuffer.h"
 
 struct SDL_Window;
 using SDL_GLContext = void*;
@@ -12,6 +13,7 @@ namespace based::graphics
 	class Framebuffer;
 	class VertexArray;
 	class Shader;
+	class Texture;
 }
 
 namespace based::core
@@ -54,9 +56,14 @@ namespace based::core
 		void EndRender();
 
 		glm::ivec2 GetSizeInAspectRatio(int width, int height);
+
+		uint32_t GetShadowMapTextureID() const { return mShadowbuffer->GetTextureId(); }
+
+		bool isInDepthPass = false;
 	private:
 		void InitializeScreenRender();
 		void RenderToScreen();
+		void RenderShadowDepth();
 		void HandleResize(int width, int height);
 
 		WindowProperties mWindowProperties;
@@ -64,6 +71,8 @@ namespace based::core
 		SDL_GLContext mGLContext;
 		ImguiWindow mImguiWindow;
 		std::shared_ptr<graphics::Framebuffer> mFramebuffer;
+		std::shared_ptr<graphics::Framebuffer> mShadowbuffer;
+		std::shared_ptr<graphics::Texture> mShadowMap;
 		bool mMaintainAspectRatio = true;
 
 		// Screen render

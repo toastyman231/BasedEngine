@@ -374,49 +374,6 @@ namespace based::graphics
 				mShaderLibrary.Load("TexturedRect", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));
 			}
 			{
-				/*auto vertexShader = R"(
-                    #version 410 core
-					layout (location = 0) in vec3 aPos;
-					layout (location = 1) in vec3 aNormal;
-					layout (location = 2) in vec2 aTexCoords;
-
-					out vec2 TexCoords;
-
-					uniform mat4 model;
-					uniform mat4 view;
-					uniform mat4 proj;
-
-					void main()
-					{
-						TexCoords = aTexCoords;    
-						gl_Position = proj * view * model * vec4(aPos, 1.0);
-					}
-                )";
-				auto fragmentShader = R"(
-                    #version 410 core
-					out vec4 FragColor;
-
-					in vec2 TexCoords;
-
-					uniform sampler2D texture_diffuse1;
-					uniform int textureSample = 1;
-					uniform vec4 color_diffuse = vec4(1.0, 1.0, 1.0, 1.0);
-					uniform vec4 color_specular = vec4(0.0, 0.0, 0.0, 1.0);
-					uniform vec4 color_ambient = vec4(0.0, 0.0, 0.0, 1.0);;
-					uniform vec4 color_emissive = vec4(0.0, 0.0, 0.0, 1.0);;
-
-					void main()
-					{    
-						vec4 matDiffuseColor = color_diffuse;
-						if (textureSample == 1) 
-						{
-							matDiffuseColor = color_diffuse * texture(texture_diffuse1, TexCoords);
-							// Set other colors here
-						}
-
-						FragColor = matDiffuseColor;
-					}
-                )";*/
 				mShaderLibrary.Load("Model", LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag"));
 			}
 			{
@@ -456,6 +413,28 @@ namespace based::graphics
                 )";
 				mShaderLibrary.Load("UI", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));
 			}
+			{
+				auto vertexShader = R"(
+                    #version 410 core
+
+					layout (location = 0) in vec3 position;
+
+					uniform mat4 lightSpaceMatrix;
+					uniform mat4 model;
+					void main()
+					{
+					    gl_Position = lightSpaceMatrix * model * vec4(position, 1.0);
+					}
+                )";
+				auto fragmentShader = R"(
+                    #version 410 core
+
+					void main()
+					{
+					}
+                )";
+				mShaderLibrary.Load("ShadowDepthShader", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));
+			}
 
 			// Textures
 			{
@@ -484,6 +463,10 @@ namespace based::graphics
 			{
 				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("UI"));
 				mMaterialLibrary.Load("UI", mat);
+			}
+			{
+				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("ShadowDepthShader"));
+				mMaterialLibrary.Load("ShadowDepthMaterial", mat);
 			}
 		}
 

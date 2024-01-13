@@ -3,6 +3,7 @@
 #include "app.h"
 #include "based/core/profiler.h"
 #include "graphics/shader.h"
+#include "graphics/defaultassetlibraries.h"
 
 namespace based::graphics
 {
@@ -35,7 +36,14 @@ namespace based::graphics
 		model = glm::scale(model, scale);
 		Shader::UpdateShaderPointLighting(material->GetShader(), position);
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());
-		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model));
+		if (Engine::Instance().GetWindow().isInDepthPass)
+		{
+			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA,
+				graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"), model));
+		} else
+		{
+			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model));
+		}
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 	}
 
@@ -143,8 +151,16 @@ namespace based::graphics
 		model = glm::scale(model, scale);
 		Shader::UpdateShaderPointLighting(material->GetShader(), position);
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());
-		Engine::Instance().GetRenderManager().Submit(
-			BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model, true, mInstanceCount));
+		if (Engine::Instance().GetWindow().isInDepthPass)
+		{
+			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA,
+				graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"), model, true, mInstanceCount));
+		}
+		else
+		{
+			Engine::Instance().GetRenderManager().Submit(
+				BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model, true, mInstanceCount));
+		}
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 	}
 

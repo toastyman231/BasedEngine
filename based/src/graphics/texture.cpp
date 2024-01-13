@@ -47,6 +47,16 @@ namespace based::graphics
 		LoadTexture();
 	}
 
+	Texture::Texture(unsigned id, uint32_t width, uint32_t height)
+		: mFilter(TextureFilter::Nearest)
+		, mId(id)
+		, mWidth(width)
+		, mHeight(height)
+		, mNumChannels(4)
+		, mPixels(nullptr)
+	{
+	}
+
 	Texture::~Texture()
 	{
 		if (mStbiTex)

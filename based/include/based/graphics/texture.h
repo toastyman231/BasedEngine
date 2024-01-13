@@ -16,6 +16,7 @@ namespace based::graphics
 		Texture(const std::string& path, bool overrideFlip = false);
 		Texture(const SDL_Surface* surface, unsigned int id);
 		Texture(const Texture& other) = default;
+		Texture(unsigned int id, uint32_t width, uint32_t height);
 		Texture() = default;
 		~Texture();
 
@@ -33,7 +34,7 @@ namespace based::graphics
 	private:
 		TextureFilter mFilter;
 
-		std::string mPath;
+		std::string mPath = "";
 		uint32_t mId;
 		uint32_t mWidth, mHeight;
 		uint32_t mNumChannels;

@@ -38,9 +38,11 @@ namespace based::graphics
 		}
 	}
 
-	void Material::AddTexture(std::shared_ptr<Texture> texture)
+	void Material::AddTexture(std::shared_ptr<Texture> texture, std::string location)
 	{
 		mTextures.emplace_back(texture);
+		if (!location.empty())
+			SetUniformValue(location, static_cast<int>(mTextures.size() - 1));
 	}
 
 	void Material::UpdateShaderUniforms()

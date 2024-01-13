@@ -11,6 +11,7 @@
 #include "input/mouse.h"
 #include "input/keyboard.h"
 #include "input/joystick.h"
+#include "graphics/defaultassetlibraries.h"
 //#include "managers/uimanager.h"
 
 namespace based::core
@@ -77,6 +78,10 @@ namespace based::core
 
 		mFramebuffer = std::make_shared<graphics::Framebuffer>(props.w, props.h);
 		mFramebuffer->SetClearColor({ props.clearColor.r, props.clearColor.g, props.clearColor.b, 1.f });
+
+		mShadowbuffer = std::make_shared<graphics::Framebuffer>(1024, 1024, GL_DEPTH_COMPONENT, GL_FLOAT,
+			graphics::TextureFilter::Nearest, GL_DEPTH_ATTACHMENT, false);
+		mShadowbuffer->SetClearColor({ props.clearColor.r, props.clearColor.g, props.clearColor.b, 1.f });
 
 		InitializeScreenRender();
 		HandleResize(props.w, props.h);
@@ -148,6 +153,13 @@ namespace based::core
 		PROFILE_FUNCTION();
 		auto& rm = Engine::Instance().GetRenderManager();
 		rm.Clear();
+		isInDepthPass = true;
+		rm.Submit(BASED_SUBMIT_RC(PushFramebuffer, mShadowbuffer));
+		Engine::Instance().GetApp().GetCurrentScene()->RenderScene();
+		rm.Submit(BASED_SUBMIT_RC(PopFramebuffer));
+		isInDepthPass = false;
+		//mShadowMap = std::make_shared<graphics::Texture>(mShadowbuffer->GetTextureId(), 1024, 1024);
+
 		rm.Submit(BASED_SUBMIT_RC(PushFramebuffer, mFramebuffer));
 	}
 
@@ -225,6 +237,7 @@ namespace based::core
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			mScreenVA->Bind();
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, mFramebuffer->GetTextureId());
 			mScreenShader->Bind();
 
@@ -237,6 +250,35 @@ namespace based::core
 			mScreenVA->Unbind();
 			glBindTexture(GL_TEXTURE_2D, 0);
 			mScreenShader->Unbind();
+		}
+	}
+
+	void Window::RenderShadowDepth()
+	{
+		PROFILE_FUNCTION();
+		BASED_ASSERT(mScreenVA->IsValid(), "Attempting to render with invalid VertexArray - did you forget to call VertexArray::Upload()?");
+		if (mScreenVA->IsValid())
+		{
+			// Black bars
+			glClearColor(0, 0, 0, 1);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			mScreenVA->Bind();
+			glBindTexture(GL_TEXTURE_2D, mShadowbuffer->GetTextureId());
+			std::shared_ptr<graphics::Shader> shader = 
+				graphics::DefaultLibraries::GetShaderLibrary().Get("ShadowDepthShader");
+			shader->Bind();
+
+			glm::vec2 scale = mFramebufferSize / (glm::vec2)GetSize();
+			glm::mat4 model(1.0);
+			model = glm::scale(model, { scale.x, scale.y, 1.f });
+			shader->SetUniformMat4("model", model);
+			shader->SetUniformMat4("lightSpaceMatrix", Engine::Instance().GetRenderManager().lightSpaceMatrix);
+			glDrawElements(GL_TRIANGLES, mScreenVA->GetElementCount(), GL_UNSIGNED_INT, 0);
+
+			mScreenVA->Unbind();
+			glBindTexture(GL_TEXTURE_2D, 0);
+			shader->Unbind();
 		}
 	}
 
