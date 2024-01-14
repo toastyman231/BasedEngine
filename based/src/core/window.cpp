@@ -158,7 +158,6 @@ namespace based::core
 		Engine::Instance().GetApp().GetCurrentScene()->RenderScene();
 		rm.Submit(BASED_SUBMIT_RC(PopFramebuffer));
 		isInDepthPass = false;
-		//mShadowMap = std::make_shared<graphics::Texture>(mShadowbuffer->GetTextureId(), 1024, 1024);
 
 		rm.Submit(BASED_SUBMIT_RC(PushFramebuffer, mFramebuffer));
 	}

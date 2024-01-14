@@ -38,8 +38,9 @@ namespace based::graphics
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());
 		if (Engine::Instance().GetWindow().isInDepthPass)
 		{
-			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA,
-				graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"), model));
+			if (material->GetUniformValue<int>("castShadows", 1) != 0)
+				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA,
+					graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"), model));
 		} else
 		{
 			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model));
@@ -153,8 +154,9 @@ namespace based::graphics
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());
 		if (Engine::Instance().GetWindow().isInDepthPass)
 		{
-			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA,
-				graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"), model, true, mInstanceCount));
+			if (material->GetUniformValue<int>("castShadows", 1) != 0)
+				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA,
+					graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"), model, true, mInstanceCount));
 		}
 		else
 		{

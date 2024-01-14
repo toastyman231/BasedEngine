@@ -25,6 +25,8 @@ namespace based::graphics
 		void AddTexture(std::shared_ptr<Texture> texture, std::string location = "");
 		void UpdateShaderUniforms();
 
+		std::string materialName;
+
 #define GETUNIFORMVALUE(mapName, defaultReturn) \
 	const auto& it = mapName.find(name);\
 	if (it != (mapName).end())\
@@ -43,6 +45,22 @@ namespace based::graphics
 			else if constexpr (std::is_same<T, glm::vec4>()) { GETUNIFORMVALUE(mUniformFloat4s, glm::vec4(0.f)) }
 			else if constexpr (std::is_same<T, glm::mat3>()) { GETUNIFORMVALUE(mUniformMat3s, glm::mat3(1.f)) }
 			else if constexpr (std::is_same<T, glm::mat4>()) { GETUNIFORMVALUE(mUniformMat4s, glm::mat4(1.f)) }
+			else
+			{
+				static_assert(false, "Unsupported data type in Material::GetUniformValue()");
+			}
+		}
+
+		template<typename T>
+		inline T GetUniformValue(const std::string& name, const T defaultVal) const
+		{
+			if constexpr (std::is_same<T, int>()) { GETUNIFORMVALUE(mUniformInts, defaultVal) }
+			else if constexpr (std::is_same<T, float>()) { GETUNIFORMVALUE(mUniformFloats, defaultVal) }
+			else if constexpr (std::is_same<T, glm::vec2>()) { GETUNIFORMVALUE(mUniformFloat2s, defaultVal) }
+			else if constexpr (std::is_same<T, glm::vec3>()) { GETUNIFORMVALUE(mUniformFloat3s, defaultVal) }
+			else if constexpr (std::is_same<T, glm::vec4>()) { GETUNIFORMVALUE(mUniformFloat4s, defaultVal) }
+			else if constexpr (std::is_same<T, glm::mat3>()) { GETUNIFORMVALUE(mUniformMat3s, defaultVal) }
+			else if constexpr (std::is_same<T, glm::mat4>()) { GETUNIFORMVALUE(mUniformMat4s, defaultVal) }
 			else
 			{
 				static_assert(false, "Unsupported data type in Material::GetUniformValue()");

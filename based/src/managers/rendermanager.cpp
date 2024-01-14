@@ -10,6 +10,7 @@
 #include "core/profiler.h"
 #include "external/glm/ext/matrix_clip_space.hpp"
 #include "external/glm/ext/matrix_transform.hpp"
+#include "math/basedmath.h"
 
 namespace based::managers
 {
@@ -152,10 +153,18 @@ namespace based::managers
 
 	void RenderManager::ConfigureShaderAndMatrices()
 	{
-		float nearPlane = 1.f;
-		float farPlane = 7.5f;
-		glm::mat4 lightProjection = glm::ortho(-10.f, 10.f, -10.f, 10.f, nearPlane, farPlane);
-		glm::mat4 lightView = glm::lookAt(glm::vec3(-2.f, 4.f, -1.f), glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
+		constexpr float nearPlane = 1.f;
+		constexpr float farPlane = 100.f;
+		glm::vec3 lightPosition = glm::vec3(-2.f, 4.f, -1.f);
+		entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+		const auto directionalLightView = registry.view<scene::DirectionalLight>();
+		if (directionalLightView.size() > 0)
+		{
+			const auto directionalLight = registry.get<scene::Transform>(directionalLightView[0]);
+			lightPosition = -directionalLight.Rotation;
+		}
+		const glm::mat4 lightProjection = glm::ortho(-10.f, 10.f, -10.f, 10.f, nearPlane, farPlane);
+		const glm::mat4 lightView = glm::lookAt(lightPosition, glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
 		lightSpaceMatrix = lightProjection * lightView;
 	}
 

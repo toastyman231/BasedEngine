@@ -103,7 +103,7 @@ public:
 	{
 		App::Initialize();
 		// TODO: Figure out how to capture the mouse properly
-		Engine::Instance().GetWindow().SetShouldRenderToScreen(true);
+		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
 
 		// UI Setup
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main", 
@@ -197,6 +197,7 @@ public:
 		grassMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		grassMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(12.f));
 		grassMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
+		grassMesh->material->SetUniformValue("castShadows", 0);
 		grassMatBase->AddTexture(heightMap);
 
 		// Set up grass instancing
@@ -222,12 +223,14 @@ public:
 				grassInstanceMesh->AddInstance(scene::Transform(pos, rot, glm::vec3(1)));
 			}
 		}
+		//grassInstance->SetActive(false);
 
 		// Set up light placeholder
 		const auto cubeMat = std::make_shared<graphics::Material>(
 			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"));
 		cubeMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		cubeMat->SetUniformValue("material.diffuseMat.useSampler", 0);
+		cubeMat->SetUniformValue("castShadows", 0);
 		auto cubeMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), cubeMat);
 		lightPlaceholder = scene::Entity::CreateEntity<scene::Entity>();
 		lightPlaceholder->AddComponent<scene::MeshRenderer>(cubeMesh);

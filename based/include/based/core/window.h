@@ -72,7 +72,6 @@ namespace based::core
 		ImguiWindow mImguiWindow;
 		std::shared_ptr<graphics::Framebuffer> mFramebuffer;
 		std::shared_ptr<graphics::Framebuffer> mShadowbuffer;
-		std::shared_ptr<graphics::Texture> mShadowMap;
 		bool mMaintainAspectRatio = true;
 
 		// Screen render

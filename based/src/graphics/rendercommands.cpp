@@ -111,6 +111,7 @@ namespace based::graphics::rendercommands
 		PROFILE_FUNCTION();
 		std::shared_ptr<VertexArray> va = mVertexArray.lock();
 		std::shared_ptr<Material> mat = mMaterial.lock();
+
 		if (va && mat)
 		{
 			BASED_ASSERT(va->IsValid(), "Attempting to execute invalid RenderVertexArrayMaterial - did you forget to call VertexArray::Upload()?");
