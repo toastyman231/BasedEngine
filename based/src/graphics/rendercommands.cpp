@@ -142,8 +142,8 @@ namespace based::graphics::rendercommands
 					{
 						shader->SetUniformMat4("model", mModelMatrix);
 						shader->SetUniformMat4("normalMat", glm::transpose(glm::inverse(mModelMatrix)));
-						shader->SetUniformMat4("lightSpaceMatrix", Engine::Instance().GetRenderManager().lightSpaceMatrix);
 					}
+					shader->SetUniformMat4("lightSpaceMatrix", Engine::Instance().GetRenderManager().lightSpaceMatrix);
 
 					if (va->GetElementCount() > 0)
 					{
