@@ -12,7 +12,6 @@ struct Material {
     MaterialProperty emissiveMat;
 };
 
-uniform int useNormalMap = 0; // If unset, use vertex normals. If set, sample normal map
 uniform Material material;
 
 vec4 GetMaterialColor(MaterialProperty mat, vec2 uv) {
@@ -39,10 +38,4 @@ float GetShininessMaterial(vec2 uv) {
 }
 vec4 GetEmissiveMaterial(vec2 uv) {
     return GetMaterialColor(material.emissiveMat, uv);
-}
-
-vec3 GetNormals(vec3 fragNormalWS, vec2 fragTexCoord) {
-    vec3 vertNormals = (1-useNormalMap) * normalize(fragNormalWS);
-    vec3 normalMapNormals = (useNormalMap) * GetNormalMaterial(fragTexCoord).rgb;
-    return vertNormals + normalMapNormals;
 }

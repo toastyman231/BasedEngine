@@ -72,6 +72,7 @@ private:
 	float R = 100.f;
 	float heightCoef = 1.f;
 	bool useLight = true;
+	bool useNormalMaps = true;
 	glm::vec3 camPos = glm::vec3(0.f, 0.f, 1.5f);
 	glm::vec3 camRot = glm::vec3(0.f);
 
@@ -85,6 +86,8 @@ private:
 	graphics::Mesh* crateMesh;
 	graphics::Mesh* boxMesh;
 	std::shared_ptr<graphics::Texture> crateTex;
+	std::shared_ptr<graphics::Material> wallMat;
+	std::shared_ptr<graphics::Material> handMat;
 
 	Rml::ElementDocument* document;
 
@@ -252,6 +255,38 @@ public:
 		sunLight->AddComponent<scene::DirectionalLight>(glm::vec3(1.f));
 		sunLight->SetEntityName("Sun");
 
+		// Set up brick wall material
+		const auto wallDiffuseTex = std::make_shared<graphics::Texture>("Assets/brick-wall/brickwall-diff.jpg", true);
+		const auto wallNormalMapTex = std::make_shared<graphics::Texture>("Assets/brick-wall/brickwall-norm.jpg", true);
+		const auto wallShader = LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag");
+		wallMat = std::make_shared<graphics::Material>(wallShader);
+		wallMat->AddTexture(wallDiffuseTex, "material.diffuseMat.tex");
+		wallMat->SetUniformValue("material.diffuseMat.useSampler", 1);
+		wallMat->AddTexture(wallNormalMapTex, "material.normalMat.tex");
+		wallMat->SetUniformValue("material.normalMat.useSampler", 1);
+		wallMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
+		// Add brick wall entity
+		const auto wallEntity = scene::Entity::CreateEntity<scene::Entity>(glm::vec3(5, 3.5f, 0)
+			, glm::vec3(90, 0, 0));
+		const auto wallMesh = GeneratePlane(2, 2);
+		wallMesh->material = wallMat;
+		wallEntity->AddComponent<scene::MeshRenderer>(wallMesh);
+
+		// Create hand material
+		const auto handDiffuseTex = std::make_shared<graphics::Texture>("Assets/hand/hand_diff.png", true);
+		const auto handNormalTex = std::make_shared<graphics::Texture>("Assets/hand/hand_normal.png", true);
+		const auto handShader = LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag");
+		handMat = std::make_shared<graphics::Material>(handShader);
+		handMat->AddTexture(handDiffuseTex, "material.diffuseMat.tex");
+		handMat->SetUniformValue("material.diffuseMat.useSampler", 1);
+		handMat->AddTexture(handNormalTex, "material.normalMat.tex");
+		handMat->SetUniformValue("material.normalMat.useSampler", 1);
+		handMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
+		// Add hand entity
+		const auto handModel = graphics::Model::CreateModelEntity("Assets/Models/HAND1.obj");
+		handModel->SetPosition(glm::vec3(0, 5, 0));
+		handModel->Children[0]->GetComponent<scene::MeshRenderer>().mesh->material = handMat;
+
 		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 2, 4));
 		GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(6, 53, 0));
 
@@ -371,6 +406,17 @@ public:
 		}
 
 		UpdateShaders(grassInstance->GetComponent<scene::MeshRenderer>().mesh, useLight, ambientStrength, heightCoef);
+
+		// Disable normal maps when not using them
+		if (!useNormalMaps)
+		{
+			handMat->SetUniformValue("material.normalMat.useSampler", 0);
+			wallMat->SetUniformValue("material.normalMat.useSampler", 0);
+		} else
+		{
+			handMat->SetUniformValue("material.normalMat.useSampler", 1);
+			wallMat->SetUniformValue("material.normalMat.useSampler", 1);
+		}
 	}
 
 	void Render() override
@@ -469,6 +515,7 @@ public:
 
 				ImGui::Text("General");
 				ImGui::DragFloat("Ambient Strength", &ambientStrength, 0.01f);
+				ImGui::Checkbox("Use Normal Maps", &useNormalMaps);
 			}
 
 			if (ImGui::CollapsingHeader("Objects"))

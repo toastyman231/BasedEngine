@@ -68,20 +68,28 @@ namespace based::graphics
 		BASED_CREATE_VERTEX_BUFFER(pos_vb, float);
 		BASED_CREATE_VERTEX_BUFFER(norm_vb, float);
 		BASED_CREATE_VERTEX_BUFFER(uv_vb, float);
+		BASED_CREATE_VERTEX_BUFFER(tan_vb, float);
+		BASED_CREATE_VERTEX_BUFFER(bitan_vb, float);
 
 		for (const auto vertex : vertices)
 		{
 			pos_vb->PushVertex({ vertex.Position.x, vertex.Position.y, vertex.Position.z });
 			norm_vb->PushVertex({ vertex.Normal.x, vertex.Normal.y, vertex.Normal.z });
 			uv_vb->PushVertex({ vertex.TexCoords.x, vertex.TexCoords.y });
+			tan_vb->PushVertex({ vertex.Tangent.x, vertex.Tangent.y, vertex.Tangent.z });
+			bitan_vb->PushVertex({ vertex.Bitangent.x, vertex.Bitangent.y, vertex.Bitangent.z });
 		}
 
 		pos_vb->SetLayout({ 3 });
 		norm_vb->SetLayout({ 3 });
 		uv_vb->SetLayout({ 2 });
+		tan_vb->SetLayout({ 3 });
+		bitan_vb->SetLayout({ 3 });
 		va->PushBuffer(std::move(pos_vb));
 		va->PushBuffer(std::move(uv_vb));
 		va->PushBuffer(std::move(norm_vb));
+		va->PushBuffer(std::move(tan_vb));
+		va->PushBuffer(std::move(bitan_vb));
 
 		va->SetElements(indices);
 		if (upload) va->Upload();

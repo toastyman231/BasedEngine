@@ -12,6 +12,8 @@ based::graphics::Mesh* GeneratePlane(int xSize, int ySize)
 			vertex.Normal = glm::vec3(0, 1, 0);
 			vertex.TexCoords = glm::vec2(static_cast<float>(x) / static_cast<float>(xSize), 
 				static_cast<float>(y) / static_cast<float>(ySize));
+			vertex.Tangent = glm::vec3(0, 0, 1);
+			vertex.Bitangent = glm::vec3(1, 0, 0);
 			vertices.emplace_back(vertex);
 		}
 	}

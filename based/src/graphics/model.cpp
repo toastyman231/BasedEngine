@@ -22,7 +22,7 @@ namespace based::graphics
 		auto* rootEntity = scene::Entity::CreateEntity<scene::Entity>();
 
 		Assimp::Importer import;
-		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 		rootEntity->SetEntityName(std::string(scene->mName.C_Str()));
 
@@ -132,6 +132,15 @@ namespace based::graphics
 			else
 				vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 
+			// process vertex tangent space
+			if (mesh->mTangents)
+			{
+				vector.x = mesh->mTangents[i].x;
+				vector.y = mesh->mTangents[i].y;
+				vector.z = mesh->mTangents[i].z;
+				vertex.Tangent = vector;
+			}
+
 			vertices.push_back(vertex);
 		}
 
@@ -151,12 +160,6 @@ namespace based::graphics
 			std::shared_ptr<Material> meshMaterial = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 
 			mMaterials.insert(mMaterials.end(), meshMaterial);
-			/*std::vector<Texture> diffuseMaps = LoadMaterialTextures(material,
-				aiTextureType_DIFFUSE, "texture_diffuse");
-			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-			std::vector<Texture> specularMaps = LoadMaterialTextures(material,
-				aiTextureType_SPECULAR, "texture_specular");
-			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());*/
 		}
 
 		return new Mesh(vertices, indices, textures);
