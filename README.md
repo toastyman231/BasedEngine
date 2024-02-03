@@ -1,5 +1,5 @@
 # BasedEngine
-A simple 2D game engine based on tutorials by https://www.youtube.com/c/Progrematic. Some inspiration was also taken from Hazel Engine by Yan Chernikov. The Samples folder contains a few finished games I've made using the engine, such as Tetris.  
+A simple 2D and 3D game engine based on tutorials by https://www.youtube.com/c/Progrematic. Some inspiration was also taken from Hazel Engine by Yan Chernikov. The Samples folder contains a few finished games I've made using the engine, such as Tetris.  
 
 ## Libraries Used
 - FreeType (Text Rendering, https://freetype.org/)
@@ -13,6 +13,7 @@ A simple 2D game engine based on tutorials by https://www.youtube.com/c/Progrema
 - Miniaudio (Audio playback, https://github.com/mackron/miniaudio)  
 - Assimp (Model importing, https://github.com/assimp/assimp)  
 - RmlUI (UI Rendering, https://github.com/mikke89/RmlUi)  
+- Tracy (Profiling, https://github.com/wolfpld/tracy)
 
 ## My Additions
 The bulk of the engine design and implentation was done by Progrematic, if something is not listed below, it was probably done by him. You can find his original engine here: https://github.com/progrematic/hippo.
@@ -24,11 +25,14 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - Sprite class with sorting
 - DeltaTime for framerate independence
 - Custom window icons (set up automatically if you include an icon.png file in your res folder)
-- Text Rendering/UI
 - Toolchain to create projects in directories outside the engine's directory
 - Simple audio system using miniaudio
 - Simple 3D rendering with assimp for model importing
 - Flexible UI system via RmlUI
+- Blinn-Phong Lighting and Shadows
+- Instanced Mesh Rendering
+- Profiling Support with Tracy
+- Materials with normal mapping and lighting support
 
 ## Planned Additions
 - 2D Physics with Box2D
@@ -37,11 +41,12 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - ~~Load shaders from file (They are hardcoded currently)~~ Complete!  
 - ~~More UI (Buttons, Sliders, Checkboxes, etc)~~ Complete!
 - Scene Save/Load (Serialization)
-- 3D Rendering capability with PBR materials (In progress!)
+- ~~3D Rendering capability~~ with PBR materials (Complete! PBR may come later)
 - GUI to make creating/loading projects easier
+- Make a game with it!
 
 ## Thoughts and Concerns
-- Currently only quads can be rendered, things like lines and circles have to be baked into a texture then rendered on a square or something. Adding dedicated render commands for those types of objects is probably worth it.
+- Currently only quads can be rendered, things like lines and circles have to be baked into a texture then rendered on a square or something. Adding dedicated render commands for those types of objects is probably worth it. Of course, this does not affect 3D rendering.
 - A GUI editor would be nice to have at some point, but it's a lot of effort to make that I could be using to make actual games (or just improving the engine in general).
 - LoadScene cannot reload an already loaded scene, because all LoadScene really does is swap which scene is currently being rendered. I will need to have some way to load a scene by reading from a file of some sort to get all of it's entities, then on load create each of those entities and destroy all entities in the current scene
 - I've only tested it on Windows, theoretically it should work on Mac and Linux, but your mileage will probably vary.
