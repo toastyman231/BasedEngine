@@ -114,8 +114,17 @@ namespace based::graphics
 			for (uint32_t count : vbo->GetLayout())
 			{
 				glEnableVertexAttribArray(attributeCount); BASED_CHECK_GL_ERROR;
-				glVertexAttribPointer(attributeCount, count, static_cast<GLenum>(vbo->GetGLType()), GL_FALSE, vbo->GetStride(), (void*)(intptr_t)offset);
-				BASED_CHECK_GL_ERROR;
+				if (vbo->GetGLType() == RawVertexBuffer::GLTypeInt)
+				{
+					glVertexAttribIPointer(attributeCount, count, static_cast<GLenum>(vbo->GetGLType()), 
+						vbo->GetStride(), (void*)(intptr_t)offset);
+					BASED_CHECK_GL_ERROR;
+				} else
+				{
+					glVertexAttribPointer(attributeCount, count, static_cast<GLenum>(vbo->GetGLType()), 
+						GL_FALSE, vbo->GetStride(), (void*)(intptr_t)offset);
+					BASED_CHECK_GL_ERROR;
+				}
 				if (vbo->IsInstanced()) glVertexAttribDivisor(attributeCount, 1); BASED_CHECK_GL_ERROR;
 
 				attributeCount++;

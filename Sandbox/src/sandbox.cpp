@@ -19,6 +19,8 @@
 #include "external/imgui/imgui.h"
 #include <RmlUi/Core.h>
 
+#include "based/animation/animation.h"
+#include "based/animation/animator.h"
 #include "based/core/basedtime.h"
 #include "based/math/random.h"
 #include "Models-Surfaces/Generators.h"
@@ -62,6 +64,7 @@ private:
 	scene::Entity* lightPlaceholder;
 	scene::Entity* grassInstance;
 	scene::Entity* sunLight;
+	scene::Entity* arms;
 
 	bool mouseControl = false;
 	float speed = 2.5f;
@@ -87,7 +90,11 @@ private:
 	graphics::Mesh* boxMesh;
 	std::shared_ptr<graphics::Texture> crateTex;
 	std::shared_ptr<graphics::Material> wallMat;
-	std::shared_ptr<graphics::Material> handMat;
+	std::shared_ptr<graphics::Material> armsMat;
+
+	animation::Animation* handsAnim;
+	animation::Animation* handsAnim2;
+	animation::Animator* animator;
 
 	Rml::ElementDocument* document;
 
@@ -123,6 +130,7 @@ public:
 		Engine::Instance().GetUiManager().SetPathPrefix("Assets/ui/");
 
 		document = Engine::Instance().GetUiManager().LoadWindow("help_screen", context);
+		document->Hide();
 
 		// Old stuff, plus setting camera to perspective mode
 		cubeRot = glm::vec3(0.f);
@@ -272,20 +280,24 @@ public:
 		wallMesh->material = wallMat;
 		wallEntity->AddComponent<scene::MeshRenderer>(wallMesh);
 
-		// Create hand material
-		const auto handDiffuseTex = std::make_shared<graphics::Texture>("Assets/hand/hand_diff.png", true);
-		const auto handNormalTex = std::make_shared<graphics::Texture>("Assets/hand/hand_normal.png", true);
-		const auto handShader = LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag");
-		handMat = std::make_shared<graphics::Material>(handShader);
-		handMat->AddTexture(handDiffuseTex, "material.diffuseMat.tex");
-		handMat->SetUniformValue("material.diffuseMat.useSampler", 1);
-		handMat->AddTexture(handNormalTex, "material.normalMat.tex");
-		handMat->SetUniformValue("material.normalMat.useSampler", 1);
-		handMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
-		// Add hand entity
-		const auto handModel = graphics::Model::CreateModelEntity("Assets/Models/HAND1.obj");
-		handModel->SetPosition(glm::vec3(0, 5, 0));
-		handModel->Children[0]->GetComponent<scene::MeshRenderer>().mesh->material = handMat;
+		// Create arms material
+		armsMat = std::make_shared<graphics::Material>(
+			LOAD_SHADER("Assets/shaders/basic_lit_bones.vert", "Assets/shaders/basic_lit.frag"));
+		const auto armsTex = std::make_shared<graphics::Texture>("Assets/Models/Base Color Palette Diffuse.png", true);
+		armsMat->AddTexture(armsTex, "material.diffuseMat.tex");
+		armsMat->SetUniformValue("material.diffuseMat.tint", glm::vec4(0.77f, 0.4f, 0.35f, 1.f));
+		armsMat->SetUniformValue("material.diffuseMat.useSampler", 1);
+		// Create arms
+		const auto armModel = new graphics::Model("Assets/Models/Arms.dae");
+		armModel->SetMaterial(armsMat);
+		const auto armEntity = new scene::Entity(GetCurrentScene()->GetRegistry());
+		armEntity->AddComponent<scene::ModelRenderer>(armModel);
+		armEntity->SetPosition({ 0, 5, 0 });
+		// Create arms animations and animator
+		handsAnim = new animation::Animation("Assets/Models/Arms_Punch.dae", armModel);
+		handsAnim->SetLooping(true);
+		handsAnim2 = new animation::Animation("Assets/Models/Arms.dae", armModel);
+		animator = new animation::Animator(handsAnim);
 
 		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 2, 4));
 		GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(6, 53, 0));
@@ -326,6 +338,13 @@ public:
 			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
 			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position + speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetRight());
 		}
+		//arms->SetPosition(GetCurrentScene()->GetActiveCamera()->GetTransform().Position);
+		//arms->SetRotation(GetCurrentScene()->GetActiveCamera()->GetTransform().Rotation);
+		animator->UpdateAnimation(deltaTime);
+
+		auto transforms = animator->GetFinalBoneMatrices();
+		for (int i = 0; i < transforms.size(); ++i)
+			armsMat->SetUniformValue("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
 
 		// Enable/disable mouse control
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_R))
@@ -375,6 +394,11 @@ public:
 			else document->Show();
 		}
 
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_P))
+		{
+			animator->PlayAnimation(handsAnim);
+		}
+
 		// Set light position and pass info to shaders
 		lightPosition = glm::vec3(based::math::Sin(based::core::Time::GetTime()) * 4, 
 			lightPosition.y, lightPosition.z);
@@ -410,11 +434,11 @@ public:
 		// Disable normal maps when not using them
 		if (!useNormalMaps)
 		{
-			handMat->SetUniformValue("material.normalMat.useSampler", 0);
+			//handMat->SetUniformValue("material.normalMat.useSampler", 0);
 			wallMat->SetUniformValue("material.normalMat.useSampler", 0);
 		} else
 		{
-			handMat->SetUniformValue("material.normalMat.useSampler", 1);
+			//handMat->SetUniformValue("material.normalMat.useSampler", 1);
 			wallMat->SetUniformValue("material.normalMat.useSampler", 1);
 		}
 	}

@@ -5,7 +5,7 @@ layout (location = 1) in vec2 texcoords;
 layout (location = 2) in vec3 normal;
 layout (location = 3) in vec3 tangent;
 layout (location = 4) in vec3 bitangent;
-layout (location = 5) in invec4 boneIds;
+layout (location = 5) in ivec4 boneIds;
 layout (location = 6) in vec4 weights;
 
 out vec2 uvs;
@@ -43,13 +43,13 @@ void main()
             continue;
         if(boneIds[i] >= MAX_BONES) 
         {
-            totalPosition = vec4(pos,1.0f);
+            totalPosition = vec4(position, 1.0);
             break;
         }
-        vec4 localPosition = finalBonesMatrices[boneIds[i]] * vec4(pos,1.0f);
+        vec4 localPosition = finalBonesMatrices[boneIds[i]] * vec4(position, 1.0);
         totalPosition += localPosition * weights[i];
-        vec3 localNormal = mat3(finalBonesMatrices[boneIds[i]]) * fragNormal;
+        vec3 localNormal = mat3(finalBonesMatrices[boneIds[i]]) * normal;
     }
 
-    gl_Position = proj * view * model * vec4(position, 1.0);
+    gl_Position = proj * view * model * totalPosition;
 }

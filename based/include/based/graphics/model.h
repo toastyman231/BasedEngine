@@ -39,6 +39,8 @@ namespace based::graphics
 
         static scene::Entity* CreateModelEntity(const std::string& path);
         static graphics::Mesh* LoadSingleMesh(const std::string& path);
+        auto& GetBoneInfoMap() { return m_BoneInfoMap; }
+        int& GetBoneCount() { return m_BoneCounter; }
     private:
         // model data
         std::vector<graphics::Mesh*> meshes;
@@ -58,7 +60,5 @@ namespace based::graphics
         void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
         void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
         void SetVertexBoneDataToDefault(Vertex& vertex);
-        auto& GetBoneInfoMap() { return m_BoneInfoMap; }
-        int& GetBoneCount() { return m_BoneCounter; }
     };
 }

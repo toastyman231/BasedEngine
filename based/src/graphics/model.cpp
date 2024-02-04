@@ -12,7 +12,10 @@ namespace based::graphics
 
 	void Model::SetMaterial(const std::shared_ptr<Material>& mat, int index)
 	{
-		mMaterials[index] = mat;
+		for (int i = 0; i < mMaterials.size(); ++i)
+		{
+			mMaterials[i] = mat;
+		}
 	}
 
 	scene::Entity* Model::CreateModelEntity(const std::string& path)
@@ -222,10 +225,11 @@ namespace based::graphics
 			{
 				aiString str;
 				mat->GetTexture(type, i, &str);
+				str = directory + std::string("/") + str.C_Str();
 				BASED_TRACE("Texture location: {}", str.C_Str());
-				Texture texture(str.C_Str());
+				//Texture texture(str.C_Str(), true);
 
-				material->AddTexture(std::make_shared<Texture>(texture));
+				material->AddTexture(std::make_shared<Texture>(str.C_Str(), true));
 			}
 			material->SetUniformValue("material." + attributeName + ".tex", sampler);
 		}

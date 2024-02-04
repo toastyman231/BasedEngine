@@ -1,5 +1,6 @@
 struct MaterialProperty {
     vec4 color;
+    vec4 tint;
     int useSampler;
     sampler2D tex;
 };
@@ -18,8 +19,12 @@ vec4 GetMaterialColor(MaterialProperty mat, vec2 uv) {
     int shouldUseSampler = mat.useSampler;
     vec4 color = (1-shouldUseSampler) * mat.color;
     vec4 tex =   shouldUseSampler     * texture(mat.tex, uv);
+    vec4 tint = mat.tint;
     // if useSampler is true, color is 0, if it's false, tex is 0
-    return color + tex;
+    if (tint.r + tint.g + tint.b == 0) {
+        tint = vec4(1.0);
+    }
+    return (color + tex) * tint;
 }
 vec4 GetDiffuseMaterial(vec2 uv) {
     return GetMaterialColor(material.diffuseMat, uv);
