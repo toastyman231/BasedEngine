@@ -41,6 +41,8 @@ namespace based::graphics
         static graphics::Mesh* LoadSingleMesh(const std::string& path);
         auto& GetBoneInfoMap() { return m_BoneInfoMap; }
         int& GetBoneCount() { return m_BoneCounter; }
+
+        inline std::shared_ptr<Material> GetMaterial(int index = 0) const { return mMaterials[index]; }
     private:
         // model data
         std::vector<graphics::Mesh*> meshes;

@@ -8,6 +8,11 @@ namespace based::ui
 	class TextEntity;
 }
 
+namespace based::animation
+{
+	class Animator;
+}
+
 namespace based::graphics
 {
 	class Mesh;
@@ -95,6 +100,14 @@ namespace based::scene
 		ModelRenderer() = default;
 		ModelRenderer(graphics::Model* modelPtr) : model(modelPtr) {}
 		ModelRenderer(const ModelRenderer&) = default;
+	};
+
+	struct AnimatorComponent
+	{
+		animation::Animator* animator;
+
+		AnimatorComponent() = default;
+		AnimatorComponent(animation::Animator* anim) : animator(anim) {}
 	};
 
 	struct MeshRenderer

@@ -2,6 +2,8 @@
 
 #include "based/scene/scene.h"
 
+#include "basedtime.h"
+#include "animation/animator.h"
 #include "external/glm/ext/matrix_transform.hpp"
 #include "graphics/model.h"
 #include "scene/components.h"
@@ -22,6 +24,24 @@ namespace based::scene
 			scene::Entity* entityPtr = mRegistry.get<EntityReference>(entity).entity;
 			if (!entityPtr->IsActive()) continue;
 			entityPtr->Initialize();
+		}
+	}
+
+	void Scene::AnimateScene() const
+	{
+		PROFILE_FUNCTION();
+		const auto view = mRegistry.view<Enabled, AnimatorComponent, ModelRenderer>();
+
+		for (const auto entity : view)
+		{
+			scene::AnimatorComponent anim = mRegistry.get<scene::AnimatorComponent>(entity);
+			scene::ModelRenderer model = mRegistry.get<scene::ModelRenderer>(entity);
+			anim.animator->UpdateAnimation(core::Time::DeltaTime());
+
+			auto transforms = anim.animator->GetFinalBoneMatrices();
+			auto mat = model.model->GetMaterial();
+			for (int i = 0; i < transforms.size(); ++i)
+				mat->SetUniformValue("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
 		}
 	}
 
@@ -89,6 +109,8 @@ namespace based::scene
 				entityPtr->Update(deltaTime);
 			}
 		}
+
+		AnimateScene();
 	}
 
 	void Scene::ShutdownScene() const

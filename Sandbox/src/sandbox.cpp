@@ -290,14 +290,16 @@ public:
 		// Create arms
 		const auto armModel = new graphics::Model("Assets/Models/Arms.dae");
 		armModel->SetMaterial(armsMat);
-		const auto armEntity = new scene::Entity(GetCurrentScene()->GetRegistry());
-		armEntity->AddComponent<scene::ModelRenderer>(armModel);
-		armEntity->SetPosition({ 0, 5, 0 });
+		arms = new scene::Entity(GetCurrentScene()->GetRegistry());
+		arms->AddComponent<scene::ModelRenderer>(armModel);
+		arms->SetPosition({ 0, 5, 0 });
 		// Create arms animations and animator
 		handsAnim = new animation::Animation("Assets/Models/Arms_Punch.dae", armModel);
-		handsAnim->SetLooping(true);
 		handsAnim2 = new animation::Animation("Assets/Models/Arms.dae", armModel);
+		handsAnim2->SetLooping(true);
 		animator = new animation::Animator(handsAnim);
+		arms->AddComponent<scene::AnimatorComponent>(animator);
+		animator->PlayAnimation(handsAnim2);
 
 		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 2, 4));
 		GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(6, 53, 0));
@@ -338,13 +340,9 @@ public:
 			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
 			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position + speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetRight());
 		}
-		//arms->SetPosition(GetCurrentScene()->GetActiveCamera()->GetTransform().Position);
-		//arms->SetRotation(GetCurrentScene()->GetActiveCamera()->GetTransform().Rotation);
-		animator->UpdateAnimation(deltaTime);
-
-		auto transforms = animator->GetFinalBoneMatrices();
-		for (int i = 0; i < transforms.size(); ++i)
-			armsMat->SetUniformValue("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+		arms->SetPosition(GetCurrentScene()->GetActiveCamera()->GetTransform().Position);
+		auto rot = GetCurrentScene()->GetActiveCamera()->GetTransform().Rotation;
+		arms->SetRotation(glm::vec3(-rot.x, -rot.y + 180, 0));
 
 		// Enable/disable mouse control
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_R))
@@ -434,11 +432,9 @@ public:
 		// Disable normal maps when not using them
 		if (!useNormalMaps)
 		{
-			//handMat->SetUniformValue("material.normalMat.useSampler", 0);
 			wallMat->SetUniformValue("material.normalMat.useSampler", 0);
 		} else
 		{
-			//handMat->SetUniformValue("material.normalMat.useSampler", 1);
 			wallMat->SetUniformValue("material.normalMat.useSampler", 1);
 		}
 	}
@@ -556,7 +552,10 @@ public:
 					glm::vec3 position = trans.Position;
 					glm::vec3 rotation = trans.Rotation;
 					glm::vec3 scale = trans.Scale;
+					bool enabled = ent->IsActive();
 					ImGui::PushID(i);
+					ImGui::Checkbox("", &enabled);
+					ImGui::SameLine();
 					ImGui::Text(ent->GetEntityName().c_str());
 					ImGui::DragFloat3("Position", glm::value_ptr(position), 0.01f);
 					ImGui::DragFloat3("Rotation", glm::value_ptr(rotation), 0.01f);
@@ -564,6 +563,7 @@ public:
 					ImGui::PopID();
 					registry.patch<scene::Transform>(obj, [position, rotation, scale](auto& t) 
 						{ t.Position = position; t.Rotation = rotation; t.Scale = scale; });
+					ent->SetActive(enabled);
 					i++;
 				}
 			}

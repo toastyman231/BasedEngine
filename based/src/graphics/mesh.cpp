@@ -30,9 +30,9 @@ namespace based::graphics
 		auto model = glm::mat4(1.f);
 		model = glm::translate(model, position);
 		// Rotations are passed as degrees and converted to radians here automatically
+		model = glm::rotate(model, rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
 		model = glm::rotate(model, rotation.x * 0.0174533f, glm::vec3(1.f, 0.f, 0.f));
 		model = glm::rotate(model, rotation.y * 0.0174533f, glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, scale);
 		Shader::UpdateShaderPointLighting(material->GetShader(), position);
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());
@@ -162,9 +162,9 @@ namespace based::graphics
 		auto model = glm::mat4(1.f);
 		model = glm::translate(model, position);
 		// Rotations are passed as degrees and converted to radians here automatically
+		model = glm::rotate(model, rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
 		model = glm::rotate(model, rotation.x * 0.0174533f, glm::vec3(1.f, 0.f, 0.f));
 		model = glm::rotate(model, rotation.y * 0.0174533f, glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, scale);
 		Shader::UpdateShaderPointLighting(material->GetShader(), position);
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());

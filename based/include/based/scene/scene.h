@@ -11,6 +11,7 @@ namespace based::scene
 		~Scene() = default;
 
 		void InitializeScene() const;
+		void AnimateScene() const;
 		void RenderScene() const;
 		void UpdateScene(float deltaTime) const;
 		void ShutdownScene() const;
