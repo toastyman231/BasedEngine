@@ -7,11 +7,24 @@
 #include <based/graphics/texture.h>
 #include <based/graphics/mesh.h>
 #include <based/graphics/defaultassetlibraries.h>
+#include <based/graphics/glmhelpers.h>
+
+#include <vector>
 
 #include <based/scene/entity.h>
 
 namespace based::graphics
 {
+    struct BoneInfo
+    {
+        /*id is index in finalBoneMatrices*/
+        int id;
+
+        /*offset matrix transforms vertex from model space to bone space*/
+        glm::mat4 offset;
+
+    };
+
     class Model
     {
     public:
@@ -31,6 +44,8 @@ namespace based::graphics
         std::vector<graphics::Mesh*> meshes;
         std::vector<std::shared_ptr<Material>> mMaterials;
         std::string directory;
+        std::map<std::string, BoneInfo> m_BoneInfoMap;
+        int m_BoneCounter = 0;
 
         void LoadModel(std::string path);
         void ProcessNode(aiNode* node, const aiScene* scene);
@@ -40,5 +55,10 @@ namespace based::graphics
             std::string typeName);
         void SetMaterialAttribute(aiMaterial* mat, std::shared_ptr<Material> material, const char* key, 
             const std::string& attributeName, int sampler, aiTextureType type);
+        void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
+        void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
+        void SetVertexBoneDataToDefault(Vertex& vertex);
+        auto& GetBoneInfoMap() { return m_BoneInfoMap; }
+        int& GetBoneCount() { return m_BoneCounter; }
     };
 }
