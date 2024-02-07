@@ -288,18 +288,21 @@ public:
 		armsMat->SetUniformValue("material.diffuseMat.tint", glm::vec4(0.77f, 0.4f, 0.35f, 1.f));
 		armsMat->SetUniformValue("material.diffuseMat.useSampler", 1);
 		// Create arms
-		const auto armModel = new graphics::Model("Assets/Models/Arms.dae");
+		const auto armModel = new graphics::Model("Assets/Models/Arms.fbx");
 		armModel->SetMaterial(armsMat);
 		arms = new scene::Entity(GetCurrentScene()->GetRegistry());
 		arms->AddComponent<scene::ModelRenderer>(armModel);
 		arms->SetPosition({ 0, 5, 0 });
+		arms->SetScale({ 0.01f, 0.01f, 0.01f });
 		// Create arms animations and animator
-		handsAnim = new animation::Animation("Assets/Models/Arms_Punch.dae", armModel);
-		handsAnim2 = new animation::Animation("Assets/Models/Arms.dae", armModel);
-		handsAnim2->SetLooping(true);
+		handsAnim = new animation::Animation("Assets/Models/Arms.fbx", armModel, 0);
+		handsAnim2 = new animation::Animation("Assets/Models/Arms.fbx", armModel, "HumanFPS|Punch");
+		handsAnim->SetLooping(true);
 		animator = new animation::Animator(handsAnim);
 		arms->AddComponent<scene::AnimatorComponent>(animator);
-		animator->PlayAnimation(handsAnim2);
+		animator->PlayAnimation(handsAnim);
+		// TODO: Fix rotations so the hands dont rotate on Z when rotating on X and Y
+		// TODO: Add animator state machine
 
 		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 2, 4));
 		GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(6, 53, 0));
@@ -340,9 +343,11 @@ public:
 			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
 			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position + speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetRight());
 		}
-		arms->SetPosition(GetCurrentScene()->GetActiveCamera()->GetTransform().Position);
+		auto pos = GetCurrentScene()->GetActiveCamera()->GetTransform().Position;
+		pos -= GetCurrentScene()->GetActiveCamera()->GetForward() * 0.3f;
+		arms->SetPosition(pos);
 		auto rot = GetCurrentScene()->GetActiveCamera()->GetTransform().Rotation;
-		arms->SetRotation(glm::vec3(-rot.x, -rot.y + 180, 0));
+		arms->SetRotation(rot + glm::vec3(0, -180, 0));
 
 		// Enable/disable mouse control
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_R))
@@ -394,7 +399,7 @@ public:
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_P))
 		{
-			animator->PlayAnimation(handsAnim);
+			animator->PlayAnimation(handsAnim2);
 		}
 
 		// Set light position and pass info to shaders

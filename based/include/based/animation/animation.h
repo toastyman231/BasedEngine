@@ -20,7 +20,8 @@ namespace based::animation
     {
     public:
         Animation() = default;
-        Animation(const std::string& animationPath, graphics::Model* model);
+        Animation(const std::string& animationPath, graphics::Model* model, int index = 0);
+        Animation(const std::string& animationPath, graphics::Model* model, const std::string& animationName);
         ~Animation() {}
 
         Bone* FindBone(const std::string& name);
@@ -52,5 +53,6 @@ namespace based::animation
 
         void ReadMissingBones(const aiAnimation* animation, graphics::Model& model);
         void ReadHeirarchyData(AssimpNodeData& dest, const aiNode* src);
+        aiAnimation* GetAnimationByName(const aiScene* scene, const std::string& name);
     };
 }

@@ -225,9 +225,13 @@ namespace based::graphics
 			{
 				aiString str;
 				mat->GetTexture(type, i, &str);
-				str = directory + std::string("/") + str.C_Str();
+				struct stat sb;
+				bool result = stat(str.C_Str(), &sb) == 0;
+				if (!result)
+				{
+					str = directory + std::string("/") + str.C_Str();
+				}
 				BASED_TRACE("Texture location: {}", str.C_Str());
-				//Texture texture(str.C_Str(), true);
 
 				material->AddTexture(std::make_shared<Texture>(str.C_Str(), true));
 			}

@@ -29,11 +29,11 @@ namespace based::graphics
 			Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()));
 		auto model = glm::mat4(1.f);
 		model = glm::translate(model, position);
-		// Rotations are passed as degrees and converted to radians here automatically
-		model = glm::rotate(model, rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
-		model = glm::rotate(model, rotation.x * 0.0174533f, glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, rotation.y * 0.0174533f, glm::vec3(0.f, 1.f, 0.f));
 		model = glm::scale(model, scale);
+		// Rotations are passed as degrees and converted to radians here automatically
+		model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.f, 0.f, 0.f));
+		model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.f, 0.f, 1.f));
+		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.f, 1.f, 0.f));
 		Shader::UpdateShaderPointLighting(material->GetShader(), position);
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());
 		if (Engine::Instance().GetWindow().isInDepthPass)
@@ -162,9 +162,9 @@ namespace based::graphics
 		auto model = glm::mat4(1.f);
 		model = glm::translate(model, position);
 		// Rotations are passed as degrees and converted to radians here automatically
-		model = glm::rotate(model, rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
-		model = glm::rotate(model, rotation.x * 0.0174533f, glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, rotation.y * 0.0174533f, glm::vec3(0.f, 1.f, 0.f));
+		model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.f, 0.f, 1.f));
+		model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.f, 0.f, 0.f));
+		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.f, 1.f, 0.f));
 		model = glm::scale(model, scale);
 		Shader::UpdateShaderPointLighting(material->GetShader(), position);
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());
@@ -195,9 +195,9 @@ namespace based::graphics
 			auto model = glm::mat4(1.f);
 			model = glm::translate(model, transform.Position);
 			// Rotations are passed as degrees and converted to radians here automatically
-			model = glm::rotate(model, transform.Rotation.x * 0.0174533f, glm::vec3(1.f, 0.f, 0.f));
-			model = glm::rotate(model, transform.Rotation.y * 0.0174533f, glm::vec3(0.f, 1.f, 0.f));
-			model = glm::rotate(model, transform.Rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
+			model = glm::rotate(model, glm::radians(transform.Rotation.z), glm::vec3(0.f, 0.f, 1.f));
+			model = glm::rotate(model, glm::radians(transform.Rotation.x), glm::vec3(1.f, 0.f, 0.f));
+			model = glm::rotate(model, glm::radians(transform.Rotation.y), glm::vec3(0.f, 1.f, 0.f));
 			model = glm::scale(model, transform.Scale);
 
 			for (int j = 0; j < 4; j++)

@@ -2,16 +2,32 @@
 
 namespace based::animation
 {
-	Animation::Animation(const std::string& animationPath, graphics::Model* model)
+	Animation::Animation(const std::string& animationPath, graphics::Model* model, int index)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
 		assert(scene && scene->mRootNode);
-		auto animation = scene->mAnimations[0];
+		auto animation = scene->mAnimations[index];
 		m_Duration = static_cast<float>(animation->mDuration);
 		m_TicksPerSecond = static_cast<int>(animation->mTicksPerSecond);
 		ReadHeirarchyData(m_RootNode, scene->mRootNode);
 		ReadMissingBones(animation, *model);
+	}
+
+	Animation::Animation(const std::string& animationPath, graphics::Model* model, const std::string& animationName)
+	{
+		Assimp::Importer importer;
+		const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
+		assert(scene && scene->mRootNode);
+		auto animation = GetAnimationByName(scene, animationName);
+		BASED_ASSERT(animation, "Could not find animation")
+		if (animation)
+		{
+			m_Duration = static_cast<float>(animation->mDuration);
+			m_TicksPerSecond = static_cast<int>(animation->mTicksPerSecond);
+			ReadHeirarchyData(m_RootNode, scene->mRootNode);
+			ReadMissingBones(animation, *model);
+		}
 	}
 
 	Bone* Animation::FindBone(const std::string& name)
@@ -65,5 +81,19 @@ namespace based::animation
 			ReadHeirarchyData(newData, src->mChildren[i]);
 			dest.children.push_back(newData);
 		}
+	}
+
+	aiAnimation* Animation::GetAnimationByName(const aiScene* scene, const std::string& name)
+	{
+		for (int i = 0; i < static_cast<int>(scene->mNumAnimations); ++i)
+		{
+			aiAnimation* animation = scene->mAnimations[i];
+			if (std::string(animation->mName.C_Str()) == std::string(name))
+			{
+				return animation;
+			}
+		}
+		BASED_WARN("Could not find animation {}", name);
+		return nullptr;
 	}
 }
