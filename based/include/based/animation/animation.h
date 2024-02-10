@@ -42,10 +42,14 @@ namespace based::animation
 
         inline void SetPlaying(bool playing) { m_IsPlaying = playing; }
         inline void SetLooping(bool looping) { m_IsLooping = looping; }
+
+        inline void SetPlaybackSpeed(float speed) { m_Speed = speed; }
+        inline float GetPlaybackSpeed() const { return m_Speed; }
     private:
         bool m_IsPlaying = false;
         bool m_IsLooping = false;
         float m_Duration;
+        float m_Speed = 1.f;
         int m_TicksPerSecond;
         std::vector<Bone> m_Bones;
         AssimpNodeData m_RootNode;

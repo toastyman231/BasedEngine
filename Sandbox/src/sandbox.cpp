@@ -297,12 +297,28 @@ public:
 		// Create arms animations and animator
 		handsAnim = new animation::Animation("Assets/Models/Arms.fbx", armModel, 0);
 		handsAnim2 = new animation::Animation("Assets/Models/Arms.fbx", armModel, "HumanFPS|Punch");
+		handsAnim->SetPlaybackSpeed(0.5f);
 		handsAnim->SetLooping(true);
-		handsAnim2->SetLooping(true);
 		animator = new animation::Animator(handsAnim);
+		// Create state machine, states, and transitions
+		auto armsStateMachine = new animation::AnimationStateMachine(animator);
+		const auto idleState = new animation::AnimationState(handsAnim);
+		const auto punchState = new animation::AnimationState(handsAnim2);
+		auto idleToPunchPredicate = [armsStateMachine]()
+		{
+			return armsStateMachine->GetBool("punch", false);
+		};
+		const auto idleToPunchTransition = new animation::AnimationTransition(idleState, punchState, 
+		                                                                      animator, idleToPunchPredicate);
+		const auto punchToIdleTransition = new animation::AnimationTransition(punchState, idleState, animator);
+		idleState->AddTransition(idleToPunchTransition);
+		punchState->AddTransition(punchToIdleTransition);
+		armsStateMachine->AddState(idleState, true);
+		armsStateMachine->AddState(punchState);
+		animator->SetStateMachine(armsStateMachine);
 		arms->AddComponent<scene::AnimatorComponent>(animator);
-		animator->PlayAnimation(handsAnim);
-		// TODO: Fix rotations so the hands dont rotate on Z when rotating on X and Y
+
+		// TODO: Fix rotations so the hands don't rotate on Z when rotating on X and Y
 		// TODO: Add animator state machine
 
 		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 2, 4));
@@ -400,7 +416,12 @@ public:
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_P))
 		{
-			animator->PlayAnimation(handsAnim2);
+			//animator->PlayAnimation(handsAnim2);
+			animator->GetStateMachine()->SetBool("punch", true);
+		}
+		if (input::Keyboard::KeyUp(BASED_INPUT_KEY_P))
+		{
+			animator->GetStateMachine()->SetBool("punch", false);
 		}
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_O))
 		{

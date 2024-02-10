@@ -65,7 +65,7 @@ namespace based::animation
 			if (animationTime < m_Positions[index + 1].timeStamp)
 				return index;
 		}
-		assert(0);
+		//assert(0);
 		return 0;
 	}
 
@@ -78,7 +78,7 @@ namespace based::animation
 			if (animationTime < m_Rotations[index + 1].timeStamp)
 				return index;
 		}
-		assert(0);
+		//assert(0);
 		return 0;
 	}
 
@@ -91,7 +91,7 @@ namespace based::animation
 			if (animationTime < m_Scales[index + 1].timeStamp)
 				return index;
 		}
-		assert(0);
+		//assert(0);
 		return 0;
 	}
 
