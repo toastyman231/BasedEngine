@@ -35,9 +35,9 @@ namespace based::animation
         glm::mat4 GetLocalTransform() const { return m_LocalTransform; }
         std::string GetBoneName() const { return m_Name; }
         int GetBoneID() const { return m_ID; }
-        int GetPositionIndex(float animationTime);
-        int GetRotationIndex(float animationTime);
-        int GetScaleIndex(float animationTime);
+        int GetPositionIndex(float animationTime) const;
+        int GetRotationIndex(float animationTime) const;
+        int GetScaleIndex(float animationTime) const;
 	private:
         std::vector<KeyPosition> m_Positions;
         std::vector<KeyRotation> m_Rotations;

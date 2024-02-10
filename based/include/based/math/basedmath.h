@@ -45,7 +45,7 @@ namespace based::math
 		return (value <= min) ? min : (value >= max) ? max : value;
 	}
 
-	static float Clamp01(float value, float min, float max)
+	static float Clamp01(float value)
 	{
 		return Clamp(value, 0, 1);
 	}

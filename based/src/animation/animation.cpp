@@ -7,10 +7,10 @@ namespace based::animation
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
 		assert(scene && scene->mRootNode);
-		auto animation = scene->mAnimations[index];
+		const auto animation = scene->mAnimations[index];
 		m_Duration = static_cast<float>(animation->mDuration);
 		m_TicksPerSecond = static_cast<int>(animation->mTicksPerSecond);
-		ReadHeirarchyData(m_RootNode, scene->mRootNode);
+		ReadHierarchyData(m_RootNode, scene->mRootNode);
 		ReadMissingBones(animation, *model);
 	}
 
@@ -19,13 +19,13 @@ namespace based::animation
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
 		assert(scene && scene->mRootNode);
-		auto animation = GetAnimationByName(scene, animationName);
+		const auto animation = GetAnimationByName(scene, animationName);
 		BASED_ASSERT(animation, "Could not find animation")
 		if (animation)
 		{
 			m_Duration = static_cast<float>(animation->mDuration);
 			m_TicksPerSecond = static_cast<int>(animation->mTicksPerSecond);
-			ReadHeirarchyData(m_RootNode, scene->mRootNode);
+			ReadHierarchyData(m_RootNode, scene->mRootNode);
 			ReadMissingBones(animation, *model);
 		}
 	}
@@ -67,7 +67,7 @@ namespace based::animation
 		m_BoneInfoMap = boneInfoMap;
 	}
 
-	void Animation::ReadHeirarchyData(AssimpNodeData& dest, const aiNode* src)
+	void Animation::ReadHierarchyData(AssimpNodeData& dest, const aiNode* src)
 	{
 		assert(src);
 
@@ -78,7 +78,7 @@ namespace based::animation
 		for (int i = 0; i < static_cast<int>(src->mNumChildren); i++)
 		{
 			AssimpNodeData newData;
-			ReadHeirarchyData(newData, src->mChildren[i]);
+			ReadHierarchyData(newData, src->mChildren[i]);
 			dest.children.push_back(newData);
 		}
 	}

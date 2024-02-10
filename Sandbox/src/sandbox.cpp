@@ -298,6 +298,7 @@ public:
 		handsAnim = new animation::Animation("Assets/Models/Arms.fbx", armModel, 0);
 		handsAnim2 = new animation::Animation("Assets/Models/Arms.fbx", armModel, "HumanFPS|Punch");
 		handsAnim->SetLooping(true);
+		handsAnim2->SetLooping(true);
 		animator = new animation::Animator(handsAnim);
 		arms->AddComponent<scene::AnimatorComponent>(animator);
 		animator->PlayAnimation(handsAnim);
@@ -343,11 +344,11 @@ public:
 			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
 			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position + speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetRight());
 		}
-		auto pos = GetCurrentScene()->GetActiveCamera()->GetTransform().Position;
-		pos -= GetCurrentScene()->GetActiveCamera()->GetForward() * 0.3f;
-		arms->SetPosition(pos);
-		auto rot = GetCurrentScene()->GetActiveCamera()->GetTransform().Rotation;
-		arms->SetRotation(rot + glm::vec3(0, -180, 0));
+		//auto pos = GetCurrentScene()->GetActiveCamera()->GetTransform().Position;
+		//pos -= GetCurrentScene()->GetActiveCamera()->GetForward() * 0.3f;
+		//arms->SetPosition(pos);
+		//auto rot = GetCurrentScene()->GetActiveCamera()->GetTransform().Rotation;
+		//arms->SetRotation(rot + glm::vec3(0, -180, 0));
 
 		// Enable/disable mouse control
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_R))
@@ -400,6 +401,10 @@ public:
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_P))
 		{
 			animator->PlayAnimation(handsAnim2);
+		}
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_O))
+		{
+			animator->PlayAnimation(handsAnim);
 		}
 
 		// Set light position and pass info to shaders
@@ -501,6 +506,8 @@ public:
 			glm::vec3 rot = startScene->GetActiveCamera()->GetTransform().Rotation;
 			ImGui::DragFloat3("Camera Rot", glm::value_ptr(rot), 0.01f);
 			if (!mouseControl) startScene->GetActiveCamera()->SetRotation(rot);
+
+			ImGui::DragFloat("Blend Speed", &animator->blendSpeed, 1.f, 0.f, 100.f);
 
 			ImGui::Spacing();
 

@@ -26,9 +26,9 @@ namespace based::animation
 
         Bone* FindBone(const std::string& name);
 
-        inline float GetTicksPerSecond() { return static_cast<float>(m_TicksPerSecond); }
+        inline float GetTicksPerSecond() const { return static_cast<float>(m_TicksPerSecond); }
 
-        inline float GetDuration() { return m_Duration; }
+        inline float GetDuration() const { return m_Duration; }
 
         inline const AssimpNodeData& GetRootNode() { return m_RootNode; }
 
@@ -52,7 +52,7 @@ namespace based::animation
         std::map<std::string, graphics::BoneInfo> m_BoneInfoMap;
 
         void ReadMissingBones(const aiAnimation* animation, graphics::Model& model);
-        void ReadHeirarchyData(AssimpNodeData& dest, const aiNode* src);
+        void ReadHierarchyData(AssimpNodeData& dest, const aiNode* src);
         aiAnimation* GetAnimationByName(const aiScene* scene, const std::string& name);
     };
 }
