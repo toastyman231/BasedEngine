@@ -30,6 +30,7 @@ namespace based::animation
 			if (anim != m_CurrentAnimation)
 			{
 				m_CurrentAnimation->SetPlaying(false);
+				m_CurrentTime = m_CurrentAnimation->GetDuration() - 0.1f; // Prevents wonky transitions between states
 				PlayAnimation(anim);
 			}
 		}

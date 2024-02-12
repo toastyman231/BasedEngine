@@ -319,7 +319,6 @@ public:
 		arms->AddComponent<scene::AnimatorComponent>(animator);
 
 		// TODO: Fix rotations so the hands don't rotate on Z when rotating on X and Y
-		// TODO: Add animator state machine
 
 		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 2, 4));
 		GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(6, 53, 0));
