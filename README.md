@@ -33,11 +33,12 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - Instanced Mesh Rendering
 - Profiling Support with Tracy
 - Materials with normal mapping and lighting support
+- Skeletal animation support with state machines
 
 ## Planned Additions
-- 2D Physics with Box2D
+- Physics (Box2D, Bolt, Bullet?)
 - ~~Audio capabilities (maybe ffmpeg?)~~ Complete!
-- Animation System
+- ~~Animation System~~ Complete!
 - ~~Load shaders from file (They are hardcoded currently)~~ Complete!  
 - ~~More UI (Buttons, Sliders, Checkboxes, etc)~~ Complete!
 - Scene Save/Load (Serialization)
