@@ -48,6 +48,8 @@ namespace based::graphics
 		void SetUniformMat4(const std::string& name, const glm::mat4& mat);
 
 		int GetUniformLocation(const std::string& name);
+		std::unordered_map<std::string, float> GetUniformFloats() const;
+		std::unordered_map<std::string, int> GetUniformSamplers() const;
 
 		static void UpdateShaderPointLighting(Shader* shader, glm::vec3 objectPos);
 		static void UpdateShaderDirectionalLighting(Shader* shader);

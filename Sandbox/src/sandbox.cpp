@@ -65,6 +65,7 @@ private:
 	scene::Entity* grassInstance;
 	scene::Entity* sunLight;
 	scene::Entity* arms;
+	scene::Entity* sphere;
 
 	bool mouseControl = false;
 	float speed = 2.5f;
@@ -74,6 +75,18 @@ private:
 	float ambientStrength = 0.1f;
 	float R = 100.f;
 	float heightCoef = 1.f;
+	float roughness = 0.3f;
+	float metallic = 0.0f;
+	float ao = 1.0f;
+	float subsurface = 0.0f;
+	float Specular = 0.5;
+	float SpecularTint = 0.0;
+	float Anisotropic = 0.0;
+	float Sheen = 0.0;
+	float SheenTint = 0.5;
+	float ClearCoat = 0.0;
+	float ClearCoatGloss = 1.0;
+
 	bool useLight = true;
 	bool useNormalMaps = true;
 	glm::vec3 camPos = glm::vec3(0.f, 0.f, 1.5f);
@@ -83,11 +96,13 @@ private:
 	glm::vec3 lightPosition;
 	glm::ivec2 initialPos;
 	glm::vec3 sunDirection;
+	glm::vec3 albedo = glm::vec3(1.0f, 0.84f, 0.0f);
 
 	graphics::Mesh* planeMesh;
 	graphics::Mesh* skyboxMesh;
 	graphics::Mesh* crateMesh;
 	graphics::Mesh* boxMesh;
+	graphics::Mesh* sphereMesh;
 	std::shared_ptr<graphics::Texture> crateTex;
 	std::shared_ptr<graphics::Material> wallMat;
 	std::shared_ptr<graphics::Material> armsMat;
@@ -164,6 +179,7 @@ public:
 		boxEntity->AddComponent<scene::MeshRenderer>(boxMesh);
 		boxEntity->SetPosition(glm::vec3(0.f, 2.f, 0.f));
 		boxEntity->SetEntityName("Box");
+		boxEntity->SetActive(false);
 
 		lightPosition = glm::vec3(1, 1.2f, 0.3f);
 
@@ -320,6 +336,32 @@ public:
 
 		// TODO: Fix rotations so the hands don't rotate on Z when rotating on X and Y
 
+		const auto sphereMat = std::make_shared<graphics::Material>(
+			LOAD_SHADER("Assets/shaders/pbr_lit.vert", "Assets/shaders/pbr_lit.frag"));
+		const auto sandAlbedo = std::make_shared<graphics::Texture>("Assets/sand_albedo.png");
+		const auto sandRoughness = std::make_shared<graphics::Texture>("Assets/sand_roughness.png");
+		const auto sandNormal = std::make_shared<graphics::Texture>("Assets/sand_normal.png");
+		const auto sandAo = std::make_shared<graphics::Texture>("Assets/sand_ao.png");
+		graphics::DefaultLibraries::GetTextureLibrary().Load("SandAlbedo", sandAlbedo);
+		graphics::DefaultLibraries::GetTextureLibrary().Load("SandRough", sandRoughness);
+		graphics::DefaultLibraries::GetTextureLibrary().Load("SandNormal", sandNormal);
+		graphics::DefaultLibraries::GetTextureLibrary().Load("SandAo", sandAo);
+		/*sphereMat->AddTexture(sandAlbedo, "material.albedo.tex");
+		sphereMat->AddTexture(sandRoughness, "material.roughness.tex");
+		sphereMat->AddTexture(sandNormal, "material.normal.tex");
+		sphereMat->AddTexture(sandAlbedo, "material.ambientOcclusion.tex");
+		sphereMat->SetUniformValue("material.albedo.useSampler", 1);
+		sphereMat->SetUniformValue("material.roughness.useSampler", 1);
+		sphereMat->SetUniformValue("material.normal.useSampler", 1);
+		sphereMat->SetUniformValue("material.ambientOcclusion.useSampler", 1);*/
+		sphereMat->SetUniformValue("material.albedo.color", glm::vec4(1.0f, 0.84f, 0.0f, 1.0f));
+		graphics::DefaultLibraries::GetMaterialLibrary().Load("Dirt", sphereMat);
+		sphereMesh = graphics::Model::LoadSingleMesh("Assets/Models/sphere.obj");
+		sphereMesh->material = sphereMat;
+		sphere = scene::Entity::CreateEntity<scene::Entity>();
+		sphere->AddComponent<scene::MeshRenderer>(sphereMesh);
+		sphere->SetEntityName("Sphere");
+
 		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 2, 4));
 		GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(6, 53, 0));
 
@@ -364,6 +406,11 @@ public:
 		//arms->SetPosition(pos);
 		//auto rot = GetCurrentScene()->GetActiveCamera()->GetTransform().Rotation;
 		//arms->SetRotation(rot + glm::vec3(0, -180, 0));
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
+		{
+			core::Time::SetTimeScale(1.0f - core::Time::TimeScale());
+		}
 
 		// Enable/disable mouse control
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_R))
@@ -446,6 +493,11 @@ public:
 		planeMesh->material->SetUniformValue("ambientStrength", ambientStrength);
 		planeMesh->material->SetUniformValue("heightCoef", heightCoef);
 		planeMesh->material->SetUniformValue("useLight", static_cast<int>(useLight));
+
+		sphereMesh->material->SetUniformValue("material.albedo.color", glm::vec4(albedo, 1.0f));
+		sphereMesh->material->SetUniformValue("material.metallic.color", glm::vec4(metallic));
+		sphereMesh->material->SetUniformValue("material.roughness.color", glm::vec4(roughness));
+		sphereMesh->material->SetUniformValue("material.ambientOcclusion.color", glm::vec4(ao));
 
 		// Disable lights when not using lighting
 		const entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
@@ -596,6 +648,106 @@ public:
 					registry.patch<scene::Transform>(obj, [position, rotation, scale](auto& t) 
 						{ t.Position = position; t.Rotation = rotation; t.Scale = scale; });
 					ent->SetActive(enabled);
+					i++;
+				}
+			}
+
+			// Material editor
+			if (ImGui::CollapsingHeader("Materials"))
+			{
+				int i = 0;
+				ImGui::Indent(10.0f);
+				// Loop over each saved material and create a dropdown for each one
+				for (const auto mat : graphics::DefaultLibraries::GetMaterialLibrary().GetAll())
+				{
+					std::shared_ptr<graphics::Material> material = mat.second;
+
+					ImGui::PushID(i);
+
+					if (ImGui::CollapsingHeader(mat.first.c_str()))
+					{
+						ImGui::Indent(10.0f);
+						if (ImGui::Button("Add Texture"))
+						{
+							ImGui::OpenPopup("Texture Setup");
+						}
+						if (ImGui::BeginPopup("Texture Setup"))
+						{
+							// Read in a new texture and activate it in the shader
+							ImGui::Text("Texture Setup");
+							static char texturePath[256] = "";
+							static char samplerName[256] = "";
+							static char enableName[256] = "";
+							ImGui::InputText("Path", texturePath, IM_ARRAYSIZE(texturePath));
+							ImGui::InputText("Sampler", samplerName, IM_ARRAYSIZE(samplerName));
+							// Mainly just for my custom materials, since all of them have a bool to disable texture sampling
+							ImGui::InputText("Enable Sampler", enableName, IM_ARRAYSIZE(enableName));
+							if (ImGui::Button("Submit"))
+							{
+								std::shared_ptr<graphics::Texture> tex = std::make_shared<graphics::Texture>(texturePath);
+								material->AddTexture(tex, samplerName);
+								if (enableName != "") material->SetUniformValue(enableName, 1);
+								ImGui::CloseCurrentPopup();
+							}
+							ImGui::EndPopup();
+						}
+						// Get all float uniforms and create an editable slider
+						for (const auto& f : material->GetShader()->GetUniformFloats())
+						{
+							float temp = f.second;
+							ImGui::DragFloat(f.first.c_str(), &temp, 0.01f);
+							material->SetUniformValue(f.first, temp);
+						}
+
+						// Setup for texture combo box, each texture must have it's own current index
+						int j = 0;
+						static std::vector<int> itemIndex;
+						itemIndex.resize((int)(material->GetShader()->GetUniformSamplers().size()));
+						// Get all texture samplers and create combo boxes to select what texture they sample
+						for (const auto& f : material->GetShader()->GetUniformSamplers())
+						{
+							// Get texture names from library key set, plus None
+							auto items = *graphics::DefaultLibraries::GetTextureLibrary().GetAllFlat();
+							items.insert(items.begin(), "None");
+							auto preview = items[itemIndex[j]];
+
+							ImGui::PushID(j);
+							if (ImGui::BeginCombo(f.first.c_str(), preview.c_str()))
+							{
+								// Create a selectable in the dropdown for each texture
+								for (int n = 0; n < (int)(graphics::DefaultLibraries::GetTextureLibrary().GetAll().size()) + 1; n++)
+								{
+									auto item = items[n];
+									const bool isSelected = itemIndex[j] == n;
+									if (ImGui::Selectable(item.c_str(), isSelected))
+									{
+										// On selected, decide what happens
+										itemIndex[j] = n;
+										if (items[n] == "None")
+										{
+											material->RemoveTexture(f.first);
+											int index = static_cast<int>(f.first.find(".tex"));
+											material->SetUniformValue(f.first.substr(*f.first.begin() - f.first[0],
+												index) + ".useSampler", 0);
+										} else
+										{
+											material->AddTexture(graphics::DefaultLibraries::GetTextureLibrary().Get(items[n]),
+												f.first);
+											int index = static_cast<int>(f.first.find(".tex"));
+											material->SetUniformValue(f.first.substr(*f.first.begin() - f.first[0], 
+												index) + ".useSampler", 1);
+										}
+									}
+									if (isSelected) ImGui::SetItemDefaultFocus();
+								}
+								ImGui::EndCombo();
+							}
+							ImGui::PopID();
+							j++;
+						}
+					}
+
+					ImGui::PopID();
 					i++;
 				}
 			}

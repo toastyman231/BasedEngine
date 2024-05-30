@@ -23,7 +23,10 @@ namespace based::graphics
 
 		void SetShader(std::shared_ptr<Shader> shader);
 		void AddTexture(std::shared_ptr<Texture> texture, std::string location = "");
+		void RemoveTexture(std::string location);
 		void UpdateShaderUniforms();
+
+		std::unordered_map<std::string, int> GetTextureOrder() const { return mTextureOrder; }
 
 		std::string materialName;
 
@@ -86,6 +89,7 @@ namespace based::graphics
 	private:
 		std::shared_ptr<Shader> mShader;
 		std::vector<std::shared_ptr<Texture>> mTextures;
+		std::unordered_map<std::string, int> mTextureOrder;
 
 		// Data
 		std::unordered_map<std::string, int> mUniformInts;

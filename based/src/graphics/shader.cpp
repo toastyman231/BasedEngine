@@ -283,6 +283,58 @@ namespace based::graphics
 		return mUniformLocations[name];
 	}
 
+	std::unordered_map<std::string, float> Shader::GetUniformFloats() const
+	{
+		GLint count;
+		GLint size;
+		GLenum type;
+		const GLsizei bufSize = 256;
+		GLchar name[bufSize];
+		GLsizei length;
+
+		glGetProgramiv(mProgramId, GL_ACTIVE_UNIFORMS, &count); BASED_CHECK_GL_ERROR;
+
+		std::unordered_map<std::string, float> output;
+
+		for (GLint i = 0; i < count; i++)
+		{
+			glGetActiveUniform(mProgramId, (GLuint)i, bufSize, &length, &size, &type, name); BASED_CHECK_GL_ERROR;
+			if (type != GL_FLOAT) continue;
+			GLfloat value;
+			const GLint location = glGetUniformLocation(mProgramId, name); BASED_CHECK_GL_ERROR;
+			if (location < 0) continue;
+			glGetUniformfv(mProgramId, location, &value); BASED_CHECK_GL_ERROR;
+			output[name] = value;
+		}
+		return output;
+	}
+
+	std::unordered_map<std::string, int> Shader::GetUniformSamplers() const
+	{
+		GLint count;
+		GLint size;
+		GLenum type;
+		const GLsizei bufSize = 256;
+		GLchar name[bufSize];
+		GLsizei length;
+
+		glGetProgramiv(mProgramId, GL_ACTIVE_UNIFORMS, &count); BASED_CHECK_GL_ERROR;
+
+		std::unordered_map<std::string, int> output;
+
+		for (GLint i = 0; i < count; i++)
+		{
+			glGetActiveUniform(mProgramId, (GLuint)i, bufSize, &length, &size, &type, name); BASED_CHECK_GL_ERROR;
+			if (type != GL_SAMPLER_2D) continue;
+			GLint value;
+			const GLint location = glGetUniformLocation(mProgramId, name); BASED_CHECK_GL_ERROR;
+			if (location < 0) continue;
+			glGetUniformiv(mProgramId, location, &value); BASED_CHECK_GL_ERROR;
+			output[name] = value;
+		}
+		return output;
+	}
+
 	void Shader::UpdateShaderPointLighting(Shader* shader, glm::vec3 objectPos)
 	{
 		const entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();

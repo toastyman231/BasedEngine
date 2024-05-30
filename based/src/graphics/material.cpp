@@ -42,7 +42,21 @@ namespace based::graphics
 	{
 		mTextures.emplace_back(texture);
 		if (!location.empty())
-			SetUniformValue(location, static_cast<int>(mTextures.size() - 1));
+		{
+			int index = static_cast<int>(mTextures.size() - 1);
+			SetUniformValue(location, index);
+			mTextureOrder[location] = index;
+		}
+	}
+
+	void Material::RemoveTexture(std::string location)
+	{
+		if (mTextureOrder.find(location) == mTextureOrder.end()) return;
+
+		const int index = mTextureOrder[location];
+		mTextures.erase(mTextures.begin() + index);
+		mTextureOrder.erase(location);
+		SetUniformValue(location, 0);
 	}
 
 	void Material::UpdateShaderUniforms()

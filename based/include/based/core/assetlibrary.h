@@ -16,6 +16,18 @@ namespace based::core
 		~AssetLibrary() = default;
 
 		const std::unordered_map<std::string, std::shared_ptr<T>>& GetAll() const { return mAssets; }
+		const std::vector<std::string>* GetAllFlat()
+		{
+			auto* vals = new std::vector<std::string>();
+			vals->reserve(mAssets.size());
+
+			for (auto kv : mAssets)
+			{
+				vals->push_back(kv.first);
+			}
+
+			return vals;
+		}
 
 		void Load(const std::string& name, std::shared_ptr<T> asset)
 		{
