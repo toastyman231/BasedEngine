@@ -6,7 +6,7 @@
 
 namespace based::graphics
 {
-	Material::Material(std::shared_ptr<Shader> shader)
+	Material::Material(const std::shared_ptr<Shader>& shader)
 		: mShader(shader)
 	{
 		BASED_ASSERT(mShader, "Attempting to instantiate a material with a nullptr shader");
@@ -25,9 +25,10 @@ namespace based::graphics
 		mUniformFloat4s = other.mUniformFloat4s;
 		mUniformMat3s = other.mUniformMat3s;
 		mUniformMat4s = other.mUniformMat4s;
+		mTextureOrder = other.mTextureOrder;
 	}
 
-	Material::~Material() {}
+	Material::~Material() = default;
 
 	void Material::SetShader(std::shared_ptr<Shader> shader)
 	{
@@ -43,7 +44,7 @@ namespace based::graphics
 		mTextures.emplace_back(texture);
 		if (!location.empty())
 		{
-			int index = static_cast<int>(mTextures.size() - 1);
+			const int index = static_cast<int>(mTextures.size() - 1);
 			SetUniformValue(location, index);
 			mTextureOrder[location] = index;
 		}
@@ -59,7 +60,7 @@ namespace based::graphics
 		SetUniformValue(location, 0);
 	}
 
-	void Material::UpdateShaderUniforms()
+	void Material::UpdateShaderUniforms() const
 	{
 		PROFILE_FUNCTION();
 		if (mShader)

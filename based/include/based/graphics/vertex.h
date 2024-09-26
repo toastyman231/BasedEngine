@@ -86,7 +86,7 @@ namespace based::graphics
 			if constexpr (std::is_same<T, double>())				{ mGLType = RawVertexBuffer::GLTypeDouble; }
 		}
 
-		~VertexBuffer() {}
+		~VertexBuffer() override = default;
 
 		uint32_t GetTypeSize() const override { return sizeof(T); }
 
@@ -148,7 +148,7 @@ namespace based::graphics
 			if constexpr (std::is_same<T, double>()) { mGLType = RawVertexBuffer::GLTypeDouble; }
 		}
 
-		~InstancedVertexBuffer() {}
+		~InstancedVertexBuffer() override = default;
 
 		uint32_t GetTypeSize() const override { return sizeof(T); }
 

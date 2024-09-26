@@ -58,7 +58,8 @@ project "based"
         "%{externals.miniaudio}",
         "%{externals.assimp}/include",
         "%{externals.rmlui}/Include",
-        "%{externals.tracy}"
+        "%{externals.tracy}",
+        "C:/Program Files (x86)/Visual Leak Detector/include"
     }
 
     flags
@@ -69,7 +70,8 @@ project "based"
     defines
     {
         "GLFW_INCLUDE_NONE", -- Ensures glad doesn't include glfw
-        "_CRT_SECURE_NO_WARNINGS"
+        "_CRT_SECURE_NO_WARNINGS",
+        "_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING"
     }
 
     filter {"system:windows", "configurations:*"}
@@ -142,7 +144,8 @@ project "basededitor"
         "%{externals.miniaudio}",
         "%{externals.assimp}/include",
         "%{externals.rmlui}/Include",
-        "%{externals.tracy}"
+        "%{externals.tracy}",
+        "C:/Program Files (x86)/Visual Leak Detector/include"
     }
 
     flags
@@ -168,7 +171,8 @@ project "basededitor"
             "%{externals.sdl2}/lib",
             "%{externals.freetype}/lib",
             "%{externals.assimp}/lib",
-            "%{externals.rmlui}/lib"
+            "%{externals.rmlui}/lib",
+            "C:/Program Files (x86)/Visual Leak Detector/lib"
         }
 
         links
@@ -179,7 +183,8 @@ project "basededitor"
             "freetype",
             "assimp-vc143-mt",
             "RmlCore",
-            "RmlDebugger"
+            "RmlDebugger",
+            "vld"
         }
 
     filter {"system:macosx", "configurations:*"}
@@ -381,7 +386,8 @@ project "Sandbox"
         "%{externals.miniaudio}",
         "%{externals.assimp}/include",
         "%{externals.rmlui}/Include",
-        "%{externals.tracy}"
+        "%{externals.tracy}",
+        "C:/Program Files (x86)/Visual Leak Detector/include"
     }
 
     flags
@@ -407,7 +413,8 @@ project "Sandbox"
             "%{externals.sdl2}/lib",
             "%{externals.freetype}/lib",
             "%{externals.assimp}/lib",
-            "%{externals.rmlui}/lib"
+            "%{externals.rmlui}/lib",
+            "C:/Program Files (x86)/Visual Leak Detector/lib"
         }
 
         links
@@ -418,7 +425,8 @@ project "Sandbox"
             "freetype",
             "assimp-vc143-mt",
             "RmlCore",
-            "RmlDebugger"
+            "RmlDebugger",
+            "vld"
         }
 
     filter {"system:macosx", "configurations:*"}
@@ -454,9 +462,11 @@ project "Sandbox"
         links
         {
             "SDL2",
-            "glad",
+            "SDL2_ttf",
             "dl",
+            "glad",
             "freetype",
+            "assimp-vc143-mt",
             "RmlCore",
             "RmlDebugger"
         }

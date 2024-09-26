@@ -54,6 +54,8 @@ namespace based::managers
 	{
 		PROFILE_FUNCTION();
 		Rml::Shutdown();
+		delete mRenderInterface;
+		delete mSystemInterface;
 	}
 
 	Rml::ElementDocument* UiManager::LoadWindow(const std::string& path, Rml::Context* context) const

@@ -50,6 +50,13 @@ namespace based::math
 		return Clamp(value, 0, 1);
 	}
 
+	template <typename T>
+	T PercentOf(T x, uint32_t percentage)
+	{
+		percentage = static_cast<uint32_t>(Clamp(static_cast<float>(percentage), 0, 100));
+		return static_cast<T>((x * static_cast<float>(percentage)) / 100);
+	}
+
 	/**
 	 * \brief Finds the next power of two for an integer.
 	 * \param v The integer to find the next power of two for.

@@ -33,6 +33,7 @@ namespace based::scene
 		{
 			PROFILE_FUNCTION();
 			ma_engine_uninit(mEngine);
+			free(mEngine);
 		}
 
 		static void AudioImpl::PlayAudio(std::string& path, float volume)

@@ -10,8 +10,8 @@ namespace based
 	class App
 	{
 	public:
-		App() {}
-		~App() {}
+		App() = default;
+		virtual ~App() = default;
 
 		// TODO: should this be public?
 		std::shared_ptr<scene::Scene> startScene;
@@ -31,14 +31,6 @@ namespace based
 
 			mCamera = std::make_shared<graphics::Camera>();
 			mCamera->SetHeight(2.f);
-
-			//mCameraEntity = new scene::Entity();
-			/*mCameraEntity = scene::Entity::CreateEntity<scene::Entity>(
-				glm::vec3(0.f, 0.f, 1.5f), 
-				glm::vec3(0.f), 
-				glm::vec3(1.f));*/
-			//mCameraEntity->AddComponent<scene::Camera>(mCamera);
-			//mCamera->SetViewMatrix(glm::vec3(0.f), 0.f)
 
 			startScene = std::make_shared<scene::Scene>();
 			startScene->SetActiveCamera(mCamera);

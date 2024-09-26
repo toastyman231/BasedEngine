@@ -41,8 +41,8 @@ namespace based::graphics
         std::vector<Texture>      textures;
         std::shared_ptr<Material> material;
 
-        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
-        Mesh(std::shared_ptr<VertexArray> va, std::shared_ptr<Material> mat);
+        Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
+        Mesh(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<Material>& mat);
         ~Mesh() { BASED_TRACE("Destroying mesh!"); }
         virtual void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material);
         void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
@@ -64,9 +64,9 @@ namespace based::graphics
     		: Mesh(va, mat), mInstanceCount(count), mIsDirty(true) {}
 
         void SetInstanceTransform(int index, const scene::Transform& transform);
-        int AddInstance(scene::Transform transform);
+        int AddInstance(scene::Transform transform, bool markDirty = true);
         void AddInstances(const std::vector<scene::Transform>& transforms);
-        bool RemoveInstance(int index);
+        bool RemoveInstance(int index, bool markDirty = true);
         bool RemoveInstances(std::vector<int> indices);
         void ClearInstances();
         void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material) override;

@@ -42,7 +42,7 @@ namespace based::graphics
 			else
 			{
 				glAttachShader(mProgramId, vertexShaderId); BASED_CHECK_GL_ERROR;
-			} 
+			}
 		}
 
 		uint32_t fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER); BASED_CHECK_GL_ERROR;
@@ -86,9 +86,7 @@ namespace based::graphics
 		glDeleteShader(fragmentShaderId); BASED_CHECK_GL_ERROR;
 	}
 
-	Shader::Shader(const Shader& other) : Shader(other.mVertexShader, other.mFragmentShader)
-	{
-	}
+	Shader::Shader(const Shader& other) : Shader(other.mVertexShader, other.mFragmentShader) {}
 
 	Shader::~Shader()
 	{
@@ -130,15 +128,15 @@ namespace based::graphics
 
 		if (vsFile && fsFile)
 		{
-			std::string temp = "";
-			std::string vertexSource = "";
+			std::string temp;
+			std::string vertexSource;
 			while (std::getline(vsFile, temp))
 			{
 				vertexSource = vertexSource.append(temp).append("\n");
 			}
 			vsFile.close();
 
-			std::string fragSource = "";
+			std::string fragSource;
 			while (std::getline(fsFile, temp))
 			{
 				fragSource = fragSource.append(temp).append("\n");
@@ -149,6 +147,14 @@ namespace based::graphics
 			vertexSource = PreprocessShader(vertexSource, "#include ", "Assets/shaders/", alreadyIncluded);
 			alreadyIncluded = {};
 			fragSource = PreprocessShader(fragSource, "#include ", "Assets/shaders/", alreadyIncluded);
+
+			// TODO: Figure out how to use this arena allocator
+			//Shader* shader = static_cast<Shader*>(ArenaAlloc(Engine::Instance().GetEngineArena(), sizeof(Shader)));
+			//*shader = Shader(vertexSource, fragSource);
+			//Shader test = Shader(vertexSource, fragSource);
+			//memcpy(shader, &test, sizeof(test));
+			//shader->mVertexShader = "";
+			//shader->mFragmentShader = "";
 
 			return new Shader(vertexSource, fragSource);
 		}
@@ -161,7 +167,7 @@ namespace based::graphics
 	{
 		// Shader preprocessing code by Grayson Clark: https://github.com/FaultyPine/tiny_engine/blob/master/engine/src/render/shader.cpp
 		static bool isRecursiveCall = false;
-		std::string fullSourceCode = "";
+		std::string fullSourceCode;
 		std::string lineBuffer;
 		std::istringstream stream = std::istringstream(source);
 		// TODO: custom strings

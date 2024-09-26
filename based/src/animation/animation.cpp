@@ -20,7 +20,7 @@ namespace based::animation
 		const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
 		assert(scene && scene->mRootNode);
 		const auto animation = GetAnimationByName(scene, animationName);
-		BASED_ASSERT(animation, "Could not find animation")
+		BASED_ASSERT(animation, "Could not find animation");
 		if (animation)
 		{
 			m_Duration = static_cast<float>(animation->mDuration);

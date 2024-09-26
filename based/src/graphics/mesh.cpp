@@ -7,7 +7,7 @@
 
 namespace based::graphics
 {
-	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned> indices, std::vector<Texture> textures)
+	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned>& indices, const std::vector<Texture>& textures)
 	{
 		this->vertices = vertices;
 		this->indices = indices;
@@ -16,7 +16,7 @@ namespace based::graphics
 		SetupMesh();
 	}
 
-	Mesh::Mesh(std::shared_ptr<VertexArray> va, std::shared_ptr<Material> mat)
+	Mesh::Mesh(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<Material>& mat)
 	{
 		mVA = va;
 		material = mat;
@@ -111,11 +111,11 @@ namespace based::graphics
 		mInstanceTransforms[index] = transform;
 	}
 
-	int InstancedMesh::AddInstance(scene::Transform transform)
+	int InstancedMesh::AddInstance(scene::Transform transform, bool markDirty)
 	{
 		mInstanceTransforms.emplace_back(transform);
 		mInstanceCount++;
-		mIsDirty = true;
+		if (markDirty) mIsDirty = true;
 		return static_cast<int>(mInstanceTransforms.size());
 	}
 
@@ -125,13 +125,14 @@ namespace based::graphics
 		{
 			AddInstance(transform);
 		}
+		mIsDirty = true;
 	}
 
-	bool InstancedMesh::RemoveInstance(int index)
+	bool InstancedMesh::RemoveInstance(int index, bool markDirty)
 	{
 		const auto originalSize = mInstanceTransforms.size();
 		mInstanceTransforms.erase(mInstanceTransforms.begin() + index);
-		mIsDirty = true;
+		if (markDirty) mIsDirty = true;
 		return mInstanceTransforms.size() < originalSize;
 	}
 

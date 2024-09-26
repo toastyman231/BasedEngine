@@ -14,7 +14,7 @@ namespace based::graphics
 	class Material
 	{
 	public:
-		Material(std::shared_ptr<Shader> shader);
+		Material(const std::shared_ptr<Shader>& shader);
 		Material(const Material& other);
 		~Material();
 
@@ -24,7 +24,7 @@ namespace based::graphics
 		void SetShader(std::shared_ptr<Shader> shader);
 		void AddTexture(std::shared_ptr<Texture> texture, std::string location = "");
 		void RemoveTexture(std::string location);
-		void UpdateShaderUniforms();
+		void UpdateShaderUniforms() const;
 
 		std::unordered_map<std::string, int> GetTextureOrder() const { return mTextureOrder; }
 

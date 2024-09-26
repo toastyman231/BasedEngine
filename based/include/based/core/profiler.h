@@ -4,7 +4,11 @@
 #define TRACY_EXPORTS
 #include "tracy/Tracy.hpp"
 
+#ifdef BASED_CONFIG_ENABLE_PROFILING
 #define PROFILING 1
+#else
+#define PROFILING 0
+#endif
 
 #if PROFILING
 #define PROFILE_SCOPE(name) ZoneScopedN(name);

@@ -1,4 +1,7 @@
 #pragma once
+
+//#include "vld.h"
+
 #include "engine.h"
 #include "app.h"
 
@@ -17,5 +20,7 @@ int main()
     based::Engine::Instance().Run(app);
 
     delete app;
+    delete based::Engine::GetRawEngineInstance();
+
     return 0;
 }

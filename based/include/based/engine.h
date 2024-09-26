@@ -4,6 +4,7 @@
 #include "managers/logmanager.h"
 #include "managers/rendermanager.h"
 #include "based/managers/uimanager.h"
+#include "memory/arena.h"
 
 namespace based
 {
@@ -12,18 +13,23 @@ namespace based
     {
     public:
         static Engine& Instance();
-        ~Engine() {}
+        ~Engine() = default;
 
         void Run(App* app);
-        void SetIcon(std::string path);
+        static void SetIcon(std::string path);
         inline void Quit() { mIsRunning = false; }
 
-        inline App& GetApp() { return *mApp; }
+        inline App& GetApp() const { return *mApp; }
         inline core::Window& GetWindow() { return mWindow; }
+        static inline Engine* GetRawEngineInstance() { return mInstance; }
 
         // Managers
         inline managers::RenderManager& GetRenderManager() { return mRenderManager; }
         inline managers::UiManager& GetUiManager() { return mUiManager; }
+
+        // Memory
+    	inline based::memory::Arena* GetEngineArena() { return &mEngineArena; }
+        inline based::memory::Arena* GetGameArena() { return &mGameArena; }
     private:
         void GetInfo();
 
@@ -46,5 +52,11 @@ namespace based
         // Singleton
         Engine();
         static Engine* mInstance;
+
+        // Arenas
+        memory::Arena mEngineArena;
+        memory::Arena mGameArena;
+        memory::Arena mFrameArena;
+        memory::Arena mSceneArena;
     };
 }

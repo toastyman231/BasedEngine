@@ -16,6 +16,7 @@
 
 #include "basedtime.h"
 #include "core/profiler.h"
+#include "math/basedmath.h"
 
 namespace based
 {
@@ -92,6 +93,7 @@ namespace based
                 core::Time::SetDelta(core::Time::GetTime(), timeDelta);
                 Update(timeDelta);
                 Render();
+                ClearArena(&mFrameArena);
             }
 
             Shutdown();
@@ -117,6 +119,8 @@ namespace based
             SDL_Surface* iconSurface = SDL_CreateRGBSurfaceFrom(pixels, width, height, 32, width * numChannels, rmask, gmask, bmask, amask);
 
             SDL_SetWindowIcon(Engine::Instance().GetWindow().GetSDLWindow(), iconSurface);
+
+            delete pixels;
         }
         else
         {
@@ -142,6 +146,24 @@ namespace based
                 SDL_version version;
                 SDL_VERSION(&version);
                 BASED_INFO("SDL {}.{}.{}", (int32_t)version.major, (int32_t)version.minor, (int32_t)version.patch);
+
+                // Initialize memory
+                uint32_t engineMemorySize = MEGABYTES_BYTES(100);
+                void* engineMemory = malloc(engineMemorySize);
+                memset(engineMemory, 0, engineMemorySize);
+                mEngineArena = memory::CreateArena(engineMemory, engineMemorySize, "Engine Memory");
+                memory::Arena* engineArena = &mEngineArena;
+                constexpr uint32_t sceneMemoryPercent = 40;
+                uint32_t sceneMemorySize = based::math::PercentOf(engineMemorySize, sceneMemoryPercent);
+                constexpr uint32_t frameMemoryPercent = 40;
+                uint32_t frameMemorySize = based::math::PercentOf(engineMemorySize, frameMemoryPercent);
+                mSceneArena = memory::CreateArena(ArenaAlloc(engineArena, sceneMemorySize), sceneMemorySize, "Scene Memory");
+                mFrameArena = memory::CreateArena(ArenaAlloc(engineArena, frameMemorySize), frameMemorySize, "Frame Memory");
+
+                uint32_t gameMemorySize = 1; // TODO: Allow users to set this in a config file or something
+                void* gameMemory = malloc(gameMemorySize);
+                memset(gameMemory, 0, gameMemorySize);
+                mGameArena = memory::CreateArena(gameMemory, gameMemorySize, "Game Memory");
 
                 core::WindowProperties props = mApp->GetWindowProperties();
                 if (mWindow.Create(props))
@@ -214,6 +236,9 @@ namespace based
         SDL_Quit();
 
         mLogManager.Shutdown();
+
+        ArenaFreeAll(&mEngineArena);
+        ArenaFreeAll(&mGameArena);
     }
 
     //Singleton

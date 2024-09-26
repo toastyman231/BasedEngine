@@ -12,7 +12,6 @@
 #include "input/keyboard.h"
 #include "input/joystick.h"
 #include "graphics/defaultassetlibraries.h"
-//#include "managers/uimanager.h"
 
 namespace based::core
 {
@@ -174,9 +173,12 @@ namespace based::core
 			RenderToScreen();
 		}
 
-		mImguiWindow.BeginRender();
-		Engine::Instance().GetApp().ImguiRender();
-		mImguiWindow.EndRender();
+		if (!mShouldRenderToScreen)
+		{
+			mImguiWindow.BeginRender();
+			Engine::Instance().GetApp().ImguiRender();
+			mImguiWindow.EndRender();
+		}
 
 		SDL_GL_SwapWindow(mWindow);
 	}

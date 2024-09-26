@@ -13,7 +13,7 @@ namespace based::core
 	{
 		IMGUI_CHECKVERSION();
 
-		ImGui::CreateContext();
+		ImGui::SetCurrentContext(ImGui::CreateContext());
 
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigWindowsMoveFromTitleBarOnly = props.MoveFromTitleBarOnly;
@@ -35,7 +35,7 @@ namespace based::core
 	{
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplSDL2_Shutdown();
-		ImGui::DestroyContext();
+		ImGui::DestroyContext(ImGui::GetCurrentContext());
 	}
 
 	void ImguiWindow::HandleSDLEvent(SDL_Event& e)

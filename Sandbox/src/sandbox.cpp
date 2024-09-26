@@ -346,21 +346,23 @@ public:
 		graphics::DefaultLibraries::GetTextureLibrary().Load("SandRough", sandRoughness);
 		graphics::DefaultLibraries::GetTextureLibrary().Load("SandNormal", sandNormal);
 		graphics::DefaultLibraries::GetTextureLibrary().Load("SandAo", sandAo);
-		/*sphereMat->AddTexture(sandAlbedo, "material.albedo.tex");
+		sphereMat->AddTexture(sandAlbedo, "material.albedo.tex");
 		sphereMat->AddTexture(sandRoughness, "material.roughness.tex");
 		sphereMat->AddTexture(sandNormal, "material.normal.tex");
 		sphereMat->AddTexture(sandAlbedo, "material.ambientOcclusion.tex");
 		sphereMat->SetUniformValue("material.albedo.useSampler", 1);
 		sphereMat->SetUniformValue("material.roughness.useSampler", 1);
 		sphereMat->SetUniformValue("material.normal.useSampler", 1);
-		sphereMat->SetUniformValue("material.ambientOcclusion.useSampler", 1);*/
-		sphereMat->SetUniformValue("material.albedo.color", glm::vec4(1.0f, 0.84f, 0.0f, 1.0f));
+		sphereMat->SetUniformValue("material.ambientOcclusion.useSampler", 1);
+		//sphereMat->SetUniformValue("material.albedo.color", glm::vec4(1.0f, 0.84f, 0.0f, 1.0f));
 		graphics::DefaultLibraries::GetMaterialLibrary().Load("Dirt", sphereMat);
 		sphereMesh = graphics::Model::LoadSingleMesh("Assets/Models/sphere.obj");
 		sphereMesh->material = sphereMat;
 		sphere = scene::Entity::CreateEntity<scene::Entity>();
 		sphere->AddComponent<scene::MeshRenderer>(sphereMesh);
 		sphere->SetEntityName("Sphere");
+
+		// TODO: Clean up and add shadows to PBR
 
 		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 2, 4));
 		GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(6, 53, 0));
@@ -694,6 +696,7 @@ public:
 						// Get all float uniforms and create an editable slider
 						for (const auto& f : material->GetShader()->GetUniformFloats())
 						{
+							if (f.first.find("pointLight") != -1) continue;
 							float temp = f.second;
 							ImGui::DragFloat(f.first.c_str(), &temp, 0.01f);
 							material->SetUniformValue(f.first, temp);
@@ -702,12 +705,12 @@ public:
 						// Setup for texture combo box, each texture must have it's own current index
 						int j = 0;
 						static std::vector<int> itemIndex;
-						itemIndex.resize((int)(material->GetShader()->GetUniformSamplers().size()));
+						itemIndex.resize(static_cast<int>(material->GetShader()->GetUniformSamplers().size()));
 						// Get all texture samplers and create combo boxes to select what texture they sample
 						for (const auto& f : material->GetShader()->GetUniformSamplers())
 						{
 							// Get texture names from library key set, plus None
-							auto items = *graphics::DefaultLibraries::GetTextureLibrary().GetAllFlat();
+							auto items = *graphics::DefaultLibraries::GetTextureLibrary().GetKeys();
 							items.insert(items.begin(), "None");
 							auto preview = items[itemIndex[j]];
 
