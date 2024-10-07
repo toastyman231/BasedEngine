@@ -6,8 +6,8 @@
 
 namespace based::graphics
 {
-	Material::Material(const std::shared_ptr<Shader>& shader)
-		: mShader(shader)
+	Material::Material(const std::shared_ptr<Shader>& shader, const std::string& name)
+		: mMaterialName(name), mShader(shader)
 	{
 		BASED_ASSERT(mShader, "Attempting to instantiate a material with a nullptr shader");
 	}
@@ -28,7 +28,18 @@ namespace based::graphics
 		mTextureOrder = other.mTextureOrder;
 	}
 
-	Material::~Material() = default;
+	Material::~Material()
+	{
+		BASED_TRACE("Deleting {}", mMaterialName);
+		BASED_TRACE("Ref count to shader: {}", mShader.use_count());
+	}
+
+	std::shared_ptr<Material> Material::CreateMaterial(const std::shared_ptr<Shader>& shader,
+		core::AssetLibrary<Material>& assetLibrary, const std::string& name)
+	{
+		assetLibrary.Load(name, std::make_shared<Material>(shader, name));
+		return assetLibrary.Get(name);
+	}
 
 	void Material::SetShader(std::shared_ptr<Shader> shader)
 	{

@@ -1,6 +1,9 @@
 #include "Generators.h"
 
-based::graphics::Mesh* GeneratePlane(int xSize, int ySize)
+#include "based/graphics/defaultassetlibraries.h"
+#include "based/graphics/mesh.h"
+
+std::shared_ptr<based::graphics::Mesh> GeneratePlane(int xSize, int ySize)
 {
 	std::vector<based::graphics::Vertex> vertices;
 	std::vector<unsigned int> indices(xSize * ySize * 6);
@@ -27,42 +30,6 @@ based::graphics::Mesh* GeneratePlane(int xSize, int ySize)
 		}
 	}
 
-	return new based::graphics::Mesh(vertices, indices, {});
-}
-
-based::graphics::Mesh* GenerateGrassBlade(glm::vec3 scale)
-{
-	std::vector<based::graphics::Vertex> vertices;
-	std::vector<unsigned int> indices;
-
-	vertices.insert(vertices.end(), {
-			based::graphics::Vertex { glm::vec3(-0.5f, 0.f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, -1.0f),
-				glm::vec2(0.f, 0.f)},
-			based::graphics::Vertex { glm::vec3(0.5f, 0.f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, -1.0f),
-				glm::vec2(1.f, 0.f)},
-			based::graphics::Vertex { glm::vec3(0.5f, 0.5f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, -1.0f),
-				glm::vec2(1.f, 0.33f)},
-			based::graphics::Vertex { glm::vec3(-0.5f, 0.5f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, -1.0f),
-				glm::vec2(0.f, 0.33f)},
-			based::graphics::Vertex { glm::vec3(0.5f, 1.0f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, -1.0f),
-				glm::vec2(1.f, 0.66f)},
-			based::graphics::Vertex { glm::vec3(-0.5f, 1.0f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, -1.0f),
-				glm::vec2(0.f, 0.66f)},
-			based::graphics::Vertex { glm::vec3(0.0f, 1.5f, 0.f) * scale,
-				glm::vec3(0.0f, 0.0f, -1.0f),
-				glm::vec2(0.5f, 1.f)}
-		});
-	indices.insert(indices.end(), {
-			0, 1, 2,    0, 2, 3,
-			3, 2, 4,    3, 4, 5,
-			5, 4, 6
-		});
-
-	return new based::graphics::Mesh(vertices, indices, {});
+	return based::graphics::Mesh::CreateMesh(vertices, indices, std::vector<based::graphics::Texture>(),
+		DEFAULT_MESH_LIB, "Plane");
 }

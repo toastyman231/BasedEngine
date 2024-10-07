@@ -6,7 +6,7 @@
 
 namespace based::animation
 {
-	Animator::Animator(Animation* currentAnimation)
+	Animator::Animator(const std::shared_ptr<Animation>& currentAnimation)
 	{
 		m_CurrentTime = 0.0f;
 		m_BlendDelta = 0.0f;
@@ -25,75 +25,92 @@ namespace based::animation
 
 		if (m_StateMachine)
 		{
-			Animation* anim = m_StateMachine->DetermineOutputAnimation();
-			m_StateMachine->GetCurrentState()->OnStateUpdate(this);
-			if (anim != m_CurrentAnimation)
+			if (auto anim = m_StateMachine->DetermineOutputAnimation().lock())
 			{
-				m_CurrentAnimation->SetPlaying(false);
-				m_CurrentTime = m_CurrentAnimation->GetDuration() - 0.1f; // Prevents wonky transitions between states
-				PlayAnimation(anim);
+				// TODO: Figure out how to make this work
+				//m_StateMachine->GetCurrentState()->OnStateUpdate(std::shared_ptr<Animator>(this));
+				if (auto cur = m_CurrentAnimation.lock())
+				{
+					if (anim != cur)
+					{
+						cur->SetPlaying(false);
+						m_CurrentTime = cur->GetDuration() - 0.1f; // Prevents wonky transitions between states
+						PlayAnimation(anim);
+					}
+				}
+				else { BASED_WARN("Current anim is invalid!"); }
 			}
+			else { BASED_WARN("State machine output is invalid!"); }
 		}
 
-		if (m_CurrentAnimation && m_CurrentAnimation->IsPlaying())
+		if (auto cur = m_CurrentAnimation.lock())
 		{
-			m_CurrentTime += m_CurrentAnimation->GetTicksPerSecond() * dt * m_CurrentAnimation->GetPlaybackSpeed();
-			if (m_CurrentTime > m_CurrentAnimation->GetDuration() && !m_CurrentAnimation->IsLooping())
+			if (!cur->IsPlaying()) return;
+
+			m_CurrentTime += cur->GetTicksPerSecond() * dt * cur->GetPlaybackSpeed();
+			if (m_CurrentTime > cur->GetDuration() && !cur->IsLooping())
 			{
-				m_CurrentAnimation->SetPlaying(false);
+				cur->SetPlaying(false);
 				return;
-			} else if (m_CurrentTime >= m_CurrentAnimation->GetDuration())
+			} else if (m_CurrentTime >= cur->GetDuration())
 			{
-				m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->GetDuration());
+				m_CurrentTime = fmod(m_CurrentTime, cur->GetDuration());
 			}
-			CalculateBoneTransform(&m_CurrentAnimation->GetRootNode(), glm::mat4(1.0f), 
-				m_CurrentAnimation);
+			CalculateBoneTransform(&cur->GetRootNode(), glm::mat4(1.0f),cur);
 		}
 	}
 
-	void Animator::PlayAnimation(Animation* pAnimation)
+	void Animator::PlayAnimation(const std::shared_ptr<Animation>& pAnimation)
 	{
 		m_OldAnimation = m_CurrentAnimation;
 		m_PreviousTime = m_CurrentTime;
 		m_CurrentAnimation = pAnimation;
 		m_CurrentTime = 0.0f;
 		m_BlendDelta = 0.0f;
-		m_CurrentAnimation->SetPlaying(true);
+		pAnimation->SetPlaying(true);
 	}
 
 	void Animator::CalculateBoneTransform(const AssimpNodeData* node, const glm::mat4& parentTransform, 
-		Animation* animation)
+		std::weak_ptr<Animation> animation)
 	{
 		const std::string nodeName = node->name;
 		glm::mat4 nodeTransform = node->transformation;
 
-		Bone* bone = animation->FindBone(nodeName);
-		Bone* previousBone = m_OldAnimation->FindBone(nodeName);
+		auto anim = animation.lock();
+		auto cur = m_CurrentAnimation.lock();
+		auto old = m_OldAnimation.lock();
 
-		if (bone && previousBone && animation != m_OldAnimation)
+		if (anim && cur && old)
 		{
-			previousBone->Update(m_PreviousTime);
-			bone->Update(m_CurrentTime);
-			nodeTransform = (1.f - m_BlendDelta) * previousBone->GetLocalTransform() + 
-				m_BlendDelta * bone->GetLocalTransform();
-		} else if (bone)
-		{
-			bone->Update(m_CurrentTime);
-			nodeTransform = bone->GetLocalTransform();
+			Bone* bone = anim->FindBone(nodeName);
+			Bone* previousBone = old->FindBone(nodeName);
+
+			if (bone && previousBone && anim != old)
+			{
+				previousBone->Update(m_PreviousTime);
+				bone->Update(m_CurrentTime);
+				nodeTransform = (1.f - m_BlendDelta) * previousBone->GetLocalTransform() +
+					m_BlendDelta * bone->GetLocalTransform();
+			}
+			else if (bone)
+			{
+				bone->Update(m_CurrentTime);
+				nodeTransform = bone->GetLocalTransform();
+			}
+
+			const glm::mat4 globalTransformation = parentTransform * nodeTransform;
+
+			auto boneInfoMap = cur->GetBoneIDMap();
+			if (boneInfoMap.find(nodeName) != boneInfoMap.end())
+			{
+				const int index = boneInfoMap[nodeName].id;
+				const glm::mat4 offset = boneInfoMap[nodeName].offset;
+				m_FinalBoneMatrices[index] = globalTransformation * offset;
+			}
+
+			for (int i = 0; i < node->childrenCount; i++)
+				CalculateBoneTransform(&node->children[i], globalTransformation, animation);
 		}
-
-		const glm::mat4 globalTransformation = parentTransform * nodeTransform;
-
-		auto boneInfoMap = m_CurrentAnimation->GetBoneIDMap();
-		if (boneInfoMap.find(nodeName) != boneInfoMap.end())
-		{
-			const int index = boneInfoMap[nodeName].id;
-			const glm::mat4 offset = boneInfoMap[nodeName].offset;
-			m_FinalBoneMatrices[index] = globalTransformation * offset;
-		}
-
-		for (int i = 0; i < node->childrenCount; i++)
-			CalculateBoneTransform(&node->children[i], globalTransformation, animation);
 	}
 
 	std::vector<glm::mat4> Animator::GetFinalBoneMatrices()
@@ -101,42 +118,58 @@ namespace based::animation
 		return m_FinalBoneMatrices;
 	}
 
-	void AnimationState::AddTransition(AnimationTransition* transition)
+	void AnimationState::AddTransition(const std::shared_ptr<AnimationTransition>& transition)
 	{
 		m_Transitions.emplace_back(transition);
 	}
 
-	Animation* AnimationStateMachine::DetermineOutputAnimation()
+	std::weak_ptr<Animation> AnimationStateMachine::DetermineOutputAnimation()
 	{
-		bool shouldTransition = false;
-		AnimationState* dest = nullptr;
-		for (const auto transition : m_CurrentState->GetTransitions())
+		std::shared_ptr<AnimationState> dest = nullptr;
+
+		auto state = m_CurrentState.lock();
+		auto animator = m_Animator.lock();
+
+		if (state && animator)
 		{
-			if (transition->ShouldStateTransition())
+			bool shouldTransition = false;
+			for (const auto& transition : state->GetTransitions())
 			{
-				shouldTransition = true;
-				dest = transition->GetDestinationState();
-				break;
+				if (transition->ShouldStateTransition())
+				{
+					shouldTransition = true;
+					dest = transition->GetDestinationState().lock();
+					break;
+				}
 			}
-		}
 
-		if (shouldTransition && dest)
+			if (shouldTransition && dest)
+			{
+				state->OnStateExit(animator);
+				m_CurrentState = dest;
+				dest->OnStateEnter(m_Animator.lock());
+			}
+
+			return state->GetStateAnimationClip();
+		} else
 		{
-			m_CurrentState->OnStateExit(m_Animator);
-			m_CurrentState = dest;
-			m_CurrentState->OnStateEnter(m_Animator);
+			BASED_WARN("Current state or animator is invalid!");
 		}
 
-		return m_CurrentState->GetStateAnimationClip();
+		return m_CurrentState.lock()->GetStateAnimationClip();
 	}
 
-	void AnimationStateMachine::AddState(AnimationState* state, bool isDefault)
+	void AnimationStateMachine::AddState(const std::shared_ptr<AnimationState>& state, bool isDefault)
 	{
 		m_States.emplace_back(state);
 		if (isDefault) 
 		{
 			m_CurrentState = state;
-			m_Animator->PlayAnimation(m_CurrentState->GetStateAnimationClip());
+			if (auto anim = m_Animator.lock())
+			{
+				if (auto clip = m_CurrentState.lock())
+					anim->PlayAnimation(clip->GetStateAnimationClip());
+			}
 		}
 	}
 

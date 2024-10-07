@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -51,8 +52,8 @@ namespace based::graphics
 		std::unordered_map<std::string, float> GetUniformFloats() const;
 		std::unordered_map<std::string, int> GetUniformSamplers() const;
 
-		static void UpdateShaderPointLighting(Shader* shader, glm::vec3 objectPos);
-		static void UpdateShaderDirectionalLighting(Shader* shader);
+		static void UpdateShaderPointLighting(std::weak_ptr<Shader> shader, glm::vec3 objectPos);
+		static void UpdateShaderDirectionalLighting(std::weak_ptr<Shader> shader);
 	private:
 		uint32_t mProgramId;
 		std::string mVertexShader;

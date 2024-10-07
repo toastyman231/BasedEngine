@@ -7,6 +7,32 @@
 
 namespace based::graphics
 {
+	std::shared_ptr<Mesh> Mesh::CreateMesh(const std::vector<Vertex>& vertices,
+		const std::vector<unsigned int>& indices, const std::vector<Texture>& textures,
+		core::AssetLibrary<Mesh>& assetLibrary, const std::string& name)
+	{
+		auto asset = std::make_shared<Mesh>(vertices, indices, textures);
+		assetLibrary.Load(name, asset);
+		return asset;
+	}
+
+	std::shared_ptr<InstancedMesh> Mesh::CreateInstancedMesh(const std::vector<Vertex>& vertices,
+		const std::vector<unsigned int>& indices, const std::vector<Texture>& textures,
+		core::AssetLibrary<Mesh>& assetLibrary, const std::string& name)
+	{
+		auto asset = std::make_shared<InstancedMesh>(vertices, indices, textures);
+		assetLibrary.Load(name, asset);
+		return asset;
+	}
+
+	std::shared_ptr<Mesh> Mesh::CreateMesh(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<Material>& mat,
+	                                       core::AssetLibrary<Mesh>& assetLibrary, const std::string& name)
+	{
+		auto asset = std::make_shared<Mesh>(va, mat);
+		assetLibrary.Load(name, asset);
+		return asset;
+	}
+
 	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned>& indices, const std::vector<Texture>& textures)
 	{
 		this->vertices = vertices;
@@ -73,7 +99,7 @@ namespace based::graphics
 		BASED_CREATE_VERTEX_BUFFER(boneid_vb, int);
 		BASED_CREATE_VERTEX_BUFFER(weight_vb, float);
 
-		for (const auto vertex : vertices)
+		for (const auto& vertex : vertices)
 		{
 			pos_vb->PushVertex({ vertex.Position.x, vertex.Position.y, vertex.Position.z });
 			norm_vb->PushVertex({ vertex.Normal.x, vertex.Normal.y, vertex.Normal.z });
@@ -102,6 +128,7 @@ namespace based::graphics
 		va->SetElements(indices);
 		if (upload) va->Upload();
 
+		//mVA.reset();
 		mVA = va;
 	}
 
@@ -186,8 +213,12 @@ namespace based::graphics
 	void InstancedMesh::RegenVertexArray()
 	{
 		SetupMesh(false);
+		
 
-		BASED_CREATE_INSTANCED_VERTEX_BUFFER(model_vb, float);
+		BASED_CREATE_INSTANCED_VERTEX_BUFFER_FULL(model_vb, float, mInstanceCount * 4, true);
+		//auto model_vb = static_cast<InstancedVertexBuffer<float>*>(memory::ArenaAlloc(Engine::Instance().GetEngineArena(),
+		//	sizeof(InstancedVertexBuffer<float>)));
+		//new(model_vb) InstancedVertexBuffer<float>(mInstanceCount * 4);
 
 		for (int i = 0; i < mInstanceCount; i++)
 		{

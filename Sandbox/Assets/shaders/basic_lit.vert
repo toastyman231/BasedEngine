@@ -18,6 +18,17 @@ uniform mat4 model = mat4(1.0);
 uniform mat4 normalMat = mat4(1.0);
 uniform mat4 lightSpaceMatrix;
 
+// vertex: the vertex to be snapped (needs to be in projection-space)
+// resolution: the lower resolution, e.g. if my screen resolution is 1280x720, I might choose 640x320
+vec4 snap(vec4 vertex, vec2 resolution)
+{
+    vec4 snappedPos = vertex;
+    snappedPos.xyz = vertex.xyz / vertex.w; // convert to normalised device coordinates (NDC)
+    snappedPos.xy = floor(resolution * snappedPos.xy) / resolution; // snap the vertex to the lower-resolution grid
+    snappedPos.xyz *= vertex.w; // convert back to projection-space
+    return snappedPos;
+}
+
 void main()
 {
     uvs = texcoords;
@@ -30,5 +41,8 @@ void main()
     vec3 B = cross(N, T);
     TBN = mat3(T, B, N);
     fragPosLightSpace = lightSpaceMatrix * vec4(fragPos, 1.0);
+
+    //vec4 pos = snap(proj * view * model * vec4(position, 1.0), vec2(160.0, 120.0));
+
     gl_Position = proj * view * model * vec4(position, 1.0);
 }

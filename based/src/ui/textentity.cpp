@@ -39,7 +39,7 @@ namespace based::ui
 	TextEntity::~TextEntity()
 	{
 		TTF_CloseFont(mFont);
-		DestroyEntity(this);
+		DestroyEntity(std::shared_ptr<Entity>(this));
 		//glDeleteTextures(1, &texture);
 	}
 

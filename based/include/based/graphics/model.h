@@ -13,6 +13,8 @@
 
 #include <based/scene/entity.h>
 
+#define DEFAULT_MODEL_LIB based::graphics::DefaultLibraries::GetModelLibrary()
+
 namespace based::graphics
 {
     struct BoneInfo
@@ -29,32 +31,34 @@ namespace based::graphics
     {
     public:
         Model() = default;
-        Model(const char* path)
+        Model(const char* path, std::string name = "New Model") : mModelName(std::move(name))
         {
             LoadModel(path);
         }
-        ~Model() { BASED_TRACE("Destroying model!"); }
-        void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
+        ~Model() { BASED_TRACE("Destroying model {}!", mModelName); }
+        void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) const;
         void SetMaterial(const std::shared_ptr<Material>& mat, int index = 0);
 
-        static scene::Entity* CreateModelEntity(const std::string& path);
-        static graphics::Mesh* LoadSingleMesh(const std::string& path);
+        static std::shared_ptr<Mesh> LoadSingleMesh(const std::string& path);
+        static std::shared_ptr<Model> CreateModel(const std::string& path, 
+            core::AssetLibrary<Model>& assetLibrary, const std::string& name);
+
         auto& GetBoneInfoMap() { return m_BoneInfoMap; }
         int& GetBoneCount() { return m_BoneCounter; }
 
         inline std::shared_ptr<Material> GetMaterial(int index = 0) const { return mMaterials[index]; }
     private:
         // model data
-        std::vector<graphics::Mesh*> meshes;
+        std::vector<std::shared_ptr<Mesh>> meshes;
         std::vector<std::shared_ptr<Material>> mMaterials;
-        std::string directory;
+        std::string mDirectory;
+        std::string mModelName;
         std::map<std::string, BoneInfo> m_BoneInfoMap;
         int m_BoneCounter = 0;
 
         void LoadModel(std::string path);
         void ProcessNode(aiNode* node, const aiScene* scene);
-        void ProcessNodeEntity(scene::Entity* parent, aiNode* node, const aiScene* scene);
-        graphics::Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene);
+        void ProcessMesh(aiMesh* mesh, const aiScene* scene);
         std::shared_ptr<Material> LoadMaterialTextures(aiMaterial* mat, aiTextureType type,
             std::string typeName);
         void SetMaterialAttribute(aiMaterial* mat, std::shared_ptr<Material> material, const char* key, 

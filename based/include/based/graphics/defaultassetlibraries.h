@@ -15,11 +15,15 @@ namespace based::graphics
 		inline static core::AssetLibrary<graphics::Shader> mShaderLibrary;
 		inline static core::AssetLibrary<graphics::Texture> mTextureLibrary;
 		inline static core::AssetLibrary<graphics::Material> mMaterialLibrary;
+		inline static core::AssetLibrary<graphics::Mesh> mMeshLibrary;
+		inline static core::AssetLibrary<graphics::Model> mModelLibrary;
 	public:
 		inline static core::AssetLibrary<VertexArray>& GetVALibrary() { return mVALibrary; }
 		inline static core::AssetLibrary<Shader>& GetShaderLibrary() { return mShaderLibrary; }
 		inline static core::AssetLibrary<Texture>& GetTextureLibrary() { return mTextureLibrary; }
 		inline static core::AssetLibrary<Material>& GetMaterialLibrary() { return mMaterialLibrary; }
+		inline static core::AssetLibrary<Mesh>& GetMeshLibrary() { return mMeshLibrary; }
+		inline static core::AssetLibrary<Model>& GetModelLibrary() { return mModelLibrary; }
 
 		inline static void InitializeLibraries()
 		{
@@ -437,42 +441,41 @@ namespace based::graphics
 			}
 
 			// Textures
-			{
-				auto tex = std::make_shared<graphics::Texture>("res/bro.png");
-				tex->SetTextureFilter(graphics::TextureFilter::Nearest);
-				mTextureLibrary.Load("Bro", tex);
-			}
-			{
-				auto tex = std::make_shared<graphics::Texture>("res/bro2.png");
-				tex->SetTextureFilter(graphics::TextureFilter::Nearest);
-				mTextureLibrary.Load("Bro2", tex);
-			}
 
 			// Materials
 			{
-				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("Rect"));
+				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("Rect"), "RectRed");
 				mat->SetUniformValue("col", glm::vec4(1, 0, 0, 1));
 				mMaterialLibrary.Load("RectRed", mat);
 			}
 
 			{
-				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("Rect"));
+				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("Rect"), "RectGreen");
 				mat->SetUniformValue("col", glm::vec4(0, 1, 0, 1));
 				mMaterialLibrary.Load("RectGreen", mat);
 			}
 			{
-				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("UI"));
+				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("UI"), "UI");
 				mMaterialLibrary.Load("UI", mat);
 			}
 			{
-				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("ShadowDepthShader"));
+				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("ShadowDepthShader"), "ShadowDepth");
 				mMaterialLibrary.Load("ShadowDepthMaterial", mat);
 			}
 		}
 
+		inline static void UninitializeLibraries()
+		{
+			mMeshLibrary.Clear();
+			mVALibrary.Clear();
+			mMaterialLibrary.Clear();
+			mShaderLibrary.Clear();
+			mTextureLibrary.Clear();
+		}
+
 		static float GetAdjustedUV(int i, int x, int size)
 		{
-			return (float)((i % size) + x) / size;
+			return static_cast<float>((i % size) + x) / size;
 		}
 	};
 

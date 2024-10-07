@@ -9,10 +9,11 @@
 #include <string>
 
 #include "based/log.h"
+#include "based/graphics/defaultassetlibraries.h"
 
 namespace based::scene
 {
-	class Entity
+	class Entity : public std::enable_shared_from_this<Entity>
 	{
 	public:
 		Entity();
@@ -20,10 +21,13 @@ namespace based::scene
 		virtual ~Entity();
 
 		template<typename Type, typename... Args>
-		static inline Type* CreateEntity(glm::vec3 pos = glm::vec3(0.f),
-			glm::vec3 rot = glm::vec3(0.f), glm::vec3 scale = glm::vec3(1.f), Args &&...args)
+		static inline std::shared_ptr<Type> CreateEntity(const std::string& name = "New Entity", 
+			glm::vec3 pos = glm::vec3(0.f), glm::vec3 rot = glm::vec3(0.f), 
+			glm::vec3 scale = glm::vec3(1.f), Args &&...args)
 		{
-			Type* newEntity = new Type(args...);
+			auto newEntity = std::make_shared<Type>(args...);
+			newEntity->template AddComponent<EntityReference>(newEntity);
+			//graphics::DefaultLibraries::GetEntityLibrary().Load(name, newEntity);
 
 			newEntity->SetTransform(pos, rot, scale);
 			newEntity->Initialize();
@@ -31,14 +35,19 @@ namespace based::scene
 			return newEntity;
 		}
 
-		static void DestroyEntity(Entity* ent);
+		static void DestroyEntity(std::shared_ptr<Entity> ent);
 
 		// TODO: Do some testing to make sure adding/removing works even if you already have component or don't have component
 		template<typename Type, typename ...Args>
 		inline void AddComponent(Args &&... args)
 		{
 			if (HasComponent<Type>()) return;
-			mRegistry.emplace<Type>(mEntity, args...);
+
+			if constexpr (std::is_same_v<Type, EntityReference>)
+			{
+				mRegistry.emplace<Type>(mEntity, shared_from_this());
+			}
+			else mRegistry.emplace<Type>(mEntity, args...);
 		}
 
 		template<typename Type, typename ...Args>
@@ -104,38 +113,46 @@ namespace based::scene
 		virtual void OnDisable() {}
 		virtual void OnDestroy() {}
 
-		void SetParent(Entity* parentEntity)
+		void SetParent(const std::shared_ptr<Entity>& parentEntity)
 		{
-			if (parentEntity == nullptr && Parent)
+			auto parent = Parent.lock();
+			if (parentEntity == nullptr && parent)
 			{
-				Parent->RemoveChild(this);
+				parent->RemoveChild(shared_from_this());
 				return;
 			}
+			if (parentEntity == nullptr && Parent.expired()) return;
 
 			Parent = parentEntity;
-			Parent->Children.emplace_back(this);
+			parentEntity->Children.emplace_back(shared_from_this());
+			SetLocalPosition(GetTransform().Position - parentEntity->GetTransform().Position);
+			SetLocalRotation(GetTransform().Rotation - parentEntity->GetTransform().Rotation);
+			SetLocalScale(GetTransform().Scale / parentEntity->GetTransform().Scale);
 		}
 
-		bool RemoveChild(const Entity* childEntity)
+		bool RemoveChild(const std::shared_ptr<Entity>& childEntity)
 		{
 			int i = 0;
-			for (const auto child : Children)
+			for (const auto& child : Children)
 			{
-				if (child->mEntity == childEntity->mEntity)
+				if (auto c = child.lock())
 				{
-					Children.erase(Children.begin() + i);//.remove(child);
-					child->Parent = nullptr;
-					return true;
+					if (c->mEntity == childEntity->mEntity)
+					{
+						Children.erase(Children.begin() + i);
+						c->Parent.reset();
+						return true;
+					}
+					i++;
 				}
-				i++;
 			}
 
 			return false;
 		}
 
-		Entity* Parent = nullptr;
+		std::weak_ptr<Entity> Parent;
 
-		std::vector<Entity*> Children;
+		std::vector<std::weak_ptr<Entity>> Children;
 
 		bool operator==(const Entity& other) const
 		{

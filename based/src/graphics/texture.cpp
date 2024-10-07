@@ -63,6 +63,10 @@ namespace based::graphics
 		{
 			stbi_image_free(mPixels);
 			mPixels = nullptr;
+		} else
+		{
+			free(mPixels);
+			mPixels = nullptr;
 		}
 	}
 

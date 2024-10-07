@@ -2,6 +2,4 @@
 
 #include "based/graphics/mesh.h"
 
-based::graphics::Mesh* GeneratePlane(int xSize, int ySize);
-
-based::graphics::Mesh* GenerateGrassBlade(glm::vec3 scale);
+std::shared_ptr<based::graphics::Mesh> GeneratePlane(int xSize, int ySize);

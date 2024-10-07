@@ -2,6 +2,7 @@
 
 #include "external/glm/glm.hpp"
 #include "external/glm/gtx/transform.hpp"
+#include <memory>
 
 namespace based::ui
 {
@@ -26,11 +27,11 @@ namespace based::scene
 
 	struct EntityReference
 	{
-		Entity* entity;
+		std::weak_ptr<Entity> entity;
 
 		EntityReference() = default;
 		EntityReference(const EntityReference&) = default;
-		EntityReference(Entity* entityPtr) : entity(entityPtr) {}
+		EntityReference(const std::shared_ptr<Entity>& entityPtr) : entity(entityPtr) {}
 	};
 
 	struct Transform
@@ -95,29 +96,27 @@ namespace based::scene
 
 	struct ModelRenderer
 	{
-		graphics::Model* model;
+		std::weak_ptr<graphics::Model> model;
 
-		ModelRenderer() = default;
-		ModelRenderer(graphics::Model* modelPtr) : model(modelPtr) {}
+		ModelRenderer() = delete;
+		ModelRenderer(const std::shared_ptr<graphics::Model>& modelPtr) : model(modelPtr) {}
 		ModelRenderer(const ModelRenderer&) = default;
 	};
 
 	struct AnimatorComponent
 	{
-		animation::Animator* animator;
+		std::weak_ptr<animation::Animator> animator;
 
 		AnimatorComponent() = default;
-		AnimatorComponent(animation::Animator* anim) : animator(anim) {}
+		AnimatorComponent(const std::shared_ptr<animation::Animator>& anim) : animator(anim) {}
 	};
 
 	struct MeshRenderer
 	{
-		graphics::Mesh* mesh;
-		graphics::Model* model;
+		std::weak_ptr<graphics::Mesh> mesh;
 
-		MeshRenderer() = default;
-		MeshRenderer(graphics::Mesh* meshPtr) : mesh(meshPtr) {}
-		MeshRenderer(graphics::Mesh* meshPtr, graphics::Model* modelPtr) : mesh(meshPtr), model(modelPtr) {}
+		MeshRenderer() = delete;
+		MeshRenderer(const std::shared_ptr<graphics::Mesh>& meshPtr) : mesh(meshPtr){}
 		MeshRenderer(const MeshRenderer&) = default;
 	};
 

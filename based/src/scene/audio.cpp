@@ -2,13 +2,15 @@
 #include "log.h"
 
 #define MINIAUDIO_IMPLEMENTATION
+#include "engine.h"
 #include "miniaudio.h"
 
 #include "based/core/profiler.h"
+#include "memory/arena.h"
 
 namespace based::scene
 {
-	static ma_engine* mEngine = (ma_engine*) malloc(sizeof(*mEngine));
+	static ma_engine* mEngine;
 
 	class AudioImpl
 	{
@@ -19,34 +21,36 @@ namespace based::scene
 		bool mMuted;
 
 	public:
-		static void AudioImpl::InitEngine()
+		static void InitEngine()
 		{
 			PROFILE_FUNCTION();
-			ma_result result = ma_engine_init(NULL, mEngine);
+			mEngine = static_cast<ma_engine*>(ArenaAlloc(Engine::Instance().GetEngineArena(),sizeof(ma_engine)));
+			ma_result result = ma_engine_init(nullptr, mEngine);
 			if (result != MA_SUCCESS)
 			{
 				BASED_WARN("Warning: Audio engine not initialized properly! Error: {}", result);
 			}
 		}
 
-		static void AudioImpl::ShutdownEngine()
+		static void ShutdownEngine()
 		{
 			PROFILE_FUNCTION();
 			ma_engine_uninit(mEngine);
-			free(mEngine);
+			ArenaRelease(Engine::Instance().GetEngineArena(), mEngine, sizeof(ma_engine));
 		}
 
-		static void AudioImpl::PlayAudio(std::string& path, float volume)
+		static void PlayAudio(std::string& path, float volume)
 		{
 			PROFILE_FUNCTION();
 			ma_engine_set_volume(mEngine, volume);
-			ma_engine_play_sound(mEngine, path.c_str(), NULL);
+			ma_engine_play_sound(mEngine, path.c_str(), nullptr);
 		}
 
 		AudioImpl(std::string& path, float volume, bool loops) : mVolume(volume), mLoops(loops), mMuted(false)
 		{
 			PROFILE_FUNCTION();
-			ma_result result = ma_sound_init_from_file(mEngine, path.c_str(), 0, NULL, NULL, &mSound);
+			ma_result result = ma_sound_init_from_file(mEngine, path.c_str(), 0, 
+				nullptr, nullptr, &mSound);
 			if (result != MA_SUCCESS)
 			{
 				BASED_WARN("Warning: Could not load audio from {}", path);
@@ -64,12 +68,12 @@ namespace based::scene
 			}
 		}
 
-		bool AudioImpl::IsPlaying() const
+		bool IsPlaying() const
 		{
 			return ma_sound_is_playing(&mSound);
 		}
 
-		void AudioImpl::SetVolume(float volume)
+		void SetVolume(float volume)
 		{
 			if (volume <= 0.f)
 			{
@@ -80,20 +84,19 @@ namespace based::scene
 			mVolume = volume;
 		}
 
-		void AudioImpl::SetLooping(bool loop)
+		void SetLooping(bool loop)
 		{
 			mLoops = loop;
 			ma_sound_set_looping(&mSound, mLoops);
-			//ma_data_source_set_looping(&mDecoder, mLoops);
 		}
 
-		void AudioImpl::ToggleMute()
+		void ToggleMute()
 		{
 			mMuted = !mMuted;
 			if (mMuted) SetVolume(0.f);
 		}
 
-		void AudioImpl::Play()
+		void Play()
 		{
 			if (ma_sound_start(&mSound) != MA_SUCCESS)
 			{
@@ -101,7 +104,7 @@ namespace based::scene
 			}
 		}
 
-		void AudioImpl::Pause()
+		void Pause()
 		{
 			if (ma_sound_stop(&mSound) != MA_SUCCESS)
 			{
@@ -109,7 +112,7 @@ namespace based::scene
 			}
 		}
 
-		void AudioImpl::Stop()
+		void Stop()
 		{
 			if (ma_sound_stop(&mSound) != MA_SUCCESS)
 			{
@@ -153,32 +156,32 @@ namespace based::scene
 		return pimpl->IsPlaying();
 	}
 
-	void Audio::SetVolume(float volume)
+	void Audio::SetVolume(float volume) const
 	{
 		pimpl->SetVolume(volume);
 	}
 
-	void Audio::SetLooping(bool loop)
+	void Audio::SetLooping(bool loop) const
 	{
 		pimpl->SetLooping(loop);
 	}
 
-	void Audio::ToggleMute()
+	void Audio::ToggleMute() const
 	{
 		pimpl->ToggleMute();
 	}
 
-	void Audio::Play()
+	void Audio::Play() const
 	{
 		pimpl->Play();
 	}
 
-	void Audio::Pause()
+	void Audio::Pause() const
 	{
 		pimpl->Pause();
 	}
 
-	void Audio::Stop()
+	void Audio::Stop() const
 	{
 		pimpl->Stop();
 	}

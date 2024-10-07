@@ -2,7 +2,7 @@
 
 namespace based::animation
 {
-	Animation::Animation(const std::string& animationPath, graphics::Model* model, int index)
+	Animation::Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model, int index)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
@@ -14,7 +14,7 @@ namespace based::animation
 		ReadMissingBones(animation, *model);
 	}
 
-	Animation::Animation(const std::string& animationPath, graphics::Model* model, const std::string& animationName)
+	Animation::Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model, const std::string& animationName)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
@@ -60,8 +60,8 @@ namespace based::animation
 				boneInfoMap[boneName].id = boneCount;
 				boneCount++;
 			}
-			m_Bones.push_back(Bone(channel->mNodeName.data,
-				boneInfoMap[channel->mNodeName.data].id, channel));
+			m_Bones.emplace_back(channel->mNodeName.data,
+			                     boneInfoMap[channel->mNodeName.data].id, channel);
 		}
 
 		m_BoneInfoMap = boneInfoMap;

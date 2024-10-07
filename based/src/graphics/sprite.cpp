@@ -148,11 +148,11 @@ namespace based::graphics
 		glm::vec3 scale;
 		auto model = glm::mat4(1.f);
 
-		if (sprite->Parent)
+		if (auto parent = sprite->Parent.lock())
 		{
-			position = sprite->GetComponent<scene::Transform>().LocalPosition + glm::vec3(sprite->mPivot, 0.f) + sprite->Parent->GetTransform().Position;
-			rotation = sprite->GetComponent<scene::Transform>().LocalRotation + sprite->Parent->GetTransform().Rotation;
-			scale = sprite->GetComponent<scene::Transform>().LocalScale * sprite->Parent->GetTransform().Scale;
+			position = sprite->GetComponent<scene::Transform>().LocalPosition + glm::vec3(sprite->mPivot, 0.f) + parent->GetTransform().Position;
+			rotation = sprite->GetComponent<scene::Transform>().LocalRotation + parent->GetTransform().Rotation;
+			scale = sprite->GetComponent<scene::Transform>().LocalScale * parent->GetTransform().Scale;
 		} else
 		{
 			position = sprite->GetComponent<scene::Transform>().Position + glm::vec3(sprite->mPivot, 0.f);

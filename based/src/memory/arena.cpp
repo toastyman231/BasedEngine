@@ -9,7 +9,7 @@ namespace based::memory
 	Arena CreateArena(void* backingMemory, size_t arenaSize)
 	{
 		Arena a;
-		a.mBackingMemory = (unsigned char*)backingMemory;
+		a.mBackingMemory = static_cast<unsigned char*>(backingMemory);
 		a.mBackingMemorySize = arenaSize;
 		a.mOffset = 0;
 		a.mPreviousOffset = 0;
@@ -25,9 +25,17 @@ namespace based::memory
 
 	void* ArenaAlloc(Arena* arena, size_t allocSize)
 	{
+		for (auto [ptr, size] : arena->mFreeList)
+		{
+			if (size <= allocSize) continue;
+
+			arena->mFreeList.erase(ptr);
+			return ptr;
+		}
+
 		size_t& offset = arena->mOffset;
 		bool isOutOfMemory = offset + allocSize > arena->mBackingMemorySize;
-		BASED_ASSERT(!isOutOfMemory, "Out of memory in arena")
+		BASED_ASSERT(!isOutOfMemory, "Out of memory in arena");
 		if (isOutOfMemory)
 		{
 			return nullptr;
@@ -36,7 +44,7 @@ namespace based::memory
 		void* newAlloc = arena->mBackingMemory + offset;
 		arena->mPreviousOffset = offset;
 		offset += allocSize;
-		BASED_TRACE("Arena {} offset is now {}", GetArenaName(arena), offset);
+		BASED_TRACE("Arena {} allocated {} bytes, offset is now {}", GetArenaName(arena), allocSize, offset);
 		return newAlloc;
 	}
 
@@ -66,6 +74,13 @@ namespace based::memory
 		}
 	}
 
+	void ArenaRelease(Arena* arena, void* memoryToRelease, size_t releaseSize)
+	{
+		memset(memoryToRelease, 0, releaseSize);
+		arena->mFreeList[memoryToRelease] = releaseSize;
+		BASED_TRACE("Arena {} released {} bytes", GetArenaName(arena), releaseSize);
+	}
+
 	void ArenaPopLatest(Arena* arena, void* data)
 	{
 		if (arena->mOffset == arena->mPreviousOffset)
@@ -81,6 +96,8 @@ namespace based::memory
 	{
 		arena->mOffset = 0;
 		arena->mPreviousOffset = 0;
+		memset(arena->mBackingMemory, 0, arena->mBackingMemorySize);
+		arena->mFreeList.clear();
 	}
 
 	void ArenaFreeAll(Arena* arena)
@@ -89,6 +106,7 @@ namespace based::memory
 		arena->mBackingMemorySize = 0;
 		free(arena->mBackingMemory);
 		arena->mBackingMemory = nullptr;
+		arena->mFreeList.clear();
 	}
 
 	const char* GetArenaName(Arena* arena)

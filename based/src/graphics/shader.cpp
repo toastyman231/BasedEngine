@@ -90,8 +90,10 @@ namespace based::graphics
 
 	Shader::~Shader()
 	{
+		BASED_TRACE("Deleting shader {}", mProgramId);
 		glUseProgram(0); BASED_CHECK_GL_ERROR;
 		glDeleteProgram(mProgramId); BASED_CHECK_GL_ERROR;
+		mProgramId = 0;
 	}
 
 	void Shader::InitializeUniformBuffers()
@@ -148,17 +150,10 @@ namespace based::graphics
 			alreadyIncluded = {};
 			fragSource = PreprocessShader(fragSource, "#include ", "Assets/shaders/", alreadyIncluded);
 
-			// TODO: Figure out how to use this arena allocator
-			//Shader* shader = static_cast<Shader*>(ArenaAlloc(Engine::Instance().GetEngineArena(), sizeof(Shader)));
-			//*shader = Shader(vertexSource, fragSource);
-			//Shader test = Shader(vertexSource, fragSource);
-			//memcpy(shader, &test, sizeof(test));
-			//shader->mVertexShader = "";
-			//shader->mFragmentShader = "";
-
 			return new Shader(vertexSource, fragSource);
 		}
-		
+
+		BASED_ERROR("Failed to load shader with source {}, {}", vsPath, fsPath);
 		return nullptr;
 	}
 
@@ -341,56 +336,62 @@ namespace based::graphics
 		return output;
 	}
 
-	void Shader::UpdateShaderPointLighting(Shader* shader, glm::vec3 objectPos)
+	void Shader::UpdateShaderPointLighting(std::weak_ptr<Shader> shader, glm::vec3 objectPos)
 	{
-		const entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
-		const auto lightsView = registry.view<scene::Enabled, scene::Transform, scene::PointLight>();
-		std::vector<scene::PointLight> pointLights;
-
-		for (const auto entity : lightsView)
+		if (auto shdr = shader.lock())
 		{
-			scene::Transform trans = registry.get<scene::Transform>(entity);
-			scene::PointLight light = registry.get<scene::PointLight>(entity);
-			light.position = trans.Position;
-			pointLights.emplace_back(light);
-		}
+			const entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+			const auto lightsView = registry.view<scene::Enabled, scene::Transform, scene::PointLight>();
+			std::vector<scene::PointLight> pointLights;
 
-		std::sort(pointLights.begin(), pointLights.end(),
-			[objectPos](const scene::PointLight& lhs, const scene::PointLight& rhs)
+			for (const auto entity : lightsView)
 			{
-				return glm::distance(objectPos, lhs.position) < glm::distance(objectPos, rhs.position);
+				scene::Transform trans = registry.get<scene::Transform>(entity);
+				scene::PointLight light = registry.get<scene::PointLight>(entity);
+				light.position = trans.Position;
+				pointLights.emplace_back(light);
 			}
-		);
 
-		for (int i = 0; i < pointLights.size() && i < 8; i++)
-		{
-			const scene::PointLight light = pointLights[i];
-			shader->SetUniformFloat3("pointLights[" + std::to_string(i) + "].position", light.position);
-			shader->SetUniformFloat("pointLights[" + std::to_string(i) + "].constant", light.constant);
-			shader->SetUniformFloat("pointLights[" + std::to_string(i) + "].linear", light.linear);
-			shader->SetUniformFloat("pointLights[" + std::to_string(i) + "].quadratic", light.quadratic);
-			shader->SetUniformFloat("pointLights[" + std::to_string(i) + "].intensity", light.intensity);
-			shader->SetUniformFloat3("pointLights[" + std::to_string(i) + "].color", light.color);
+			std::sort(pointLights.begin(), pointLights.end(),
+				[objectPos](const scene::PointLight& lhs, const scene::PointLight& rhs)
+				{
+					return glm::distance(objectPos, lhs.position) < glm::distance(objectPos, rhs.position);
+				}
+			);
+
+			for (int i = 0; i < pointLights.size() && i < 8; i++)
+			{
+				const scene::PointLight light = pointLights[i];
+				shdr->SetUniformFloat3("pointLights[" + std::to_string(i) + "].position", light.position);
+				shdr->SetUniformFloat("pointLights[" + std::to_string(i) + "].constant", light.constant);
+				shdr->SetUniformFloat("pointLights[" + std::to_string(i) + "].linear", light.linear);
+				shdr->SetUniformFloat("pointLights[" + std::to_string(i) + "].quadratic", light.quadratic);
+				shdr->SetUniformFloat("pointLights[" + std::to_string(i) + "].intensity", light.intensity);
+				shdr->SetUniformFloat3("pointLights[" + std::to_string(i) + "].color", light.color);
+			}
 		}
 	}
 
-	void Shader::UpdateShaderDirectionalLighting(Shader* shader)
+	void Shader::UpdateShaderDirectionalLighting(std::weak_ptr<Shader> shader)
 	{
-		const entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
-		const auto lightsView = registry.view<scene::Enabled, scene::Transform, scene::DirectionalLight>();
-
-		// Return if there are no directional lights
-		if (lightsView.begin() == lightsView.end()) return;
-
-		for (const auto entity : lightsView)
+		if (auto shdr = shader.lock())
 		{
-			scene::Transform trans = registry.get<scene::Transform>(entity);
-			scene::DirectionalLight light = registry.get<scene::DirectionalLight>(entity);
-			light.direction = trans.Rotation;
+			const entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+			const auto lightsView = registry.view<scene::Enabled, scene::Transform, scene::DirectionalLight>();
 
-			shader->SetUniformFloat3("directionalLight.direction", light.direction);
-			shader->SetUniformFloat3("directionalLight.color", light.color);
-			break;
+			// Return if there are no directional lights
+			if (lightsView.begin() == lightsView.end()) return;
+
+			for (const auto entity : lightsView)
+			{
+				scene::Transform trans = registry.get<scene::Transform>(entity);
+				scene::DirectionalLight light = registry.get<scene::DirectionalLight>(entity);
+				light.direction = trans.Rotation;
+
+				shdr->SetUniformFloat3("directionalLight.direction", light.direction);
+				shdr->SetUniformFloat3("directionalLight.color", light.color);
+				break;
+			}
 		}
 	}
 }

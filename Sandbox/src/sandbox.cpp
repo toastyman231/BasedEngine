@@ -23,6 +23,7 @@
 #include "based/animation/animator.h"
 #include "based/core/basedtime.h"
 #include "based/math/random.h"
+#include "based/scene/audio.h"
 #include "Models-Surfaces/Generators.h"
 
 using namespace based;
@@ -53,19 +54,52 @@ private:
 	std::string val;
 };
 
+class MyAnimationTransition : public animation::AnimationTransition
+{
+public:
+	MyAnimationTransition(
+		const std::shared_ptr<animation::AnimationState>& source,
+		const std::shared_ptr<animation::AnimationState>& destination,
+		const std::shared_ptr<animation::Animator>& animator,
+		const std::shared_ptr<animation::AnimationStateMachine>& stateMachine)
+		: AnimationTransition(source, destination, animator)
+		, mStateMachine(stateMachine) {}
+	~MyAnimationTransition() override = default;
+
+	bool ShouldStateTransition() override
+	{
+		if (auto stateMachine = mStateMachine.lock())
+		{
+			return stateMachine->GetBool("punch", false);
+		}
+		else
+		{
+			BASED_WARN("State machine invalid!");
+			return false;
+		}
+	}
+
+private:
+	std::weak_ptr<animation::AnimationStateMachine> mStateMachine;
+};
+
 class Sandbox : public based::App
 {
 private:
 	std::shared_ptr<scene::Scene> secondScene;
-	scene::Entity* modelEntity;
-	scene::Entity* skyEntity;
-	scene::Entity* planeEntity;
-	scene::Entity* crateEntity;
-	scene::Entity* lightPlaceholder;
-	scene::Entity* grassInstance;
-	scene::Entity* sunLight;
-	scene::Entity* arms;
-	scene::Entity* sphere;
+
+	std::shared_ptr<scene::Entity> modelEntity;
+	std::shared_ptr<scene::Entity> boxEntity;
+	std::shared_ptr<scene::Entity> skyEntity;
+	std::shared_ptr<scene::Entity> planeEntity;
+	std::shared_ptr<scene::Entity> crateEntity;
+	std::shared_ptr<scene::Entity> lightPlaceholder;
+	std::shared_ptr<scene::Entity> otherLight;
+	std::shared_ptr<scene::Entity> grassInstance;
+	std::shared_ptr<scene::Entity> sunLight;
+	std::shared_ptr<scene::Entity> arms;
+	std::shared_ptr<scene::Entity> sphere;
+	std::shared_ptr<scene::Entity> wallEntity;
 
 	bool mouseControl = false;
 	float speed = 2.5f;
@@ -98,18 +132,14 @@ private:
 	glm::vec3 sunDirection;
 	glm::vec3 albedo = glm::vec3(1.0f, 0.84f, 0.0f);
 
-	graphics::Mesh* planeMesh;
-	graphics::Mesh* skyboxMesh;
-	graphics::Mesh* crateMesh;
-	graphics::Mesh* boxMesh;
-	graphics::Mesh* sphereMesh;
-	std::shared_ptr<graphics::Texture> crateTex;
-	std::shared_ptr<graphics::Material> wallMat;
-	std::shared_ptr<graphics::Material> armsMat;
-
-	animation::Animation* handsAnim;
-	animation::Animation* handsAnim2;
-	animation::Animator* animator;
+	std::shared_ptr<animation::Animation> handsAnim;
+	std::shared_ptr<animation::Animation> handsAnim2;
+	std::shared_ptr<animation::Animator> animator;
+	std::shared_ptr<animation::AnimationStateMachine> armsStateMachine;
+	std::shared_ptr<animation::AnimationState> idleState;
+	std::shared_ptr<animation::AnimationState> punchState;
+	std::shared_ptr<MyAnimationTransition> idleToPunchTransition;
+	std::shared_ptr<animation::AnimationTransition> punchToIdleTransition;
 
 	Rml::ElementDocument* document;
 
@@ -117,11 +147,20 @@ public:
 	core::WindowProperties GetWindowProperties() override
 	{
 		core::WindowProperties props;
+		props.title = "Sandbox";
 		props.w = 1280;
 		props.h = 720;
 		props.imguiProps.IsDockingEnabled = true;
 
 		return props;
+	}
+
+	based::GameSettings GetGameSettings() override
+	{
+		based::GameSettings settings;
+		settings.gameMemory = 1;
+
+		return settings;
 	}
 
 	void Initialize() override
@@ -155,27 +194,32 @@ public:
 		// TODO: Confirm local transforms work in 2D, scene loading
 		
 		// Set up crate object and material
-		crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
-		const auto crateMat = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag"));
+		const auto crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
+		const auto crateMat = graphics::Material::CreateMaterial(
+			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag"), 
+			DEFAULT_MAT_LIB, "Crate");
 		crateMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		crateMat->SetUniformValue("material.shininessMat.color", glm::vec4(128.f));
 		crateMat->SetUniformValue("material.diffuseMat.useSampler", 1);
 		crateMat->AddTexture(crateTex, "material.diffuseMat.tex");
-		crateMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), crateMat);
-		crateEntity = scene::Entity::CreateEntity<scene::Entity>();
+		const auto crateMesh = graphics::Mesh::CreateMesh(
+			graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"),
+			crateMat, DEFAULT_MESH_LIB, "CrateMesh");
+		crateEntity = scene::Entity::CreateEntity<scene::Entity>("Crate");
 		crateEntity->AddComponent<scene::MeshRenderer>(crateMesh);
 		crateEntity->SetPosition(glm::vec3(2.7f, 1.f, 1.7f));
 		crateEntity->SetEntityName("Crate");
 
 		// Set up second cube object
-		const auto distanceMat = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/custom/cube_distance.frag"));
+		const auto distanceMat = graphics::Material::CreateMaterial(
+			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/custom/cube_distance.frag"),
+			DEFAULT_MAT_LIB, "DistCube");
 		distanceMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		distanceMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
-		boxMesh = new graphics::Mesh(
-			graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), distanceMat);
-		const auto boxEntity = scene::Entity::CreateEntity<scene::Entity>();
+		const auto boxMesh = graphics::Mesh::CreateMesh(
+			graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), distanceMat,
+			DEFAULT_MESH_LIB, "BoxMesh");
+		boxEntity = scene::Entity::CreateEntity<scene::Entity>("Box");
 		boxEntity->AddComponent<scene::MeshRenderer>(boxMesh);
 		boxEntity->SetPosition(glm::vec3(0.f, 2.f, 0.f));
 		boxEntity->SetEntityName("Box");
@@ -186,28 +230,31 @@ public:
 		// Skybox material setup
 
 		const auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
-		const auto skybox = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"));
+		const auto skybox = graphics::Material::CreateMaterial(
+			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"),
+			DEFAULT_MAT_LIB, "Skybox");
 		skybox->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		skybox->SetUniformValue("material.diffuseMat.useSampler", 1);
 		skybox->AddTexture(skyboxTex);
-		graphics::DefaultLibraries::GetMaterialLibrary().Load("Sky", skybox);
 
 		// Generate plane mesh and skybox cube
-		planeMesh = GeneratePlane(100, 100);
-		skyboxMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("AtlasTextureCube"), skybox);
+		const auto planeMesh = GeneratePlane(100, 100);
+		const auto skyboxMesh = graphics::Mesh::CreateMesh(
+			graphics::DefaultLibraries::GetVALibrary().Get("AtlasTextureCube"),
+			skybox, DEFAULT_MESH_LIB, "SkyboxMesh");
 
 		// Skybox setup
-		skyEntity = scene::Entity::CreateEntity<scene::Entity>();
+		skyEntity = scene::Entity::CreateEntity<scene::Entity>("Sky");
 		skyEntity->AddComponent<scene::MeshRenderer>(skyboxMesh);
 		skyEntity->SetScale(glm::vec3(500.f));
 		skyEntity->SetEntityName("Skybox");
 
 		// Set up plane material
-		planeEntity = scene::Entity::CreateEntity<scene::Entity>();
+		planeEntity = scene::Entity::CreateEntity<scene::Entity>("Plane");
 		planeEntity->SetPosition({-50.f, 0.f, -50.f});
-		planeMesh->material = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/custom/heightmap.vert", "Assets/shaders/custom/terrain.frag"));
+		planeMesh->material = graphics::Material::CreateMaterial(
+			LOAD_SHADER("Assets/shaders/custom/heightmap.vert", "Assets/shaders/custom/terrain.frag"),
+			DEFAULT_MAT_LIB, "Plane");
 		planeMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		planeMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
 		planeMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
@@ -218,8 +265,10 @@ public:
 
 		// Load grass mesh and set up material
 		const auto grassMesh = graphics::Model::LoadSingleMesh("Assets/Models/grass_highPoly.obj");
-		const auto grassMatBase = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/custom/grass.vert", "Assets/shaders/custom/grass.frag"));
+		graphics::DefaultLibraries::GetMeshLibrary().Load("GrassMesh", grassMesh);
+		const auto grassMatBase = graphics::Material::CreateMaterial(
+			LOAD_SHADER("Assets/shaders/custom/grass.vert", "Assets/shaders/custom/grass.frag"),
+			DEFAULT_MAT_LIB, "Grass");
 		grassMesh->material = grassMatBase;
 		grassMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		grassMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(12.f));
@@ -228,9 +277,11 @@ public:
 		grassMatBase->AddTexture(heightMap);
 
 		// Set up grass instancing
-		auto grassInstanceMesh = new graphics::InstancedMesh(grassMesh->vertices, grassMesh->indices, grassMesh->textures);
+		const auto grassInstanceMesh = graphics::Mesh::CreateInstancedMesh(
+			grassMesh->vertices, grassMesh->indices, grassMesh->textures,
+			DEFAULT_MESH_LIB, "GrassInstanceMesh");
 		grassInstanceMesh->material = grassMatBase;
-		grassInstance = scene::Entity::CreateEntity<scene::Entity>();
+		grassInstance = scene::Entity::CreateEntity<scene::Entity>("Grass");
 		grassInstance->AddComponent<scene::MeshRenderer>(grassInstanceMesh);
 		grassInstance->SetEntityName("Grass");
 
@@ -253,13 +304,16 @@ public:
 		//grassInstance->SetActive(false);
 
 		// Set up light placeholder
-		const auto cubeMat = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"));
+		const auto cubeMat = graphics::Material::CreateMaterial(
+			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"),
+			DEFAULT_MAT_LIB, "Cube");
 		cubeMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		cubeMat->SetUniformValue("material.diffuseMat.useSampler", 0);
 		cubeMat->SetUniformValue("castShadows", 0);
-		auto cubeMesh = new graphics::Mesh(graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), cubeMat);
-		lightPlaceholder = scene::Entity::CreateEntity<scene::Entity>();
+		const auto cubeMesh = graphics::Mesh::CreateMesh(
+			graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"),
+			cubeMat, DEFAULT_MESH_LIB, "LightCubeMesh");
+		lightPlaceholder = scene::Entity::CreateEntity<scene::Entity>("Light1");
 		lightPlaceholder->AddComponent<scene::MeshRenderer>(cubeMesh);
 		lightPlaceholder->AddComponent<scene::PointLight>(1.0f, 0.0014f, 0.0007f, glm::vec3(1.f));
 		lightPlaceholder->SetPosition(lightPosition);
@@ -267,7 +321,7 @@ public:
 		lightPlaceholder->SetEntityName("LIGHT 1");
 
 		// Set up second light
-		const auto otherLight = scene::Entity::CreateEntity<scene::Entity>();
+		otherLight = scene::Entity::CreateEntity<scene::Entity>("Light2");
 		otherLight->AddComponent<scene::MeshRenderer>(cubeMesh);
 		otherLight->AddComponent<scene::PointLight>(1.0f, 0.09f, 0.032f, glm::vec3(1.f));
 		otherLight->SetPosition(glm::vec3(1.8f, 2.4f, 2.2f));
@@ -275,69 +329,72 @@ public:
 		otherLight->SetEntityName("LIGHT 2");
 
 		// Add sun light
-		sunLight = scene::Entity::CreateEntity<scene::Entity>();
+		sunLight = scene::Entity::CreateEntity<scene::Entity>("Sun");
 		sunLight->AddComponent<scene::DirectionalLight>(glm::vec3(1.f));
 		sunLight->SetEntityName("Sun");
 
 		// Set up brick wall material
 		const auto wallDiffuseTex = std::make_shared<graphics::Texture>("Assets/brick-wall/brickwall-diff.jpg", true);
 		const auto wallNormalMapTex = std::make_shared<graphics::Texture>("Assets/brick-wall/brickwall-norm.jpg", true);
-		const auto wallShader = LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag");
-		wallMat = std::make_shared<graphics::Material>(wallShader);
+		const auto wallMat = graphics::Material::CreateMaterial(
+			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag"),
+			DEFAULT_MAT_LIB, "Wall");
 		wallMat->AddTexture(wallDiffuseTex, "material.diffuseMat.tex");
 		wallMat->SetUniformValue("material.diffuseMat.useSampler", 1);
 		wallMat->AddTexture(wallNormalMapTex, "material.normalMat.tex");
 		wallMat->SetUniformValue("material.normalMat.useSampler", 1);
 		wallMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
 		// Add brick wall entity
-		const auto wallEntity = scene::Entity::CreateEntity<scene::Entity>(glm::vec3(5, 3.5f, 0)
+		wallEntity = scene::Entity::CreateEntity<scene::Entity>("Wall", glm::vec3(5, 3.5f, 0)
 			, glm::vec3(90, 0, 0));
 		const auto wallMesh = GeneratePlane(2, 2);
 		wallMesh->material = wallMat;
 		wallEntity->AddComponent<scene::MeshRenderer>(wallMesh);
+		wallEntity->SetEntityName("Wall");
 
 		// Create arms material
-		armsMat = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/basic_lit_bones.vert", "Assets/shaders/basic_lit.frag"));
+		const auto armsMat = graphics::Material::CreateMaterial(
+			LOAD_SHADER("Assets/shaders/basic_lit_bones.vert", "Assets/shaders/basic_lit.frag"),
+			DEFAULT_MAT_LIB, "Arms");
 		const auto armsTex = std::make_shared<graphics::Texture>("Assets/Models/Base Color Palette Diffuse.png", true);
 		armsMat->AddTexture(armsTex, "material.diffuseMat.tex");
 		armsMat->SetUniformValue("material.diffuseMat.tint", glm::vec4(0.77f, 0.4f, 0.35f, 1.f));
 		armsMat->SetUniformValue("material.diffuseMat.useSampler", 1);
 		// Create arms
-		const auto armModel = new graphics::Model("Assets/Models/Arms.fbx");
+		const auto armModel = graphics::Model::CreateModel(
+			"Assets/Models/Arms.fbx", DEFAULT_MODEL_LIB, "ArmsModel");
+		auto lib = graphics::DefaultLibraries::GetModelLibrary();
 		armModel->SetMaterial(armsMat);
-		arms = new scene::Entity(GetCurrentScene()->GetRegistry());
+		arms = scene::Entity::CreateEntity<scene::Entity>("Arms");
 		arms->AddComponent<scene::ModelRenderer>(armModel);
 		arms->SetPosition({ 0, 5, 0 });
 		arms->SetScale({ 0.01f, 0.01f, 0.01f });
 		// Create arms animations and animator
-		handsAnim = new animation::Animation("Assets/Models/Arms.fbx", armModel, 0);
-		handsAnim2 = new animation::Animation("Assets/Models/Arms.fbx", armModel, "HumanFPS|Punch");
+		handsAnim = std::make_shared<animation::Animation>("Assets/Models/Arms.fbx", armModel, 0);
+		handsAnim2 = std::make_shared<animation::Animation>("Assets/Models/Arms.fbx", armModel, "HumanFPS|Punch");
 		handsAnim->SetPlaybackSpeed(0.5f);
 		handsAnim->SetLooping(true);
-		animator = new animation::Animator(handsAnim);
+		animator = std::make_shared<animation::Animator>(handsAnim);
 		// Create state machine, states, and transitions
-		auto armsStateMachine = new animation::AnimationStateMachine(animator);
-		const auto idleState = new animation::AnimationState(handsAnim);
-		const auto punchState = new animation::AnimationState(handsAnim2);
-		auto idleToPunchPredicate = [armsStateMachine]()
-		{
-			return armsStateMachine->GetBool("punch", false);
-		};
-		const auto idleToPunchTransition = new animation::AnimationTransition(idleState, punchState, 
-		                                                                      animator, idleToPunchPredicate);
-		const auto punchToIdleTransition = new animation::AnimationTransition(punchState, idleState, animator);
+		armsStateMachine = std::make_shared<animation::AnimationStateMachine>(animator);
+		idleState = std::make_shared<animation::AnimationState>(handsAnim, "IdleState");
+		punchState = std::make_shared<animation::AnimationState>(handsAnim2, "PunchState");
+
+		idleToPunchTransition = std::make_shared<MyAnimationTransition>(idleState, punchState, animator, armsStateMachine);
+		punchToIdleTransition = std::make_shared<animation::AnimationTransition>(punchState, idleState, animator);
 		idleState->AddTransition(idleToPunchTransition);
 		punchState->AddTransition(punchToIdleTransition);
 		armsStateMachine->AddState(idleState, true);
 		armsStateMachine->AddState(punchState);
 		animator->SetStateMachine(armsStateMachine);
 		arms->AddComponent<scene::AnimatorComponent>(animator);
+		arms->SetEntityName("Arms");
 
 		// TODO: Fix rotations so the hands don't rotate on Z when rotating on X and Y
 
-		const auto sphereMat = std::make_shared<graphics::Material>(
-			LOAD_SHADER("Assets/shaders/pbr_lit.vert", "Assets/shaders/pbr_lit.frag"));
+		const auto sphereMat = graphics::Material::CreateMaterial(
+			LOAD_SHADER("Assets/shaders/pbr_lit.vert", "Assets/shaders/pbr_lit.frag"),
+			DEFAULT_MAT_LIB, "Sphere");
 		const auto sandAlbedo = std::make_shared<graphics::Texture>("Assets/sand_albedo.png");
 		const auto sandRoughness = std::make_shared<graphics::Texture>("Assets/sand_roughness.png");
 		const auto sandNormal = std::make_shared<graphics::Texture>("Assets/sand_normal.png");
@@ -355,14 +412,15 @@ public:
 		sphereMat->SetUniformValue("material.normal.useSampler", 1);
 		sphereMat->SetUniformValue("material.ambientOcclusion.useSampler", 1);
 		//sphereMat->SetUniformValue("material.albedo.color", glm::vec4(1.0f, 0.84f, 0.0f, 1.0f));
-		graphics::DefaultLibraries::GetMaterialLibrary().Load("Dirt", sphereMat);
-		sphereMesh = graphics::Model::LoadSingleMesh("Assets/Models/sphere.obj");
+		const auto sphereMesh = graphics::Model::LoadSingleMesh("Assets/Models/sphere.obj");
+		graphics::DefaultLibraries::GetMeshLibrary().Load("Sphere", sphereMesh);
 		sphereMesh->material = sphereMat;
-		sphere = scene::Entity::CreateEntity<scene::Entity>();
+		sphere = scene::Entity::CreateEntity<scene::Entity>("Sphere");
 		sphere->AddComponent<scene::MeshRenderer>(sphereMesh);
 		sphere->SetEntityName("Sphere");
 
 		// TODO: Clean up and add shadows to PBR
+		// TODO: Add a way to tie object lifetimes to scene lifetime
 
 		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 2, 4));
 		GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(6, 53, 0));
@@ -464,16 +522,11 @@ public:
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_P))
 		{
-			//animator->PlayAnimation(handsAnim2);
 			animator->GetStateMachine()->SetBool("punch", true);
 		}
 		if (input::Keyboard::KeyUp(BASED_INPUT_KEY_P))
 		{
 			animator->GetStateMachine()->SetBool("punch", false);
-		}
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_O))
-		{
-			animator->PlayAnimation(handsAnim);
 		}
 
 		// Set light position and pass info to shaders
@@ -486,20 +539,31 @@ public:
 
 		crateEntity->SetRotation(cubeRot);
 
-		boxMesh->material->SetUniformValue("cratePos", crateEntity->GetTransform().Position);
-		boxMesh->material->SetUniformValue("useLight", static_cast<int>(useLight));
+		auto matLib = graphics::DefaultLibraries::GetMaterialLibrary();
+		const auto boxMat = matLib.Get("DistCube");
+		const auto crateMat = matLib.Get("Crate");
+		const auto planeMat = matLib.Get("Plane");
+		const auto sphereMat = matLib.Get("Sphere");
+		const auto wallMat = matLib.Get("Wall");
+		const auto grassMat = matLib.Get("Grass");
 
-		crateMesh->material->SetUniformValue("ambientStrength", ambientStrength);
-		crateMesh->material->SetUniformValue("useLight", static_cast<int>(useLight));
+		if (boxMat && crateMat && planeMat && sphereMat && wallMat && grassMat)
+		{
+			boxMat->SetUniformValue("cratePos", crateEntity->GetTransform().Position);
+			boxMat->SetUniformValue("useLight", static_cast<int>(useLight));
 
-		planeMesh->material->SetUniformValue("ambientStrength", ambientStrength);
-		planeMesh->material->SetUniformValue("heightCoef", heightCoef);
-		planeMesh->material->SetUniformValue("useLight", static_cast<int>(useLight));
+			crateMat->SetUniformValue("ambientStrength", ambientStrength);
+			crateMat->SetUniformValue("useLight", static_cast<int>(useLight));
 
-		sphereMesh->material->SetUniformValue("material.albedo.color", glm::vec4(albedo, 1.0f));
-		sphereMesh->material->SetUniformValue("material.metallic.color", glm::vec4(metallic));
-		sphereMesh->material->SetUniformValue("material.roughness.color", glm::vec4(roughness));
-		sphereMesh->material->SetUniformValue("material.ambientOcclusion.color", glm::vec4(ao));
+			planeMat->SetUniformValue("ambientStrength", ambientStrength);
+			planeMat->SetUniformValue("heightCoef", heightCoef);
+			planeMat->SetUniformValue("useLight", static_cast<int>(useLight));
+
+			sphereMat->SetUniformValue("material.albedo.color", glm::vec4(albedo, 1.0f));
+			sphereMat->SetUniformValue("material.metallic.color", glm::vec4(metallic));
+			sphereMat->SetUniformValue("material.roughness.color", glm::vec4(roughness));
+			sphereMat->SetUniformValue("material.ambientOcclusion.color", glm::vec4(ao));
+		}
 
 		// Disable lights when not using lighting
 		const entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
@@ -507,11 +571,11 @@ public:
 
 		for (const auto light : lights)
 		{
-			scene::Entity* ent = registry.get<scene::EntityReference>(light).entity;
-			ent->SetActive(useLight);
+			auto ent = registry.get<scene::EntityReference>(light).entity;
+			if (auto e = ent.lock()) e->SetActive(useLight);
 		}
 
-		UpdateShaders(grassInstance->GetComponent<scene::MeshRenderer>().mesh, useLight, ambientStrength, heightCoef);
+		UpdateShaders(grassMat, useLight, ambientStrength, heightCoef);
 
 		// Disable normal maps when not using them
 		if (!useNormalMaps)
@@ -632,29 +696,35 @@ public:
 				int i = 0;
 				for (const auto obj : objects)
 				{
-					scene::Entity* ent = registry.get<scene::EntityReference>(obj).entity;
+					auto ent = registry.get<scene::EntityReference>(obj).entity;
 					scene::Transform trans = registry.get<scene::Transform>(obj);
 
-					glm::vec3 position = trans.Position;
-					glm::vec3 rotation = trans.Rotation;
-					glm::vec3 scale = trans.Scale;
-					bool enabled = ent->IsActive();
-					ImGui::PushID(i);
-					ImGui::Checkbox("", &enabled);
-					ImGui::SameLine();
-					ImGui::Text(ent->GetEntityName().c_str());
-					ImGui::DragFloat3("Position", glm::value_ptr(position), 0.01f);
-					ImGui::DragFloat3("Rotation", glm::value_ptr(rotation), 0.01f);
-					ImGui::DragFloat3("Scale", glm::value_ptr(scale), 0.01f);
-					ImGui::PopID();
-					registry.patch<scene::Transform>(obj, [position, rotation, scale](auto& t) 
-						{ t.Position = position; t.Rotation = rotation; t.Scale = scale; });
-					ent->SetActive(enabled);
-					i++;
+					if (auto e = ent.lock())
+					{
+						glm::vec3 position = !e->Parent.expired() ? trans.LocalPosition : trans.Position;
+						glm::vec3 rotation = !e->Parent.expired() ? trans.LocalRotation : trans.Rotation;
+						glm::vec3 scale = trans.Scale;
+						bool enabled = e->IsActive();
+						ImGui::PushID(i);
+						ImGui::Checkbox("", &enabled);
+						ImGui::SameLine();
+						ImGui::Text(e->GetEntityName().c_str());
+						ImGui::DragFloat3("Position", glm::value_ptr(position), 0.01f);
+						ImGui::DragFloat3("Rotation", glm::value_ptr(rotation), 0.01f);
+						ImGui::DragFloat3("Scale", glm::value_ptr(scale), 0.01f);
+						ImGui::PopID();
+						if (!e->Parent.expired()) e->SetLocalTransform(position, rotation, scale);
+						else e->SetTransform(position, rotation, scale);
+						//registry.patch<scene::Transform>(obj, [position, rotation, scale](auto& t)
+						//	{ t.Position = position; t.Rotation = rotation; t.Scale = scale; });
+						e->SetActive(enabled);
+						i++;
+					}
 				}
 			}
 
 			// Material editor
+			/*
 			if (ImGui::CollapsingHeader("Materials"))
 			{
 				int i = 0;
@@ -662,98 +732,101 @@ public:
 				// Loop over each saved material and create a dropdown for each one
 				for (const auto mat : graphics::DefaultLibraries::GetMaterialLibrary().GetAll())
 				{
-					std::shared_ptr<graphics::Material> material = mat.second;
-
-					ImGui::PushID(i);
-
-					if (ImGui::CollapsingHeader(mat.first.c_str()))
+					if (auto matPtr = mat.second.lock())
 					{
-						ImGui::Indent(10.0f);
-						if (ImGui::Button("Add Texture"))
+						ImGui::PushID(i);
+
+						if (ImGui::CollapsingHeader(mat.first.c_str()))
 						{
-							ImGui::OpenPopup("Texture Setup");
-						}
-						if (ImGui::BeginPopup("Texture Setup"))
-						{
-							// Read in a new texture and activate it in the shader
-							ImGui::Text("Texture Setup");
-							static char texturePath[256] = "";
-							static char samplerName[256] = "";
-							static char enableName[256] = "";
-							ImGui::InputText("Path", texturePath, IM_ARRAYSIZE(texturePath));
-							ImGui::InputText("Sampler", samplerName, IM_ARRAYSIZE(samplerName));
-							// Mainly just for my custom materials, since all of them have a bool to disable texture sampling
-							ImGui::InputText("Enable Sampler", enableName, IM_ARRAYSIZE(enableName));
-							if (ImGui::Button("Submit"))
+							ImGui::Indent(10.0f);
+							if (ImGui::Button("Add Texture"))
 							{
-								std::shared_ptr<graphics::Texture> tex = std::make_shared<graphics::Texture>(texturePath);
-								material->AddTexture(tex, samplerName);
-								if (enableName != "") material->SetUniformValue(enableName, 1);
-								ImGui::CloseCurrentPopup();
+								ImGui::OpenPopup("Texture Setup");
 							}
-							ImGui::EndPopup();
-						}
-						// Get all float uniforms and create an editable slider
-						for (const auto& f : material->GetShader()->GetUniformFloats())
-						{
-							if (f.first.find("pointLight") != -1) continue;
-							float temp = f.second;
-							ImGui::DragFloat(f.first.c_str(), &temp, 0.01f);
-							material->SetUniformValue(f.first, temp);
-						}
-
-						// Setup for texture combo box, each texture must have it's own current index
-						int j = 0;
-						static std::vector<int> itemIndex;
-						itemIndex.resize(static_cast<int>(material->GetShader()->GetUniformSamplers().size()));
-						// Get all texture samplers and create combo boxes to select what texture they sample
-						for (const auto& f : material->GetShader()->GetUniformSamplers())
-						{
-							// Get texture names from library key set, plus None
-							auto items = *graphics::DefaultLibraries::GetTextureLibrary().GetKeys();
-							items.insert(items.begin(), "None");
-							auto preview = items[itemIndex[j]];
-
-							ImGui::PushID(j);
-							if (ImGui::BeginCombo(f.first.c_str(), preview.c_str()))
+							if (ImGui::BeginPopup("Texture Setup"))
 							{
-								// Create a selectable in the dropdown for each texture
-								for (int n = 0; n < (int)(graphics::DefaultLibraries::GetTextureLibrary().GetAll().size()) + 1; n++)
+								// Read in a new texture and activate it in the shader
+								ImGui::Text("Texture Setup");
+								static char texturePath[256] = "";
+								static char samplerName[256] = "";
+								static char enableName[256] = "";
+								ImGui::InputText("Path", texturePath, IM_ARRAYSIZE(texturePath));
+								ImGui::InputText("Sampler", samplerName, IM_ARRAYSIZE(samplerName));
+								// Mainly just for my custom materials, since all of them have a bool to disable texture sampling
+								ImGui::InputText("Enable Sampler", enableName, IM_ARRAYSIZE(enableName));
+								if (ImGui::Button("Submit"))
 								{
-									auto item = items[n];
-									const bool isSelected = itemIndex[j] == n;
-									if (ImGui::Selectable(item.c_str(), isSelected))
-									{
-										// On selected, decide what happens
-										itemIndex[j] = n;
-										if (items[n] == "None")
-										{
-											material->RemoveTexture(f.first);
-											int index = static_cast<int>(f.first.find(".tex"));
-											material->SetUniformValue(f.first.substr(*f.first.begin() - f.first[0],
-												index) + ".useSampler", 0);
-										} else
-										{
-											material->AddTexture(graphics::DefaultLibraries::GetTextureLibrary().Get(items[n]),
-												f.first);
-											int index = static_cast<int>(f.first.find(".tex"));
-											material->SetUniformValue(f.first.substr(*f.first.begin() - f.first[0], 
-												index) + ".useSampler", 1);
-										}
-									}
-									if (isSelected) ImGui::SetItemDefaultFocus();
+									std::shared_ptr<graphics::Texture> tex = std::make_shared<graphics::Texture>(texturePath);
+									matPtr->AddTexture(tex, samplerName);
+									if (enableName != "") matPtr->SetUniformValue(enableName, 1);
+									ImGui::CloseCurrentPopup();
 								}
-								ImGui::EndCombo();
+								ImGui::EndPopup();
 							}
-							ImGui::PopID();
-							j++;
-						}
-					}
+							// Get all float uniforms and create an editable slider
+							for (const auto& f : matPtr->GetShader()->GetUniformFloats())
+							{
+								if (f.first.find("pointLight") != -1) continue;
+								float temp = f.second;
+								ImGui::DragFloat(f.first.c_str(), &temp, 0.01f);
+								matPtr->SetUniformValue(f.first, temp);
+							}
 
-					ImGui::PopID();
-					i++;
+							// Setup for texture combo box, each texture must have it's own current index
+							int j = 0;
+							static std::vector<int> itemIndex;
+							itemIndex.resize(static_cast<int>(matPtr->GetShader()->GetUniformSamplers().size()));
+							// Get all texture samplers and create combo boxes to select what texture they sample
+							for (const auto& f : matPtr->GetShader()->GetUniformSamplers())
+							{
+								// Get texture names from library key set, plus None
+								auto items = graphics::DefaultLibraries::GetTextureLibrary().GetKeys();
+								items.insert(items.begin(), "None");
+								auto preview = items[itemIndex[j]];
+
+								ImGui::PushID(j);
+								if (ImGui::BeginCombo(f.first.c_str(), preview.c_str()))
+								{
+									// Create a selectable in the dropdown for each texture
+									for (int n = 0; n < (int)(graphics::DefaultLibraries::GetTextureLibrary().GetAll().size()) + 1; n++)
+									{
+										auto item = items[n];
+										const bool isSelected = itemIndex[j] == n;
+										if (ImGui::Selectable(item.c_str(), isSelected))
+										{
+											// On selected, decide what happens
+											itemIndex[j] = n;
+											if (items[n] == "None")
+											{
+												matPtr->RemoveTexture(f.first);
+												int index = static_cast<int>(f.first.find(".tex"));
+												matPtr->SetUniformValue(f.first.substr(*f.first.begin() - f.first[0],
+													index) + ".useSampler", 0);
+											}
+											else
+											{
+												matPtr->AddTexture(graphics::DefaultLibraries::GetTextureLibrary().Get(items[n]),
+													f.first);
+												int index = static_cast<int>(f.first.find(".tex"));
+												matPtr->SetUniformValue(f.first.substr(*f.first.begin() - f.first[0],
+													index) + ".useSampler", 1);
+											}
+										}
+										if (isSelected) ImGui::SetItemDefaultFocus();
+									}
+									ImGui::EndCombo();
+								}
+								ImGui::PopID();
+								j++;
+							}
+						}
+
+						ImGui::PopID();
+						i++;
+					}
 				}
 			}
+			*/
 		}
 		ImGui::End();
 	}
@@ -790,13 +863,13 @@ public:
 		return {attitude, heading, bank};
 	}
 
-	void UpdateShaders(const graphics::Mesh* mesh, const bool useLight, float ambientStrength, float height)
+	static void UpdateShaders(const std::shared_ptr<graphics::Material>& mat, const bool useLight, float ambientStrength, float height)
 	{
-		mesh->material->SetUniformValue("ambientStrength", ambientStrength);
+		mat->SetUniformValue("ambientStrength", ambientStrength);
 
-		mesh->material->SetUniformValue("heightCoef", height);
+		mat->SetUniformValue("heightCoef", height);
 
-		mesh->material->SetUniformValue("useLight", static_cast<int>(useLight));
+		mat->SetUniformValue("useLight", static_cast<int>(useLight));
 	}
 };
 

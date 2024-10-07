@@ -2,6 +2,8 @@
 
 // Arena allocator taken from https://github.com/FaultyPine/tiny_engine by Grayson Clark
 
+#include <unordered_map>
+
 #include "memory/memoryhelpers.h"
 
 namespace based::memory
@@ -9,6 +11,7 @@ namespace based::memory
 	struct Arena
 	{
 		unsigned char* mBackingMemory = 0;
+		std::unordered_map<void*, size_t> mFreeList;
 		size_t mBackingMemorySize = 0;
 		size_t mOffset = 0;
 		size_t mPreviousOffset = 0;
@@ -20,6 +23,7 @@ namespace based::memory
 
 	void* ArenaAlloc(Arena* arena, size_t allocSize);
 	void* ResizeArena(Arena* arena, void* oldMemory, size_t oldSize, size_t newSize);
+	void ArenaRelease(Arena* arena, void* memoryToRelease, size_t releaseSize);
 
 	void ArenaPopLatest(Arena* arena, void* data);
 	void ClearArena(Arena* arena);

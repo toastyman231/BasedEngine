@@ -2,7 +2,7 @@
 
 namespace based::graphics
 {
-	void Model::Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
+	void Model::Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) const
 	{
 		for (unsigned int i = 0; i < meshes.size(); i++)
 		{
@@ -12,39 +12,30 @@ namespace based::graphics
 
 	void Model::SetMaterial(const std::shared_ptr<Material>& mat, int index)
 	{
-		for (int i = 0; i < mMaterials.size(); ++i)
+		if (index < 0 || index >= static_cast<int>(mMaterials.size()))
 		{
-			mMaterials[i] = mat;
+			BASED_WARN("Trying to set index {}, but there are only {} materials!", index, mMaterials.size());
+			return;
 		}
+
+		mMaterials[index] = mat;
 	}
 
-	scene::Entity* Model::CreateModelEntity(const std::string& path)
-	{
-		PROFILE_FUNCTION();
-		Model* model = new Model();
-		auto* rootEntity = scene::Entity::CreateEntity<scene::Entity>();
-
-		Assimp::Importer import;
-		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-
-		rootEntity->SetEntityName(std::string(scene->mName.C_Str()));
-
-		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-		{
-			BASED_ERROR("Assimp Error: {}", import.GetErrorString());
-			return rootEntity;
-		}
-		model->directory = path.substr(0, path.find_last_of('/'));
-
-		model->ProcessNodeEntity(rootEntity, scene->mRootNode, scene);
-
-		return rootEntity;
-	}
-
-	graphics::Mesh* Model::LoadSingleMesh(const std::string& path)
+	std::shared_ptr<Mesh> Model::LoadSingleMesh(const std::string& path)
 	{
 		const Model* model = new Model(path.c_str());
-		return model->meshes[0];
+		std::shared_ptr<Mesh> meshToCopy = model->meshes[0];
+		delete model;
+
+		return meshToCopy;
+	}
+
+	std::shared_ptr<Model> Model::CreateModel(const std::string& path, core::AssetLibrary<Model>& assetLibrary,
+		const std::string& name)
+	{
+		auto model = std::make_shared<Model>(path.c_str(), name);
+		assetLibrary.Load(name, model);
+		return model;
 	}
 
 	void Model::LoadModel(std::string path)
@@ -58,7 +49,7 @@ namespace based::graphics
 			BASED_ERROR("Assimp Error: {}", import.GetErrorString());
 			return;
 		}
-		directory = path.substr(0, path.find_last_of('/'));
+		mDirectory = path.substr(0, path.find_last_of('/'));
 
 		ProcessNode(scene->mRootNode, scene);
 	}
@@ -70,7 +61,7 @@ namespace based::graphics
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			meshes.push_back(ProcessMesh(mesh, scene));
+			ProcessMesh(mesh, scene);
 		}
 		// then do the same for each of its children
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -79,31 +70,7 @@ namespace based::graphics
 		}
 	}
 
-	void Model::ProcessNodeEntity(scene::Entity* parent, aiNode* node, const aiScene* scene)
-	{
-		PROFILE_FUNCTION();
-		auto* childEntity = scene::Entity::CreateEntity<scene::Entity>();
-		if (node->mNumMeshes > 0) childEntity->SetParent(parent);
-
-		// process all the node's meshes (if any)
-		for (unsigned int i = 0; i < node->mNumMeshes; i++)
-		{
-			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			childEntity->SetEntityName(std::string(mesh->mName.C_Str()));
-			Mesh* processedMesh = ProcessMesh(mesh, scene);
-			meshes.push_back(processedMesh);
-			meshes.back()->material = std::move(mMaterials.back());
-			childEntity->AddComponent<scene::MeshRenderer>(processedMesh, this);
-		}
-		// then do the same for each of its children
-		for (unsigned int i = 0; i < node->mNumChildren; i++)
-		{
-			if (node->mNumMeshes == 0) ProcessNodeEntity(parent, node->mChildren[i], scene);
-			else ProcessNodeEntity(childEntity, node->mChildren[i], scene);
-		}
-	}
-
-	graphics::Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+	void Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		PROFILE_FUNCTION();
 		std::vector<Vertex> vertices;
@@ -147,7 +114,7 @@ namespace based::graphics
 				vertex.Tangent = vector;
 			}
 
-			vertices.push_back(vertex);
+			vertices.emplace_back(vertex);
 		}
 
 		// process indices
@@ -155,7 +122,7 @@ namespace based::graphics
 		{
 			aiFace face = mesh->mFaces[i];
 			for (unsigned int j = 0; j < face.mNumIndices; j++)
-				indices.push_back(face.mIndices[j]);
+				indices.emplace_back(face.mIndices[j]);
 		}
 
 		// process material
@@ -170,7 +137,7 @@ namespace based::graphics
 
 		ExtractBoneWeightForVertices(vertices, mesh, scene);
 
-		return new Mesh(vertices, indices, textures);
+		meshes.emplace_back(std::make_shared<Mesh>(vertices, indices, textures));
 	}
 
 	std::shared_ptr<Material> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
@@ -229,7 +196,7 @@ namespace based::graphics
 				bool result = stat(str.C_Str(), &sb) == 0;
 				if (!result)
 				{
-					str = directory + std::string("/") + str.C_Str();
+					str = mDirectory + std::string("/") + str.C_Str();
 				}
 				BASED_TRACE("Texture location: {}", str.C_Str());
 

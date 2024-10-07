@@ -1,6 +1,10 @@
 #pragma once
 
-//#include "vld.h"
+#ifdef PROFILE_MEMORY_LEAKS
+#ifdef BASED_CONFIG_DEBUG
+#include "vld.h"
+#endif
+#endif
 
 #include "engine.h"
 #include "app.h"

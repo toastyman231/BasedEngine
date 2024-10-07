@@ -9,22 +9,27 @@ namespace based::animation
 	class Animator
 	{
 	public:
-		Animator(Animation* animation);
+		Animator(const std::shared_ptr<Animation>& animation);
+		~Animator()
+		{
+			BASED_TRACE("Destroying animator");
+		}
+
 		void UpdateAnimation(float dt);
-		void PlayAnimation(Animation* pAnimation);
+		void PlayAnimation(const std::shared_ptr<Animation>& pAnimation);
 		void CalculateBoneTransform(const AssimpNodeData* node, const glm::mat4& parentTransform, 
-			Animation* animation);
+			std::weak_ptr<Animation> animation);
 		std::vector<glm::mat4> GetFinalBoneMatrices();
 		float blendSpeed = 5.f;
 
 		inline float GetPlaybackTime() const { return m_CurrentTime; }
-		inline void SetStateMachine(AnimationStateMachine* machine) { m_StateMachine = machine; }
-		inline AnimationStateMachine* GetStateMachine() const { return m_StateMachine; }
+		inline void SetStateMachine(const std::shared_ptr<AnimationStateMachine>& machine) { m_StateMachine = machine; }
+		inline std::shared_ptr<AnimationStateMachine> GetStateMachine() const { return m_StateMachine; }
 	private:
 		std::vector<glm::mat4> m_FinalBoneMatrices;
-		Animation* m_CurrentAnimation;
-		Animation* m_OldAnimation;
-		AnimationStateMachine* m_StateMachine;
+		std::weak_ptr<Animation> m_CurrentAnimation;
+		std::weak_ptr<Animation> m_OldAnimation;
+		std::shared_ptr<AnimationStateMachine> m_StateMachine;
 		float m_PreviousTime;
 		float m_CurrentTime;
 		float m_DeltaTime;
@@ -35,47 +40,59 @@ namespace based::animation
 	{
 	public:
 		AnimationState() = default;
-		AnimationState(Animation* anim) : m_Animation(anim), m_Speed(1.f) {}
+		AnimationState(const std::shared_ptr<Animation>& anim, const std::string& name = "New State")
+			: m_Animation(anim), m_Speed(1.f), m_Name(name) {}
 		virtual ~AnimationState() = default;
 
-		virtual void OnStateEnter(Animator* animator) {}
-		virtual void OnStateExit(Animator* animator) {}
-		virtual void OnStateUpdate(Animator* animator) {}
+		virtual void OnStateEnter(const std::shared_ptr<Animator>& animator) {}
+		virtual void OnStateExit(const std::shared_ptr<Animator>& animator) {}
+		virtual void OnStateUpdate(const std::shared_ptr<Animator>& animator) {}
 
-		std::vector<AnimationTransition*> GetTransitions() const { return m_Transitions; }
-		void AddTransition(AnimationTransition* transition);
+		std::vector<std::shared_ptr<AnimationTransition>> GetTransitions() const { return m_Transitions; }
+		void AddTransition(const std::shared_ptr<AnimationTransition>& transition);
 
 		inline void SetPlaybackSpeed(float speed) { m_Speed = speed; }
 		inline float GetPlaybackSpeed() const { return m_Speed; }
-		inline Animation* GetStateAnimationClip() const { return m_Animation; }
+		inline std::shared_ptr<Animation> GetStateAnimationClip() const { return m_Animation.lock(); }
+
+		inline const std::string& GetStateName() const { return m_Name; }
 	private:
-		Animation* m_Animation;
-		std::vector<AnimationTransition*> m_Transitions;
+		std::weak_ptr<Animation> m_Animation;
+		std::vector<std::shared_ptr<AnimationTransition>> m_Transitions;
 		float m_Speed;
+		std::string m_Name;
 	};
 
 	class AnimationTransition
 	{
 	public:
 		AnimationTransition() = default;
-		AnimationTransition(AnimationState* source, AnimationState* destination, 
-			Animator* animator, std::function<bool()> predicate = nullptr)
+		AnimationTransition(const std::shared_ptr<AnimationState>& source, const std::shared_ptr<AnimationState>& destination, 
+			const std::shared_ptr<Animator>& animator, std::function<bool()> predicate = nullptr)
 			: m_Source(source), m_Destination(destination), m_Animator(animator)
 			, m_Predicate(std::move(predicate)) {}
 		virtual ~AnimationTransition() = default;
 
 		virtual bool ShouldStateTransition() {
 			if (m_Predicate != nullptr) return m_Predicate();
-			else return m_Animator->GetPlaybackTime() >=
-				m_Source->GetStateAnimationClip()->GetDuration();
+
+			if (auto anim = m_Animator.lock())
+			{
+				if (auto source = m_Source.lock())
+					return anim->GetPlaybackTime() >= source->GetStateAnimationClip()->GetDuration();
+				BASED_WARN("Source state is invalid!");
+			}
+			else { BASED_WARN("Animator is invalid!"); }
+
+			return false;
 		}
 
-		inline AnimationState* GetSourceState() const { return m_Source; }
-		inline AnimationState* GetDestinationState() const { return m_Destination; }
+		inline std::weak_ptr<AnimationState> GetSourceState() const { return m_Source; }
+		inline std::weak_ptr<AnimationState> GetDestinationState() const { return m_Destination; }
 	private:
-		AnimationState* m_Source;
-		AnimationState* m_Destination;
-		Animator* m_Animator;
+		std::weak_ptr<AnimationState> m_Source;
+		std::weak_ptr<AnimationState> m_Destination;
+		std::weak_ptr<Animator> m_Animator;
 		std::function<bool()> m_Predicate;
 	};
 
@@ -83,12 +100,12 @@ namespace based::animation
 	{
 	public:
 		AnimationStateMachine() = default;
-		AnimationStateMachine(Animator* animator) : m_Animator(animator) {}
+		AnimationStateMachine(const std::shared_ptr<Animator>& animator) : m_Animator(animator) {}
 		virtual ~AnimationStateMachine() = default;
 
-		virtual Animation* DetermineOutputAnimation();
+		virtual std::weak_ptr<Animation> DetermineOutputAnimation();
 
-		void AddState(AnimationState* state, bool isDefault = false);
+		void AddState(const std::shared_ptr<AnimationState>& state, bool isDefault = false);
 
 		void SetFloat(const std::string& name, float value);
 		void SetInteger(const std::string& name, int value);
@@ -100,12 +117,12 @@ namespace based::animation
 		bool GetBool(const std::string& name, bool defaultValue = false);
 		std::string GetString(const std::string& name, std::string defaultValue = "none");
 
-		inline std::vector<AnimationState*> GetStates() const { return m_States; }
-		inline AnimationState* GetCurrentState() const { return m_CurrentState; }
+		inline std::vector<std::shared_ptr<AnimationState>> GetStates() const { return m_States; }
+		inline std::shared_ptr<AnimationState> GetCurrentState() const { return m_CurrentState.lock(); }
 	private:
-		Animator* m_Animator;
-		AnimationState* m_CurrentState;
-		std::vector<AnimationState*> m_States;
+		std::weak_ptr<Animator> m_Animator;
+		std::weak_ptr<AnimationState> m_CurrentState;
+		std::vector<std::shared_ptr<AnimationState>> m_States;
 		std::unordered_map<std::string, float> m_FloatParameters;
 		std::unordered_map<std::string, int> m_IntParameters;
 		std::unordered_map<std::string, bool> m_BoolParameters;

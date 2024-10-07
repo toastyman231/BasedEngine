@@ -5,7 +5,10 @@
 #include <string>
 #include <type_traits>
 
+#include "based/core/assetlibrary.h"
 #include "external/glm/glm.hpp"
+
+#define DEFAULT_MAT_LIB based::graphics::DefaultLibraries::GetMaterialLibrary()
 
 namespace based::graphics
 {
@@ -14,11 +17,14 @@ namespace based::graphics
 	class Material
 	{
 	public:
-		Material(const std::shared_ptr<Shader>& shader);
+		Material(const std::shared_ptr<Shader>& shader, const std::string& name = "New Material");
 		Material(const Material& other);
 		~Material();
 
-		inline Shader* GetShader() const { return mShader.get(); }
+		static std::shared_ptr<Material> CreateMaterial(const std::shared_ptr<Shader>& shader,
+			core::AssetLibrary<Material>& assetLibrary, const std::string& name = "New Material");
+
+		inline std::weak_ptr<Shader> GetShader() const { return mShader; }
 		inline std::vector<std::shared_ptr<Texture>> GetTextures() const { return mTextures; }
 
 		void SetShader(std::shared_ptr<Shader> shader);
@@ -28,7 +34,7 @@ namespace based::graphics
 
 		std::unordered_map<std::string, int> GetTextureOrder() const { return mTextureOrder; }
 
-		std::string materialName;
+		std::string mMaterialName;
 
 #define GETUNIFORMVALUE(mapName, defaultReturn) \
 	const auto& it = mapName.find(name);\

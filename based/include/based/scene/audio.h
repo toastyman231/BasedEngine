@@ -21,22 +21,18 @@ namespace based::scene
 
 		bool IsPlaying() const;
 
-		void SetVolume(float volume);
+		void SetVolume(float volume) const;
 
-		void SetLooping(bool loop);
+		void SetLooping(bool loop) const;
 
-		void ToggleMute();
+		void ToggleMute() const;
 
-		void Play();
+		void Play() const;
 
-		void Pause();
+		void Pause() const;
 
-		void Stop();
+		void Stop() const;
 	private:
 		based::scene::AudioImpl* pimpl;
-		//ma_sound* mSound = nullptr;
-		/*float mVolume;
-		bool mLoops;
-		bool mMuted;*/
 	};
 }

@@ -15,15 +15,16 @@ namespace based::core
 		AssetLibrary() = default;
 		~AssetLibrary() = default;
 
-		const std::unordered_map<std::string, std::shared_ptr<T>>& GetAll() const { return mAssets; }
-		const std::vector<std::string>* GetKeys()
+		const std::unordered_map<std::string, std::weak_ptr<T>>& GetAll() const { return mAssets; }
+
+		std::vector<std::string> GetKeys()
 		{
-			auto* vals = new std::vector<std::string>();
-			vals->reserve(mAssets.size());
+			const auto vals = std::vector<std::string>();
+			vals.reserve(mAssets.size());
 
 			for (auto kv : mAssets)
 			{
-				vals->push_back(kv.first);
+				vals.emplace_back(kv.first);
 			}
 
 			return vals;
@@ -31,11 +32,15 @@ namespace based::core
 
 		void Load(const std::string& name, std::shared_ptr<T> asset)
 		{
-			if (Exists(name))
+			std::string finalName = name;
+			int count = 1;
+			while (Exists(finalName))
 			{
-				BASED_WARN("AssetLibrary::Load() - overwriting asset with same name: {}", name.c_str());
+				finalName = name + std::to_string(count);
+				count++;
+				//BASED_WARN("AssetLibrary::Load() - overwriting asset with same name: {}", name.c_str());
 			}
-			mAssets[name] = asset;
+			mAssets[finalName] = asset;
 		}
 
 		std::shared_ptr<T> Get(const std::string& name)
@@ -67,6 +72,11 @@ namespace based::core
 
 		void Clear()
 		{
+			for (auto [name, asset] : mAssets)
+			{
+				asset.reset();
+			}
+
 			mAssets.clear();
 		}
 

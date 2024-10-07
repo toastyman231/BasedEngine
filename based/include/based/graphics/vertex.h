@@ -9,9 +9,12 @@
 #include "../log.h"
 #include "based/core/profiler.h"
 #include "external/glm/glm.hpp"
+#include "based/memory/memoryhelpers.h"
 
 #define BASED_CREATE_VERTEX_BUFFER(name, type) std::unique_ptr<based::graphics::VertexBuffer<type>> name = std::make_unique<based::graphics::VertexBuffer<type>>()
 #define BASED_CREATE_INSTANCED_VERTEX_BUFFER(name, type) std::unique_ptr<based::graphics::InstancedVertexBuffer<type>> name = std::make_unique<based::graphics::InstancedVertexBuffer<type>>()
+#define BASED_CREATE_INSTANCED_VERTEX_BUFFER_FULL(name, type, size, dbg) std::unique_ptr<based::graphics::InstancedVertexBuffer<type>> name = std::make_unique<based::graphics::InstancedVertexBuffer<type>>(size, dbg)
+
 
 namespace based::graphics
 {
@@ -28,6 +31,7 @@ namespace based::graphics
 		static const uint32_t GLTypeDouble;
 	public:
 		RawVertexBuffer();
+		RawVertexBuffer(RawVertexBuffer& other) = default;
 		virtual ~RawVertexBuffer();
 
 		virtual uint32_t GetTypeSize() const = 0;
@@ -95,14 +99,18 @@ namespace based::graphics
 			BASED_ASSERT(vert.size() > 0, "No values passed in for vertex");
 			if (mDataVec.size() == 0)
 			{
-				mValueCount = (uint32_t)vert.size();
+				mValueCount = static_cast<uint32_t>(vert.size());
 			}
 
 			BASED_ASSERT(vert.size() == mValueCount, "VertexBuffer::PushVertex - Attempting to push a Vertex with an unexpected amount of values");
 			if (vert.size() == mValueCount)
 			{
 				mVertexCount++;
-				mDataVec.insert(mDataVec.end(), vert.begin(), vert.end());
+
+				for (uint32_t i = 0; i < mValueCount; i++)
+				{
+					mDataVec.emplace_back(vert[i]);
+				}
 			}
 		}
 
@@ -135,8 +143,8 @@ namespace based::graphics
 			std::is_same<T, double>()				//GL_DOUBLE
 			, "This type is not supported");
 	public:
-		InstancedVertexBuffer()
-			: mValueCount(0)
+		InstancedVertexBuffer(int reserveSize = 0, bool showDebug = false)
+			: mValueCount(0), mShowDebug(showDebug)
 		{
 			if constexpr (std::is_same<T, char>()) { mGLType = RawVertexBuffer::GLTypeByte; }
 			if constexpr (std::is_same<T, unsigned char>()) { mGLType = RawVertexBuffer::GLTypeUByte; }
@@ -146,9 +154,18 @@ namespace based::graphics
 			if constexpr (std::is_same<T, unsigned int>()) { mGLType = RawVertexBuffer::GLTypeUInt; }
 			if constexpr (std::is_same<T, float>()) { mGLType = RawVertexBuffer::GLTypeFloat; }
 			if constexpr (std::is_same<T, double>()) { mGLType = RawVertexBuffer::GLTypeDouble; }
+			//if (mShowDebug) BASED_TRACE("Created instanced VB");
+			mDataVec.reserve(reserveSize);
 		}
 
-		~InstancedVertexBuffer() override = default;
+		~InstancedVertexBuffer() override
+		{
+			mDataVec.clear();
+			mDataVec.shrink_to_fit();
+			//if (mShowDebug) BASED_TRACE("Destroyed instanced VB")
+		}
+
+		inline void SetShowDebug(bool newValue) { mShowDebug = newValue; }
 
 		uint32_t GetTypeSize() const override { return sizeof(T); }
 
@@ -159,14 +176,18 @@ namespace based::graphics
 			BASED_ASSERT(vert.size() > 0, "No values passed in for vertex");
 			if (mDataVec.size() == 0)
 			{
-				mValueCount = (uint32_t)vert.size();
+				mValueCount = static_cast<uint32_t>(vert.size());
 			}
 
 			BASED_ASSERT(vert.size() == mValueCount, "InstancedVertexBuffer::PushVertex - Attempting to push a Vertex with an unexpected amount of values");
 			if (vert.size() == mValueCount)
 			{
 				mVertexCount++;
-				mDataVec.insert(mDataVec.end(), vert.begin(), vert.end());
+
+				for (uint32_t i = 0; i < mValueCount; i++)
+				{
+					mDataVec.emplace_back(vert[i]);
+				}
 			}
 		}
 
@@ -182,6 +203,7 @@ namespace based::graphics
 	private:
 		std::vector<T> mDataVec;
 		uint32_t mValueCount;
+		bool mShowDebug;
 	};
 
 	class VertexArray
@@ -196,6 +218,7 @@ namespace based::graphics
 
 		void PushBuffer(std::unique_ptr<RawVertexBuffer> vbo);
 		void SetElements(const std::vector<uint32_t>& elements);
+		void ClearElements();
 
 		void Upload();
 

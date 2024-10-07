@@ -20,9 +20,9 @@ namespace based::animation
     {
     public:
         Animation() = default;
-        Animation(const std::string& animationPath, graphics::Model* model, int index = 0);
-        Animation(const std::string& animationPath, graphics::Model* model, const std::string& animationName);
-        ~Animation() {}
+        Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model, int index = 0);
+        Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model, const std::string& animationName);
+        ~Animation() = default;
 
         Bone* FindBone(const std::string& name);
 

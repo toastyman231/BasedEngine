@@ -14,8 +14,11 @@
 
 // Taken from learnopengl.com : https://learnopengl.com/Model-Loading/Mesh
 
+#define DEFAULT_MESH_LIB based::graphics::DefaultLibraries::GetMeshLibrary()
+
 namespace based::graphics
 {
+	class InstancedMesh;
 	class Shader;
 
 #define MAX_BONE_INFLUENCE 4
@@ -41,9 +44,33 @@ namespace based::graphics
         std::vector<Texture>      textures;
         std::shared_ptr<Material> material;
 
+        static std::shared_ptr<Mesh> CreateMesh(
+            const std::vector<Vertex>& vertices,
+            const std::vector<unsigned int>& indices,
+            const std::vector<Texture>& textures,
+            core::AssetLibrary<Mesh>& assetLibrary,
+            const std::string& name = "New Mesh");
+
+        static std::shared_ptr<InstancedMesh> CreateInstancedMesh(
+            const std::vector<Vertex>& vertices,
+            const std::vector<unsigned int>& indices,
+            const std::vector<Texture>& textures,
+            core::AssetLibrary<Mesh>& assetLibrary,
+            const std::string& name = "New Instanced Mesh");
+
+        static std::shared_ptr<Mesh> CreateMesh(
+            const std::shared_ptr<VertexArray>& va, 
+            const std::shared_ptr<Material>& mat,
+            core::AssetLibrary<Mesh>& assetLibrary,
+            const std::string& name = "New Mesh");
+
         Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
         Mesh(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<Material>& mat);
-        ~Mesh() { BASED_TRACE("Destroying mesh!"); }
+        Mesh(const Mesh& other) = default;
+        virtual ~Mesh()
+        {
+            BASED_TRACE("Destroying mesh");
+        }
         virtual void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material);
         void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
     protected:
@@ -62,6 +89,7 @@ namespace based::graphics
 	        : Mesh(vertices, indices, textures), mInstanceCount(0), mIsDirty(true) {}
         InstancedMesh(std::shared_ptr<VertexArray> va, std::shared_ptr<Material> mat, int count)
     		: Mesh(va, mat), mInstanceCount(count), mIsDirty(true) {}
+        ~InstancedMesh() override = default;
 
         void SetInstanceTransform(int index, const scene::Transform& transform);
         int AddInstance(scene::Transform transform, bool markDirty = true);

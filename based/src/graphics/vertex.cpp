@@ -94,8 +94,13 @@ namespace based::graphics
 		glBindVertexArray(mVao); BASED_CHECK_GL_ERROR;
 		glGenBuffers(1, &mEbo); BASED_CHECK_GL_ERROR;
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEbo); BASED_CHECK_GL_ERROR;
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements.size() * sizeof(uint32_t), &elements[0], GL_STATIC_DRAW); BASED_CHECK_GL_ERROR;
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements.size() * sizeof(uint32_t), elements.data(), GL_STATIC_DRAW); BASED_CHECK_GL_ERROR;
 		glBindVertexArray(0); BASED_CHECK_GL_ERROR;
+	}
+
+	void VertexArray::ClearElements()
+	{
+		mVbos.clear();
 	}
 
 	void VertexArray::Upload()

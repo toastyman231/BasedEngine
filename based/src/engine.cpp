@@ -18,6 +18,8 @@
 #include "core/profiler.h"
 #include "math/basedmath.h"
 
+bool logging_enabled = false;
+
 namespace based
 {
     //public
@@ -160,7 +162,7 @@ namespace based
                 mSceneArena = memory::CreateArena(ArenaAlloc(engineArena, sceneMemorySize), sceneMemorySize, "Scene Memory");
                 mFrameArena = memory::CreateArena(ArenaAlloc(engineArena, frameMemorySize), frameMemorySize, "Frame Memory");
 
-                uint32_t gameMemorySize = 1; // TODO: Allow users to set this in a config file or something
+                uint32_t gameMemorySize = Instance().GetApp().GetGameSettings().gameMemory;
                 void* gameMemory = malloc(gameMemorySize);
                 memset(gameMemory, 0, gameMemorySize);
                 mGameArena = memory::CreateArena(gameMemory, gameMemorySize, "Game Memory");
@@ -223,6 +225,9 @@ namespace based
 
         // Shutdown UI
         mUiManager.Shutdown();
+
+        // Shutdown libraries
+        graphics::DefaultLibraries::UninitializeLibraries();
 
         // Shutdown input
         input::Joystick::Shutdown();

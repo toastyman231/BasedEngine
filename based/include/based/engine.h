@@ -8,7 +8,7 @@
 
 namespace based
 {
-    class App;
+	class App;
     class Engine
     {
     public:
@@ -29,6 +29,7 @@ namespace based
 
         // Memory
     	inline based::memory::Arena* GetEngineArena() { return &mEngineArena; }
+        inline based::memory::Arena* GetFrameArena() { return &mFrameArena; }
         inline based::memory::Arena* GetGameArena() { return &mGameArena; }
     private:
         void GetInfo();

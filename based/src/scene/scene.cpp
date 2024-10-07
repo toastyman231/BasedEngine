@@ -21,9 +21,12 @@ namespace based::scene
 
 		for (const auto entity : entityView)
 		{
-			scene::Entity* entityPtr = mRegistry.get<EntityReference>(entity).entity;
-			if (!entityPtr->IsActive()) continue;
-			entityPtr->Initialize();
+			auto entityPtr = mRegistry.get<EntityReference>(entity).entity;
+			if (auto ent = entityPtr.lock())
+			{
+				if (!ent->IsActive()) continue;
+				ent->Initialize();
+			}
 		}
 	}
 
@@ -36,12 +39,19 @@ namespace based::scene
 		{
 			scene::AnimatorComponent anim = mRegistry.get<scene::AnimatorComponent>(entity);
 			scene::ModelRenderer model = mRegistry.get<scene::ModelRenderer>(entity);
-			anim.animator->UpdateAnimation(core::Time::DeltaTime());
 
-			auto transforms = anim.animator->GetFinalBoneMatrices();
-			auto mat = model.model->GetMaterial();
-			for (int i = 0; i < transforms.size(); ++i)
-				mat->SetUniformValue("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+			auto m = model.model.lock();
+			auto a = anim.animator.lock();
+			if (m && a)
+			{
+				a->UpdateAnimation(core::Time::DeltaTime());
+
+				auto transforms = a->GetFinalBoneMatrices();
+				auto mat = m->GetMaterial();
+				for (int i = 0; i < transforms.size(); ++i)
+					mat->SetUniformValue("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+			}
+			
 		}
 	}
 
@@ -68,20 +78,40 @@ namespace based::scene
 			graphics::Sprite::DrawSprite(sprite);
 		}
 
-		const auto modelView = mRegistry.view<Enabled, Transform, ModelRenderer>();
+		const auto modelView = mRegistry.view<Enabled, Transform, ModelRenderer, EntityReference>();
 
 		for (const auto entity : modelView)
 		{
 			scene::Transform trans = mRegistry.get<Transform>(entity);
-			mRegistry.get<ModelRenderer>(entity).model->Draw(trans.Position, trans.Rotation, trans.Scale);
+			scene::ModelRenderer renderer = mRegistry.get<ModelRenderer>(entity);
+			scene::EntityReference ent = mRegistry.get<EntityReference>(entity);
+
+			auto m = renderer.model.lock();
+			auto e = ent.entity.lock();
+			if (m)
+			{
+				m->Draw(trans.Position, trans.Rotation, trans.Scale);
+			}
+			else
+			{
+				BASED_WARN("Could not lock mesh for entity {}", e->GetEntityName());
+			}
 		}
 
-		const auto meshView = mRegistry.view<Enabled, Transform, MeshRenderer>();
+		const auto meshView = mRegistry.view<Enabled, Transform, MeshRenderer, EntityReference>();
 
 		for (const auto entity : meshView)
 		{
 			scene::Transform trans = mRegistry.get<Transform>(entity);
-			mRegistry.get<MeshRenderer>(entity).mesh->Draw(trans.Position, trans.Rotation, trans.Scale);
+			scene::MeshRenderer renderer = mRegistry.get<MeshRenderer>(entity);
+			scene::EntityReference ent = mRegistry.get<EntityReference>(entity);
+			if (auto m = renderer.mesh.lock())
+			{
+				m->Draw(trans.Position, trans.Rotation, trans.Scale);
+			} else
+			{
+				BASED_WARN("Could not lock mesh for entity {}", ent.entity.lock()->GetEntityName());
+			}
 		}
 
 		const auto textView = mRegistry.view<Enabled, Transform, TextRenderer>();
@@ -102,11 +132,11 @@ namespace based::scene
 
 		for (const auto entity : entityView)
 		{
-			scene::Entity* entityPtr = mRegistry.get<EntityReference>(entity).entity;
-			if (entityPtr)
+			auto entityPtr = mRegistry.get<EntityReference>(entity).entity;
+			if (auto ent = entityPtr.lock())
 			{
-				if (!entityPtr->IsActive()) continue;
-				entityPtr->Update(deltaTime);
+				if (!ent->IsActive()) continue;
+				ent->Update(deltaTime);
 			}
 		}
 
@@ -120,9 +150,12 @@ namespace based::scene
 
 		for (const auto entity : entityView)
 		{
-			scene::Entity* entityPtr = mRegistry.get<EntityReference>(entity).entity;
-			if (!entityPtr->IsActive()) continue;
-			entityPtr->Shutdown();
+			auto entityPtr = mRegistry.get<EntityReference>(entity).entity;
+			if (auto ent = entityPtr.lock())
+			{
+				if (!ent->IsActive()) continue;
+				ent->Shutdown();
+			}
 		}
 	}
 }

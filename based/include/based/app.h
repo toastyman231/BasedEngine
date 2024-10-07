@@ -7,6 +7,18 @@
 
 namespace based
 {
+	struct GameSettings
+	{
+		uint32_t gameMemory;
+
+		GameSettings();
+	};
+
+	inline GameSettings::GameSettings()
+	{
+		gameMemory = MEGABYTES_BYTES(100);
+	}
+
 	class App
 	{
 	public:
@@ -16,8 +28,9 @@ namespace based
 		// TODO: should this be public?
 		std::shared_ptr<scene::Scene> startScene;
 
-		virtual core::WindowProperties GetWindowProperties() { return core::WindowProperties(); }
-		inline const std::shared_ptr<scene::Scene> GetCurrentScene() const { return mCurrentScene; }
+		virtual core::WindowProperties GetWindowProperties() { return {}; }
+		virtual based::GameSettings GetGameSettings() { return {}; }
+		inline std::shared_ptr<scene::Scene> GetCurrentScene() const { return mCurrentScene; }
 		inline void LoadScene(std::shared_ptr<scene::Scene> newScene) 
 		{
 			mCurrentScene = std::move(newScene);

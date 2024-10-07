@@ -11,6 +11,7 @@ namespace based::animation
 		, m_ID(ID)
 	{
 		m_NumPositions = channel->mNumPositionKeys;
+		m_Positions.reserve(m_NumPositions);
 
 		for (int positionIndex = 0; positionIndex < m_NumPositions; ++positionIndex)
 		{
@@ -23,6 +24,7 @@ namespace based::animation
 		}
 
 		m_NumRotations = channel->mNumRotationKeys;
+		m_Rotations.reserve(m_NumRotations);
 		for (int rotationIndex = 0; rotationIndex < m_NumRotations; ++rotationIndex)
 		{
 			aiQuaternion aiOrientation = channel->mRotationKeys[rotationIndex].mValue;
@@ -34,6 +36,7 @@ namespace based::animation
 		}
 
 		m_NumScalings = channel->mNumScalingKeys;
+		m_Scales.reserve(m_NumScalings);
 		for (int keyIndex = 0; keyIndex < m_NumScalings; ++keyIndex)
 		{
 			aiVector3D scale = channel->mScalingKeys[keyIndex].mValue;

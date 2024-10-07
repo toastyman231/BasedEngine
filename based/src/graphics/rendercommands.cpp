@@ -119,7 +119,7 @@ namespace based::graphics::rendercommands
 			{
 				va->Bind();
 
-				Shader* shader = mat->GetShader();
+				std::shared_ptr<Shader> shader = mat->GetShader().lock();
 				BASED_ASSERT(shader, "Attempting to execute invalid RenderVertexArrayMaterial - shader is nullptr");
 				if (shader)
 				{

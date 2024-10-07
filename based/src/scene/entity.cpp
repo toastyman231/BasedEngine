@@ -13,22 +13,23 @@ namespace based::scene
 		mEntity = mRegistry.create();
 		mEntityName = "New Entity";
 		AddComponent<Transform>();
-		AddComponent<EntityReference>(this);
 		SetActive(true);
 	}
 
 	Entity::~Entity()
 	{
-		if (mRegistry.valid(mEntity)) DestroyEntity(this);
+		BASED_TRACE("Destroying entity {}", GetEntityName());
+		if (mRegistry.valid(mEntity)) mRegistry.destroy(mEntity);
 	}
 
-	void Entity::DestroyEntity(Entity* ent)
+	void Entity::DestroyEntity(std::shared_ptr<Entity> ent)
 	{
 		if (!ent) return;
 		ent->OnDestroy();
 
 		ent->mRegistry.destroy(ent->mEntity);
-		delete(ent);
+
+		ent.reset();
 	}
 
 	void Entity::SetActive(bool active)
@@ -56,8 +57,11 @@ namespace based::scene
 
 		for (auto const& child : Children)
 		{
-			glm::vec3 newAbsolutePosition = pos + child->GetComponent<scene::Transform>().LocalPosition;
-			child->SetPosition(newAbsolutePosition);
+			if (auto ch = child.lock())
+			{
+				glm::vec3 newAbsolutePosition = pos + ch->GetComponent<scene::Transform>().LocalPosition;
+				ch->SetPosition(newAbsolutePosition);
+			}
 		}
 	}
 
@@ -71,8 +75,11 @@ namespace based::scene
 
 		for (auto const& child : Children)
 		{
-			glm::vec3 newAbsoluteRotation = rot + child->GetComponent<scene::Transform>().LocalRotation;
-			child->SetRotation(newAbsoluteRotation);
+			if (auto ch = child.lock())
+			{
+				glm::vec3 newAbsoluteRotation = rot + ch->GetComponent<scene::Transform>().LocalRotation;
+				ch->SetRotation(newAbsoluteRotation);
+			}
 		}
 	}
 
@@ -86,8 +93,11 @@ namespace based::scene
 
 		for (auto const& child : Children)
 		{
-			glm::vec3 newAbsoluteScale = scale * child->GetComponent<scene::Transform>().LocalScale;
-			child->SetScale(newAbsoluteScale);
+			if (auto ch = child.lock())
+			{
+				glm::vec3 newAbsoluteScale = scale * ch->GetComponent<scene::Transform>().LocalScale;
+				ch->SetScale(newAbsoluteScale);
+			}
 		}
 	}
 
@@ -104,9 +114,9 @@ namespace based::scene
 		Transform transform = GetComponent<scene::Transform>();
 		glm::vec3 newPosition;
 
-		if (Parent)
+		if (auto parent = Parent.lock())
 		{
-			newPosition = Parent->GetComponent<scene::Transform>().Position + pos;
+			newPosition = parent->GetComponent<scene::Transform>().Position + pos;
 		} else
 		{
 			newPosition = pos;
@@ -119,8 +129,11 @@ namespace based::scene
 
 		for (auto const& child : Children)
 		{
-			glm::vec3 newAbsolutePosition = newPosition + child->GetComponent<scene::Transform>().LocalPosition;
-			child->SetPosition(newAbsolutePosition);
+			if (auto ch = child.lock())
+			{
+				glm::vec3 newAbsolutePosition = newPosition + ch->GetComponent<scene::Transform>().LocalPosition;
+				ch->SetPosition(newAbsolutePosition);
+			}
 		}
 	}
 
@@ -129,9 +142,9 @@ namespace based::scene
 		Transform transform = GetComponent<scene::Transform>();
 		glm::vec3 newRotation;
 
-		if (Parent)
+		if (auto parent = Parent.lock())
 		{
-			newRotation = Parent->GetComponent<scene::Transform>().Rotation + rot;
+			newRotation = parent->GetComponent<scene::Transform>().Rotation + rot;
 		} else
 		{
 			newRotation = rot;
@@ -144,8 +157,11 @@ namespace based::scene
 
 		for (auto const& child : Children)
 		{
-			glm::vec3 newAbsoluteRotation = newRotation + child->GetComponent<scene::Transform>().LocalRotation;
-			child->SetRotation(newAbsoluteRotation);
+			if (auto ch = child.lock())
+			{
+				glm::vec3 newAbsoluteRotation = newRotation + ch->GetComponent<scene::Transform>().LocalRotation;
+				ch->SetRotation(newAbsoluteRotation);
+			}
 		}
 	}
 
@@ -155,9 +171,9 @@ namespace based::scene
 
 		glm::vec3 newScale;
 
-		if (Parent)
+		if (auto parent = Parent.lock())
 		{
-			newScale = Parent->GetComponent<scene::Transform>().Scale * scale;
+			newScale = parent->GetComponent<scene::Transform>().Scale * scale;
 		}
 		else
 		{
@@ -171,8 +187,11 @@ namespace based::scene
 
 		for (auto const& child : Children)
 		{
-			glm::vec3 newAbsoluteScale = newScale * child->GetComponent<scene::Transform>().LocalScale;
-			child->SetScale(newAbsoluteScale);
+			if (auto ch = child.lock())
+			{
+				glm::vec3 newAbsoluteScale = newScale * ch->GetComponent<scene::Transform>().LocalScale;
+				ch->SetScale(newAbsoluteScale);
+			}
 		}
 	}
 }

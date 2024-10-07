@@ -19,11 +19,14 @@ namespace based::managers
 		logger->set_level(spdlog::level::trace);
 		logger->flush_on(spdlog::level::trace);
 		spdlog::register_logger(logger);
+
+		logging_enabled = true;
 	}
 
 	void LogManager::Shutdown()
 	{
 		PROFILE_FUNCTION();
 		spdlog::shutdown();
+		logging_enabled = false;
 	}
 }
