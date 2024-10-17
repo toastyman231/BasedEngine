@@ -15,7 +15,7 @@ namespace based::core
 		AssetLibrary() = default;
 		~AssetLibrary() = default;
 
-		const std::unordered_map<std::string, std::weak_ptr<T>>& GetAll() const { return mAssets; }
+		const std::unordered_map<std::string, std::shared_ptr<T>>& GetAll() const { return mAssets; }
 
 		std::vector<std::string> GetKeys()
 		{
@@ -78,6 +78,11 @@ namespace based::core
 			}
 
 			mAssets.clear();
+		}
+
+		int Size() const
+		{
+			return static_cast<int>(mAssets.size());
 		}
 
 		bool Exists(const std::string& name)

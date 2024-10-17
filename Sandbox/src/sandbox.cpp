@@ -110,17 +110,6 @@ private:
 	float ambientStrength = 0.1f;
 	float R = 100.f;
 	float heightCoef = 1.f;
-	float roughness = 0.3f;
-	float metallic = 0.0f;
-	float ao = 1.0f;
-	float subsurface = 0.0f;
-	float Specular = 0.5;
-	float SpecularTint = 0.0;
-	float Anisotropic = 0.0;
-	float Sheen = 0.0;
-	float SheenTint = 0.5;
-	float ClearCoat = 0.0;
-	float ClearCoatGloss = 1.0;
 
 	bool useLight = true;
 	bool useNormalMaps = true;
@@ -167,7 +156,7 @@ public:
 	void Initialize() override
 	{
 		App::Initialize();
-		Engine::Instance().GetWindow().SetShouldRenderToScreen(true);
+		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
 		input::Mouse::SetCursorVisible(!Engine::Instance().GetWindow().GetShouldRenderToScreen());
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
@@ -427,7 +416,7 @@ public:
 		sphere->AddComponent<scene::MeshRenderer>(sphereMesh);
 		sphere->SetEntityName("Sphere");
 
-		// TODO: Clean up and add shadows to PBR
+		// TODO: Clean up and add shadows and directional lights to PBR
 		// TODO: Add a way to tie object lifetimes to scene lifetime
 
 		cameraEntity->SetPosition(glm::vec3(-1, 2, 4));
@@ -507,8 +496,7 @@ public:
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
 		{
 			initialPos = input::Mouse::GetMousePosition();
-			BASED_TRACE("Pressed mouse button!")
-				animator->GetStateMachine()->SetBool("punch", true);
+			animator->GetStateMachine()->SetBool("punch", true);
 		}
 
 		if (input::Mouse::Button(BASED_INPUT_MOUSE_LEFT))
@@ -570,11 +558,6 @@ public:
 			planeMat->SetUniformValue("ambientStrength", ambientStrength);
 			planeMat->SetUniformValue("heightCoef", heightCoef);
 			planeMat->SetUniformValue("useLight", static_cast<int>(useLight));
-
-			sphereMat->SetUniformValue("material.albedo.color", glm::vec4(albedo, 1.0f));
-			sphereMat->SetUniformValue("material.metallic.color", glm::vec4(metallic));
-			sphereMat->SetUniformValue("material.roughness.color", glm::vec4(roughness));
-			sphereMat->SetUniformValue("material.ambientOcclusion.color", glm::vec4(ao));
 		}
 
 		// Disable lights when not using lighting
@@ -741,7 +724,7 @@ public:
 			}
 
 			// Material editor
-			/*
+			
 			if (ImGui::CollapsingHeader("Materials"))
 			{
 				int i = 0;
@@ -749,7 +732,7 @@ public:
 				// Loop over each saved material and create a dropdown for each one
 				for (const auto mat : graphics::DefaultLibraries::GetMaterialLibrary().GetAll())
 				{
-					if (auto matPtr = mat.second.lock())
+					if (auto matPtr = mat.second)
 					{
 						ImGui::PushID(i);
 
@@ -781,69 +764,78 @@ public:
 								ImGui::EndPopup();
 							}
 							// Get all float uniforms and create an editable slider
-							for (const auto& f : matPtr->GetShader()->GetUniformFloats())
+							if (auto shader = matPtr->GetShader().lock())
 							{
-								if (f.first.find("pointLight") != -1) continue;
-								float temp = f.second;
-								ImGui::DragFloat(f.first.c_str(), &temp, 0.01f);
-								matPtr->SetUniformValue(f.first, temp);
-							}
-
-							// Setup for texture combo box, each texture must have it's own current index
-							int j = 0;
-							static std::vector<int> itemIndex;
-							itemIndex.resize(static_cast<int>(matPtr->GetShader()->GetUniformSamplers().size()));
-							// Get all texture samplers and create combo boxes to select what texture they sample
-							for (const auto& f : matPtr->GetShader()->GetUniformSamplers())
-							{
-								// Get texture names from library key set, plus None
-								auto items = graphics::DefaultLibraries::GetTextureLibrary().GetKeys();
-								items.insert(items.begin(), "None");
-								auto preview = items[itemIndex[j]];
-
-								ImGui::PushID(j);
-								if (ImGui::BeginCombo(f.first.c_str(), preview.c_str()))
+								for (const auto& f : shader->GetUniformFloats())
 								{
-									// Create a selectable in the dropdown for each texture
-									for (int n = 0; n < (int)(graphics::DefaultLibraries::GetTextureLibrary().GetAll().size()) + 1; n++)
-									{
-										auto item = items[n];
-										const bool isSelected = itemIndex[j] == n;
-										if (ImGui::Selectable(item.c_str(), isSelected))
-										{
-											// On selected, decide what happens
-											itemIndex[j] = n;
-											if (items[n] == "None")
-											{
-												matPtr->RemoveTexture(f.first);
-												int index = static_cast<int>(f.first.find(".tex"));
-												matPtr->SetUniformValue(f.first.substr(*f.first.begin() - f.first[0],
-													index) + ".useSampler", 0);
-											}
-											else
-											{
-												matPtr->AddTexture(graphics::DefaultLibraries::GetTextureLibrary().Get(items[n]),
-													f.first);
-												int index = static_cast<int>(f.first.find(".tex"));
-												matPtr->SetUniformValue(f.first.substr(*f.first.begin() - f.first[0],
-													index) + ".useSampler", 1);
-											}
-										}
-										if (isSelected) ImGui::SetItemDefaultFocus();
-									}
-									ImGui::EndCombo();
+									if (f.first.find("pointLight") != -1) continue;
+									float temp = f.second;
+									ImGui::DragFloat(f.first.c_str(), &temp, 0.01f);
+									matPtr->SetUniformValue(f.first, temp);
 								}
-								ImGui::PopID();
-								j++;
+
+								// Setup for texture combo box, each texture must have it's own current index
+								int j = 0;
+								static std::vector<int> itemIndex;
+								itemIndex.resize(static_cast<int>(shader->GetUniformSamplers().size()));
+								// Get all texture samplers and create combo boxes to select what texture they sample
+								for (const auto& f : shader->GetUniformSamplers())
+								{
+									// Get texture names from library key set, plus None
+									std::vector<std::string> items;
+									items.reserve(graphics::DefaultLibraries::GetTextureLibrary().Size());
+
+									for (const auto& kv : 
+										graphics::DefaultLibraries::GetTextureLibrary().GetAll())
+									{
+										items.emplace_back(kv.first);
+									}
+
+									items.insert(items.begin(), "None");
+									auto preview = items[matPtr->GetTextureOrder()[f.first]];
+
+									ImGui::PushID(j);
+									if (ImGui::BeginCombo(f.first.c_str(), preview.c_str()))
+									{
+										// Create a selectable in the dropdown for each texture
+										for (int n = 0; n < (int)(graphics::DefaultLibraries::GetTextureLibrary().GetAll().size()) + 1; n++)
+										{
+											auto item = items[n];
+											const bool isSelected = itemIndex[j] == n;
+											if (ImGui::Selectable(item.c_str(), isSelected))
+											{
+												// On selected, decide what happens
+												itemIndex[j] = n;
+												if (items[n] == "None")
+												{
+													matPtr->RemoveTexture(f.first);
+													int index = static_cast<int>(f.first.find(".tex"));
+													matPtr->SetUniformValue(f.first.substr(*f.first.begin() - f.first[0],
+														index) + ".useSampler", 0);
+												}
+												else
+												{
+													matPtr->AddTexture(graphics::DefaultLibraries::GetTextureLibrary().Get(items[n]),
+														f.first);
+													int index = static_cast<int>(f.first.find(".tex"));
+													matPtr->SetUniformValue(f.first.substr(*f.first.begin() - f.first[0],
+														index) + ".useSampler", 1);
+												}
+											}
+											if (isSelected) ImGui::SetItemDefaultFocus();
+										}
+										ImGui::EndCombo();
+									}
+									ImGui::PopID();
+									j++;
+								}
 							}
 						}
-
 						ImGui::PopID();
 						i++;
 					}
 				}
 			}
-			*/
 		}
 		ImGui::End();
 	}
