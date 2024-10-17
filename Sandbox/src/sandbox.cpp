@@ -507,6 +507,8 @@ public:
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
 		{
 			initialPos = input::Mouse::GetMousePosition();
+			BASED_TRACE("Pressed mouse button!")
+				animator->GetStateMachine()->SetBool("punch", true);
 		}
 
 		if (input::Mouse::Button(BASED_INPUT_MOUSE_LEFT))
@@ -527,21 +529,16 @@ public:
 			cubeRot += rot;
 		}
 
+		if (input::Mouse::ButtonUp(BASED_INPUT_MOUSE_LEFT))
+		{
+			animator->GetStateMachine()->SetBool("punch", false);
+		}
+
 		// Show/Hide UI
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_H))
 		{
 			if (document->IsVisible()) document->Hide();
 			else document->Show();
-		}
-
-		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
-		{
-			BASED_TRACE("Pressed mouse button!")
-			animator->GetStateMachine()->SetBool("punch", true);
-		}
-		if (input::Mouse::ButtonUp(BASED_INPUT_MOUSE_LEFT))
-		{
-			animator->GetStateMachine()->SetBool("punch", false);
 		}
 
 		// Set light position and pass info to shaders
@@ -552,7 +549,7 @@ public:
 
 		sunLight->SetRotation(sunDirection);
 
-		//crateEntity->SetRotation(cubeRot);
+		crateEntity->SetRotation(cubeRot);
 
 		auto matLib = graphics::DefaultLibraries::GetMaterialLibrary();
 		const auto boxMat = matLib.Get("DistCube");
@@ -651,6 +648,12 @@ public:
 			float farPlane = persistentScene->GetActiveCamera()->GetFar();
 			ImGui::DragFloat("Far", &farPlane, 0.5f);
 			persistentScene->GetActiveCamera()->SetFar(farPlane);
+
+			// Other settings
+
+			float timescale = core::Time::TimeScale();
+			ImGui::SliderFloat("Time Scale", &timescale, 0.f, 2.f);
+			core::Time::SetTimeScale(timescale);
 
 			ImGui::DragFloat("Blend Speed", &animator->blendSpeed, 1.f, 0.f, 100.f);
 
