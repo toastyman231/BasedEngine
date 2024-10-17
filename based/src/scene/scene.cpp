@@ -44,7 +44,9 @@ namespace based::scene
 			auto a = anim.animator.lock();
 			if (m && a)
 			{
-				a->UpdateAnimation(core::Time::DeltaTime());
+				a->UpdateAnimation(a->GetTimeMode() == animation::TimeMode::Scaled ? 
+					core::Time::DeltaTime() : 
+					core::Time::UnscaledDeltaTime());
 
 				auto transforms = a->GetFinalBoneMatrices();
 				auto mat = m->GetMaterial();
@@ -90,7 +92,7 @@ namespace based::scene
 			auto e = ent.entity.lock();
 			if (m)
 			{
-				m->Draw(trans.Position, trans.Rotation, trans.Scale);
+				m->Draw(trans);
 			}
 			else
 			{
@@ -107,7 +109,7 @@ namespace based::scene
 			scene::EntityReference ent = mRegistry.get<EntityReference>(entity);
 			if (auto m = renderer.mesh.lock())
 			{
-				m->Draw(trans.Position, trans.Rotation, trans.Scale);
+				m->Draw(trans);
 			} else
 			{
 				BASED_WARN("Could not lock mesh for entity {}", ent.entity.lock()->GetEntityName());
@@ -128,9 +130,22 @@ namespace based::scene
 	void Scene::UpdateScene(float deltaTime) const
 	{
 		PROFILE_FUNCTION();
+
+		const auto cameraView = mRegistry.view<Enabled, Transform, CameraComponent>();
+
+		for (const auto& camera : cameraView)
+		{
+			auto camPtr = mRegistry.get<CameraComponent>(camera);
+			auto trans = mRegistry.get<Transform>(camera);
+			if (auto cam = camPtr.camera.lock())
+			{
+				cam->SetTransform(trans.Position, trans.Rotation, trans.Scale);
+			}
+		}
+
 		const auto entityView = mRegistry.view<Enabled, EntityReference>();
 
-		for (const auto entity : entityView)
+		for (const auto& entity : entityView)
 		{
 			auto entityPtr = mRegistry.get<EntityReference>(entity).entity;
 			if (auto ent = entityPtr.lock())

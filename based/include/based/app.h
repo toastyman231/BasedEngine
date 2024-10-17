@@ -26,7 +26,7 @@ namespace based
 		virtual ~App() = default;
 
 		// TODO: should this be public?
-		std::shared_ptr<scene::Scene> startScene;
+		std::shared_ptr<scene::Scene> persistentScene;
 
 		virtual core::WindowProperties GetWindowProperties() { return {}; }
 		virtual based::GameSettings GetGameSettings() { return {}; }
@@ -45,9 +45,9 @@ namespace based
 			mCamera = std::make_shared<graphics::Camera>();
 			mCamera->SetHeight(2.f);
 
-			startScene = std::make_shared<scene::Scene>();
-			startScene->SetActiveCamera(mCamera);
-			LoadScene(startScene);
+			persistentScene = std::make_shared<scene::Scene>();
+			persistentScene->SetActiveCamera(mCamera);
+			LoadScene(persistentScene);
 		}
 		virtual void Shutdown() {}
 

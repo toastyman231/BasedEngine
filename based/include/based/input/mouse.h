@@ -6,6 +6,12 @@
 
 namespace based::input
 {
+	enum class CursorMode : uint8_t
+	{
+		Free,
+		Confined
+	};
+
 	class Mouse
 	{
 	public:
@@ -22,7 +28,8 @@ namespace based::input
 		static bool ButtonDown(int button);
 		static bool ButtonUp(int button);
 
-		static void SetCursorLocked(bool locked);
+		static void SetCursorMode(CursorMode mode);
+		static void SetCursorVisible(bool visible);
 
 		static glm::ivec2 GetMousePosition();
 
@@ -31,8 +38,7 @@ namespace based::input
 
 		static int x, xLast;
 		static int y, yLast;
-
-		inline static bool mCursorLocked = false;
+		static CursorMode mCursorMode;
 
 		static std::array<bool, ButtonCount> buttons;
 		static std::array<bool, ButtonCount> buttonsLast;
@@ -40,7 +46,7 @@ namespace based::input
 }
 
 // Adapted from SDL
-enum
+enum : uint8_t
 {
 	BASED_INPUT_MOUSE_FIRST = 1,
 	BASED_INPUT_MOUSE_LEFT = BASED_INPUT_MOUSE_FIRST,

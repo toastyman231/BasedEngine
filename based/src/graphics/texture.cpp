@@ -110,7 +110,7 @@ namespace based::graphics
 		switch (mNumChannels)
 		{
 		case 1:
-			dataFormat = GL_ALPHA;
+			dataFormat = GL_RED;
 			break;
 		case 3:     // no alpha channel
 			// TODO: Figure out a better way to determine RGB vs BGR

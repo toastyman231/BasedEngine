@@ -91,8 +91,12 @@ namespace based
             while (mIsRunning)
             {
                 PROFILER_FRAME_MARK();
-                const float timeDelta = (core::Time::GetTime() - core::Time::mLastFrameTime) * core::Time::TimeScale();
-                core::Time::SetDelta(core::Time::GetTime(), timeDelta);
+                core::Time::UpdateUnscaledTime();
+                const float unscaledTimeDelta = core::Time::GetUnscaledTime() - core::Time::mUnscaledLastFrameTime;
+                core::Time::SetUnscaledDelta(unscaledTimeDelta);
+                core::Time::UpdateTime();
+                const float timeDelta = core::Time::GetTime() - core::Time::mLastFrameTime;
+                core::Time::SetDelta(timeDelta);
                 Update(timeDelta);
                 Render();
                 ClearArena(&mFrameArena);

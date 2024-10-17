@@ -6,6 +6,12 @@ namespace based::animation
 	class AnimationStateMachine;
 	class AnimationTransition;
 
+	enum class TimeMode : uint8_t
+	{
+		Scaled,
+		Unscaled
+	};
+
 	class Animator
 	{
 	public:
@@ -22,6 +28,9 @@ namespace based::animation
 		std::vector<glm::mat4> GetFinalBoneMatrices();
 		float blendSpeed = 5.f;
 
+		TimeMode GetTimeMode() const { return m_TimeMode; }
+		void SetTimeMode(TimeMode mode) { m_TimeMode = mode; }
+
 		inline float GetPlaybackTime() const { return m_CurrentTime; }
 		inline void SetStateMachine(const std::shared_ptr<AnimationStateMachine>& machine) { m_StateMachine = machine; }
 		inline std::shared_ptr<AnimationStateMachine> GetStateMachine() const { return m_StateMachine; }
@@ -34,6 +43,8 @@ namespace based::animation
 		float m_CurrentTime;
 		float m_DeltaTime;
 		float m_BlendDelta;
+
+		TimeMode m_TimeMode;
 	};
 
 	class AnimationState

@@ -14,6 +14,7 @@ namespace based::input
 	int Mouse::xLast = 0;
 	int Mouse::y = 0;
 	int Mouse::yLast = 0;
+	CursorMode Mouse::mCursorMode = CursorMode::Confined;
 
 	std::array<bool, Mouse::ButtonCount> Mouse::buttons;
 	std::array<bool, Mouse::ButtonCount> Mouse::buttonsLast;
@@ -30,7 +31,23 @@ namespace based::input
 		xLast = x;
 		yLast = y;
 		buttonsLast = buttons;
-		Uint32 state = SDL_GetGlobalMouseState(&x, &y);
+		Uint32 state = mCursorMode == CursorMode::Confined ? SDL_GetMouseState(&x, &y) : SDL_GetGlobalMouseState(&x, &y);
+		glm::vec2 size = based::Engine::Instance().GetWindow().GetSize();
+		if (mCursorMode == CursorMode::Confined && (x <= 1 || x >= static_cast<int>(size.x) - 1))
+		{
+			int newX = x <= 1 ? static_cast<int>(size.x) - 2 : 2;
+			SDL_WarpMouseInWindow(based::Engine::Instance().GetWindow().GetSDLWindow(), newX, y);
+			x = newX;
+			xLast = newX;
+		}
+		if (mCursorMode == CursorMode::Confined && (y <= 1 || y >= static_cast<int>(size.y) - 1))
+		{
+			int newY = y <= 1 ? static_cast<int>(size.y) - 2 : 2;
+			SDL_WarpMouseInWindow(based::Engine::Instance().GetWindow().GetSDLWindow(), x, newY);
+			y = newY;
+			yLast = newY;
+		}
+
 		for (int i = 0; i < ButtonCount; i++)
 		{
 			buttons[i] = state & SDL_BUTTON(i + 1);
@@ -39,7 +56,8 @@ namespace based::input
 #ifdef BASED_CONFIG_DEBUG
 		if (Keyboard::KeyDown(BASED_INPUT_KEY_ESCAPE))
 		{
-			SetCursorLocked(false);
+			SetCursorMode(CursorMode::Free);
+			SetCursorVisible(true);
 		}
 #endif
 	}
@@ -86,10 +104,14 @@ namespace based::input
 		}
 	}
 
-	void Mouse::SetCursorLocked(bool locked)
+	void Mouse::SetCursorMode(CursorMode mode)
 	{
-		mCursorLocked = locked;
-		SDL_SetRelativeMouseMode((locked) ? SDL_TRUE : SDL_FALSE);
+		mCursorMode = mode;
+	}
+
+	void Mouse::SetCursorVisible(bool visible)
+	{
+		SDL_ShowCursor(visible);
 	}
 
 	glm::ivec2 Mouse::GetMousePosition()

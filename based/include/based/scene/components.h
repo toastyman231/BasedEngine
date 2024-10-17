@@ -19,6 +19,7 @@ namespace based::graphics
 	class Mesh;
 	class Model;
 	class Sprite;
+	class Camera;
 }
 
 namespace based::scene
@@ -141,6 +142,13 @@ namespace based::scene
 
 		DirectionalLight(glm::vec3 dir, glm::vec3 col) : direction(dir), color(col) {}
 		DirectionalLight(glm::vec3 col) : direction(glm::vec3(60.f, 60.f, 0.f)), color(col) {}
+	};
+
+	struct CameraComponent
+	{
+		std::weak_ptr<graphics::Camera> camera;
+
+		CameraComponent(const std::shared_ptr<graphics::Camera>& cam) : camera(cam) {}
 	};
 
 	struct TextRenderer

@@ -10,6 +10,14 @@ namespace based::graphics
 		}
 	}
 
+	void Model::Draw(scene::Transform transform) const
+	{
+		for (unsigned int i = 0; i < meshes.size(); i++)
+		{
+			meshes[i]->Draw(transform, mMaterials[i]);
+		}
+	}
+
 	void Model::SetMaterial(const std::shared_ptr<Material>& mat, int index)
 	{
 		if (index < 0 || index >= static_cast<int>(mMaterials.size()))

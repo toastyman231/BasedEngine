@@ -100,12 +100,13 @@ private:
 	std::shared_ptr<scene::Entity> arms;
 	std::shared_ptr<scene::Entity> sphere;
 	std::shared_ptr<scene::Entity> wallEntity;
+	std::shared_ptr<scene::Entity> cameraEntity;
 
 	bool mouseControl = false;
 	float speed = 2.5f;
 	float yaw = 0.f;
 	float pitch = 0.0f;
-	float sensitivity = 100.f;
+	float sensitivity = 0.8f;
 	float ambientStrength = 0.1f;
 	float R = 100.f;
 	float heightCoef = 1.f;
@@ -166,8 +167,10 @@ public:
 	void Initialize() override
 	{
 		App::Initialize();
-		// TODO: Figure out how to capture the mouse properly
-		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
+		Engine::Instance().GetWindow().SetShouldRenderToScreen(true);
+		input::Mouse::SetCursorVisible(!Engine::Instance().GetWindow().GetShouldRenderToScreen());
+		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
+			input::CursorMode::Confined : input::CursorMode::Free);
 
 		// UI Setup
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main", 
@@ -189,7 +192,13 @@ public:
 		// Old stuff, plus setting camera to perspective mode
 		cubeRot = glm::vec3(0.f);
 		sunDirection = glm::vec3(60.f, -60.f, 0.f);
-		startScene->GetActiveCamera()->SetProjection(based::graphics::PERSPECTIVE);
+		auto camera = GetCurrentScene()->GetActiveCamera();
+		camera->SetProjection(based::graphics::PERSPECTIVE);
+
+		const auto& camTransform = camera->GetTransform();
+		cameraEntity = scene::Entity::CreateEntity<scene::Entity>("Camera", camTransform.Position,
+			camTransform.Rotation, camTransform.Scale);
+		cameraEntity->AddComponent<scene::CameraComponent>(camera);
 
 		// TODO: Confirm local transforms work in 2D, scene loading
 		
@@ -387,10 +396,9 @@ public:
 		armsStateMachine->AddState(idleState, true);
 		armsStateMachine->AddState(punchState);
 		animator->SetStateMachine(armsStateMachine);
+		animator->SetTimeMode(animation::TimeMode::Unscaled);
 		arms->AddComponent<scene::AnimatorComponent>(animator);
 		arms->SetEntityName("Arms");
-
-		// TODO: Fix rotations so the hands don't rotate on Z when rotating on X and Y
 
 		const auto sphereMat = graphics::Material::CreateMaterial(
 			LOAD_SHADER("Assets/shaders/pbr_lit.vert", "Assets/shaders/pbr_lit.frag"),
@@ -422,8 +430,12 @@ public:
 		// TODO: Clean up and add shadows to PBR
 		// TODO: Add a way to tie object lifetimes to scene lifetime
 
-		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(-1, 2, 4));
-		GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(6, 53, 0));
+		cameraEntity->SetPosition(glm::vec3(-1, 2, 4));
+		cameraEntity->SetRotation(glm::vec3(6, 53, 0));
+
+		arms->SetParent(cameraEntity);
+		arms->SetLocalPosition(glm::vec3(0.f, 0.f, -0.2f));
+		arms->SetLocalRotation(glm::vec3(0.f, 180.f, 0.f));
 
 		BASED_TRACE("Done initializing");
 
@@ -443,32 +455,33 @@ public:
 		// Movement input
 		if (input::Keyboard::Key(BASED_INPUT_KEY_W))
 		{
-			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
-			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position - speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetForward());
+			const auto& transform = cameraEntity->GetTransform();
+			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
+			cameraEntity->SetPosition(transform.Position - speed * core::Time::UnscaledDeltaTime() * camera->GetForward());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_S))
 		{
-			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
-			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position + speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetForward());
+			const auto& transform = cameraEntity->GetTransform();
+			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
+			cameraEntity->SetPosition(transform.Position + speed * core::Time::UnscaledDeltaTime() * camera->GetForward());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_A))
 		{
-			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
-			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position - speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetRight());
+			const auto& transform = cameraEntity->GetTransform();
+			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
+			cameraEntity->SetPosition(transform.Position - speed * core::Time::UnscaledDeltaTime() * camera->GetRight());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_D))
 		{
-			scene::Transform transform = GetCurrentScene()->GetActiveCamera()->GetTransform();
-			GetCurrentScene()->GetActiveCamera()->SetPosition(transform.Position + speed * deltaTime * GetCurrentScene()->GetActiveCamera()->GetRight());
+			const auto& transform = cameraEntity->GetTransform();
+			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
+			cameraEntity->SetPosition(transform.Position + speed * core::Time::UnscaledDeltaTime() * camera->GetRight());
 		}
-		//auto pos = GetCurrentScene()->GetActiveCamera()->GetTransform().Position;
-		//pos -= GetCurrentScene()->GetActiveCamera()->GetForward() * 0.3f;
-		//arms->SetPosition(pos);
-		//auto rot = GetCurrentScene()->GetActiveCamera()->GetTransform().Rotation;
-		//arms->SetRotation(rot + glm::vec3(0, -180, 0));
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
 		{
+			//if (core::Time::TimeScale() == 0.1f) core::Time::SetTimeScale(1.0f);
+			//else core::Time::SetTimeScale(0.1f);
 			core::Time::SetTimeScale(1.0f - core::Time::TimeScale());
 		}
 
@@ -481,12 +494,13 @@ public:
 		// Mouse input
 		if (mouseControl)
 		{
-			pitch += static_cast<float>(input::Mouse::DX()) * sensitivity * deltaTime;
-			yaw += static_cast<float>(input::Mouse::DY()) * sensitivity * deltaTime;
+			pitch += static_cast<float>(input::Mouse::DX()) * sensitivity;
+			yaw += static_cast<float>(input::Mouse::DY()) * sensitivity;
 
 			yaw = based::math::Clamp(yaw, -89.f, 89.f);
 
-			GetCurrentScene()->GetActiveCamera()->SetRotation(glm::vec3(yaw, pitch, GetCurrentScene()->GetActiveCamera()->GetTransform().Rotation.z));
+			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
+			cameraEntity->SetRotation(glm::vec3(yaw, pitch, camera->GetTransform().Rotation.z));
 		}
 
 		// Save initial mouse position for rolling ball
@@ -520,11 +534,12 @@ public:
 			else document->Show();
 		}
 
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_P))
+		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
 		{
+			BASED_TRACE("Pressed mouse button!")
 			animator->GetStateMachine()->SetBool("punch", true);
 		}
-		if (input::Keyboard::KeyUp(BASED_INPUT_KEY_P))
+		if (input::Mouse::ButtonUp(BASED_INPUT_MOUSE_LEFT))
 		{
 			animator->GetStateMachine()->SetBool("punch", false);
 		}
@@ -537,7 +552,7 @@ public:
 
 		sunLight->SetRotation(sunDirection);
 
-		crateEntity->SetRotation(cubeRot);
+		//crateEntity->SetRotation(cubeRot);
 
 		auto matLib = graphics::DefaultLibraries::GetMaterialLibrary();
 		const auto boxMat = matLib.Get("DistCube");
@@ -623,27 +638,19 @@ public:
 		if (ImGui::Begin("Settings"))
 		{
 			// Camera Settings
-			float fov = startScene->GetActiveCamera()->GetFOV();
+			float fov = persistentScene->GetActiveCamera()->GetFOV();
 			ImGui::DragFloat("FOV", &fov, 0.5f);
-			startScene->GetActiveCamera()->SetFOV(fov);
+			persistentScene->GetActiveCamera()->SetFOV(fov);
 
 			ImGui::DragFloat("Sensitivity", &sensitivity, 0.5f);
 
-			float nearPlane = startScene->GetActiveCamera()->GetNear();
+			float nearPlane = persistentScene->GetActiveCamera()->GetNear();
 			ImGui::DragFloat("Near", &nearPlane, 0.5f);
-			startScene->GetActiveCamera()->SetNear(nearPlane);
+			persistentScene->GetActiveCamera()->SetNear(nearPlane);
 
-			float farPlane = startScene->GetActiveCamera()->GetFar();
+			float farPlane = persistentScene->GetActiveCamera()->GetFar();
 			ImGui::DragFloat("Far", &farPlane, 0.5f);
-			startScene->GetActiveCamera()->SetFar(farPlane);
-
-			glm::vec3 pos = startScene->GetActiveCamera()->GetTransform().Position;
-			ImGui::DragFloat3("Camera Pos", glm::value_ptr(pos), 0.01f);
-			startScene->GetActiveCamera()->SetPosition(pos);
-
-			glm::vec3 rot = startScene->GetActiveCamera()->GetTransform().Rotation;
-			ImGui::DragFloat3("Camera Rot", glm::value_ptr(rot), 0.01f);
-			if (!mouseControl) startScene->GetActiveCamera()->SetRotation(rot);
+			persistentScene->GetActiveCamera()->SetFar(farPlane);
 
 			ImGui::DragFloat("Blend Speed", &animator->blendSpeed, 1.f, 0.f, 100.f);
 
@@ -701,9 +708,12 @@ public:
 
 					if (auto e = ent.lock())
 					{
-						glm::vec3 position = !e->Parent.expired() ? trans.LocalPosition : trans.Position;
-						glm::vec3 rotation = !e->Parent.expired() ? trans.LocalRotation : trans.Rotation;
+						glm::vec3 position = trans.Position;
+						glm::vec3 rotation = trans.Rotation;
 						glm::vec3 scale = trans.Scale;
+						glm::vec3 localPos = trans.LocalPosition;
+						glm::vec3 localRot = trans.LocalRotation;
+						glm::vec3 localScale = trans.LocalScale;
 						bool enabled = e->IsActive();
 						ImGui::PushID(i);
 						ImGui::Checkbox("", &enabled);
@@ -712,11 +722,15 @@ public:
 						ImGui::DragFloat3("Position", glm::value_ptr(position), 0.01f);
 						ImGui::DragFloat3("Rotation", glm::value_ptr(rotation), 0.01f);
 						ImGui::DragFloat3("Scale", glm::value_ptr(scale), 0.01f);
+						if (!e->Parent.expired())
+						{
+							ImGui::DragFloat3("Local Position", glm::value_ptr(localPos), 0.01f);
+							ImGui::DragFloat3("Local Rotation", glm::value_ptr(localRot), 0.01f);
+							ImGui::DragFloat3("Local Scale", glm::value_ptr(localScale), 0.01f);
+						}
 						ImGui::PopID();
-						if (!e->Parent.expired()) e->SetLocalTransform(position, rotation, scale);
-						else e->SetTransform(position, rotation, scale);
-						//registry.patch<scene::Transform>(obj, [position, rotation, scale](auto& t)
-						//	{ t.Position = position; t.Rotation = rotation; t.Scale = scale; });
+						e->SetTransform(position, rotation, scale);
+						if (!e->Parent.expired()) e->SetLocalTransform(localPos, localRot, localScale);
 						e->SetActive(enabled);
 						i++;
 					}

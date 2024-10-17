@@ -11,6 +11,7 @@ namespace based::animation
 		m_CurrentTime = 0.0f;
 		m_BlendDelta = 0.0f;
 		m_CurrentAnimation = currentAnimation;
+		m_TimeMode = TimeMode::Scaled;
 
 		m_FinalBoneMatrices.reserve(100);
 

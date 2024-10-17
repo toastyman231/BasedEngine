@@ -72,7 +72,9 @@ namespace based::graphics
             BASED_TRACE("Destroying mesh");
         }
         virtual void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material);
+        virtual void Draw(scene::Transform transform, std::shared_ptr<Material> material);
         void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
+        void Draw(scene::Transform transform);
     protected:
         //  render data
         //unsigned int VAO, VBO, EBO;
@@ -98,6 +100,7 @@ namespace based::graphics
         bool RemoveInstances(std::vector<int> indices);
         void ClearInstances();
         void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material) override;
+        void Draw(scene::Transform, std::shared_ptr<Material> material) override;
 
         int GetInstanceCount() const { return mInstanceCount; }
     private:

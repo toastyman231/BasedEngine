@@ -27,7 +27,7 @@ namespace based::scene
 		{
 			auto newEntity = std::make_shared<Type>(args...);
 			newEntity->template AddComponent<EntityReference>(newEntity);
-			//graphics::DefaultLibraries::GetEntityLibrary().Load(name, newEntity);
+			newEntity->SetEntityName(name);
 
 			newEntity->SetTransform(pos, rot, scale);
 			newEntity->Initialize();
