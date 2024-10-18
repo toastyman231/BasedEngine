@@ -1,9 +1,7 @@
+#include "pch.h"
 #include "graphics/camera.h"
 
 #include "engine.h"
-#include "log.h"
-#include "external/glm/gtc/matrix_transform.hpp"
-#include "based/core/profiler.h"
 
 namespace based::graphics
 {

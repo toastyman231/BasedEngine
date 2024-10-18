@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "graphics/model.h"
 
 namespace based::graphics

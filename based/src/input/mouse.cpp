@@ -1,12 +1,9 @@
+#include "pch.h"
 #include "input/mouse.h"
-#include "log.h"
-
-#include <algorithm>
 
 #include "engine.h"
 #include "input/keyboard.h"
 #include "SDL2/SDL_mouse.h"
-#include "based/core/profiler.h"
 
 namespace based::input
 {

@@ -1,8 +1,6 @@
-#include <utility>
-
+#include "pch.h"
 #include "graphics/sprite.h"
 
-#include "external/glm/gtx/transform.hpp"
 #include "graphics/defaultassetlibraries.h"
 #include "graphics/texture.h"
 

@@ -1,8 +1,7 @@
+#include "pch.h"
 #include "graphics/mesh.h"
 
 #include "app.h"
-#include "based/core/profiler.h"
-#include "external/glm/gtx/quaternion.hpp"
 #include "graphics/shader.h"
 #include "graphics/defaultassetlibraries.h"
 

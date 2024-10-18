@@ -1,7 +1,5 @@
+#include "pch.h"
 #include "graphics/helpers.h"
-
-#include <fstream>
-#include <sstream>
 
 namespace based::graphics
 {

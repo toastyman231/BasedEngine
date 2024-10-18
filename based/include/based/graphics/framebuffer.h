@@ -1,8 +1,6 @@
 #pragma once
-#include <cstdint>
 
 #include "texture.h"
-#include "external/glm/glm.hpp"
 
 namespace based::graphics
 {

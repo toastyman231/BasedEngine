@@ -1,8 +1,6 @@
+#include "pch.h"
 #include "ui/uisysteminterface.h"
-#include <RmlUi/Core/Context.h>
-#include <RmlUi/Core/Input.h>
-#include <RmlUi/Core/StringUtilities.h>
-#include <RmlUi/Core/SystemInterface.h>
+
 #include <SDL2/SDL.h>
 
 namespace based::ui

@@ -1,9 +1,5 @@
 #pragma once
 
-#include <array>
-#include <unordered_map>
-#include <memory>
-
 struct SDL_ControllerDeviceEvent;
 typedef struct _SDL_GameController SDL_GameController;
 namespace based::input

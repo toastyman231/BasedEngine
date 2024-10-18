@@ -1,12 +1,10 @@
+#include "pch.h"
 #include "graphics/texture.h"
-#include "graphics/helpers.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "external/stb/stb_image.h"
 
 #include "glad/glad.h"
-#include "log.h"
-#include "based/core/profiler.h"
 
 namespace based::graphics
 {

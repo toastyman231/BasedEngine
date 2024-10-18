@@ -1,11 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <set>
-#include <string>
-#include <unordered_map>
-#include "external/glm/glm.hpp"
-
 #define LOAD_SHADER(vs, fs) std::shared_ptr<graphics::Shader>(graphics::Shader::LoadShader(vs, fs))
 
 namespace based::graphics

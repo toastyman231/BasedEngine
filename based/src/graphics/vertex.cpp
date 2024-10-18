@@ -1,5 +1,5 @@
+#include "pch.h"
 #include "graphics/vertex.h"
-#include "graphics/helpers.h"
 
 #include "glad/glad.h"
 

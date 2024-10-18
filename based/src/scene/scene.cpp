@@ -1,16 +1,14 @@
+#include "pch.h"
 #include "engine.h"
 
 #include "based/scene/scene.h"
 
 #include "basedtime.h"
 #include "animation/animator.h"
-#include "external/glm/ext/matrix_transform.hpp"
 #include "graphics/model.h"
 #include "scene/components.h"
 #include "ui/textentity.h"
 #include "graphics/sprite.h"
-
-#include "based/core/profiler.h"
 
 namespace based::scene
 {

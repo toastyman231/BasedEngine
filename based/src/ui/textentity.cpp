@@ -1,13 +1,12 @@
+#include "pch.h"
 #include "ui/textentity.h"
 
 #include "app.h"
 #include "engine.h"
 
 #include "SDL2/SDL_ttf.h"
-#include "external/glm/gtc/type_ptr.hpp"
 
 #include "graphics/defaultassetlibraries.h"
-#include "graphics/helpers.h"
 
 #include "math/basedmath.h"
 

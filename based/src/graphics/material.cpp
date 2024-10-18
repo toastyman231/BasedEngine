@@ -1,8 +1,7 @@
+#include "pch.h"
 #include "graphics/material.h"
 #include "graphics/shader.h"
 #include "graphics/texture.h"
-#include "log.h"
-#include "based/core/profiler.h"
 
 namespace based::graphics
 {

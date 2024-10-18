@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 namespace based::input
 {
 	class Keyboard

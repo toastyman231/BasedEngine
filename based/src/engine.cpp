@@ -1,6 +1,6 @@
+#include "pch.h"
 #include "engine.h"
 
-#include "log.h"
 #include "app.h"
 #include "graphics/defaultassetlibraries.h"
 
@@ -8,14 +8,13 @@
 #include "input/keyboard.h"
 #include "input/joystick.h"
 
-#include "external/stb/stb_image.h"
+#include <external/stb/stb_image.h>
 
-#include "SDL2/SDL.h"
+#include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include "scene/audio.h"
 
 #include "basedtime.h"
-#include "core/profiler.h"
 #include "math/basedmath.h"
 
 bool logging_enabled = false;
@@ -154,7 +153,7 @@ namespace based
                 BASED_INFO("SDL {}.{}.{}", (int32_t)version.major, (int32_t)version.minor, (int32_t)version.patch);
 
                 // Initialize memory
-                uint32_t engineMemorySize = MEGABYTES_BYTES(100);
+                uint32_t engineMemorySize = MEGABYTES_BYTES(2);
                 void* engineMemory = malloc(engineMemorySize);
                 memset(engineMemory, 0, engineMemorySize);
                 mEngineArena = memory::CreateArena(engineMemory, engineMemorySize, "Engine Memory");

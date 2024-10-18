@@ -1,6 +1,5 @@
+#include "pch.h"
 #include "scene/entity.h"
-
-#include "based/core/profiler.h"
 
 namespace based::scene
 {

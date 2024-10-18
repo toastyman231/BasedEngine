@@ -1,10 +1,6 @@
 #pragma once
 
-#include <string>
-#include <unordered_map>
-#include <memory>
-
-#include "../log.h"
+#include "based/pch.h"
 
 namespace based::core
 {

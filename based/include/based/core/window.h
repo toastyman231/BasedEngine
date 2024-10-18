@@ -1,9 +1,8 @@
 #pragma once
 
+#include "based/pch.h"
+
 #include "imguiwindow.h"
-#include <string>
-#include <memory>
-#include "external/glm/glm.hpp"
 #include "graphics/framebuffer.h"
 
 struct SDL_Window;

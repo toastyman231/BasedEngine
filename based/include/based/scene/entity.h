@@ -1,14 +1,9 @@
 #pragma once
 
-#include "external/entt/entt.hpp"
-
 #include "components.h"
 #include "based/engine.h"
 #include "based/app.h"
 
-#include <string>
-
-#include "based/log.h"
 #include "based/graphics/defaultassetlibraries.h"
 
 namespace based::scene

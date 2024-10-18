@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include <based/animation/animation.h>
 
 namespace based::animation

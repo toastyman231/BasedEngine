@@ -1,15 +1,9 @@
+#include "pch.h"
 #include "graphics/shader.h"
-#include "graphics/helpers.h"
-#include "log.h"
 #include "glad/glad.h"
-#include "external/glm/gtc/type_ptr.hpp"
-
-#include <fstream>
-#include <sstream>
 
 #include "app.h"
 #include "engine.h"
-#include "based/core/profiler.h"
 #include "based/core/basedtime.h"
 
 namespace based::graphics

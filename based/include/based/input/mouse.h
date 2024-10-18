@@ -1,9 +1,5 @@
 #pragma once
 
-#include <array>
-
-#include "external/glm/glm.hpp"
-
 namespace based::input
 {
 	enum class CursorMode : uint8_t

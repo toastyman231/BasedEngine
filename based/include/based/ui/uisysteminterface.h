@@ -3,9 +3,6 @@
 #ifndef RMLUI_BACKENDS_PLATFORM_SDL_H
 #define RMLUI_BACKENDS_PLATFORM_SDL_H
 
-#include <RmlUi/Core/Input.h>
-#include <RmlUi/Core/SystemInterface.h>
-#include <RmlUi/Core/Types.h>
 #include <SDL2/SDL.h>
 
 namespace based::ui

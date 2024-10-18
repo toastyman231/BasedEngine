@@ -1,12 +1,6 @@
 #pragma once
 
-#include <memory>
-#include <unordered_map>
-#include <string>
-#include <type_traits>
-
 #include "based/core/assetlibrary.h"
-#include "external/glm/glm.hpp"
 
 #define DEFAULT_MAT_LIB based::graphics::DefaultLibraries::GetMaterialLibrary()
 

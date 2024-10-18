@@ -1,6 +1,5 @@
+#include "pch.h"
 #include "memory/arena.h"
-
-#include "log.h"
 
 // Arena allocator taken from https://github.com/FaultyPine/tiny_engine by Grayson Clark
 

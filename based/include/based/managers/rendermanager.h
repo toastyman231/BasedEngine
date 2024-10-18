@@ -1,9 +1,6 @@
 #pragma once
 
 #include "graphics/rendercommands.h"
-#include "external/glm/glm.hpp"
-#include <queue>
-#include <stack>
 
 #define BASED_SUBMIT_RC(type, ...) std::move(std::make_unique<based::graphics::rendercommands::type>(__VA_ARGS__))
 

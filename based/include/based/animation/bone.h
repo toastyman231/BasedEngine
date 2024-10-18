@@ -1,10 +1,8 @@
 #pragma once
 
-#include <string>
-#include <vector>
+#include "based/pch.h"
+
 #include <assimp/anim.h>
-#include <external/glm/glm.hpp>
-#include "external/glm/gtx/quaternion.hpp"
 
 namespace based::animation
 {

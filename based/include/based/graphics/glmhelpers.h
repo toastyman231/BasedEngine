@@ -3,8 +3,6 @@
 #include<assimp/quaternion.h>
 #include<assimp/vector3.h>
 #include<assimp/matrix4x4.h>
-#include<external/glm/glm.hpp>
-#include<external/glm/gtc/quaternion.hpp>
 
 namespace based::graphics
 {

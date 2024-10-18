@@ -1,8 +1,6 @@
-﻿#include <memory>
-#include <external/glm/gtx/string_cast.hpp>
+﻿#include "based/pch.h"
 
 #include "based/engine.h"
-#include "based/log.h"
 #include "based/main.h"
 #include "based/core/assetlibrary.h"
 #include "based/graphics/camera.h"
@@ -15,9 +13,7 @@
 #include "based/math/basedmath.h"
 #include "based/scene/components.h"
 #include "based/scene/entity.h"
-#include "external/glm/gtc/type_ptr.hpp"
 #include "external/imgui/imgui.h"
-#include <RmlUi/Core.h>
 
 #include "based/animation/animation.h"
 #include "based/animation/animator.h"

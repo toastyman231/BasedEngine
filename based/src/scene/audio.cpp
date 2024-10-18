@@ -1,11 +1,10 @@
+#include "pch.h"
 #include "based/scene/audio.h"
-#include "log.h"
 
 #define MINIAUDIO_IMPLEMENTATION
 #include "engine.h"
 #include "miniaudio.h"
 
-#include "based/core/profiler.h"
 #include "memory/arena.h"
 
 namespace based::scene

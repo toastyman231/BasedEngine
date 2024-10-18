@@ -1,6 +1,5 @@
 #pragma once
 
-#include "external/glm/glm.hpp"
 #include "scene/components.h"
 
 namespace based::graphics

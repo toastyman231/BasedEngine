@@ -1,7 +1,7 @@
+#include "pch.h"
 #include <based/animation/animator.h>
 
 #include "basedtime.h"
-#include "external/glm/gtx/matrix_interpolation.hpp"
 #include "math/basedmath.h"
 
 namespace based::animation

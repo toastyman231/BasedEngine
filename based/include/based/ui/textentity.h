@@ -1,9 +1,5 @@
 #pragma once
 
-#include "external/glm/glm.hpp"
-
-#include <string>
-
 #include "alignment.h"
 #include "SDL2/SDL_ttf.h"
 

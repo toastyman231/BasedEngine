@@ -1,6 +1,4 @@
 #pragma once
-#include <memory>
-#include "external/glm/glm.hpp"
 
 namespace based::graphics
 {

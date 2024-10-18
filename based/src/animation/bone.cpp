@@ -1,7 +1,5 @@
+#include "pch.h"
 #include <based/animation/bone.h>
-
-#include "log.h"
-#include "graphics/glmhelpers.h"
 
 namespace based::animation
 {

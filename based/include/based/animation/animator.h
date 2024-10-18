@@ -1,4 +1,7 @@
 #pragma once
+
+#include "based/pch.h"
+
 #include "animation.h"
 
 namespace based::animation

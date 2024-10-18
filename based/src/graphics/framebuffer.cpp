@@ -1,9 +1,7 @@
+#include "pch.h"
 #include "graphics/framebuffer.h"
-#include "log.h"
-#include "graphics/helpers.h"
 
 #include "glad/glad.h"
-#include "core/profiler.h"
 
 namespace based::graphics
 {

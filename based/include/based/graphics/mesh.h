@@ -1,14 +1,9 @@
 #pragma once
-#include <memory>
-#include <vector>
 
 #include "based/engine.h"
 #include "material.h"
 #include "texture.h"
 #include "vertex.h"
-#include "external/glm/vec2.hpp"
-#include "external/glm/vec3.hpp"
-#include "external/glm/gtx/transform.hpp"
 #include "based/scene/scene.h"
 #include "based/scene/components.h"
 

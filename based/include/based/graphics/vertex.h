@@ -1,16 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <cstdint>
-#include <vector>
-#include <type_traits>
-
-#include "helpers.h"
-#include "../log.h"
-#include "based/core/profiler.h"
-#include "external/glm/glm.hpp"
-#include "based/memory/memoryhelpers.h"
-
 #define BASED_CREATE_VERTEX_BUFFER(name, type) std::unique_ptr<based::graphics::VertexBuffer<type>> name = std::make_unique<based::graphics::VertexBuffer<type>>()
 #define BASED_CREATE_INSTANCED_VERTEX_BUFFER(name, type) std::unique_ptr<based::graphics::InstancedVertexBuffer<type>> name = std::make_unique<based::graphics::InstancedVertexBuffer<type>>()
 #define BASED_CREATE_INSTANCED_VERTEX_BUFFER_FULL(name, type, size, dbg) std::unique_ptr<based::graphics::InstancedVertexBuffer<type>> name = std::make_unique<based::graphics::InstancedVertexBuffer<type>>(size, dbg)

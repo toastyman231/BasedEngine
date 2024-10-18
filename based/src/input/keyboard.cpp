@@ -1,10 +1,7 @@
+#include "pch.h"
 #include "input/keyboard.h"
-#include "log.h"
-
-#include <algorithm>
 
 #include "SDL2/SDL_keyboard.h"
-#include "based/core/profiler.h"
 
 namespace based::input
 {

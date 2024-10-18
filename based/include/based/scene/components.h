@@ -1,9 +1,5 @@
 #pragma once
 
-#include "external/glm/glm.hpp"
-#include "external/glm/gtx/transform.hpp"
-#include <memory>
-
 namespace based::ui
 {
 	class TextEntity;

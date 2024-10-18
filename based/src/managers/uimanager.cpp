@@ -1,9 +1,8 @@
+#include "pch.h"
 #include "managers/uimanager.h"
 
 #include "based/ui/uisysteminterface.h"
 #include "based/ui/uirenderinterface.h"
-
-#include "based/core/profiler.h"
 
 namespace based::managers
 {

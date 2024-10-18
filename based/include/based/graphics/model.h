@@ -7,9 +7,6 @@
 #include <based/graphics/texture.h>
 #include <based/graphics/mesh.h>
 #include <based/graphics/defaultassetlibraries.h>
-#include <based/graphics/glmhelpers.h>
-
-#include <vector>
 
 #include <based/scene/entity.h>
 

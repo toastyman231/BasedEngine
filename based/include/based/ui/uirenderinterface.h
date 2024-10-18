@@ -3,11 +3,6 @@
 #ifndef RMLUI_BACKENDS_RENDERER_GL3_H
 #define RMLUI_BACKENDS_RENDERER_GL3_H
 
-#include <RmlUi/Core/Core.h>
-#include <RmlUi/Core/FileInterface.h>
-#include <RmlUi/Core/RenderInterface.h>
-#include <RmlUi/Core/Types.h>
-
 #include "based/graphics/vertex.h"
 #include "based/graphics/shader.h"
 #include "glad/glad.h"

@@ -1,15 +1,12 @@
+#include "pch.h"
 #include "managers/rendermanager.h"
 
 #include "app.h"
-#include "graphics/helpers.h"
 #include "graphics/framebuffer.h"
 
 #include "engine.h"
-#include "log.h"
 #include "glad/glad.h"
-#include "core/profiler.h"
-#include "external/glm/ext/matrix_clip_space.hpp"
-#include "external/glm/ext/matrix_transform.hpp"
+
 #include "math/basedmath.h"
 
 namespace based::managers

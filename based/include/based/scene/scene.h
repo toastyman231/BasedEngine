@@ -1,7 +1,5 @@
 #pragma once
 
-#include "external/entt/entt.hpp"
-
 namespace based::scene
 {
 	class Scene

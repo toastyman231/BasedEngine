@@ -1,6 +1,7 @@
 #pragma once
 
-#include "based/log.h"
+#include <string>
+
 #include "glad/glad.h"
 
 namespace based::graphics

@@ -1,9 +1,6 @@
 #pragma once
-#include <string>
-#include <vector>
 
 #include "bone.h"
-#include "external/glm/fwd.hpp"
 #include "based/graphics/model.h"
 
 namespace based::animation

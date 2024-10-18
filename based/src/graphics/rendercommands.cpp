@@ -1,19 +1,18 @@
+#include "pch.h"
+
 #include "graphics/rendercommands.h"
 
 #include "app.h"
 #include "engine.h"
-#include "log.h"
 
 #include "graphics/camera.h"
 #include "graphics/vertex.h"
 #include "graphics/texture.h"
 #include "graphics/shader.h"
-#include "graphics/helpers.h"
 #include "graphics/framebuffer.h"
 #include "graphics/material.h"
 
 #include "glad/glad.h"
-#include "based/core/profiler.h"
 
 namespace based::graphics::rendercommands
 {

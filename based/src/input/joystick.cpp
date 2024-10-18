@@ -1,7 +1,5 @@
+#include "pch.h"
 #include "input/joystick.h"
-#include "log.h"
-
-#include <algorithm>
 
 #include "SDL2/SDL_events.h"
 #include "SDL2/SDL_gamecontroller.h"
