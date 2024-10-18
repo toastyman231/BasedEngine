@@ -31,6 +31,9 @@ void main() {
     vec3 Y = normalize(cross(N, TBN[0]));
 
     vec3 Lo = vec3(0.0);
+
+    float shadow = CalculateShadows(fragPosLightSpace);
+
     for (int i = 0; i < NR_POINT_LIGHTS; ++i) {
         PointLight light = pointLights[i];
         if (light.color == vec3(0.0)) continue;
@@ -41,35 +44,32 @@ void main() {
 
         BRDFResults reflection = DisneyBRDF(albedo, L, V, N, X, Y);
 
-        Lo += (lightColor * (reflection.diffuse + reflection.specular + reflection.clearcoat)) * DotClamped(N, L);
+        Lo += (lightColor * (reflection.diffuse + reflection.specular + reflection.clearcoat)) * DotClamped(N, L) * (1.0 - shadow);
+    }
 
-        /*vec3 L = normalize(lightPos - fragPos);
-        vec3 H = normalize(V + L);
+    vec3 Do = vec3(0.0);
 
-        float dist = length(lightPos - fragPos);
-        float attenuation = 1.0 / (dist * dist);
-        vec3 radiance = lightColor * attenuation;
-        vec3 F = FresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
-        
-        float NDF = DistributionGGX(N, H, roughness);
-        float G = GeometrySmith(N, V, L, roughness);
+    if (directionalLight.direction != vec3(0)) {
+        if (directionalLight.color != vec3(0.0)) {
+            vec3 L = normalize(-directionalLight.direction);
+            vec3 lightColor = directionalLight.color;
+            vec3 H = normalize(L + V);
 
-        vec3 numerator = NDF * G * F;
-        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
-        vec3 specular = numerator / denominator;
+            float NdotL = DotClamped(N, L);
+            float NdotV = DotClamped(N, V);
+            float NdotH = DotClamped(N, H);
+            float VdotH = DotClamped(V, H);
 
-        vec3 kS = F;
-        vec3 kD = vec3(1.0) - kS;
-        kD *= 1.0 - metallic;
+            BRDFResults res = DisneyBRDF(albedo, L, V, N, X, Y);
 
-        float NdotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;*/
+            Do += (lightColor * (res.diffuse + res.specular + res.clearcoat)) * NdotL * (1.0 - shadow);
+        }
     }
 
     vec3 ambient = vec3(ambientStrength) * albedo * GetMaterialAmbientOcclusion(uvs);
-    vec3 color = ambient + Lo;
+    vec3 color = ambient + Do + Lo;
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
 
-    outColor = vec4(color, 1.0);
+    outColor = useLight == 1 ? vec4(color, 1.0) : vec4(albedo, 1.0);
 }

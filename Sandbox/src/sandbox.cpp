@@ -116,6 +116,7 @@ private:
 	glm::vec3 lightPosition;
 	glm::ivec2 initialPos;
 	glm::vec3 sunDirection;
+	glm::vec3 sunColor = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 albedo = glm::vec3(1.0f, 0.84f, 0.0f);
 
 	std::shared_ptr<animation::Animation> handsAnim;
@@ -185,7 +186,7 @@ public:
 			camTransform.Rotation, camTransform.Scale);
 		cameraEntity->AddComponent<scene::CameraComponent>(camera);
 
-		// TODO: Confirm local transforms work in 2D, scene loading
+		// TODO: Confirm local transforms work in 2D
 		
 		// Set up crate object and material
 		const auto crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
@@ -354,6 +355,7 @@ public:
 		armsMat->AddTexture(armsTex, "material.diffuseMat.tex");
 		armsMat->SetUniformValue("material.diffuseMat.tint", glm::vec4(0.77f, 0.4f, 0.35f, 1.f));
 		armsMat->SetUniformValue("material.diffuseMat.useSampler", 1);
+		armsMat->SetUniformValue("receiveShadows", 0);
 		// Create arms
 		const auto armModel = graphics::Model::CreateModel(
 			"Assets/Models/Arms.fbx", DEFAULT_MODEL_LIB, "ArmsModel");
@@ -411,9 +413,9 @@ public:
 		sphere = scene::Entity::CreateEntity<scene::Entity>("Sphere");
 		sphere->AddComponent<scene::MeshRenderer>(sphereMesh);
 		sphere->SetEntityName("Sphere");
+		sphere->SetPosition({ 0.f, 2.f, 0.f });
 
-		// TODO: Clean up and add shadows and directional lights to PBR
-		// TODO: Add a way to tie object lifetimes to scene lifetime
+		// TODO: Add a way to tie object lifetimes to scene lifetime (scene serialization)
 
 		cameraEntity->SetPosition(glm::vec3(-1, 2, 4));
 		cameraEntity->SetRotation(glm::vec3(6, 53, 0));
@@ -554,10 +556,19 @@ public:
 			planeMat->SetUniformValue("ambientStrength", ambientStrength);
 			planeMat->SetUniformValue("heightCoef", heightCoef);
 			planeMat->SetUniformValue("useLight", static_cast<int>(useLight));
+
+			sphereMat->SetUniformValue("useLight", static_cast<int>(useLight));
 		}
 
 		// Disable lights when not using lighting
-		const entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+		entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+		registry.patch<scene::DirectionalLight>(sunLight->GetEntityHandle(),
+			[this](auto& l)
+			{
+				l.direction = sunDirection;
+				l.color = sunColor;
+			});
+
 		const auto lights = registry.view<scene::PointLight, scene::EntityReference>();
 
 		for (const auto light : lights)
@@ -671,12 +682,14 @@ public:
 
 				ImGui::Text("Sun Controls");
 				ImGui::DragFloat3("Sun Direction", glm::value_ptr(sunDirection), 0.01f);
+				ImGui::DragFloat3("Sun Color", glm::value_ptr(sunColor), 0.01f);
 
 				ImGui::Text("General");
 				ImGui::DragFloat("Ambient Strength", &ambientStrength, 0.01f);
 				ImGui::Checkbox("Use Normal Maps", &useNormalMaps);
 			}
 
+			// Object controls
 			if (ImGui::CollapsingHeader("Objects"))
 			{
 				const auto objects = registry.view<
@@ -720,7 +733,6 @@ public:
 			}
 
 			// Material editor
-			
 			if (ImGui::CollapsingHeader("Materials"))
 			{
 				int i = 0;

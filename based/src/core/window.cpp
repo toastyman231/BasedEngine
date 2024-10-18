@@ -78,7 +78,7 @@ namespace based::core
 		mFramebuffer = std::make_shared<graphics::Framebuffer>(props.w, props.h);
 		mFramebuffer->SetClearColor({ props.clearColor.r, props.clearColor.g, props.clearColor.b, 1.f });
 
-		mShadowbuffer = std::make_shared<graphics::Framebuffer>(1024, 1024, GL_DEPTH_COMPONENT, GL_FLOAT,
+		mShadowbuffer = std::make_shared<graphics::Framebuffer>(2048, 2048, GL_DEPTH_COMPONENT, GL_FLOAT,
 			graphics::TextureFilter::Nearest, GL_DEPTH_ATTACHMENT, false);
 		mShadowbuffer->SetClearColor({ props.clearColor.r, props.clearColor.g, props.clearColor.b, 1.f });
 

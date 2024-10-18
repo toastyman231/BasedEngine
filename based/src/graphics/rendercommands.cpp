@@ -29,7 +29,6 @@ namespace based::graphics::rendercommands
 				va->Bind();
 				shader->Bind();
 
-				// TODO: Convert camera matrices to leverage UBOs
 				const auto& rm = Engine::Instance().GetRenderManager();
 				const auto& cam = rm.GetActiveCamera();
 				if (cam)
@@ -74,7 +73,6 @@ namespace based::graphics::rendercommands
 				texture->Bind();
 				shader->Bind();
 
-				// TODO: Convert camera matrices to leverage UBOs
 				const auto& rm = Engine::Instance().GetRenderManager();
 				const auto& cam = rm.GetActiveCamera();
 				if (cam)
