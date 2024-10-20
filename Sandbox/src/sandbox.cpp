@@ -427,7 +427,6 @@ public:
 		BASED_TRACE("Done initializing");
 
 		// TODO: Fix text rendering behind sprites even when handled last
-		// TODO: Optimize UI to not regenerate VAs every single frame
 	}
 
 	void Shutdown() override

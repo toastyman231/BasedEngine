@@ -74,6 +74,8 @@ namespace based::ui
 
 	void RenderInterface_GL4::BeginFrame()
 	{
+		// Clear VAs at the start of the next frame (we can't clear in EndFrame because that actually runs before
+		// the scene is even rendered, so we still need the VAs after that point)
 		mVAs.clear();
 		mProjection = glm::ortho(0.f,
 			static_cast<float>(Engine::Instance().GetWindow().GetSize().x),
@@ -121,13 +123,76 @@ namespace based::ui
 		{
 			// Use texture
 			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayUserInterface,
-				mVAs.back(), mFragTexture, static_cast<uint32_t>(texture), mTransform, glm::vec2{ translation.x, translation.y }));
+				mVAs.back(), mFragTexture, static_cast<uint32_t>(texture), mTransform, glm::vec2{translation.x, translation.y}));
 		} else
 		{
 			// Render solid color
 			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayUserInterface,
-				mVAs.back(), mFragColor, 0, mTransform, glm::vec2{ translation.x, translation.y }));
+				mVAs.back(), mFragColor, 0, mTransform, glm::vec2{translation.x, translation.y}));
 		}
+	}
+
+	Rml::CompiledGeometryHandle RenderInterface_GL4::CompileGeometry(Rml::Vertex* vertices, int num_vertices,
+		int* indices, int num_indices, Rml::TextureHandle texture)
+	{
+		// Build and upload vertex array
+		auto va = std::make_shared<graphics::VertexArray>();
+
+		BASED_CREATE_VERTEX_BUFFER(pos_vb, float);
+		BASED_CREATE_VERTEX_BUFFER(col_vb, unsigned char);
+		BASED_CREATE_VERTEX_BUFFER(uv_vb, float);
+
+		for (const auto* vertex = vertices; vertex != vertices + num_vertices; ++vertex)
+		{
+			pos_vb->PushVertex({ vertex->position.x, vertex->position.y });
+			col_vb->PushVertex({ vertex->colour.red, vertex->colour.green, vertex->colour.blue, vertex->colour.alpha });
+			uv_vb->PushVertex({ vertex->tex_coord.x, vertex->tex_coord.y });
+		}
+
+		pos_vb->SetLayout({ 2 });
+		col_vb->SetLayout({ 4 });
+		uv_vb->SetLayout({ 2 });
+		va->PushBuffer(std::move(pos_vb));
+		va->PushBuffer(std::move(col_vb));
+		va->PushBuffer(std::move(uv_vb));
+
+		va->SetElements(std::vector<uint32_t>(indices, indices + num_indices));
+		va->Upload();
+
+		mCompiledVAs.emplace_back(va);
+		mCompiledTextures.emplace_back(texture);
+
+		return mCompiledVAs.size() - 1;
+	}
+
+	void RenderInterface_GL4::RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry,
+		const Rml::Vector2f& translation)
+	{
+		auto va = mCompiledVAs[geometry];
+		auto texture = mCompiledTextures[geometry];
+		if (va)
+		{
+			if (texture)
+			{
+				// Use texture
+				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayUserInterface,
+					va, mFragTexture, static_cast<uint32_t>(texture), mTransform, glm::vec2{ translation.x, translation.y }));
+			}
+			else
+			{
+				// Render solid color
+				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayUserInterface,
+					va, mFragColor, 0, mTransform, glm::vec2{ translation.x, translation.y }));
+			}
+		}
+	}
+
+	void RenderInterface_GL4::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry)
+	{
+		if (geometry < 0 || geometry > mCompiledVAs.size()) return;
+
+		mCompiledVAs.erase(mCompiledVAs.begin() + geometry);
+		mCompiledTextures.erase(mCompiledTextures.begin() + geometry);
 	}
 
 	void RenderInterface_GL4::EnableScissorRegion(bool enable)
@@ -243,6 +308,7 @@ namespace based::ui
 
 		if (header.dataType != 2)
 		{
+			delete[] buffer;
 			// Try to load the texture using my texture API
 			auto texture = std::make_shared<graphics::Texture>(source);
 			texture_handle = (Rml::TextureHandle)texture->GetId();
@@ -329,7 +395,7 @@ namespace based::ui
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
+		 
 		texture_handle = (Rml::TextureHandle)texture_id;
 
 		return true;

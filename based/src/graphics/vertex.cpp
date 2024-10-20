@@ -68,23 +68,18 @@ namespace based::graphics
 	{
 		mVbos.clear();
 		glDeleteVertexArrays(1, &mVao); BASED_CHECK_GL_ERROR;
+		glDeleteBuffers(1, &mEbo); BASED_CHECK_GL_ERROR;
 	}
 
 	void VertexArray::PushBuffer(std::unique_ptr<RawVertexBuffer> vbo)
 	{
 		PROFILE_FUNCTION();
-		if (mVbos.size() > 0)
-		{
-			//BASED_ASSERT(mVbos[0]->GetVertexCount() == vbo->GetVertexCount(),
-			//	"Attempting to push a VertexBuffer with a different VertexCount");
-		}
-		BASED_ASSERT(vbo->GetLayout().size() > 0, "VertexBuffer has no layout defined");
-		if (vbo->GetLayout().size() > 0)
+		BASED_ASSERT(!vbo->GetLayout().empty(), "VertexBuffer has no layout defined");
+		if (!vbo->GetLayout().empty())
 		{
 			mVbos.push_back(std::move(vbo));
 			mVertexCount = (uint32_t)mVbos[0]->GetVertexCount();
 		}
-		
 	}
 
 	void VertexArray::SetElements(const std::vector<uint32_t>& elements)

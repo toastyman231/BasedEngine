@@ -46,8 +46,8 @@ namespace based::core
 
 		glm::ivec2 GetSize();
 
-		inline SDL_Window* GetSDLWindow() { return mWindow; }
-		inline SDL_GLContext GetGLContext() { return mGLContext; }
+		inline SDL_Window* GetSDLWindow() const { return mWindow; }
+		inline SDL_GLContext GetGLContext() const { return mGLContext; }
 		inline graphics::Framebuffer* GetFramebuffer() { return mFramebuffer.get(); }
 		void SetMaintainAspectRatio(bool newMaintain);
 
