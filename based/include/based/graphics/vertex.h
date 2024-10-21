@@ -1,9 +1,11 @@
 #pragma once
 
+#include "based/core/profiler.h"
+#include "based/log.h"
+
 #define BASED_CREATE_VERTEX_BUFFER(name, type) std::unique_ptr<based::graphics::VertexBuffer<type>> name = std::make_unique<based::graphics::VertexBuffer<type>>()
 #define BASED_CREATE_INSTANCED_VERTEX_BUFFER(name, type) std::unique_ptr<based::graphics::InstancedVertexBuffer<type>> name = std::make_unique<based::graphics::InstancedVertexBuffer<type>>()
 #define BASED_CREATE_INSTANCED_VERTEX_BUFFER_FULL(name, type, size, dbg) std::unique_ptr<based::graphics::InstancedVertexBuffer<type>> name = std::make_unique<based::graphics::InstancedVertexBuffer<type>>(size, dbg)
-
 
 namespace based::graphics
 {
@@ -143,7 +145,7 @@ namespace based::graphics
 			if constexpr (std::is_same<T, unsigned int>()) { mGLType = RawVertexBuffer::GLTypeUInt; }
 			if constexpr (std::is_same<T, float>()) { mGLType = RawVertexBuffer::GLTypeFloat; }
 			if constexpr (std::is_same<T, double>()) { mGLType = RawVertexBuffer::GLTypeDouble; }
-			//if (mShowDebug) BASED_TRACE("Created instanced VB");
+
 			mDataVec.reserve(reserveSize);
 		}
 
@@ -151,7 +153,6 @@ namespace based::graphics
 		{
 			mDataVec.clear();
 			mDataVec.shrink_to_fit();
-			//if (mShowDebug) BASED_TRACE("Destroyed instanced VB")
 		}
 
 		inline void SetShowDebug(bool newValue) { mShowDebug = newValue; }
@@ -184,9 +185,12 @@ namespace based::graphics
 		{
 			PROFILE_FUNCTION();
 			mStride *= sizeof(T);
-			glBindBuffer(GL_ARRAY_BUFFER, mVbo); BASED_CHECK_GL_ERROR;
-			glBufferData(GL_ARRAY_BUFFER, (mVertexCount / 4) * sizeof(glm::mat4), &mDataVec[0], dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW); BASED_CHECK_GL_ERROR;
-			glBindBuffer(GL_ARRAY_BUFFER, 0); BASED_CHECK_GL_ERROR;
+			mSize = (mVertexCount / 4) * sizeof(glm::mat4);
+			mData = &mDataVec[0];
+			RawVertexBuffer::Upload(dynamic);
+			//glBindBuffer(GL_ARRAY_BUFFER, mVbo); BASED_CHECK_GL_ERROR;
+			//glBufferData(GL_ARRAY_BUFFER, (mVertexCount / 4) * sizeof(glm::mat4), &mDataVec[0], dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW); BASED_CHECK_GL_ERROR;
+			//glBindBuffer(GL_ARRAY_BUFFER, 0); BASED_CHECK_GL_ERROR;
 			mIsUploaded = true;
 		}
 	private:

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <external/glm/mat4x4.hpp>
+
 namespace based::graphics
 {
 	class VertexArray;

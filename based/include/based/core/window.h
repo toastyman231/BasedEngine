@@ -1,9 +1,11 @@
 #pragma once
 
-#include "based/pch.h"
-
 #include "imguiwindow.h"
 #include "graphics/framebuffer.h"
+
+#include <memory>
+#include <external/glm/vec2.hpp>
+#include <external/glm/vec3.hpp>
 
 struct SDL_Window;
 using SDL_GLContext = void*;

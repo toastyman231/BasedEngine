@@ -1,4 +1,4 @@
-project "Sandbox"
+project "BasedEditor"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
@@ -19,7 +19,7 @@ project "Sandbox"
         "%{wks.location}/based/include",
         "%{externals.spdlog}",
         "%{externals.rmlui}",
-        "%{externals.tracy}"
+        "%{externals.tracy}",
     }
 
     flags

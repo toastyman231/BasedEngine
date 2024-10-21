@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "graphics/model.h"
 
+#include "assimp/Importer.hpp"
+#include "assimp/scene.h"
+#include "assimp/postprocess.h"
+
 namespace based::graphics
 {
 	void Model::Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) const
@@ -149,12 +153,12 @@ namespace based::graphics
 		meshes.emplace_back(std::make_shared<Mesh>(vertices, indices, textures));
 	}
 
-	std::shared_ptr<Material> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
+	std::shared_ptr<Material> Model::LoadMaterialTextures(aiMaterial* mat, int type, std::string typeName)
 	{
 		PROFILE_FUNCTION();
 		std::shared_ptr<Material> material = std::make_shared<Material>(DefaultLibraries::GetShaderLibrary().Get("Model"));
 
-		if (mat->GetTextureCount(type) <= 0)
+		if (mat->GetTextureCount(static_cast<aiTextureType>(type)) <= 0)
 		{
 			SetMaterialAttribute(mat, material, "$clr.diffuse", "diffuseMat", -1, aiTextureType_UNKNOWN);
 			SetMaterialAttribute(mat, material, "$clr.ambient", "ambientMat", -1, aiTextureType_UNKNOWN);
@@ -175,8 +179,10 @@ namespace based::graphics
 	}
 
 	void Model::SetMaterialAttribute(aiMaterial* mat, std::shared_ptr<Material> material, const char* key,
-		const std::string& attributeName, int sampler, aiTextureType type)
+		const std::string& attributeName, int sampler, int type)
 	{
+		aiTextureType textureType = static_cast<aiTextureType>(type);
+
 		if (key != "none")
 		{
 			aiColor4D color(0.f, 0.f, 0.f, 1.f);
@@ -197,10 +203,10 @@ namespace based::graphics
 		material->SetUniformValue("material." + attributeName + ".useSampler", (sampler != -1) ? 1 : 0);
 		if (sampler != -1) 
 		{
-			for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+			for (unsigned int i = 0; i < mat->GetTextureCount(textureType); i++)
 			{
 				aiString str;
-				mat->GetTexture(type, i, &str);
+				mat->GetTexture(textureType, i, &str);
 				struct stat sb;
 				bool result = stat(str.C_Str(), &sb) == 0;
 				if (!result)
@@ -226,7 +232,7 @@ namespace based::graphics
 				BoneInfo newBoneInfo;
 				newBoneInfo.id = m_BoneCounter;
 				newBoneInfo.offset = AssimpGLMHelpers::ConvertMatrixToGLMFormat(
-					mesh->mBones[boneIndex]->mOffsetMatrix);
+					&mesh->mBones[boneIndex]->mOffsetMatrix);
 				m_BoneInfoMap[boneName] = newBoneInfo;
 				boneID = m_BoneCounter;
 				m_BoneCounter++;

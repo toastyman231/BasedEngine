@@ -1,6 +1,6 @@
 #pragma once
 
-#include "based/pch.h"
+#include "based/log.h"
 
 namespace based::core
 {

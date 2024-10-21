@@ -1,7 +1,5 @@
 #pragma once
 
-#include "SDL2/SDL.h"
-
 namespace based::core
 {
 	class Time
@@ -15,6 +13,7 @@ namespace based::core
 		inline static float mUnscaledDeltaTime = 0.f;
 		inline static float mTimeScale = 1.f;
 		inline static float mUnscaledTime = 0.f;
+		inline static uint64_t mTicks = 0;
 
 		static void SetDelta(float delta)
 		{
@@ -30,7 +29,7 @@ namespace based::core
 
 		static void UpdateUnscaledTime()
 		{
-			mUnscaledTime = SDL_GetTicks64() / 1000.f;
+			mUnscaledTime = Engine::GetEngineTicks() / 1000.f;
 		}
 
 		static void UpdateTime()

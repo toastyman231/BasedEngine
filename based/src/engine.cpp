@@ -133,6 +133,11 @@ namespace based
         }
     }
 
+    uint64_t Engine::GetEngineTicks()
+    {
+        return SDL_GetTicks64();
+    }
+
     bool Engine::Initialize()
     {
         BASED_ASSERT(!mIsInitialized, "Attempting to call Engine::Initialize() more than once!");

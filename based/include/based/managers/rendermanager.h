@@ -2,6 +2,10 @@
 
 #include "graphics/rendercommands.h"
 
+#include <memory>
+#include <stack>
+#include <queue>
+
 #define BASED_SUBMIT_RC(type, ...) std::move(std::make_unique<based::graphics::rendercommands::type>(__VA_ARGS__))
 
 namespace based::managers

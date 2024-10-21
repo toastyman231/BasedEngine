@@ -1,9 +1,5 @@
 #pragma once
 
-#include <string>
-
-#include "glad/glad.h"
-
 namespace based::graphics
 {
 	void CheckGLError();

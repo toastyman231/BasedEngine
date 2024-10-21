@@ -147,7 +147,7 @@ namespace based::ui
 
 	void TextEntity::RegenerateTexture()
 	{
-		GLuint texture;
+		uint32_t texture;
 		SDL_Surface* surface = TTF_RenderUTF8_Blended(mFont, mText.c_str(), mColor);
 		surface = ResizeToPowerOfTwo(surface);
 

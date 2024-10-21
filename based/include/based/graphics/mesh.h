@@ -6,6 +6,7 @@
 #include "vertex.h"
 #include "based/scene/scene.h"
 #include "based/scene/components.h"
+#include "based/log.h"
 
 // Taken from learnopengl.com : https://learnopengl.com/Model-Loading/Mesh
 

@@ -1,6 +1,7 @@
 ﻿#include "based/pch.h"
 
 #include "based/engine.h"
+#include "based/log.h"
 #include "based/main.h"
 #include "based/core/assetlibrary.h"
 #include "based/graphics/camera.h"
@@ -427,6 +428,7 @@ public:
 		BASED_TRACE("Done initializing");
 
 		// TODO: Fix text rendering behind sprites even when handled last
+		// TODO: Redo premake setup to be cleaner and more modular
 	}
 
 	void Shutdown() override

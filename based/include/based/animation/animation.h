@@ -3,6 +3,8 @@
 #include "bone.h"
 #include "based/graphics/model.h"
 
+struct aiAnimation;
+
 namespace based::animation
 {
     struct AssimpNodeData

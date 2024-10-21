@@ -23,6 +23,8 @@ namespace based
         inline core::Window& GetWindow() { return mWindow; }
         static inline Engine* GetRawEngineInstance() { return mInstance; }
 
+        static uint64_t GetEngineTicks();
+
         // Managers
         inline managers::RenderManager& GetRenderManager() { return mRenderManager; }
         inline managers::UiManager& GetUiManager() { return mUiManager; }

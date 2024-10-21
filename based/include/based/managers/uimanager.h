@@ -3,6 +3,8 @@
 // Done because including SDL prevents compiling for some reason
 #include "external/imgui/imgui_impl_sdl.h"
 
+#include <RmlUi/Core.h>
+
 namespace based::managers
 {
 	class UiManager

@@ -1,6 +1,8 @@
 #include "pch.h"
 #include <based/animation/bone.h>
 
+#include <assimp/anim.h>
+
 namespace based::animation
 {
 	Bone::Bone(std::string name, int ID, const aiNodeAnim* channel)
@@ -16,7 +18,7 @@ namespace based::animation
 			aiVector3D aiPosition = channel->mPositionKeys[positionIndex].mValue;
 			auto timeStamp = static_cast<float>(channel->mPositionKeys[positionIndex].mTime);
 			KeyPosition data;
-			data.position = graphics::AssimpGLMHelpers::GetGLMVec(aiPosition);
+			data.position = graphics::AssimpGLMHelpers::GetGLMVec(&aiPosition);
 			data.timeStamp = timeStamp;
 			m_Positions.push_back(data);
 		}
@@ -28,7 +30,7 @@ namespace based::animation
 			aiQuaternion aiOrientation = channel->mRotationKeys[rotationIndex].mValue;
 			auto timeStamp = static_cast<float>(channel->mRotationKeys[rotationIndex].mTime);
 			KeyRotation data;
-			data.orientation = graphics::AssimpGLMHelpers::GetGLMQuat(aiOrientation);
+			data.orientation = graphics::AssimpGLMHelpers::GetGLMQuat(&aiOrientation);
 			data.timeStamp = timeStamp;
 			m_Rotations.push_back(data);
 		}
@@ -40,7 +42,7 @@ namespace based::animation
 			aiVector3D scale = channel->mScalingKeys[keyIndex].mValue;
 			auto timeStamp = static_cast<float>(channel->mScalingKeys[keyIndex].mTime);
 			KeyScale data;
-			data.scale = graphics::AssimpGLMHelpers::GetGLMVec(scale);
+			data.scale = graphics::AssimpGLMHelpers::GetGLMVec(&scale);
 			data.timeStamp = timeStamp;
 			m_Scales.push_back(data);
 		}

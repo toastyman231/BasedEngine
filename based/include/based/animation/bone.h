@@ -1,8 +1,6 @@
 #pragma once
 
-#include "based/pch.h"
-
-#include <assimp/anim.h>
+struct aiNodeAnim;
 
 namespace based::animation
 {

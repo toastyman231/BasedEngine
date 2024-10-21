@@ -1,8 +1,5 @@
 #pragma once
 
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
-#include "assimp/postprocess.h"
 #include <based/graphics/shader.h>
 #include <based/graphics/texture.h>
 #include <based/graphics/mesh.h>
@@ -11,6 +8,11 @@
 #include <based/scene/entity.h>
 
 #define DEFAULT_MODEL_LIB based::graphics::DefaultLibraries::GetModelLibrary()
+
+struct aiMaterial;
+struct aiMesh;
+struct aiScene;
+struct aiNode;
 
 namespace based::graphics
 {
@@ -57,10 +59,10 @@ namespace based::graphics
         void LoadModel(std::string path);
         void ProcessNode(aiNode* node, const aiScene* scene);
         void ProcessMesh(aiMesh* mesh, const aiScene* scene);
-        std::shared_ptr<Material> LoadMaterialTextures(aiMaterial* mat, aiTextureType type,
+        std::shared_ptr<Material> LoadMaterialTextures(aiMaterial* mat, int type,
             std::string typeName);
         void SetMaterialAttribute(aiMaterial* mat, std::shared_ptr<Material> material, const char* key, 
-            const std::string& attributeName, int sampler, aiTextureType type);
+            const std::string& attributeName, int sampler, int type);
         void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
         void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
         void SetVertexBoneDataToDefault(Vertex& vertex);

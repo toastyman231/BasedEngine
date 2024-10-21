@@ -6,6 +6,8 @@
 
 #include "glad/glad.h"
 
+#include <SDL2/SDL_surface.h>
+
 namespace based::graphics
 {
 	Texture::Texture(const std::string& path, bool overrideFlip)

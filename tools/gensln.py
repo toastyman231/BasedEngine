@@ -3,6 +3,7 @@ import subprocess, globals, sys, os
 args = globals.ProcessArguments(sys.argv)
 prj = globals.GetArgumentValue(args, "prj", "New Project")
 location = globals.GetArgumentValue(args, "location", "{}".format(os.getcwd()))
+version = globals.GetArgumentValue(args, "v", "vs2022")
 ret = 0;
 
 def CopyBuildFiles(dest, project):
@@ -31,7 +32,7 @@ def CopyBuildFiles(dest, project):
 if (globals.IsWindows()):
         if (not os.path.exists("{}/premake5.lua".format(location)) or not os.path.exists("{}/postbuild.py".format(location))):
             CopyBuildFiles(location, prj)
-        ret = subprocess.call(["cmd.exe", "/c", "cd", location, "&&", "{}/premake/premake5".format(os.getcwd()), "vs2019"])
+        ret = subprocess.call(["cmd.exe", "/c", "cd", location, "&&", "{}/premake/premake5".format(os.getcwd()), version])
 
 if (globals.IsLinux()):
     ret = subprocess.call(["premake/premake5.linux", "gmake2"])

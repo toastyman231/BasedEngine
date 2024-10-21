@@ -1,6 +1,8 @@
 #pragma once
 
 #include "texture.h"
+#include <external/glm/vec2.hpp>
+#include <external/glm/vec4.hpp>
 
 namespace based::graphics
 {
@@ -8,7 +10,7 @@ namespace based::graphics
 	{
 	public:
 		Framebuffer(uint32_t width, uint32_t height);
-		Framebuffer::Framebuffer(uint32_t width, uint32_t height, int format, int type,
+		Framebuffer(uint32_t width, uint32_t height, int format, int type,
 			graphics::TextureFilter filter, int attachment, bool colorData);
 		~Framebuffer();
 

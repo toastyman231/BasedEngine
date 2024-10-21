@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "graphics/helpers.h"
 
+#include "glad/glad.h"
+
 namespace based::graphics
 {
 	void CheckGLError()

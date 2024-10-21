@@ -1,6 +1,9 @@
 #include "pch.h"
-
 #include <based/animation/animation.h>
+
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 namespace based::animation
 {
@@ -74,7 +77,7 @@ namespace based::animation
 		assert(src);
 
 		dest.name = src->mName.data;
-		dest.transformation = graphics::AssimpGLMHelpers::ConvertMatrixToGLMFormat(src->mTransformation);
+		dest.transformation = graphics::AssimpGLMHelpers::ConvertMatrixToGLMFormat(&src->mTransformation);
 		dest.childrenCount = src->mNumChildren;
 
 		for (int i = 0; i < static_cast<int>(src->mNumChildren); i++)
