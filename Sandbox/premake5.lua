@@ -19,7 +19,8 @@ project "Sandbox"
         "%{wks.location}/based/include",
         "%{externals.spdlog}",
         "%{externals.rmlui}",
-        "%{externals.tracy}"
+        "%{externals.tracy}",
+        "%{externals.yaml_cpp}"
     }
 
     flags

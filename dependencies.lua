@@ -9,15 +9,13 @@ externals["miniaudio"] = "%{wks.location}/external/miniaudio"
 externals["assimp"] = "%{wks.location}/external/assimp/include"
 externals["rmlui"] = "%{wks.location}/external/rmlui/Include"
 externals["tracy"] = "%{wks.location}/external/tracy"
-externals["yaml_cpp"] = "%{wks.location}/based/include/external/yaml-cpp/include"
+externals["yaml_cpp"] = "%{wks.location}/external/yaml-cpp/include"
 
 -- External libraries
 libraries = {}
 libraries["maclibs"] = "%{wks.location}/external/maclibs"
 libraries["sdl2"] = "%{wks.location}/external/sdl2/lib"
 libraries["spdlog"] = "%{wks.location}/external/spdlog/lib"
-libraries["glad"] = "%{wks.location}/external/glad/lib"
 libraries["freetype"] = "%{wks.location}/external/freetype/lib"
 libraries["assimp"] = "%{wks.location}/external/assimp/lib"
 libraries["rmlui"] = "%{wks.location}/external/rmlui/lib"
-libraries["yaml_cpp"] = "%{wks.location}/based/include/external/yaml-cpp/lib"

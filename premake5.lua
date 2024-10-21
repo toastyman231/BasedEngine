@@ -24,6 +24,7 @@ group ""
 
 group "Dependencies"
     include "external/glad"
+    include "external/yaml-cpp"
 group ""
 
 group "Tools"

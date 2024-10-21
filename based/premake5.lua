@@ -33,7 +33,7 @@ project "based"
         "%{externals.assimp}",
         "%{externals.rmlui}",
         "%{externals.tracy}",
-        --"%{externals.yaml_cpp}",
+        "%{externals.yaml_cpp}",
         --"C:/Program Files (x86)/Visual Leak Detector/include"
     }
 
@@ -53,7 +53,7 @@ project "based"
         "assimp-vc143-mt",
         "RmlCore",
         "RmlDebugger",
-        --"yaml-cpp",
+        "yaml-cpp",
         --"vld"
     }
 

@@ -20,6 +20,7 @@ project "BasedEditor"
         "%{externals.spdlog}",
         "%{externals.rmlui}",
         "%{externals.tracy}",
+        "%{externals.yaml_cpp}"
     }
 
     flags
