@@ -6,18 +6,18 @@
 #include "based/graphics/defaultassetlibraries.h"
 
 #include "based/core/assetlibrary.h"
+#include "based/graphics/mesh.h"
 
 #include "based/scene/components.h"
 #include "based/input/mouse.h"
 #include "based/scene/entity.h"
-#include "based/graphics/sprite.h"
 
 using namespace based;
 
 class BasedApp : public based::App
 {
 private:
-	std::shared_ptr<graphics::Sprite> iconSprite;
+	std::shared_ptr<scene::Entity> iconEntity;
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -40,7 +40,7 @@ public:
 	void Initialize() override
 	{
 		App::Initialize();
-		Engine::Instance().GetWindow().SetShouldRenderToScreen(false);
+		Engine::Instance().GetWindow().SetShouldRenderToScreen(true);
 		input::Mouse::SetCursorVisible(!Engine::Instance().GetWindow().GetShouldRenderToScreen());
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
@@ -49,12 +49,15 @@ public:
 		auto material = graphics::Material::CreateMaterial(
 			graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect"),
 			DEFAULT_MAT_LIB, "Icon");
-		auto iconSprite = scene::Entity::CreateEntity<graphics::Sprite>("Icon",
-			{ 0.f, 0.f, 0.f },
-			{ 0.f, 0.f, 0.f },
-			{ 1.f, 1.f, 1.f },
-			graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"), material);
-		iconSprite->AddComponent<scene::SpriteRenderer>(iconSprite);
+		material->AddTexture(texture, "tex");
+		material->SetUniformValue("col", glm::vec4{ 1.f, 1.f, 1.f, 1.f });
+		auto mesh = graphics::Mesh::CreateMesh(
+			graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
+			material, DEFAULT_MESH_LIB, "IconMesh");
+		iconEntity = scene::Entity::CreateEntity<scene::Entity>("Icon");
+		iconEntity->AddComponent<scene::MeshRenderer>(mesh);
+
+		GetCurrentScene()->GetActiveCamera()->SetPosition({ 0.f, 0.f, 10.f });
 	}
 
 	void Shutdown() override

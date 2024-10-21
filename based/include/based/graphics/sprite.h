@@ -1,12 +1,21 @@
 #pragma once
 
-#include "based/scene/entity.h"
-
 #include "based/ui/alignment.h"
+#include "based/scene/components.h"
 
 namespace based::graphics
 {
-	class Sprite : public scene::Entity
+	class Shader;
+	class Texture;
+	class Material;
+	class VertexArray;
+
+	enum class SpriteShape : uint8_t
+	{
+		Square
+	};
+
+	/*class Sprite : public scene::ScriptableBehavior
 	{
 	private:
 		std::shared_ptr<VertexArray> mVA;
@@ -19,9 +28,10 @@ namespace based::graphics
 
 		void RegenerateVA();
 	public:
-		Sprite(glm::vec4 color);
-		Sprite(std::shared_ptr<Material> mat);
-		Sprite(std::shared_ptr<VertexArray> va, std::shared_ptr<Material> mat);
+		Sprite(const std::shared_ptr<scene::Entity>& owner, glm::vec4 color);
+		Sprite(const std::shared_ptr<scene::Entity>& owner, std::shared_ptr<Material> mat);
+		Sprite(const std::shared_ptr<scene::Entity>& owner, SpriteShape shape, std::shared_ptr<Material> mat);
+		~Sprite() override = default;
 
 		int GetSortOrder() const { return mSortOrder; }
 		void SetSortOrder(int order) { mSortOrder = order; }
@@ -31,11 +41,6 @@ namespace based::graphics
 		void SetMaterial(std::shared_ptr<Material> material);
 		void SetColor(glm::vec4 color);
 
-		void SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) override;
-		void SetPosition(glm::vec3 pos) override;
-		void SetRotation(glm::vec3 rot) override;
-		void SetScale(glm::vec3 scale) override;
-
 		void SetPivot(ui::Align alignment);
 		glm::vec2 GetPivot() const { return mPivot; }
 		glm::vec4 GetColor() const { return mColor; }
@@ -43,6 +48,9 @@ namespace based::graphics
 		std::shared_ptr<VertexArray> GetVA() { return mVA; }
 		std::shared_ptr<Material> GetMaterial() { return mMaterial; }
 
-		static void DrawSprite(Sprite* sprite);
-	};
+		void Draw();
+		void Initialize() override {}
+		void Update(float deltaTime) override { BASED_TRACE("Updating sprite!"); }
+		void Shutdown() override { BASED_TRACE("Shutting down sprite!"); }
+	};*/
 }

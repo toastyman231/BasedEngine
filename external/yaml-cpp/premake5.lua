@@ -1,9 +1,10 @@
 project "yaml-cpp"
     kind "StaticLib"
     language "C++"
+    if externalBuild then location "%{wks.location}/ProjectFiles" end
 
-    targetdir(tdir)
-    objdir(odir)
+    if externalBuild then targetdir("%{wks.location}/ProjectFiles/" .. tdir) else targetdir(tdir) end
+    if externalBuild then objdir("%{wks.location}/ProjectFiles/" .. odir) else objdir(odir) end
 
     files 
     {

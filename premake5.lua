@@ -1,5 +1,6 @@
 include "dependencies.lua"
 importedDependencies = true
+externalBuild = false
 
 workspace "based"
     startproject "BasedEditor"

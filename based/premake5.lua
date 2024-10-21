@@ -1,13 +1,12 @@
-if not importedDependencies then include "../dependencies.lua" end
-
 project "based"
     kind "StaticLib"
     language "C++"
     cppdialect "C++17"
     staticruntime "on"
+    if externalBuild then location "%{wks.location}/ProjectFiles" end
 
-    targetdir(tdir)
-    objdir(odir)
+    if externalBuild then targetdir("%{wks.location}/ProjectFiles/" .. tdir) else targetdir(tdir) end
+    if externalBuild then objdir("%{wks.location}/ProjectFiles/" .. odir) else objdir(odir) end
 
     pchheader "pch.h"
     pchsource "src/pch.cpp"

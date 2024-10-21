@@ -1,27 +1,33 @@
 #include "pch.h"
 #include "graphics/sprite.h"
 
+#include "engine.h"
 #include "graphics/defaultassetlibraries.h"
 #include "graphics/texture.h"
+#include "scene/entity.h"
 
 namespace based::graphics
 {
-	Sprite::Sprite(std::shared_ptr<VertexArray> va, std::shared_ptr<Material> mat)
-		: Entity(), mVA(std::move(va)),
-		mMaterial(std::move(mat)), mColor(1.f), mSize(1.f, 1.f), mPivot(0.f, 0.f), mSortOrder(0)
+	/*Sprite::Sprite(const std::shared_ptr<scene::Entity>& owner, SpriteShape shape, std::shared_ptr<Material> mat)
+		: ScriptableBehavior(owner), mMaterial(std::move(mat)), mColor(1.f), mSize(1.f, 1.f), mPivot(0.f, 0.f),
+		mSortOrder(0)
 	{
-		if (mMaterial->GetTextures()[0])
+		switch (shape)
+		{
+		case SpriteShape::Square:
+			mVA = graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect");
+			break;
+		}
+		if (!mMaterial->GetTextures().empty())
 		{
 			mSize = glm::vec2(mMaterial->GetTextures()[0]->GetWidth(), mMaterial->GetTextures()[0]->GetHeight());
 		}
-
 		mAlignment = ui::Middle;
 		mMaterial->SetUniformValue("col", mColor);
-		//AddComponent<scene::SpriteRenderer>(this);
 	}
 
-	Sprite::Sprite(glm::vec4 color)
-		: Entity(), mColor(color), mSize(1.f), mPivot(0.f), mSortOrder(0)
+	Sprite::Sprite(const std::shared_ptr<scene::Entity>& owner, glm::vec4 color)
+		: ScriptableBehavior(owner), mColor(color), mSize(1.f), mPivot(0.f), mSortOrder(0)
 	{
 		mVA = DefaultLibraries::GetVALibrary().Get("Rect");
 
@@ -30,18 +36,17 @@ namespace based::graphics
 
 		mAlignment = ui::Middle;
 		mMaterial = mat;
-		//AddComponent<scene::SpriteRenderer>(this);
 	}
 
-	Sprite::Sprite(std::shared_ptr<Material> mat)
-		: Entity(), mMaterial(std::move(mat)), mColor(1.f), mSize(1.f), mPivot(0.f), mSortOrder(0)
+	Sprite::Sprite(const std::shared_ptr<scene::Entity>& owner, std::shared_ptr<Material> mat)
+		: ScriptableBehavior(owner), mMaterial(std::move(mat)), mColor(1.f), mSize(1.f), mPivot(0.f), mAlignment(ui::Middle),
+		mSortOrder(0)
 	{
 		if (mMaterial->GetTextures()[0])
 		{
 			mSize = glm::vec2(mMaterial->GetTextures()[0]->GetWidth(), mMaterial->GetTextures()[0]->GetHeight());
 		}
 		mMaterial->SetUniformValue("col", mColor);
-		//AddComponent<scene::SpriteRenderer>(this);
 	}
 
 	void Sprite::SetSprite(std::shared_ptr<Texture> texture)
@@ -67,102 +72,85 @@ namespace based::graphics
 		mMaterial->SetUniformValue("col", mColor);
 	}
 
-	void Sprite::SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
-	{
-		Entity::SetTransform(pos, rot, scale);
-
-		SetPivot(mAlignment);
-	}
-
-	void Sprite::SetPosition(glm::vec3 pos)
-	{
-		Entity::SetPosition(pos);
-
-		SetPivot(mAlignment);
-	}
-
-	void Sprite::SetRotation(glm::vec3 rot)
-	{
-		Entity::SetRotation(rot);
-
-		SetPivot(mAlignment);
-	}
-
-	void Sprite::SetScale(glm::vec3 scale)
-	{
-		Entity::SetScale(scale);
-
-		SetPivot(mAlignment);
-	}
-
 	void Sprite::SetPivot(ui::Align alignment)
 	{
+		auto ent = mOwner.lock();
+		if (!ent) return;
+
 		mAlignment = alignment;
 
 		switch (alignment)
 		{
 		case ui::Align::TopLeft:
-			mPivot = { (mSize.x * GetComponent<scene::Transform>().Scale.x) / 2.f,
-			-(mSize.y * GetComponent<scene::Transform>().Scale.y) / 2.f };
+			mPivot = { (mSize.x * ent->GetComponent<scene::Transform>().Scale.x) / 2.f,
+			-(mSize.y * ent->GetComponent<scene::Transform>().Scale.y) / 2.f };
 			break;
 		case ui::Align::TopMiddle:
-			mPivot = { 0.f,-(mSize.y * GetComponent<scene::Transform>().Scale.y) / 2.f };
+			mPivot = { 0.f,-(mSize.y * ent->GetComponent<scene::Transform>().Scale.y) / 2.f };
 			break;
 		case ui::Align::TopRight:
-			mPivot = { -(mSize.x * GetComponent<scene::Transform>().Scale.x) / 2.f,
-			-(mSize.y * GetComponent<scene::Transform>().Scale.y) / 2.f };
+			mPivot = { -(mSize.x * ent->GetComponent<scene::Transform>().Scale.x) / 2.f,
+			-(mSize.y * ent->GetComponent<scene::Transform>().Scale.y) / 2.f };
 			break;
 		case ui::Align::MiddleLeft:
-			mPivot = { (mSize.x * GetComponent<scene::Transform>().Scale.x) / 2.f, 0.f };
+			mPivot = { (mSize.x * ent->GetComponent<scene::Transform>().Scale.x) / 2.f, 0.f };
 			break;
 		case ui::Align::Middle:
 			mPivot = { 0, 0 };
 			break;
 		case ui::Align::MiddleRight:
-			mPivot = { -(mSize.x * GetComponent<scene::Transform>().Scale.x) / 2.f, 0.f };
+			mPivot = { -(mSize.x * ent->GetComponent<scene::Transform>().Scale.x) / 2.f, 0.f };
 			break;
 		case ui::Align::BottomLeft:
-			mPivot = { (mSize.x * GetComponent<scene::Transform>().Scale.x) / 2.f,
-			(mSize.y * GetComponent<scene::Transform>().Scale.y) / 2.f };
+			mPivot = { (mSize.x * ent->GetComponent<scene::Transform>().Scale.x) / 2.f,
+			(mSize.y * ent->GetComponent<scene::Transform>().Scale.y) / 2.f };
 			break;
 		case ui::Align::BottomMiddle:
-			mPivot = {0.f, -(mSize.y * GetComponent<scene::Transform>().Scale.y) / 2.f };
+			mPivot = {0.f, -(mSize.y * ent->GetComponent<scene::Transform>().Scale.y) / 2.f };
 			break;
 		case ui::Align::BottomRight:
-			mPivot = { -(mSize.x * GetComponent<scene::Transform>().Scale.x) / 2.f,
-			(mSize.y * GetComponent<scene::Transform>().Scale.y) / 2.f };
+			mPivot = { -(mSize.x * ent->GetComponent<scene::Transform>().Scale.x) / 2.f,
+			(mSize.y * ent->GetComponent<scene::Transform>().Scale.y) / 2.f };
 			break;
 		}
 	}
 
-	void Sprite::DrawSprite(Sprite* sprite)
+	void Sprite::Draw()
 	{
 		PROFILE_FUNCTION();
-		const std::shared_ptr<VertexArray> va = sprite->GetVA();
-		const std::shared_ptr<Material> mat = sprite->GetMaterial();
-
-		glm::vec3 position;
-		glm::vec3 rotation;
-		glm::vec3 scale;
-		auto model = glm::mat4(1.f);
-
-		if (auto parent = sprite->Parent.lock())
+		auto ent = mOwner.lock();
+		if (!ent)
 		{
-			position = sprite->GetComponent<scene::Transform>().LocalPosition + glm::vec3(sprite->mPivot, 0.f) + parent->GetTransform().Position;
-			rotation = sprite->GetComponent<scene::Transform>().LocalRotation + parent->GetTransform().Rotation;
-			scale = sprite->GetComponent<scene::Transform>().LocalScale * parent->GetTransform().Scale;
-		} else
-		{
-			position = sprite->GetComponent<scene::Transform>().Position + glm::vec3(sprite->mPivot, 0.f);
-			rotation = sprite->GetComponent<scene::Transform>().Rotation;
-			scale = sprite->GetComponent<scene::Transform>().Scale;
+			BASED_WARN("Trying to draw sprite with expired owner!");
+			return;
 		}
 
-		model = glm::translate(model, position);
+		auto transform = ent->GetTransform();
+
+		const std::shared_ptr<VertexArray> va = GetVA();
+		const std::shared_ptr<Material> mat = GetMaterial();
+
+		const glm::vec3 pos = transform.Position;
+		const glm::vec3 rot = transform.Rotation;
+		const glm::vec3 scale = transform.Scale;
+		const glm::vec3 localPos = transform.LocalPosition;
+		const glm::vec3 localRot = transform.LocalRotation;
+		auto model = glm::mat4(1.f);
+
+		model = glm::translate(model, pos - localPos);
+
 		// Rotations are passed as degrees and converted to radians here automatically
-		model = glm::rotate(model, rotation.x * 0.0174533f, glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, rotation.y * 0.0174533f, glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
+		model = glm::rotate(model, glm::radians(-(rot.y - localRot.y)), glm::vec3(0.f, 1.f, 0.f));
+		model = glm::rotate(model, glm::radians(-(rot.x - localRot.x)), glm::vec3(1.f, 0.f, 0.f));
+		model = glm::rotate(model, glm::radians(-(rot.z - localRot.z)), glm::vec3(0.f, 0.f, 1.f));
+
+		model = glm::translate(model, localPos);
+
+		// Rotations are passed as degrees and converted to radians here automatically
+		model = glm::rotate(model, glm::radians(localRot.y), glm::vec3(0.f, 1.f, 0.f));
+		model = glm::rotate(model, glm::radians(localRot.x), glm::vec3(1.f, 0.f, 0.f));
+		model = glm::rotate(model, glm::radians(localRot.z), glm::vec3(0.f, 0.f, 1.f));
+
 		model = glm::scale(model, scale);
 
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, va, mat, model));
@@ -196,5 +184,5 @@ namespace based::graphics
 
 		mVA->SetElements({ 0, 3, 1, 1, 3, 2 });
 		mVA->Upload();
-	}
+	}*/
 }

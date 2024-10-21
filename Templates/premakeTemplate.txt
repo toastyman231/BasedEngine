@@ -1,4 +1,6 @@
+engineLocation = "ENGINE_LOCATION"
 include "project-dependencies.lua"
+externalBuild = true
 
 workspace "PROJ_NAME"
     startproject "PROJ_NAME"
@@ -15,6 +17,11 @@ odir = "bin-obj/%{cfg.buildcfg}/%{prj.name}"
 
 group "Engine"
     include "ENGINE_LOCATION\based"
+group ""
+
+group "Dependencies"
+    include "ENGINE_LOCATION\external\glad"
+    include "ENGINE_LOCATION\external\yaml-cpp"
 group ""
 
 group "Projects"
@@ -37,16 +44,21 @@ group "Projects"
         includedirs
         {
             "ENGINE_LOCATION\based\include",
-            "ENGINE_LOCATION\%{IncludeDirs.spdlog}",
-            "ENGINE_LOCATION\%{IncludeDirs.rmlui}",
-            "ENGINE_LOCATION\%{IncludeDirs.tracy}",
-            "ENGINE_LOCATION\%{IncludeDirs.yaml_cpp}"
+            "ENGINE_LOCATION\%{externals.spdlog}",
+            "ENGINE_LOCATION\%{externals.rmlui}",
+            "ENGINE_LOCATION\%{externals.tracy}",
+            "ENGINE_LOCATION\%{externals.yaml_cpp}"
         }
 
         flags
         {
             "FatalWarnings"
         }
+
+	defines
+	{
+		"_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING"
+	}
 
         postbuildcommands
         {
@@ -81,7 +93,7 @@ group "Projects"
                 "BASED_PLATFORM_MAC"
             }
 
-            abspath = path.getabsolute("%{IncludeDirs.maclibs}")
+            abspath = path.getabsolute("%{externals.maclibs}")
             linkoptions {"-F " .. abspath}
 
         filter {"system:linux", "configurations:*"}

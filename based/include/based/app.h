@@ -4,6 +4,7 @@
 #include "core/window.h"
 #include "graphics/camera.h"
 #include "scene/scene.h"
+#include "memory/memoryhelpers.h"
 
 namespace based
 {

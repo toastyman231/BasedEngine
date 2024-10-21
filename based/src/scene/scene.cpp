@@ -3,10 +3,10 @@
 
 #include "based/scene/scene.h"
 
+#include "based/scene/components.h"
 #include "basedtime.h"
 #include "animation/animator.h"
 #include "graphics/model.h"
-#include "scene/components.h"
 #include "ui/textentity.h"
 #include "graphics/sprite.h"
 
@@ -59,7 +59,7 @@ namespace based::scene
 	{
 		PROFILE_FUNCTION();
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera, mActiveCamera));
-		const auto view = mRegistry.view<Enabled, Transform, SpriteRenderer>();
+		/*const auto view = mRegistry.view<Enabled, Transform, SpriteRenderer>();
 		std::vector<std::shared_ptr<graphics::Sprite>> sprites;
 		sprites.reserve(view.size_hint());
 
@@ -79,8 +79,8 @@ namespace based::scene
 
 		for (auto& sprite : sprites)
 		{
-			graphics::Sprite::DrawSprite(sprite.get());
-		}
+			sprite->Draw();
+		}*/
 
 		const auto modelView = mRegistry.view<Enabled, Transform, ModelRenderer, EntityReference>();
 
@@ -157,12 +157,30 @@ namespace based::scene
 			}
 		}
 
+		/*const auto bhvrView = mRegistry.view<Enabled, ScriptableComponent>();
+
+		for (const auto& entity : bhvrView)
+		{
+			auto behavior = mRegistry.get<ScriptableComponent>(entity).behavior.lock();
+			if (!behavior) continue;
+			behavior->Update(deltaTime);
+		}*/
+
 		AnimateScene();
 	}
 
 	void Scene::ShutdownScene() const
 	{
 		PROFILE_FUNCTION();
+		/*const auto bhvrView = mRegistry.view<Enabled, ScriptableComponent>();
+
+		for (const auto& entity : bhvrView)
+		{
+			auto behavior = mRegistry.get<ScriptableComponent>(entity).behavior.lock();
+			if (!behavior) continue;
+			behavior->Shutdown();
+		}*/
+
 		const auto entityView = mRegistry.view<EntityReference>();
 
 		for (const auto entity : entityView)

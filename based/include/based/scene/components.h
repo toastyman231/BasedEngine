@@ -82,6 +82,31 @@ namespace based::scene
 		Velocity(const glm::vec2& vel) : dx(vel.x), dy(vel.y) {}
 	};
 
+	/*class ScriptableBehavior
+	{
+	protected:
+		std::weak_ptr<scene::Entity> mOwner;
+
+	public:
+		virtual void Initialize() = 0;
+		virtual void Update(float deltaTime) = 0;
+		virtual void Shutdown() = 0;
+
+		ScriptableBehavior() = default;
+		ScriptableBehavior(const std::shared_ptr<scene::Entity>& owner) : mOwner(owner) {}
+		virtual ~ScriptableBehavior() = default;
+	};
+
+	struct ScriptableComponent
+	{
+		std::weak_ptr<scene::ScriptableBehavior> behavior;
+
+		ScriptableComponent() = default;
+		ScriptableComponent(const ScriptableComponent& other) = default;
+		ScriptableComponent(const std::shared_ptr<ScriptableBehavior>& bhvr) : behavior(bhvr) {}
+		~ScriptableComponent() = default;
+	};*/
+
 	struct SpriteRenderer
 	{
 		std::weak_ptr<graphics::Sprite> sprite;

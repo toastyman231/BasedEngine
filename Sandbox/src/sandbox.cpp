@@ -19,6 +19,7 @@
 #include "based/animation/animation.h"
 #include "based/animation/animator.h"
 #include "based/core/basedtime.h"
+#include "based/graphics/sprite.h"
 #include "based/math/random.h"
 #include "based/scene/audio.h"
 #include "Models-Surfaces/Generators.h"
@@ -98,6 +99,9 @@ private:
 	std::shared_ptr<scene::Entity> sphere;
 	std::shared_ptr<scene::Entity> wallEntity;
 	std::shared_ptr<scene::Entity> cameraEntity;
+	std::shared_ptr<scene::Entity> iconEntity;
+
+	std::shared_ptr<graphics::Mesh> temp;
 
 	bool mouseControl = false;
 	float speed = 2.5f;
@@ -428,7 +432,8 @@ public:
 		BASED_TRACE("Done initializing");
 
 		// TODO: Fix text rendering behind sprites even when handled last
-		// TODO: Redo premake setup to be cleaner and more modular
+		// TODO: Add Scriptable Components
+		// TODO: Decide what to do about Sprites
 	}
 
 	void Shutdown() override
