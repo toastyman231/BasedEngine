@@ -1,3 +1,5 @@
+if not importedDependencies then include "../dependencies.lua" end
+
 project "based"
     kind "StaticLib"
     language "C++"

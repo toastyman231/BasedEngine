@@ -1,6 +1,4 @@
-include "ENGINE_LOCATION"
--- Process Glad before anything else
-include "ENGINE_LOCATION\external\glad"
+include "project-dependencies.lua"
 
 workspace "PROJ_NAME"
     startproject "PROJ_NAME"
@@ -12,136 +10,100 @@ workspace "PROJ_NAME"
         "Release"
     }
 
-project "PROJ_NAME"
-    kind "ConsoleApp"
-    language "C++"
-    cppdialect "C++17"
-    staticruntime "on"
-    links "based"
+tdir = "bin/%{cfg.buildcfg}/%{prj.name}"
+odir = "bin-obj/%{cfg.buildcfg}/%{prj.name}"
 
-    targetdir(tdir)
-    objdir(odir)
+group "Engine"
+    include "ENGINE_LOCATION\based"
+group ""
 
-    files 
-    {
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp"
-    }
+group "Projects"
+    project "PROJ_NAME"
+        kind "ConsoleApp"
+        language "C++"
+        cppdialect "C++17"
+        staticruntime "on"
+        links "based"
 
-    externalincludedirs
-    {
-        "ENGINE_LOCATION\based\include",
-        "ENGINE_LOCATION\%{externals.sdl2}\include",
-        "ENGINE_LOCATION\%{externals.spdlog}\include"
-    }
+        targetdir(tdir)
+        objdir(odir)
 
-    flags
-    {
-        "FatalWarnings"
-    }
-
-    postbuildcommands
-    {
-        "python3 " .. string.sub(path.getabsolute("%{prj.name}"), 1, string.len(path.getabsolute("%{prj.name}")) - (string.len("%{prj.name}") + 1)) .. "/postbuild.py config=%{cfg.buildcfg} prj=%{prj.name}"
-    }   
-
-    filter {"system:windows", "configurations:Debug"}
-        systemversion "latest"
-
-        defines
+        files 
         {
-            "BASED_PLATFORM_WINDOWS"
+            "src/**.h",
+            "src/**.cpp"
         }
 
-        libdirs
+        includedirs
         {
-            "ENGINE_LOCATION\bin\Debug\based",
-            "ENGINE_LOCATION\external\glad\bin\Debug\glad",
-            "ENGINE_LOCATION\%{externals.sdl2}\lib",
-            "ENGINE_LOCATION\%{externals.freetype}\lib"
+            "ENGINE_LOCATION\based\include",
+            "ENGINE_LOCATION\%{IncludeDirs.spdlog}",
+            "ENGINE_LOCATION\%{IncludeDirs.rmlui}",
+            "ENGINE_LOCATION\%{IncludeDirs.tracy}",
+            "ENGINE_LOCATION\%{IncludeDirs.yaml_cpp}"
         }
 
-        links
+        flags
         {
-            "SDL2",
-            "SDL2_ttf",
-            "glad",
-            "freetype"
+            "FatalWarnings"
         }
 
-    filter {"system:windows", "configurations:Release"}
-        systemversion "latest"
-
-        defines
+        postbuildcommands
         {
-            "BASED_PLATFORM_WINDOWS"
-        }
+            "python3 " .. string.sub(path.getabsolute("%{prj.name}"), 1, string.len(path.getabsolute("%{prj.name}")) - (string.len("%{prj.name}") + 1)) .. "/postbuild.py config=%{cfg.buildcfg} prj=%{prj.name}"
+        }   
 
-        libdirs
-        {
-            "ENGINE_LOCATION\bin\Release\based",
-            "ENGINE_LOCATION\external\glad\bin\Release\glad",
-            "ENGINE_LOCATION\%{externals.sdl2}\lib",
-            "ENGINE_LOCATION\%{externals.freetype}\lib"
-        }
+        filter {"system:windows", "configurations:Debug"}
+            systemversion "latest"
 
-        links
-        {
-            "SDL2",
-            "SDL2_ttf",
-            "glad",
-            "freetype"
-        }
+            defines
+            {
+                "BASED_PLATFORM_WINDOWS"
+            }
 
-    filter {"system:macosx", "configurations:*"}
-        xcodebuildsettings
-        {
-            ["MACOSX_DEPLOYMENT_TARGET"] = "10.15",
-            ["UseModernBuildSystem"] = "NO"
-        }
+        filter {"system:windows", "configurations:Release"}
+            systemversion "latest"
 
-        defines
-        {
-            "BASED_PLATFORM_MAC"
-        }
+            defines
+            {
+                "BASED_PLATFORM_WINDOWS"
+            }
 
-        abspath = path.getabsolute("%{externals.maclibs}")
-        linkoptions {"-F " .. abspath}
+        filter {"system:macosx", "configurations:*"}
+            xcodebuildsettings
+            {
+                ["MACOSX_DEPLOYMENT_TARGET"] = "10.15",
+                ["UseModernBuildSystem"] = "NO"
+            }
 
-        links
-        {
-            "SDL2.framework",
-            "glad",
-            "freetype"
-        }
+            defines
+            {
+                "BASED_PLATFORM_MAC"
+            }
 
-    filter {"system:linux", "configurations:*"}
-        defines
-        {
-            "BASED_PLATFORM_LINUX"
-        }
+            abspath = path.getabsolute("%{IncludeDirs.maclibs}")
+            linkoptions {"-F " .. abspath}
 
-        links
-        {
-            "SDL2",
-            "glad",
-            "dl",
-            "freetype"
-        }
+        filter {"system:linux", "configurations:*"}
+            defines
+            {
+                "BASED_PLATFORM_LINUX"
+            }
 
-    filter "configurations:Debug"
-        defines
-        {
-            "BASED_CONFIG_DEBUG"
-        }
-        runtime "Debug"
-        symbols "on"
+        filter "configurations:Debug"
+            defines
+            {
+                "BASED_CONFIG_DEBUG"
+            }
+            runtime "Debug"
+            symbols "on"
 
-    filter "configurations:Release"
-        defines
-        {
-            "BASED_CONFIG_RELEASE"
-        }
-        runtime "Release"
-        symbols "off"
-        optimize "on"
+        filter "configurations:Release"
+            defines
+            {
+                "BASED_CONFIG_RELEASE"
+            }
+            runtime "Release"
+            symbols "off"
+            optimize "on"
+group""

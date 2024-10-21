@@ -17,7 +17,7 @@ namespace based::graphics
 
 		mAlignment = ui::Middle;
 		mMaterial->SetUniformValue("col", mColor);
-		AddComponent<scene::SpriteRenderer>(this);
+		//AddComponent<scene::SpriteRenderer>(this);
 	}
 
 	Sprite::Sprite(glm::vec4 color)
@@ -30,7 +30,7 @@ namespace based::graphics
 
 		mAlignment = ui::Middle;
 		mMaterial = mat;
-		AddComponent<scene::SpriteRenderer>(this);
+		//AddComponent<scene::SpriteRenderer>(this);
 	}
 
 	Sprite::Sprite(std::shared_ptr<Material> mat)
@@ -41,7 +41,7 @@ namespace based::graphics
 			mSize = glm::vec2(mMaterial->GetTextures()[0]->GetWidth(), mMaterial->GetTextures()[0]->GetHeight());
 		}
 		mMaterial->SetUniformValue("col", mColor);
-		AddComponent<scene::SpriteRenderer>(this);
+		//AddComponent<scene::SpriteRenderer>(this);
 	}
 
 	void Sprite::SetSprite(std::shared_ptr<Texture> texture)

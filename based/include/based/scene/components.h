@@ -84,11 +84,10 @@ namespace based::scene
 
 	struct SpriteRenderer
 	{
-		graphics::Sprite* sprite;
+		std::weak_ptr<graphics::Sprite> sprite;
 
-		SpriteRenderer() = default;
-		SpriteRenderer(graphics::Sprite* spritePtr) : sprite(spritePtr) {}
-		SpriteRenderer(const SpriteRenderer&) = default;
+		SpriteRenderer() = delete;
+		SpriteRenderer(const std::shared_ptr<graphics::Sprite>& spritePtr) : sprite(spritePtr) {}
 	};
 
 	struct ModelRenderer

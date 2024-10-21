@@ -60,22 +60,26 @@ namespace based::scene
 		PROFILE_FUNCTION();
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera, mActiveCamera));
 		const auto view = mRegistry.view<Enabled, Transform, SpriteRenderer>();
-		std::vector<graphics::Sprite*> sprites;
+		std::vector<std::shared_ptr<graphics::Sprite>> sprites;
+		sprites.reserve(view.size_hint());
 
 		// TODO: Find a better way to sort entities
 		for (const auto entity : view)
 		{
-			sprites.push_back(mRegistry.get<SpriteRenderer>(entity).sprite);
+			auto sprite = mRegistry.get<SpriteRenderer>(entity);
+			if (auto spr = sprite.sprite.lock())
+				sprites.emplace_back(spr);
 		}
 
 		std::sort(sprites.begin(), sprites.end(), [](const auto& ent1, const auto& ent2)
 			{
-				return static_cast<graphics::Sprite*>(ent1)->GetSortOrder() < static_cast<graphics::Sprite*>(ent2)->GetSortOrder();
+				return static_cast<std::shared_ptr<graphics::Sprite>>(ent1)->GetSortOrder() < 
+					static_cast<std::shared_ptr<graphics::Sprite>>(ent2)->GetSortOrder();
 			});
 
-		for (const auto sprite : sprites)
+		for (auto& sprite : sprites)
 		{
-			graphics::Sprite::DrawSprite(sprite);
+			graphics::Sprite::DrawSprite(sprite.get());
 		}
 
 		const auto modelView = mRegistry.view<Enabled, Transform, ModelRenderer, EntityReference>();

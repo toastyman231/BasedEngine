@@ -1,0 +1,12 @@
+-- External Dependencies
+IncludeDirs = {}
+IncludeDirs["maclibs"] = "/external/maclibs"
+IncludeDirs["sdl2"] = "/external/sdl2/include"
+IncludeDirs["spdlog"] = "/external/spdlog/include"
+IncludeDirs["glad"] = "/external/glad/include"
+IncludeDirs["freetype"] = "/external/freetype/include"
+IncludeDirs["miniaudio"] = "/external/miniaudio"
+IncludeDirs["assimp"] = "/external/assimp/include"
+IncludeDirs["rmlui"] = "/external/rmlui/Include"
+IncludeDirs["tracy"] = "/external/tracy"
+IncludeDirs["yaml_cpp"] = "/external/yaml-cpp/include"
