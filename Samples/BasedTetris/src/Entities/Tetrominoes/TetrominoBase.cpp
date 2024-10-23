@@ -8,7 +8,7 @@
 #include "TPiece.h"
 #include "RevZigZagPiece.h"
 
-TetrominoBase* TetrominoBase::SpawnTetromino(int x, int y, TetrominoType type, PlayGrid* grid)
+TetrominoBase* TetrominoBase::SpawnTetromino(int x, int y, TetrominoType type, std::shared_ptr<PlayGrid> grid)
 {
 	switch (type)
 	{

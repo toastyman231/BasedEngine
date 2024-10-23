@@ -59,7 +59,7 @@ namespace based::scene
 	{
 		PROFILE_FUNCTION();
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera, mActiveCamera));
-		/*const auto view = mRegistry.view<Enabled, Transform, SpriteRenderer>();
+		const auto view = mRegistry.view<Enabled, Transform, SpriteRenderer>();
 		std::vector<std::shared_ptr<graphics::Sprite>> sprites;
 		sprites.reserve(view.size_hint());
 
@@ -80,7 +80,7 @@ namespace based::scene
 		for (auto& sprite : sprites)
 		{
 			sprite->Draw();
-		}*/
+		}
 
 		const auto modelView = mRegistry.view<Enabled, Transform, ModelRenderer, EntityReference>();
 

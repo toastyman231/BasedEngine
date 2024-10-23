@@ -17,7 +17,7 @@ PlayGrid::PlayGrid(int x, int y)
 	for (int i = 0; i < x * y; i++)
 	{
 		auto sprite = new based::graphics::Sprite(glm::vec4(0.5f, 0.5f, 0.5f, 1.f));
-		sprite->SetPivot(based::graphics::Align::TopLeft);
+		sprite->SetPivot(based::ui::Align::TopLeft);
 		mTiles.emplace_back(sprite);
 	}
 
@@ -87,7 +87,7 @@ void PlayGrid::Update(float deltaTime)
 				}
 			}
 
-			TetrominoBase::SpawnTetromino(4, 0, TetrominoBase::GetRandomTetromino(), this);
+			//TetrominoBase::SpawnTetromino(4, 0, TetrominoBase::GetRandomTetromino(), shared_from_this());
 		}
 	}
 }
@@ -132,7 +132,7 @@ void PlayGrid::CheckRows()
 		return;
 	}
 
-	TetrominoBase::SpawnTetromino(4, 0, TetrominoBase::GetRandomTetromino(), this);
+	//TetrominoBase::SpawnTetromino(4, 0, TetrominoBase::GetRandomTetromino(), this);
 	mClearing = false;
 }
 

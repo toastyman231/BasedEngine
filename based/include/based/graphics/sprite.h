@@ -1,7 +1,7 @@
 #pragma once
 
 #include "based/ui/alignment.h"
-#include "based/scene/components.h"
+#include "based/scene/entity.h"
 
 namespace based::graphics
 {
@@ -15,7 +15,7 @@ namespace based::graphics
 		Square
 	};
 
-	/*class Sprite : public scene::ScriptableBehavior
+	class Sprite : public scene::Entity
 	{
 	private:
 		std::shared_ptr<VertexArray> mVA;
@@ -28,9 +28,9 @@ namespace based::graphics
 
 		void RegenerateVA();
 	public:
-		Sprite(const std::shared_ptr<scene::Entity>& owner, glm::vec4 color);
-		Sprite(const std::shared_ptr<scene::Entity>& owner, std::shared_ptr<Material> mat);
-		Sprite(const std::shared_ptr<scene::Entity>& owner, SpriteShape shape, std::shared_ptr<Material> mat);
+		Sprite(glm::vec4 color);
+		Sprite(std::shared_ptr<Material> mat);
+		Sprite(SpriteShape shape, std::shared_ptr<Material> mat);
 		~Sprite() override = default;
 
 		int GetSortOrder() const { return mSortOrder; }
@@ -52,5 +52,5 @@ namespace based::graphics
 		void Initialize() override {}
 		void Update(float deltaTime) override { BASED_TRACE("Updating sprite!"); }
 		void Shutdown() override { BASED_TRACE("Shutting down sprite!"); }
-	};*/
+	};
 }

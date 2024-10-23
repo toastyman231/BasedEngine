@@ -8,8 +8,8 @@
 
 namespace based::graphics
 {
-	/*Sprite::Sprite(const std::shared_ptr<scene::Entity>& owner, SpriteShape shape, std::shared_ptr<Material> mat)
-		: ScriptableBehavior(owner), mMaterial(std::move(mat)), mColor(1.f), mSize(1.f, 1.f), mPivot(0.f, 0.f),
+	Sprite::Sprite(SpriteShape shape, std::shared_ptr<Material> mat)
+		: Entity(), mMaterial(std::move(mat)), mColor(1.f), mSize(1.f, 1.f), mPivot(0.f, 0.f),
 		mSortOrder(0)
 	{
 		switch (shape)
@@ -26,8 +26,8 @@ namespace based::graphics
 		mMaterial->SetUniformValue("col", mColor);
 	}
 
-	Sprite::Sprite(const std::shared_ptr<scene::Entity>& owner, glm::vec4 color)
-		: ScriptableBehavior(owner), mColor(color), mSize(1.f), mPivot(0.f), mSortOrder(0)
+	Sprite::Sprite(glm::vec4 color)
+		: mColor(color), mSize(1.f), mPivot(0.f), mSortOrder(0)
 	{
 		mVA = DefaultLibraries::GetVALibrary().Get("Rect");
 
@@ -38,8 +38,8 @@ namespace based::graphics
 		mMaterial = mat;
 	}
 
-	Sprite::Sprite(const std::shared_ptr<scene::Entity>& owner, std::shared_ptr<Material> mat)
-		: ScriptableBehavior(owner), mMaterial(std::move(mat)), mColor(1.f), mSize(1.f), mPivot(0.f), mAlignment(ui::Middle),
+	Sprite::Sprite(std::shared_ptr<Material> mat)
+		: mMaterial(std::move(mat)), mColor(1.f), mSize(1.f), mPivot(0.f), mAlignment(ui::Middle),
 		mSortOrder(0)
 	{
 		if (mMaterial->GetTextures()[0])
@@ -74,7 +74,7 @@ namespace based::graphics
 
 	void Sprite::SetPivot(ui::Align alignment)
 	{
-		auto ent = mOwner.lock();
+		auto ent = this;//mOwner.lock();
 		if (!ent) return;
 
 		mAlignment = alignment;
@@ -118,7 +118,7 @@ namespace based::graphics
 	void Sprite::Draw()
 	{
 		PROFILE_FUNCTION();
-		auto ent = mOwner.lock();
+		auto ent = this;//mOwner.lock();
 		if (!ent)
 		{
 			BASED_WARN("Trying to draw sprite with expired owner!");
@@ -184,5 +184,5 @@ namespace based::graphics
 
 		mVA->SetElements({ 0, 3, 1, 1, 3, 2 });
 		mVA->Upload();
-	}*/
+	}
 }

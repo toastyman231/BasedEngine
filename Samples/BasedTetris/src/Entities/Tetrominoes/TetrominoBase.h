@@ -38,7 +38,7 @@ private:
 public:
 	TetrominoBase(int x, int y, PlayGrid* grid, glm::vec3 color = {1.f, 0.f, 0.f}, float fallTime = 1.f);
 
-	static TetrominoBase* SpawnTetromino(int x, int y, TetrominoType type, PlayGrid* grid);
+	static TetrominoBase* SpawnTetromino(int x, int y, TetrominoType type, std::shared_ptr<PlayGrid> grid);
 
 	static TetrominoBase* GetCurrentTetromino() { return currentTetromino; }
 

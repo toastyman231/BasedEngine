@@ -8,7 +8,7 @@
 #include <based/input/keyboard.h>
 #include <based/math/basedmath.h>
 
-class PlayGrid : public based::scene::Entity
+class PlayGrid : public based::scene::Entity//, std::enable_shared_from_this<PlayGrid>
 {
 public:
 	PlayGrid(int x, int y);
