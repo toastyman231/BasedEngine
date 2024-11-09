@@ -27,7 +27,7 @@ namespace based::graphics
 
 		inline static void InitializeLibraries()
 		{
-			// VertexArray
+#pragma region VertexArrays
 			{
 				auto va = std::make_shared<graphics::VertexArray>();
 
@@ -320,15 +320,32 @@ namespace based::graphics
 
 				mVALibrary.Load("AtlasTextureCube", va);
 			}
+#pragma endregion VertexArrays
 
-			// Shaders
+#pragma region Shaders
 			{
 				auto vertexShader = R"(
                     #version 410 core
                     layout (location = 0) in vec3 position;
 
-                    uniform mat4 proj = mat4(1.0);
-                    uniform mat4 view = mat4(1.0);
+					layout (std140) uniform Globals
+					{                   // base alignment  // aligned offset
+					    mat4 proj;      // 16              // 0
+					                    // 16              // 16
+					                    // 16              // 32
+					                    // 16              // 48
+					    mat4 view;      // 16              // 64
+					                    // 16              // 80
+					                    // 16              // 96
+					                    // 16              // 112
+					    vec4 eyePos;    // 16              // 128
+					    vec4 eyeForward;// 16              // 144
+
+					    float time;     // 4               // 148
+					};
+
+                    //uniform mat4 proj = mat4(1.0);
+                    //uniform mat4 view = mat4(1.0);
                     uniform mat4 model = mat4(1.0);
                     void main()
                     {
@@ -439,10 +456,9 @@ namespace based::graphics
                 )";
 				mShaderLibrary.Load("ShadowDepthShader", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));
 			}
+#pragma endregion Shaders
 
-			// Textures
-
-			// Materials
+#pragma region Materials
 			{
 				auto mat = std::make_shared<graphics::Material>(mShaderLibrary.Get("Rect"), "RectRed");
 				mat->SetUniformValue("col", glm::vec4(1, 0, 0, 1));
@@ -463,6 +479,7 @@ namespace based::graphics
 				mMaterialLibrary.Load("ShadowDepthMaterial", mat);
 			}
 		}
+#pragma endregion Materials
 
 		inline static void UninitializeLibraries()
 		{

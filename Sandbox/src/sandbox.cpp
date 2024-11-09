@@ -22,6 +22,7 @@
 #include "based/graphics/sprite.h"
 #include "based/math/random.h"
 #include "based/scene/audio.h"
+#include "based/ui/textentity.h"
 #include "Models-Surfaces/Generators.h"
 
 using namespace based;
@@ -100,6 +101,7 @@ private:
 	std::shared_ptr<scene::Entity> wallEntity;
 	std::shared_ptr<scene::Entity> cameraEntity;
 	std::shared_ptr<scene::Entity> iconEntity;
+	std::shared_ptr<ui::TextEntity> text;
 
 	std::shared_ptr<graphics::Mesh> temp;
 
@@ -428,6 +430,11 @@ public:
 		arms->SetParent(cameraEntity);
 		arms->SetLocalPosition(glm::vec3(0.f, 0.f, -0.2f));
 		arms->SetLocalRotation(glm::vec3(0.f, 180.f, 0.f));
+
+		text = scene::Entity::CreateEntity<ui::TextEntity>("Text",
+			glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f),
+			"Assets/fonts/Arimo-Regular.ttf", "This is a test!", 128);
+		//text->SetRenderSpace(ui::RenderSpace::World);
 
 		BASED_TRACE("Done initializing");
 

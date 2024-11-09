@@ -16,6 +16,9 @@ out mat3 TBN;
 #include "globals.glsl"
 uniform mat4 model = mat4(1.0);
 uniform mat4 normalMat = mat4(1.0);
+uniform mat4 overrideProj = mat4(1.0);
+uniform mat4 overrideView = mat4(1.0);
+uniform int useOverrideMatrices = 0;
 uniform mat4 lightSpaceMatrix;
 
 // vertex: the vertex to be snapped (needs to be in projection-space)
@@ -44,5 +47,9 @@ void main()
 
     //vec4 pos = snap(proj * view * model * vec4(position, 1.0), vec2(160.0, 120.0));
 
-    gl_Position = proj * view * model * vec4(position, 1.0);
+    if (useOverrideMatrices == 0) {
+        gl_Position = proj * view * model * vec4(position, 1.0);
+    } else {
+        gl_Position = overrideProj * overrideView * model * vec4(position, 1.0);
+    }
 }

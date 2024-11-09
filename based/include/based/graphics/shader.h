@@ -1,6 +1,6 @@
 #pragma once
 
-#define LOAD_SHADER(vs, fs) std::shared_ptr<graphics::Shader>(graphics::Shader::LoadShader(vs, fs))
+#define LOAD_SHADER(vs, fs) std::shared_ptr<based::graphics::Shader>(based::graphics::Shader::LoadShader(vs, fs))
 
 namespace based::graphics
 {
@@ -48,6 +48,8 @@ namespace based::graphics
 
 		static void UpdateShaderPointLighting(std::weak_ptr<Shader> shader, glm::vec3 objectPos);
 		static void UpdateShaderDirectionalLighting(std::weak_ptr<Shader> shader);
+
+		static ShaderGlobals GetShaderGlobals();
 	private:
 		uint32_t mProgramId;
 		std::string mVertexShader;

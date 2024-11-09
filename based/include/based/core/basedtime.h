@@ -1,5 +1,7 @@
 #pragma once
 
+#include "based/engine.h"
+
 namespace based::core
 {
 	class Time

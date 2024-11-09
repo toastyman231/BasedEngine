@@ -17,6 +17,7 @@ namespace based::graphics
 		, mHeight(0)
 		, mNumChannels(0)
 		, mStbiTex(true)
+		, mSdlSurface(false)
 		, mPixels(nullptr)
 	{
 		int width, height, numChannels;
@@ -34,15 +35,16 @@ namespace based::graphics
 	}
 
 	Texture::Texture(const SDL_Surface* surface, unsigned int id)
-		: mPath("")
+		: mFilter(TextureFilter::Nearest)
+		, mPath("")
 		, mId(id)
-		, mHeight(surface->h)
 		, mWidth(surface->w)
+		, mHeight(surface->h)
 		, mNumChannels(surface->format->BytesPerPixel)
-		, mPixels((unsigned char*)surface->pixels)
-		, mStbiTex(false)
-		, mFilter(TextureFilter::Nearest)
 		, mRmask(surface->format->Rmask)
+		, mStbiTex(false)
+		, mSdlSurface(true)
+		, mPixels((unsigned char*)surface->pixels)
 	{
 		LoadTexture();
 	}
@@ -63,7 +65,10 @@ namespace based::graphics
 		{
 			stbi_image_free(mPixels);
 			mPixels = nullptr;
-		} else
+		} else if (mSdlSurface)
+		{
+			return;
+		} else if (mPixels)
 		{
 			free(mPixels);
 			mPixels = nullptr;

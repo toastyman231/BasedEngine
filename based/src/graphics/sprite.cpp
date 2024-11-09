@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "pch.h"
 #include "graphics/sprite.h"
 
@@ -63,13 +65,13 @@ namespace based::graphics
 
 	void Sprite::SetMaterial(std::shared_ptr<Material> material)
 	{
-		mMaterial = material;
+		mMaterial = std::move(material);
 	}
 
 	void Sprite::SetColor(glm::vec4 color)
 	{
 		mColor = color;
-		mMaterial->SetUniformValue("col", mColor);
+		mMaterial->SetUniformValue("material.diffuseMat.color", mColor);
 	}
 
 	void Sprite::SetPivot(ui::Align alignment)

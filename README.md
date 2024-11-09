@@ -37,13 +37,13 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - Physically based materials (Based on https://github.com/GarrettGunnell/Disney-PBR), with simple material editor
 
 ## Planned Additions
-- Physics (Box2D, Bolt, Bullet?)
+- Physics (Box2D, Jolt, Bullet?)
 - ~~Audio capabilities (maybe ffmpeg?)~~ Complete!
 - ~~Animation System~~ Complete!
 - ~~Load shaders from file (They are hardcoded currently)~~ Complete!  
 - ~~More UI (Buttons, Sliders, Checkboxes, etc)~~ Complete!
 - Scene Save/Load (Serialization)
-- ~~3D Rendering capability~~ with PBR materials (Complete! PBR may come later)
+- ~~3D Rendering capability with PBR materials~~ Complete!
 - GUI to make creating/loading projects easier
 - Make a game with it!
 

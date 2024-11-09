@@ -21,8 +21,8 @@ namespace based::scene
 			glm::vec3 scale = glm::vec3(1.f), Args &&...args)
 		{
 			auto newEntity = std::make_shared<Type>(args...);
-			newEntity->template AddComponent<EntityReference>(newEntity);
 			newEntity->SetEntityName(name);
+			newEntity->template AddComponent<EntityReference>(newEntity);
 
 			newEntity->SetTransform(pos, rot, scale);
 			newEntity->Initialize();

@@ -1,3 +1,4 @@
+#include "based/pch.h"
 #include "PlayGrid.h"
 
 #include <based/core/basedtime.h>
@@ -16,8 +17,14 @@ PlayGrid::PlayGrid(int x, int y)
 
 	for (int i = 0; i < x * y; i++)
 	{
-		auto sprite = new based::graphics::Sprite(glm::vec4(0.5f, 0.5f, 0.5f, 1.f));
+		auto sprite = std::make_shared<based::graphics::Sprite>(glm::vec4(0.5f, 0.5f, 0.5f, 1.f));
 		sprite->SetPivot(based::ui::Align::TopLeft);
+		sprite->AddComponent<based::scene::SpriteRenderer>(sprite);
+		auto mat = based::graphics::Material::CreateMaterial(
+		LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"),
+			DEFAULT_MAT_LIB, std::string("SpriteMaterial").append(std::to_string(i)));
+		mat->SetUniformValue("material.diffuseMat.color", sprite->GetColor());
+		sprite->SetMaterial(mat);
 		mTiles.emplace_back(sprite);
 	}
 
@@ -38,8 +45,9 @@ void PlayGrid::SetupTiles() const
 			float xPos = based::math::Lerp(gridWidth, gridWidth + gridWidth, (float)i / (float)mSize.x);
 			float yPos = based::math::Lerp(5.f, (float)based::Engine::Instance().GetWindow().GetSize().y, (float)j / (float)mSize.y);
 
-			mTiles[j * mSize.x + i]->SetPosition(
-				based::Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->ScreenToWorldPoint({xPos, yPos}));
+			const auto newPos = 
+				based::Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->ScreenToWorldPoint({ xPos, yPos });
+			mTiles[j * mSize.x + i]->SetPosition(glm::vec3(newPos.x, newPos.y - 0.045f, 0.f));
 		}
 	}
 }
@@ -87,7 +95,8 @@ void PlayGrid::Update(float deltaTime)
 				}
 			}
 
-			//TetrominoBase::SpawnTetromino(4, 0, TetrominoBase::GetRandomTetromino(), shared_from_this());
+			TetrominoBase::SpawnTetromino(4, 0, TetrominoBase::GetRandomTetromino(), 
+				std::static_pointer_cast<PlayGrid>(shared_from_this()));
 		}
 	}
 }
@@ -132,7 +141,8 @@ void PlayGrid::CheckRows()
 		return;
 	}
 
-	//TetrominoBase::SpawnTetromino(4, 0, TetrominoBase::GetRandomTetromino(), this);
+	TetrominoBase::SpawnTetromino(4, 0, TetrominoBase::GetRandomTetromino(), 
+		std::static_pointer_cast<PlayGrid>(shared_from_this()));
 	mClearing = false;
 }
 

@@ -43,6 +43,7 @@ namespace based::graphics
 		uint32_t mRmask;
 
 		bool mStbiTex;
+		bool mSdlSurface;
 
 		unsigned char* mPixels;
 

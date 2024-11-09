@@ -34,7 +34,7 @@ namespace based::core
 			{
 				finalName = name + std::to_string(count);
 				count++;
-				//BASED_WARN("AssetLibrary::Load() - overwriting asset with same name: {}", name.c_str());
+				//BASED_WARN("AssetLibrary::Load() - asset with same name: {}", finalName.c_str());
 			}
 			mAssets[finalName] = asset;
 		}

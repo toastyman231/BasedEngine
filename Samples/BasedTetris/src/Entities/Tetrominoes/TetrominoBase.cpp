@@ -10,28 +10,32 @@
 
 TetrominoBase* TetrominoBase::SpawnTetromino(int x, int y, TetrominoType type, std::shared_ptr<PlayGrid> grid)
 {
+	std::shared_ptr<LinePiece> piece;
 	switch (type)
 	{
 	case LINE:
-		currentTetromino = new LinePiece(x, y, grid, {0.19f, 0.78f, 0.94f});
+		currentTetromino = new LinePiece(x, y, grid.get(), {0.19f, 0.78f, 0.94f});
+		/*CreateEntity<LinePiece>(
+			"LinePiece", { 0.f, 0.f, 0.f }, { 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f }, x, y, grid.get(),
+			{ 0.19f, 0.78f, 0.94f }, 1.0f);*/
 		break;
 	case L:
-		currentTetromino = new LPiece(x, y, grid, { 0.35f, 0.40f, 0.68f });
+		currentTetromino = new LPiece(x, y, grid.get(), { 0.35f, 0.40f, 0.68f });
 		break;
 	case REVERSEL:
-		currentTetromino = new RevLPiece(x, y, grid, { 0.94f, 0.47f, 0.13f });
+		currentTetromino = new RevLPiece(x, y, grid.get(), { 0.94f, 0.47f, 0.13f });
 		break;
 	case SQUARE:
-		currentTetromino = new SquarePiece(x, y, grid, { 0.97f, 0.83f, 0.03f });
+		currentTetromino = new SquarePiece(x, y, grid.get(), { 0.97f, 0.83f, 0.03f });
 		break;
 	case ZIGZAG:
-		currentTetromino = new ZigZagPiece(x, y, grid, { 0.26f, 0.71f, 0.26f });
+		currentTetromino = new ZigZagPiece(x, y, grid.get(), { 0.26f, 0.71f, 0.26f });
 		break;
 	case T:
-		currentTetromino = new TPiece(x, y, grid, { 0.68f, 0.30f, 0.61f });
+		currentTetromino = new TPiece(x, y, grid.get(), { 0.68f, 0.30f, 0.61f });
 		break;
 	case REVERSEZIGZAG:
-		currentTetromino = new RevZigZagPiece(x, y, grid, { 0.94f, 0.13f, 0.16f });
+		currentTetromino = new RevZigZagPiece(x, y, grid.get(), { 0.94f, 0.13f, 0.16f });
 		break;
 	}
 

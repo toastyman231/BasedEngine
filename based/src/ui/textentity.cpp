@@ -5,6 +5,7 @@
 #include "engine.h"
 
 #include "SDL2/SDL_ttf.h"
+#include <utility>
 
 #include "graphics/defaultassetlibraries.h"
 
@@ -12,34 +13,35 @@
 
 namespace based::ui
 {
-	TextEntity::TextEntity(std::string path, std::string text, int fontSize, glm::vec3 pos, SDL_Color color)
+	TextEntity::TextEntity(std::string path, std::string text, int fontSize, glm::vec3 pos, BColor color, RenderSpace space)
 		: Entity(Engine::Instance().GetApp().GetCurrentScene()->GetRegistry()),
-		mShouldRegenerate(false), mShouldRegenVA(false)
+		  mRenderSpace(space),
+		  mFont(nullptr), mShouldRegenerate(false), mShouldRegenVA(false), mShouldRegenSpace(true)
 	{
 		SetFont(path, fontSize);
-		SetText(text);
+		SetText(std::move(text));
 		MoveText(pos);
 		SetColor(color);
 		SetAlignment(Middle);
+		SetRenderSpace(RenderSpace::Screen);
+
+		auto shader = LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag");
+		mMaterial = std::make_shared<graphics::Material>(shader);
+		mMaterial->mMaterialName = std::string("TextEntityMaterial-") + GetEntityName();
+		mMaterial->AddTexture(mTexture, "material.diffuseMat.tex");
+		mMaterial->SetUniformValue("material.diffuseMat.useSampler", 1);
 
 		RegenerateTexture();
 
 		RegenerateVertexArray();
-
-		auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect");
-		auto mat = std::make_shared<graphics::Material>(shader);
-		mat->AddTexture(mTexture);
-		mat->SetUniformValue("col", glm::vec4{ 1.f, 1.f, 1.f, 1.f });
-		mMaterialLibrary.Load("Material", mat);
 
 		AddComponent<scene::TextRenderer>(this);
 	}
 
 	TextEntity::~TextEntity()
 	{
-		TTF_CloseFont(mFont);
-		DestroyEntity(std::shared_ptr<Entity>(this));
-		//glDeleteTextures(1, &texture);
+		//TODO: Figure out why this causes an error when closing the game
+		//if (mFont) TTF_CloseFont(static_cast<TTF_Font*>(mFont));
 	}
 
 	void TextEntity::SetText(std::string text)
@@ -52,6 +54,7 @@ namespace based::ui
 	void TextEntity::SetFont(std::string& path, int fontSize)
 	{
 		mFontPath = path;
+		if (mFont) TTF_CloseFont(static_cast<TTF_Font*>(mFont));
 		mFont = TTF_OpenFont(path.c_str(), fontSize);
 		BASED_ASSERT(mFont, "Error loading font!");
 		if (fontSize != mFontSize)
@@ -66,6 +69,7 @@ namespace based::ui
 	{
 		if (size != mFontSize)
 		{
+			if (mFont) TTF_CloseFont(static_cast<TTF_Font*>(mFont));
 			mFont = TTF_OpenFont(mFontPath.c_str(), size);
 			BASED_ASSERT(mFont, "Error loading font!");
 			mFontSize = size;
@@ -75,21 +79,28 @@ namespace based::ui
 
 	}
 
-	void TextEntity::SetColor(SDL_Color col)
+	void TextEntity::SetColor(BColor col)
 	{
 		mColor = col;
 		mShouldRegenerate = true;
 	}
 
-	void TextEntity::MoveText(glm::vec3 pos)
+	void TextEntity::SetRenderSpace(RenderSpace space)
 	{
-		AddOrReplaceComponent<scene::Transform>(Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->ScreenToWorldPoint(pos));
+		mRenderSpace = space;
+		mShouldRegenSpace = true;
+	}
+
+	void TextEntity::MoveText(glm::vec3 pos, bool overrideZ, float newZ)
+	{
+		auto newPos = Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->ScreenToWorldPoint(pos);
+		if (overrideZ) newPos.z = newZ;
+		AddOrReplaceComponent<scene::Transform>(newPos);
 	}
 
 	void TextEntity::Shutdown()
 	{
 		Entity::Shutdown();
-		//delete(this);
 	}
 
 	void TextEntity::SetAlignment(Align alignment)
@@ -100,22 +111,43 @@ namespace based::ui
 
 	void TextEntity::DrawFont(TextEntity* textEntity)
 	{
-		//if (!textEntity->IsActive()) return;
+		if (!textEntity->IsActive() || Engine::Instance().GetWindow().isInDepthPass) return;
+		if (textEntity->mShouldRegenSpace || textEntity->mRenderSpace == RenderSpace::World) 
+			textEntity->RegenerateRenderSpace();
 
-		Engine::Instance().GetRenderManager().Submit(
-			BASED_SUBMIT_RC(PushCamera, Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()));
+		const scene::Transform transform = textEntity->GetComponent<scene::Transform>();
+		const glm::vec3 pos = transform.Position;
+		const glm::vec3 rot = transform.Rotation;
+		const glm::vec3 scale = transform.Scale;
+		const glm::vec3 localPos = transform.LocalPosition;
+		const glm::vec3 localRot = transform.LocalRotation;
+
+		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera,
+			Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()));
+		// Translations are applied in the opposite order they are defined here
+		// So - scale, rotate by local rotation, translate by local position, rotate by global rotation,
+		// translate by global translation
+
 		auto model = glm::mat4(1.f);
-		const glm::vec3 rotation = textEntity->GetComponent<scene::Transform>().Rotation;
-		model = glm::translate(model, textEntity->GetComponent<scene::Transform>().Position);
+		model = glm::translate(model, pos - localPos);
+
 		// Rotations are passed as degrees and converted to radians here automatically
-		model = glm::rotate(model, rotation.x * 0.0174533f, glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, rotation.y * 0.0174533f, glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, rotation.z * 0.0174533f, glm::vec3(0.f, 0.f, 1.f));
+		model = glm::rotate(model, glm::radians(-(rot.y - localRot.y)), glm::vec3(0.f, 1.f, 0.f));
+		model = glm::rotate(model, glm::radians(-(rot.x - localRot.x)), glm::vec3(1.f, 0.f, 0.f));
+		model = glm::rotate(model, glm::radians(-(rot.z - localRot.z)), glm::vec3(0.f, 0.f, 1.f));
+
+		model = glm::translate(model, localPos);
+
+		// Rotations are passed as degrees and converted to radians here automatically
+		model = glm::rotate(model, glm::radians(localRot.y), glm::vec3(0.f, 1.f, 0.f));
+		model = glm::rotate(model, glm::radians(localRot.x), glm::vec3(1.f, 0.f, 0.f));
+		model = glm::rotate(model, glm::radians(localRot.z), glm::vec3(0.f, 0.f, 1.f));
+
+		model = glm::scale(model, scale);
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial,
-			textEntity->mVALibrary.Get("VA"),//mVA, 
-			textEntity->mMaterialLibrary.Get("Material"),
+			textEntity->mVA,
+			textEntity->mMaterial,
 			model));
-		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 
 		if (textEntity->mShouldRegenerate) textEntity->RegenerateTexture();
 	}
@@ -148,23 +180,21 @@ namespace based::ui
 	void TextEntity::RegenerateTexture()
 	{
 		uint32_t texture;
-		SDL_Surface* surface = TTF_RenderUTF8_Blended(mFont, mText.c_str(), mColor);
+		SDL_Surface* surface = TTF_RenderUTF8_Blended(static_cast<TTF_Font*>(mFont), 
+			mText.c_str(), {mColor.r, mColor.g, mColor.b, mColor.a});
 		surface = ResizeToPowerOfTwo(surface);
 
 		mSize = { surface->w, surface->h };
 
 		mTexture = std::make_shared<graphics::Texture>(surface, texture);
 		mTexture->SetTextureFilter(graphics::TextureFilter::Nearest);
-		auto shader = graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect");
-		auto mat = std::make_shared<graphics::Material>(shader);
-		mat->AddTexture(mTexture);
-		mat->SetUniformValue("col", glm::vec4{ 1.f, 1.f, 1.f, 1.f });
-		mMaterialLibrary.Load("Material", mat);
+
+		//mMaterial->RemoveTexture("material.diffuseMat.tex");
+		mMaterial->AddTexture(mTexture, "material.diffuseMat.tex");
 
 		SDL_FreeSurface(surface);
 		mShouldRegenerate = false;
 		if (mShouldRegenVA) RegenerateVertexArray();
-		//glDeleteTextures(1, &texture);
 	}
 
 	void TextEntity::RegenerateVertexArray()
@@ -194,8 +224,24 @@ namespace based::ui
 
 		mVA->SetElements({ 0, 3, 1, 1, 3, 2 });
 		mVA->Upload();
+	}
 
-		mVALibrary.Load("VA", mVA);
+	void TextEntity::RegenerateRenderSpace()
+	{
+		switch (mRenderSpace)
+		{
+		case RenderSpace::Screen:
+			/*mMaterial->SetUniformValue("proj", glm::mat4(1.f));
+			mMaterial->SetUniformValue("view", glm::mat4(1.f));*/
+			mMaterial->SetUniformValue("useOverrideMatrices", 1);
+			break;
+		case RenderSpace::World:
+			mMaterial->SetUniformValue("useOverrideMatrices", 0);
+			/*mMaterial->SetUniformValue("proj", graphics::Shader::GetShaderGlobals().proj);
+			mMaterial->SetUniformValue("view", graphics::Shader::GetShaderGlobals().view);*/
+			break;
+		}
+		mShouldRegenSpace = false;
 	}
 
 	/*

@@ -1,7 +1,9 @@
-#include "based/log.h"
+#include "based/pch.h"
+
+#include <memory>
+#include <external/glm/vec3.hpp>
 #include "based/main.h"
 
-#include "based/scene/components.h"
 #include "based/scene/entity.h"
 #include "based/scene/audio.h"
 #include "based/ui/textentity.h"
@@ -15,9 +17,9 @@ class BasedApp : public based::App
 private:
 	std::shared_ptr<PlayGrid> playGrid = nullptr;
 	TetrominoBase* currentTetromino = nullptr;
-	ui::TextEntity* scoreText = nullptr;
-	ui::TextEntity* gameOverText = nullptr;
-	ui::TextEntity* pausedText = nullptr;
+	std::shared_ptr<ui::TextEntity> scoreText = nullptr;
+	std::shared_ptr<ui::TextEntity> gameOverText = nullptr;
+	std::shared_ptr<ui::TextEntity> pausedText = nullptr;
 	scene::Audio* tetrisTheme = nullptr;
 
 	bool firstTime = true;
@@ -38,19 +40,33 @@ public:
 		App::Initialize();
 		// TODO: Add way to hide console in release config
 		// TODO: Figure out how to stop errors on game shutdown
+		GetCurrentScene()->GetActiveCamera()->SetProjection(graphics::Projection::ORTHOGRAPHIC);
+		GetCurrentScene()->GetActiveCamera()->SetPosition(glm::vec3(0.f, 0.f, 10.f));
 
 		playGrid = scene::Entity::CreateEntity<PlayGrid>("PlayGrid",
 			glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f),
 			10, 16);
-		pausedText = new ui::TextEntity("Assets/fonts/Arimo-Bold.ttf", "Paused", 48,
-			{ 150.f, Engine::Instance().GetWindow().GetSize().y / 2 - 150.f, 0.f }, { 255, 255, 255, 255 });
-		scoreText = new ui::TextEntity("Assets/fonts/Arimo-Bold.ttf", "Score: 0", 48,
-			{ 150.f, Engine::Instance().GetWindow().GetSize().y / 2, 0.f }, {255, 255, 255, 255});
-		gameOverText = new ui::TextEntity("Assets/fonts/Arimo-Bold.ttf", "Game Over!", 48,
-			{150.f, Engine::Instance().GetWindow().GetSize().y / 2 + 150.f, 0.f}, { 255, 255, 255, 255 });
+		pausedText = scene::Entity::CreateEntity<ui::TextEntity>("PauseText", 
+			{ 0.f, 0.f, 0.f }, {0.f, 0.f, 0.f},
+			{1.f, 1.f, 1.f}, "Assets/fonts/Arimo-Bold.ttf", "Paused", 48);
+		pausedText->SetRenderSpace(ui::RenderSpace::World);
+		pausedText->SetColor({ 255, 255, 255, 255 });
+		pausedText->MoveText({ 150.f, Engine::Instance().GetWindow().GetSize().y / 2 - 150.f, 0.f }, true);
+		scoreText = scene::Entity::CreateEntity<ui::TextEntity>("ScoreText",
+			{ 0.f, 0.f, 0.f }, { 0.f, 0.f, 0.f },
+			{ 1.f, 1.f, 1.f }, "Assets/fonts/Arimo-Bold.ttf", "Score: 0", 48);
+		scoreText->SetRenderSpace(based::ui::RenderSpace::World);
+		scoreText->SetColor({ 255, 255, 255 ,255 });
+		scoreText->MoveText({ 150.f, Engine::Instance().GetWindow().GetSize().y / 2, 0.f }, true);
+		gameOverText = scene::Entity::CreateEntity<ui::TextEntity>("GameOverText",
+			{ 0.f, 0.f, 0.f }, { 0.f, 0.f, 0.f },
+			{ 1.f, 1.f, 1.f }, "Assets/fonts/Arimo-Bold.ttf", "Game Over!", 48);
+		gameOverText->SetRenderSpace(ui::RenderSpace::World);
+		gameOverText->SetColor({ 255, 255, 255, 255 });
+		gameOverText->MoveText({ 150.f, Engine::Instance().GetWindow().GetSize().y / 2 + 150.f, 0.f }, true);
 		gameOverText->SetActive(false);
 		pausedText->SetActive(false);
-		playGrid->SetScoreText(scoreText);
+		playGrid->SetScoreText(scoreText.get());
 		currentTetromino = TetrominoBase::SpawnTetromino(5, 0, LINE, playGrid);
 
 		tetrisTheme = new scene::Audio(std::string("Assets/sounds/tetris.mp3"), 0.5f, true);
@@ -92,6 +108,7 @@ public:
 		}
 
 		currentTetromino = TetrominoBase::GetCurrentTetromino();
+		currentTetromino->Update(deltaTime);
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_D))
 		{

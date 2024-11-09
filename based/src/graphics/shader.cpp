@@ -388,4 +388,9 @@ namespace based::graphics
 			}
 		}
 	}
+
+	ShaderGlobals Shader::GetShaderGlobals()
+	{
+		return mGlobals;
+	}
 }

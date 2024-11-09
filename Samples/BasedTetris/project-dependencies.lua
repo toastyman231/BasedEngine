@@ -1,0 +1,21 @@
+-- External Dependencies
+externals = {}
+externals["maclibs"] = "%{engineLocation}/external/maclibs"
+externals["sdl2"] = "%{engineLocation}/external/sdl2/include"
+externals["spdlog"] = "%{engineLocation}/external/spdlog/include"
+externals["glad"] = "%{engineLocation}/external/glad/include"
+externals["freetype"] = "%{engineLocation}/external/freetype/include"
+externals["miniaudio"] = "%{engineLocation}/external/miniaudio"
+externals["assimp"] = "%{engineLocation}/external/assimp/include"
+externals["rmlui"] = "%{engineLocation}/external/rmlui/Include"
+externals["tracy"] = "%{engineLocation}/external/tracy"
+externals["yaml_cpp"] = "%{engineLocation}/external/yaml-cpp/include"
+
+-- External libraries
+libraries = {}
+libraries["maclibs"] = "%{engineLocation}/external/maclibs"
+libraries["sdl2"] = "%{engineLocation}/external/sdl2/lib"
+libraries["spdlog"] = "%{engineLocation}/external/spdlog/lib"
+libraries["freetype"] = "%{engineLocation}/external/freetype/lib"
+libraries["assimp"] = "%{engineLocation}/external/assimp/lib"
+libraries["rmlui"] = "%{engineLocation}/external/rmlui/lib"

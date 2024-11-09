@@ -18,8 +18,8 @@ namespace based::managers
 		friend class graphics::rendercommands::PopCamera;
 
 	public:
-		RenderManager() {}
-		~RenderManager() {}
+		RenderManager() = default;
+		~RenderManager() = default;
 
 		const graphics::Camera* GetActiveCamera() const;
 

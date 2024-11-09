@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <external/glm/fwd.hpp>
+#include <external/glm/vec2.hpp>
+#include <external/glm/vec3.hpp>
+
 namespace based::ui
 {
 	class TextEntity;

@@ -45,7 +45,7 @@ private:
 	float mTimeToWait;
 	glm::ivec2 mSize;
 	std::vector<int> mClearedRows;
-	std::vector<based::graphics::Sprite*> mTiles;
+	std::vector<std::shared_ptr<based::graphics::Sprite>> mTiles;
 	based::core::AssetLibrary<std::shared_ptr<based::graphics::Material>> mMaterials;
 	based::ui::TextEntity* scoreText;
 
