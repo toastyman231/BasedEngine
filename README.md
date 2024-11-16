@@ -35,6 +35,7 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - Materials with normal mapping and lighting support
 - Skeletal animation support with state machines
 - Physically based materials (Based on https://github.com/GarrettGunnell/Disney-PBR), with simple material editor
+- Custom Render Pass support, including post processing
 
 ## Planned Additions
 - Physics (Box2D, Jolt, Bullet?)
