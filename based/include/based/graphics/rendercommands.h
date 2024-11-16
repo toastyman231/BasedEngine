@@ -2,6 +2,15 @@
 
 #include <external/glm/mat4x4.hpp>
 
+#define GL_NEVER 0x0200
+#define GL_LESS 0x0201
+#define GL_EQUAL 0x0202
+#define GL_LEQUAL 0x0203
+#define GL_GREATER 0x0204
+#define GL_NOTEQUAL 0x0205
+#define GL_GEQUAL 0x0206
+#define GL_ALWAYS 0x0207
+
 namespace based::graphics
 {
 	class VertexArray;
@@ -62,12 +71,14 @@ namespace based::graphics
 		{
 		public:
 			RenderVertexArrayMaterial(std::weak_ptr<VertexArray> vertexArray, std::weak_ptr<Material> material,
-				const glm::mat4 modelMatrix = glm::mat4(1.f), const bool instanced = false, const int count = 0,
+				const glm::mat4 modelMatrix = glm::mat4(1.f), const uint32_t depthFunc = GL_LEQUAL, 
+				const bool instanced = false, const int count = 0,
 				const int index = 0)
 				: mVertexArray(std::move(vertexArray))
 				  , mMaterial(std::move(material))
 				  , mModelMatrix(modelMatrix)
 				, mInstanced(instanced)
+				, mDepthFunc(depthFunc)
 				, mInstanceCount(count)
 				, mIndex(index)
 			{
@@ -79,6 +90,7 @@ namespace based::graphics
 			std::weak_ptr<Material> mMaterial;
 			glm::mat4 mModelMatrix;
 			bool mInstanced;
+			uint32_t mDepthFunc;
 			int mInstanceCount;
 			int mIndex;
 		};

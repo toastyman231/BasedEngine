@@ -431,10 +431,11 @@ public:
 		arms->SetLocalPosition(glm::vec3(0.f, 0.f, -0.2f));
 		arms->SetLocalRotation(glm::vec3(0.f, 180.f, 0.f));
 
-		text = scene::Entity::CreateEntity<ui::TextEntity>("Text",
+		/*text = scene::Entity::CreateEntity<ui::TextEntity>("Text",
 			glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f),
-			"Assets/fonts/Arimo-Regular.ttf", "This is a test!", 128);
+			"Assets/fonts/Arimo-Regular.ttf", "This is a test!", 128);*/
 		//text->SetRenderSpace(ui::RenderSpace::World);
+		//text->SetIgnoreDepth(true);
 
 		BASED_TRACE("Done initializing");
 

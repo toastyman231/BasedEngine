@@ -308,12 +308,13 @@ namespace based::graphics
 		{
 			if (material->GetUniformValue<int>("castShadows", 1) != 0)
 				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA,
-					graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"), model, true, mInstanceCount));
+					graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"), 
+					model, GL_LEQUAL, true, mInstanceCount));
 		}
 		else
 		{
 			Engine::Instance().GetRenderManager().Submit(
-				BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model, true, mInstanceCount));
+				BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model, GL_LEQUAL, true, mInstanceCount));
 		}
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 	}

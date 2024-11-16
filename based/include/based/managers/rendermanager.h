@@ -30,6 +30,7 @@ namespace based::managers
 		void SetViewport(const glm::ivec4 dimensions);
 		void SetClearColor(const glm::vec4 clearColor);
 		void SetWireframeMode(bool enabled);
+		static void SetDepthFunction(uint32_t func);
 
 		void Submit(std::unique_ptr<graphics::rendercommands::RenderCommand> rc);
 		

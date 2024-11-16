@@ -120,6 +120,7 @@ namespace based::graphics::rendercommands
 				BASED_ASSERT(shader, "Attempting to execute invalid RenderVertexArrayMaterial - shader is nullptr");
 				if (shader)
 				{
+					managers::RenderManager::SetDepthFunction(mDepthFunc);
 					mat->UpdateShaderUniforms();
 					shader->Bind();
 					int index = -1;
@@ -180,6 +181,8 @@ namespace based::graphics::rendercommands
 					}
 					glActiveTexture(GL_TEXTURE0); BASED_CHECK_GL_ERROR;
 					shader->Unbind();
+
+					managers::RenderManager::SetDepthFunction(GL_LEQUAL);
 				}
 				va->Unbind();
 			}

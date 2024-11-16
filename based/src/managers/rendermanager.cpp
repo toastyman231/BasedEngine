@@ -76,6 +76,11 @@ namespace based::managers
 		}
 	}
 
+	void RenderManager::SetDepthFunction(uint32_t func)
+	{
+		glDepthFunc(func); BASED_CHECK_GL_ERROR;
+	}
+
 	void RenderManager::Submit(std::unique_ptr<graphics::rendercommands::RenderCommand> rc)
 	{
 		PROFILE_FUNCTION();

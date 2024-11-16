@@ -44,6 +44,7 @@ namespace based::ui
 		bool mShouldRegenerate;
 		bool mShouldRegenVA;
 		bool mShouldRegenSpace = true;
+		bool mIgnoreDepth = false;
 
 		SDL_Surface* ResizeToPowerOfTwo(SDL_Surface* surface);
 
@@ -71,6 +72,7 @@ namespace based::ui
 		void Shutdown() override;
 		void MoveTexture(SDL_Surface* src, SDL_Surface* dest);
 		void SetAlignment(Align alignment);
+		void SetIgnoreDepth(bool shouldIgnore);
 
 		static void DrawFont(TextEntity* textEntity);
 

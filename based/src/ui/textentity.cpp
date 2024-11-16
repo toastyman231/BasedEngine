@@ -109,6 +109,11 @@ namespace based::ui
 		mShouldRegenerate = true;
 	}
 
+	void TextEntity::SetIgnoreDepth(bool shouldIgnore)
+	{
+		mIgnoreDepth = shouldIgnore;
+	}
+
 	void TextEntity::DrawFont(TextEntity* textEntity)
 	{
 		if (!textEntity->IsActive() || Engine::Instance().GetWindow().isInDepthPass) return;
@@ -147,7 +152,8 @@ namespace based::ui
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial,
 			textEntity->mVA,
 			textEntity->mMaterial,
-			model));
+			model,
+			textEntity->mIgnoreDepth ? GL_ALWAYS : GL_LEQUAL));
 
 		if (textEntity->mShouldRegenerate) textEntity->RegenerateTexture();
 	}
