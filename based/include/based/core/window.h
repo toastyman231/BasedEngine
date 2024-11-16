@@ -50,17 +50,15 @@ namespace based::core
 
 		inline SDL_Window* GetSDLWindow() const { return mWindow; }
 		inline SDL_GLContext GetGLContext() const { return mGLContext; }
-		inline graphics::Framebuffer* GetFramebuffer() { return mFramebuffer.get(); }
+		inline graphics::Framebuffer* GetFramebufferRaw() { return mFramebuffer.get(); }
+		inline std::shared_ptr<graphics::Framebuffer> GetFramebuffer() { return mFramebuffer; }
+		inline std::shared_ptr<graphics::Framebuffer> GetShadowBuffer() { return mShadowbuffer; }
 		void SetMaintainAspectRatio(bool newMaintain);
 
 		void BeginRender();
 		void EndRender();
 
 		glm::ivec2 GetSizeInAspectRatio(int width, int height);
-
-		uint32_t GetShadowMapTextureID() const { return mShadowbuffer->GetTextureId(); }
-
-		bool isInDepthPass = false;
 	private:
 		void InitializeScreenRender();
 		void RenderToScreen();

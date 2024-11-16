@@ -56,6 +56,8 @@ namespace based::core
 
 	void ImguiWindow::BeginRender()
 	{
+		auto& rm = Engine::Instance().GetRenderManager();
+		rm.PushDebugGroup("ImGuiPass");
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplSDL2_NewFrame(Engine::Instance().GetWindow().GetSDLWindow());
 		ImGui::NewFrame();
@@ -74,5 +76,7 @@ namespace based::core
 			ImGui::RenderPlatformWindowsDefault();
 			SDL_GL_MakeCurrent(window.GetSDLWindow(), window.GetGLContext());
 		}
+		auto& rm = Engine::Instance().GetRenderManager();
+		rm.PopDebugGroup();
 	}
 }

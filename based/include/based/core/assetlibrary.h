@@ -5,13 +5,13 @@
 namespace based::core
 {
 	template <typename T>
-	class AssetLibrary
+	class SimpleAssetLibrary
 	{
 	public:
-		AssetLibrary() = default;
-		~AssetLibrary() = default;
+		SimpleAssetLibrary() = default;
+		~SimpleAssetLibrary() = default;
 
-		const std::unordered_map<std::string, std::shared_ptr<T>>& GetAll() const { return mAssets; }
+		const std::unordered_map<std::string, T>& GetAll() const { return mAssets; }
 
 		std::vector<std::string> GetKeys()
 		{
@@ -26,11 +26,11 @@ namespace based::core
 			return vals;
 		}
 
-		void Load(const std::string& name, std::shared_ptr<T> asset)
+		void Load(const std::string& name, T asset, bool force = false)
 		{
 			std::string finalName = name;
 			int count = 1;
-			while (Exists(finalName))
+			while (!force && Exists(finalName))
 			{
 				finalName = name + std::to_string(count);
 				count++;
@@ -39,7 +39,7 @@ namespace based::core
 			mAssets[finalName] = asset;
 		}
 
-		std::shared_ptr<T> Get(const std::string& name)
+		T Get(const std::string& name)
 		{
 			if (Exists(name))
 			{
@@ -48,7 +48,7 @@ namespace based::core
 			else
 			{
 				BASED_ERROR("AssetLibrary::Get() - Asset not found: {}", name.c_str());
-				return nullptr;
+				return NULL;
 			}
 		}
 
@@ -85,7 +85,16 @@ namespace based::core
 		{
 			return mAssets.find(name) != mAssets.end();
 		}
+
 	private:
-		std::unordered_map<std::string, std::shared_ptr<T>> mAssets;
+		std::unordered_map<std::string, T> mAssets;
+	};
+
+	template <typename T>
+	class AssetLibrary : public SimpleAssetLibrary<std::shared_ptr<T>>
+	{
+	public:
+		AssetLibrary() : SimpleAssetLibrary<std::shared_ptr<T>>() {}
+		~AssetLibrary() = default;
 	};
 }

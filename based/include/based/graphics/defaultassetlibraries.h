@@ -13,6 +13,7 @@ namespace based::graphics
 	private:
 		inline static core::AssetLibrary<graphics::VertexArray> mVALibrary;
 		inline static core::AssetLibrary<graphics::Shader> mShaderLibrary;
+		inline static core::SimpleAssetLibrary<uint32_t> mRenderPassOutputs;
 		inline static core::AssetLibrary<graphics::Texture> mTextureLibrary;
 		inline static core::AssetLibrary<graphics::Material> mMaterialLibrary;
 		inline static core::AssetLibrary<graphics::Mesh> mMeshLibrary;
@@ -20,6 +21,7 @@ namespace based::graphics
 	public:
 		inline static core::AssetLibrary<VertexArray>& GetVALibrary() { return mVALibrary; }
 		inline static core::AssetLibrary<Shader>& GetShaderLibrary() { return mShaderLibrary; }
+		inline static core::SimpleAssetLibrary<uint32_t>& GetRenderPassOutputs() { return mRenderPassOutputs; }
 		inline static core::AssetLibrary<Texture>& GetTextureLibrary() { return mTextureLibrary; }
 		inline static core::AssetLibrary<Material>& GetMaterialLibrary() { return mMaterialLibrary; }
 		inline static core::AssetLibrary<Mesh>& GetMeshLibrary() { return mMeshLibrary; }

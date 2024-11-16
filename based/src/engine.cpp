@@ -48,9 +48,14 @@ namespace based
 
         mWindow.BeginRender();
 
-        mUiManager.Render();
-
-        mApp->GetCurrentScene()->RenderScene();
+        for (const auto& pass : mRenderManager.GetRenderPasses())
+        {
+            pass->BeginRender();
+            pass->Render();
+            pass->EndRender();
+            mRenderManager.IncrementPassCount();
+        }
+        mRenderManager.ResetPassCount();
 
         mApp->Render();
 
@@ -191,6 +196,20 @@ namespace based
 
                     // Initialize Asset Libraries
                     graphics::DefaultLibraries::InitializeLibraries();
+
+                    // Initialize passes
+                    auto shadowDepthPass = new graphics::CustomRenderPass(
+                        "ShadowDepthPass", mWindow.GetShadowBuffer(),
+                        graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"));
+                    shadowDepthPass->SetOutputName("ShadowMap");
+                    mRenderManager.InjectPass(shadowDepthPass);
+                    auto mainRenderPass = new graphics::CustomRenderPass(
+                        "MainColorPass", mWindow.GetFramebuffer());
+                    mainRenderPass->SetOutputName("SceneColor");
+                    mRenderManager.InjectPass(mainRenderPass);
+                    auto uiRenderPass = new graphics::UIRenderPass("UserInterfacePass", mWindow.GetFramebuffer());
+                    uiRenderPass->SetOutputName("SceneColor");
+                    mRenderManager.InjectPass(uiRenderPass);
 
                     // Initialize UI after input and rendering is initialized
                     mUiManager.Initialize();

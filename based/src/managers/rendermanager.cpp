@@ -26,6 +26,10 @@ namespace based::managers
 		glEnable(GL_BLEND); BASED_CHECK_GL_ERROR;
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); BASED_CHECK_GL_ERROR;
 
+#ifdef BASED_CONFIG_DEBUG
+		glEnable(GL_DEBUG_OUTPUT); BASED_CHECK_GL_ERROR;
+#endif
+
 		SetClearColor({
 			static_cast<float>(0x64) / static_cast<float>(0xFF),
 			static_cast<float>(0x95) / static_cast<float>(0xFF),
@@ -81,6 +85,82 @@ namespace based::managers
 		glDepthFunc(func); BASED_CHECK_GL_ERROR;
 	}
 
+	void RenderManager::SetEnablePassInjection(bool enable)
+	{
+		mAllowPassInjection = enable;
+	}
+
+	bool RenderManager::InjectPass(graphics::CustomRenderPass* pass, int index)
+	{
+		if (!mAllowPassInjection)
+		{
+			BASED_WARN("Attempting to inject a pass while rendering - skipping!");
+			return false;
+		}
+
+		if (index < 0)
+		{
+			mRenderPasses.insert(mRenderPasses.end(), std::unique_ptr<graphics::CustomRenderPass>(pass));
+			return true;
+		}
+
+		mRenderPasses.insert(mRenderPasses.begin() + index, std::unique_ptr<graphics::CustomRenderPass>(pass));
+
+		return true;
+	}
+
+	bool RenderManager::RemovePass(int index)
+	{
+		if (index < 0 || index > mRenderPasses.size()) return false;
+
+		mRenderPasses.erase(mRenderPasses.begin() + index);
+		return false;
+	}
+
+	void RenderManager::IncrementPassCount()
+	{
+		mCurrentPass++;
+	}
+
+	void RenderManager::ResetPassCount()
+	{
+		mCurrentPass = 0;
+	}
+
+	const std::vector<std::unique_ptr<graphics::CustomRenderPass>>& RenderManager::GetRenderPasses()
+	{
+		return mRenderPasses;
+	}
+
+	const std::string& RenderManager::GetCurrentPassName() const
+	{
+		if (mCurrentPass >= mRenderPasses.size()) return mInvalidPassName;
+
+		return mRenderPasses[mCurrentPass]->GetPassName();
+	}
+
+	std::shared_ptr<graphics::Material> RenderManager::GetCurrentPassOverrideMaterial() const
+	{
+		if (mCurrentPass >= mRenderPasses.size()) return nullptr;
+
+		return mRenderPasses[mCurrentPass]->GetOverrideMaterial();
+	}
+
+	void RenderManager::PushDebugGroup(const std::string& group) const
+	{
+#ifdef BASED_CONFIG_DEBUG
+		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, mCurrentPass, static_cast<GLsizei>(group.length()), 
+			group.c_str()); BASED_CHECK_GL_ERROR;
+#endif
+	}
+
+	void RenderManager::PopDebugGroup()
+	{
+#ifdef BASED_CONFIG_DEBUG
+		glPopDebugGroup(); BASED_CHECK_GL_ERROR;
+#endif
+	}
+
 	void RenderManager::Submit(std::unique_ptr<graphics::rendercommands::RenderCommand> rc)
 	{
 		PROFILE_FUNCTION();
@@ -90,7 +170,7 @@ namespace based::managers
 	void RenderManager::Flush()
 	{
 		PROFILE_FUNCTION();
-		while (mRenderCommands.size() > 0)
+		while (!mRenderCommands.empty())
 		{
 			auto rc = std::move(mRenderCommands.front());
 			mRenderCommands.pop();
@@ -99,7 +179,7 @@ namespace based::managers
 		}
 	}
 
-	void RenderManager::PushFramebuffer(std::shared_ptr<graphics::Framebuffer> framebuffer)
+	void RenderManager::PushFramebuffer(std::shared_ptr<graphics::Framebuffer> framebuffer, bool clear)
 	{
 		PROFILE_FUNCTION();
 		BASED_ASSERT(framebuffer, "Framebuffer is null");
@@ -107,9 +187,12 @@ namespace based::managers
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->GetFbo()); BASED_CHECK_GL_ERROR;
 		SetViewport({ 0, 0, framebuffer->GetSize().x, framebuffer->GetSize().y });
 
-		auto cc = framebuffer->GetClearColor(); 
-		glClearColor(cc.r, cc.g, cc.b, cc.a); BASED_CHECK_GL_ERROR;
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); BASED_CHECK_GL_ERROR;
+		if (clear)
+		{
+			auto cc = framebuffer->GetClearColor();
+			glClearColor(cc.r, cc.g, cc.b, cc.a); BASED_CHECK_GL_ERROR;
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); BASED_CHECK_GL_ERROR;
+		}
 
 		ConfigureShaderAndMatrices();
 	}

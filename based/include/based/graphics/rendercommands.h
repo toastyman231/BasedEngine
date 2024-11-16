@@ -20,6 +20,13 @@ namespace based::graphics
 	class Camera;
 	class Material;
 
+	enum class PassInjectionPoint : uint8_t
+	{
+		BeforeShadowDepth = 0,
+		BeforeMainColor = 1,
+		BeforeUserInterface = 2
+	};
+
 	namespace rendercommands
 	{
 		class RenderCommand
@@ -27,6 +34,10 @@ namespace based::graphics
 		public:
 			virtual void Execute() = 0;
 			virtual ~RenderCommand() {}
+
+			bool ShouldClearBuffer() const { return mClearBuffer; }
+		protected:
+			bool mClearBuffer = true;
 		};
 
 		class RenderVertexArray : public RenderCommand
@@ -120,10 +131,17 @@ namespace based::graphics
 		class PushFramebuffer : public RenderCommand
 		{
 		public:
-			PushFramebuffer(std::weak_ptr<Framebuffer> framebuffer) : mFramebuffer(std::move(framebuffer)) {}
+			PushFramebuffer(std::weak_ptr<Framebuffer> framebuffer, 
+				const std::string& name = "Unnamed Pass",
+				bool clearBuffer = true)
+			: mFramebuffer(std::move(framebuffer)), mName(name)
+			{
+				mClearBuffer = clearBuffer;
+			}
 			virtual void Execute() override;
 		private:
 			std::weak_ptr<Framebuffer> mFramebuffer;
+			std::string mName;
 		};
 
 		class PopFramebuffer : public RenderCommand

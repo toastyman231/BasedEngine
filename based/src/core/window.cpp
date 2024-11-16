@@ -60,9 +60,12 @@ namespace based::core
 #endif
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+#ifdef BASED_CONFIG_DEBUG
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#endif
 
 		SDL_SetWindowMinimumSize(mWindow, props.wMin, props.hMin);
 
@@ -152,21 +155,11 @@ namespace based::core
 		PROFILE_FUNCTION();
 		auto& rm = Engine::Instance().GetRenderManager();
 		rm.Clear();
-		isInDepthPass = true;
-		rm.Submit(BASED_SUBMIT_RC(PushFramebuffer, mShadowbuffer));
-		Engine::Instance().GetApp().GetCurrentScene()->RenderScene();
-		rm.Submit(BASED_SUBMIT_RC(PopFramebuffer));
-		isInDepthPass = false;
-
-		rm.Submit(BASED_SUBMIT_RC(PushFramebuffer, mFramebuffer));
 	}
 
 	void Window::EndRender()
 	{
 		PROFILE_FUNCTION();
-		auto& rm = Engine::Instance().GetRenderManager();
-		rm.Submit(BASED_SUBMIT_RC(PopFramebuffer));
-		rm.Flush();
 
 		if (mShouldRenderToScreen)
 		{
@@ -239,7 +232,7 @@ namespace based::core
 
 			mScreenVA->Bind();
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, mFramebuffer->GetTextureId());
+			glBindTexture(GL_TEXTURE_2D, graphics::DefaultLibraries::GetRenderPassOutputs().Get("SceneColor"));
 			mScreenShader->Bind();
 
 			glm::vec2 scale = mFramebufferSize / (glm::vec2) GetSize();

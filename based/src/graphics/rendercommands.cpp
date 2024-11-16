@@ -13,6 +13,7 @@
 #include "graphics/material.h"
 
 #include "glad/glad.h"
+#include "graphics/defaultassetlibraries.h"
 
 namespace based::graphics::rendercommands
 {
@@ -134,7 +135,8 @@ namespace based::graphics::rendercommands
 					}
 					shader->SetUniformInt("shadowMap", index + 1);
 					glActiveTexture(GL_TEXTURE0 + index + 1); BASED_CHECK_GL_ERROR;
-					glBindTexture(GL_TEXTURE_2D, Engine::Instance().GetWindow().GetShadowMapTextureID()); BASED_CHECK_GL_ERROR;
+					glBindTexture(GL_TEXTURE_2D,
+						graphics::DefaultLibraries::GetRenderPassOutputs().Get("ShadowMap")); BASED_CHECK_GL_ERROR;
 
 					if (!mInstanced)
 					{
@@ -242,7 +244,9 @@ namespace based::graphics::rendercommands
 		std::shared_ptr<Framebuffer> fb = mFramebuffer.lock();
 		if (fb)
 		{
-			Engine::Instance().GetRenderManager().PushFramebuffer(fb);
+			auto& rm = Engine::Instance().GetRenderManager();
+			rm.PushFramebuffer(fb, ShouldClearBuffer());
+			rm.PushDebugGroup(mName);
 		}
 		else
 		{
@@ -253,7 +257,9 @@ namespace based::graphics::rendercommands
 	void PopFramebuffer::Execute()
 	{
 		PROFILE_FUNCTION();
-		Engine::Instance().GetRenderManager().PopFramebuffer();
+		auto& rm = Engine::Instance().GetRenderManager();
+		rm.PopFramebuffer();
+		rm.PopDebugGroup();
 	}
 
 	void PushCamera::Execute()

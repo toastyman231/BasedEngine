@@ -4,6 +4,7 @@
 #include "managers/logmanager.h"
 #include "managers/rendermanager.h"
 #include "based/managers/uimanager.h"
+#include "graphics/renderpass.h"
 #include "memory/arena.h"
 
 namespace based
@@ -18,6 +19,8 @@ namespace based
         void Run(App* app);
         static void SetIcon(std::string path);
         inline void Quit() { mIsRunning = false; }
+
+        inline void SetShadowPassEnabled(bool enabled) { mShadowPassEnabled = enabled; }
 
         inline App& GetApp() const { return *mApp; }
         inline core::Window& GetWindow() { return mWindow; }
@@ -43,6 +46,7 @@ namespace based
 
         bool mIsRunning;
         bool mIsInitialized;
+        bool mShadowPassEnabled;
 
         core::Window mWindow;
         App* mApp;

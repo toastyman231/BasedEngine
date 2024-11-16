@@ -38,7 +38,8 @@ project "Sandbox"
 
         defines
         {
-            "BASED_PLATFORM_WINDOWS"
+            "BASED_PLATFORM_WINDOWS",
+            "_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING"
         }
 
     filter {"system:macosx", "configurations:*"}

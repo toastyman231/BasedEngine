@@ -62,11 +62,11 @@ namespace based::graphics
 		model = glm::scale(model, scale);
 		Shader::UpdateShaderPointLighting(material->GetShader(), position);
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());
-		if (Engine::Instance().GetWindow().isInDepthPass)
+		if (auto overrideMat = Engine::Instance().GetRenderManager().GetCurrentPassOverrideMaterial())
 		{
 			if (material->GetUniformValue<int>("castShadows", 1) != 0)
 				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA,
-					graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"), model));
+					overrideMat, model));
 		} else
 		{
 			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model));
@@ -106,11 +106,11 @@ namespace based::graphics
 		model = glm::scale(model, scale);
 		Shader::UpdateShaderPointLighting(material->GetShader(), pos);
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());
-		if (Engine::Instance().GetWindow().isInDepthPass)
+		if (auto overrideMat = Engine::Instance().GetRenderManager().GetCurrentPassOverrideMaterial())
 		{
 			if (material->GetUniformValue<int>("castShadows", 1) != 0)
 				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA,
-					graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"), model));
+					overrideMat, model));
 		}
 		else
 		{
@@ -254,11 +254,11 @@ namespace based::graphics
 		model = glm::scale(model, scale);
 		Shader::UpdateShaderPointLighting(material->GetShader(), position);
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());
-		if (Engine::Instance().GetWindow().isInDepthPass)
+		if (auto overrideMat = Engine::Instance().GetRenderManager().GetCurrentPassOverrideMaterial())
 		{
 			if (material->GetUniformValue<int>("castShadows", 1) != 0)
 				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA,
-					graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"), model, true, mInstanceCount));
+					overrideMat, model, true, mInstanceCount));
 		}
 		else
 		{
@@ -304,12 +304,12 @@ namespace based::graphics
 		model = glm::scale(model, scale * localScale);
 		Shader::UpdateShaderPointLighting(material->GetShader(), pos);
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());
-		if (Engine::Instance().GetWindow().isInDepthPass)
+		if (auto overrideMat = Engine::Instance().GetRenderManager().GetCurrentPassOverrideMaterial())
 		{
+
 			if (material->GetUniformValue<int>("castShadows", 1) != 0)
 				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA,
-					graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"), 
-					model, GL_LEQUAL, true, mInstanceCount));
+					overrideMat, model, GL_LEQUAL, true, mInstanceCount));
 		}
 		else
 		{
@@ -325,9 +325,6 @@ namespace based::graphics
 		
 
 		BASED_CREATE_INSTANCED_VERTEX_BUFFER_FULL(model_vb, float, mInstanceCount * 4, true);
-		//auto model_vb = static_cast<InstancedVertexBuffer<float>*>(memory::ArenaAlloc(Engine::Instance().GetEngineArena(),
-		//	sizeof(InstancedVertexBuffer<float>)));
-		//new(model_vb) InstancedVertexBuffer<float>(mInstanceCount * 4);
 
 		for (int i = 0; i < mInstanceCount; i++)
 		{

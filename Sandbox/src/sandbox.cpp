@@ -633,7 +633,8 @@ public:
 			ImVec2 uv0 = { 0, 1 };
 			ImVec2 uv1 = { 1, 0 };
 			ImGui::SetCursorPos(pos);
-			ImGui::Image((void*)static_cast<intptr_t>(window.GetFramebuffer()->GetTextureId()), size, uv0, uv1);
+			ImGui::Image((void*)static_cast<intptr_t>(graphics::DefaultLibraries::GetRenderPassOutputs().Get("SceneColor")), 
+				size, uv0, uv1);
 		}
 		ImGui::End();
 

@@ -116,7 +116,7 @@ namespace based::ui
 
 	void TextEntity::DrawFont(TextEntity* textEntity)
 	{
-		if (!textEntity->IsActive() || Engine::Instance().GetWindow().isInDepthPass) return;
+		if (!textEntity->IsActive() || Engine::Instance().GetRenderManager().GetCurrentPassName() == "ShadowDepthPass") return;
 		if (textEntity->mShouldRegenSpace || textEntity->mRenderSpace == RenderSpace::World) 
 			textEntity->RegenerateRenderSpace();
 
