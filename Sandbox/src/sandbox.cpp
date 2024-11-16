@@ -437,6 +437,13 @@ public:
 		//text->SetRenderSpace(ui::RenderSpace::World);
 		//text->SetIgnoreDepth(true);
 
+		auto postProcessMaterial = graphics::Material::CreateMaterial(
+			LOAD_SHADER("Assets/shaders/postProcess.vert", "Assets/shaders/custom/ppTint.frag"),
+			DEFAULT_MAT_LIB, "TintMaterial");
+		auto postProcessPass = new graphics::PostProcessPass("PostProcessTint", "SceneColor",
+			postProcessMaterial);
+		Engine::Instance().GetRenderManager().InjectPass(postProcessPass, (int)graphics::PassInjectionPoint::BeforeUserInterface);
+
 		BASED_TRACE("Done initializing");
 
 		// TODO: Fix text rendering behind sprites even when handled last
@@ -633,7 +640,8 @@ public:
 			ImVec2 uv0 = { 0, 1 };
 			ImVec2 uv1 = { 1, 0 };
 			ImGui::SetCursorPos(pos);
-			ImGui::Image((void*)static_cast<intptr_t>(graphics::DefaultLibraries::GetRenderPassOutputs().Get("SceneColor")), 
+			ImGui::Image((void*)static_cast<intptr_t>(
+				graphics::DefaultLibraries::GetRenderPassOutputs().Get("SceneColor")), 
 				size, uv0, uv1);
 		}
 		ImGui::End();

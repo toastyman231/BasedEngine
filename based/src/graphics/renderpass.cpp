@@ -1,5 +1,3 @@
-#include <utility>
-
 #include "pch.h"
 #include "graphics/renderpass.h"
 
@@ -9,6 +7,8 @@
 
 namespace based::graphics
 {
+	std::shared_ptr<Framebuffer> CustomRenderPass::mLastFrameBuffer = nullptr;
+
 	CustomRenderPass::CustomRenderPass(std::string name)
 		: mPassName(std::move(name))
 	{
@@ -71,8 +71,10 @@ namespace based::graphics
 
 		if (mOutputName != CRP_NO_OUTPUT)
 		{
-			graphics::DefaultLibraries::GetRenderPassOutputs().Load(mOutputName, mPassBuffer->GetTextureId());
+			graphics::DefaultLibraries::GetRenderPassOutputs().Load(mOutputName, mPassBuffer->GetTextureId(), true);
 		}
+
+		mLastFrameBuffer = mPassBuffer;
 	}
 
 	UIRenderPass::UIRenderPass(std::string name) : CustomRenderPass(std::move(name)) {}
@@ -86,7 +88,7 @@ namespace based::graphics
 	{
 		auto& rm = Engine::Instance().GetRenderManager();
 
-		rm.Submit(BASED_SUBMIT_RC(PushFramebuffer, mPassBuffer, mPassName, false));
+		rm.Submit(BASED_SUBMIT_RC(PushFramebuffer, mLastFrameBuffer, mPassName, false));
 
 		return;
 	}
@@ -97,6 +99,68 @@ namespace based::graphics
 	}
 
 	void UIRenderPass::EndRender()
+	{
+		auto& rm = Engine::Instance().GetRenderManager();
+		rm.Submit(BASED_SUBMIT_RC(PopFramebuffer));
+		rm.Flush();
+
+		if (mOutputName != CRP_NO_OUTPUT)
+		{
+			graphics::DefaultLibraries::GetRenderPassOutputs().Load(mOutputName, mLastFrameBuffer->GetTextureId(), true);
+		}
+
+		mLastFrameBuffer = mPassBuffer;
+	}
+
+	PostProcessPass::PostProcessPass(const std::string& name, const std::string& output, std::shared_ptr<Material> material)
+		: CustomRenderPass(name, std::move(material))
+	{
+		mOutputName = output;
+
+		mVA = std::make_shared<VertexArray>();
+
+		BASED_CREATE_VERTEX_BUFFER(vb, short);
+		vb->PushVertex({ 1, 1, 1, 1 });
+		vb->PushVertex({ 1, -1, 1, 0 });
+		vb->PushVertex({ -1, -1, 0, 0 });
+		vb->PushVertex({ -1, 1, 0, 1 });
+		vb->SetLayout({ 2, 2 });
+		mVA->PushBuffer(std::move(vb));
+		mVA->SetElements({ 0, 3, 1, 1, 3, 2 });
+		mVA->Upload();
+	}
+
+	PostProcessPass::PostProcessPass(const std::string& name, const std::string& output, std::shared_ptr<Material> material, 
+	                                 std::shared_ptr<Framebuffer> buffer)
+		: CustomRenderPass(name, std::move(buffer), std::move(material))
+	{
+		mOutputName = output;
+
+		mVA = std::make_shared<VertexArray>();
+
+		BASED_CREATE_VERTEX_BUFFER(vb, short);
+		vb->PushVertex({ 1, 1, 1, 1 });
+		vb->PushVertex({ 1, -1, 1, 0 });
+		vb->PushVertex({ -1, -1, 0, 0 });
+		vb->PushVertex({ -1, 1, 0, 1 });
+		vb->SetLayout({ 2, 2 });
+		mVA->PushBuffer(std::move(vb));
+		mVA->SetElements({ 0, 3, 1, 1, 3, 2 });
+		mVA->Upload();
+	}
+
+	void PostProcessPass::BeginRender()
+	{
+		CustomRenderPass::BeginRender();
+	}
+
+	void PostProcessPass::Render()
+	{
+		auto& rm = Engine::Instance().GetRenderManager();
+		rm.Submit(BASED_SUBMIT_RC(RenderVertexArrayPostProcess, mVA, mOverrideMaterial));
+	}
+
+	void PostProcessPass::EndRender()
 	{
 		CustomRenderPass::EndRender();
 	}

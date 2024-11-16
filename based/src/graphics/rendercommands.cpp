@@ -133,10 +133,14 @@ namespace based::graphics::rendercommands
 						BASED_CHECK_GL_ERROR;
 						texture->Bind();
 					}
-					shader->SetUniformInt("shadowMap", index + 1);
-					glActiveTexture(GL_TEXTURE0 + index + 1); BASED_CHECK_GL_ERROR;
-					glBindTexture(GL_TEXTURE_2D,
-						graphics::DefaultLibraries::GetRenderPassOutputs().Get("ShadowMap")); BASED_CHECK_GL_ERROR;
+					if (Engine::Instance().GetRenderManager().GetCurrentPassName() != "ShadowDepthPass")
+					{
+						shader->SetUniformInt("shadowMap", index + 1);
+						glActiveTexture(GL_TEXTURE0 + index + 1); BASED_CHECK_GL_ERROR;
+						glBindTexture(GL_TEXTURE_2D,
+							graphics::DefaultLibraries::GetRenderPassOutputs().Get("ShadowMap"));
+						BASED_CHECK_GL_ERROR;
+					}
 
 					if (!mInstanced)
 					{
@@ -192,6 +196,79 @@ namespace based::graphics::rendercommands
 		else
 		{
 			BASED_WARN("Attempting to execute RenderVertexArrayMaterial with invalid data");
+		}
+	}
+
+	void RenderVertexArrayPostProcess::Execute()
+	{
+		PROFILE_FUNCTION();
+		std::shared_ptr<VertexArray> va = mVertexArray.lock();
+		std::shared_ptr<Material> mat = mMaterial.lock();
+
+		if (va && mat)
+		{
+			BASED_ASSERT(va->IsValid(), "Attempting to execute invalid RenderVertexArrayMaterial - did you forget to call VertexArray::Upload()?");
+			if (va->IsValid())
+			{
+				va->Bind();
+
+				std::shared_ptr<Shader> shader = mat->GetShader().lock();
+				BASED_ASSERT(shader, "Attempting to execute invalid RenderVertexArrayMaterial - shader is nullptr");
+				if (shader)
+				{
+					mat->UpdateShaderUniforms();
+					shader->Bind();
+					int index = -1;
+					for (const auto& texture : mat->GetTextures())
+					{
+						index++;
+						if (!texture) continue;
+						glActiveTexture(GL_TEXTURE0 + index); // See GL_TEXTURE macro
+						BASED_CHECK_GL_ERROR;
+						texture->Bind();
+					}
+
+					for (const auto& output : 
+						graphics::DefaultLibraries::GetRenderPassOutputs().GetAll())
+					{
+						index++;
+						shader->SetUniformInt(output.first, index);
+						glActiveTexture(GL_TEXTURE0 + index); BASED_CHECK_GL_ERROR;
+						glBindTexture(GL_TEXTURE_2D, output.second); BASED_CHECK_GL_ERROR;
+					}
+
+					auto& window = Engine::Instance().GetWindow();
+					glm::vec2 scale = window.GetFramebufferSize() / (glm::vec2)window.GetSize();
+					mModelMatrix = glm::scale(mModelMatrix, { scale.x, scale.y, 1.f });
+					shader->SetUniformMat4("model", mModelMatrix);
+
+					if (va->GetElementCount() > 0)
+					{
+						glDrawElements(GL_TRIANGLES, va->GetElementCount(), GL_UNSIGNED_INT, 0);
+						BASED_CHECK_GL_ERROR;
+					}
+					else
+					{
+						glDrawArrays(GL_TRIANGLE_STRIP, 0, va->GetVertexCount());
+						BASED_CHECK_GL_ERROR;
+					}
+
+					index = 0;
+					for (const auto& texture : mat->GetTextures())
+					{
+						glActiveTexture(GL_TEXTURE0 + index); BASED_CHECK_GL_ERROR;
+						index++;
+						texture->Unbind();
+					}
+					glActiveTexture(GL_TEXTURE0); BASED_CHECK_GL_ERROR;
+					shader->Unbind();
+				}
+				va->Unbind();
+			}
+		}
+		else
+		{
+			BASED_WARN("Attempting to execute RenderVertexArrayPostProcess with invalid data");
 		}
 	}
 

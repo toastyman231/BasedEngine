@@ -1,6 +1,7 @@
 #pragma once
 
 #include "texture.h"
+#include <memory>
 #include <external/glm/vec2.hpp>
 #include <external/glm/vec4.hpp>
 

@@ -67,8 +67,7 @@ namespace based::graphics
 				  , mTexture(std::move(texture))
 				  , mShader(std::move(shader))
 				  , mModelMatrix(modelMatrix)
-			{
-			}
+			{}
 
 			virtual void Execute() override;
 		private:
@@ -104,6 +103,23 @@ namespace based::graphics
 			uint32_t mDepthFunc;
 			int mInstanceCount;
 			int mIndex;
+		};
+
+		class RenderVertexArrayPostProcess : public RenderCommand
+		{
+		public:
+			RenderVertexArrayPostProcess(std::weak_ptr<VertexArray> vertexArray, std::weak_ptr<Material> material,
+				const glm::mat4 modelMatrix = glm::mat4(1.f))
+				: mVertexArray(std::move(vertexArray))
+				, mMaterial(std::move(material))
+				, mModelMatrix(modelMatrix)
+			{}
+
+			virtual void Execute() override;
+		private:
+			std::weak_ptr<VertexArray> mVertexArray;
+			std::weak_ptr<Material> mMaterial;
+			glm::mat4 mModelMatrix;
 		};
 
 		class RenderVertexArrayUserInterface : public RenderCommand

@@ -30,6 +30,8 @@ namespace based::graphics
 		std::string mOutputName = CRP_NO_OUTPUT;
 		std::shared_ptr<Framebuffer> mPassBuffer;
 		std::shared_ptr<Material> mOverrideMaterial;
+
+		static std::shared_ptr<Framebuffer> mLastFrameBuffer;
 	};
 
 	class UIRenderPass : public CustomRenderPass
@@ -42,8 +44,21 @@ namespace based::graphics
 		void BeginRender() override;
 		void Render() override;
 		void EndRender() override;
+	};
+
+	class PostProcessPass : public CustomRenderPass
+	{
+	public:
+		PostProcessPass(const std::string& name, const std::string& output, std::shared_ptr<Material> material);
+		PostProcessPass(const std::string& name, const std::string& output, std::shared_ptr<Material> material, 
+		                std::shared_ptr<Framebuffer> buffer);
+		~PostProcessPass() override = default;
+
+		void BeginRender() override;
+		void Render() override;
+		void EndRender() override;
 
 	private:
-		std::vector<rendercommands::RenderCommand*> mQueuedTasks;
+		std::shared_ptr<VertexArray> mVA;
 	};
 }

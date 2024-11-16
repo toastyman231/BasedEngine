@@ -232,7 +232,8 @@ namespace based::core
 
 			mScreenVA->Bind();
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, graphics::DefaultLibraries::GetRenderPassOutputs().Get("SceneColor"));
+			glBindTexture(GL_TEXTURE_2D, 
+				graphics::DefaultLibraries::GetRenderPassOutputs().Get("SceneColor"));
 			mScreenShader->Bind();
 
 			glm::vec2 scale = mFramebufferSize / (glm::vec2) GetSize();
@@ -244,35 +245,6 @@ namespace based::core
 			mScreenVA->Unbind();
 			glBindTexture(GL_TEXTURE_2D, 0);
 			mScreenShader->Unbind();
-		}
-	}
-
-	void Window::RenderShadowDepth()
-	{
-		PROFILE_FUNCTION();
-		BASED_ASSERT(mScreenVA->IsValid(), "Attempting to render with invalid VertexArray - did you forget to call VertexArray::Upload()?");
-		if (mScreenVA->IsValid())
-		{
-			// Black bars
-			glClearColor(0, 0, 0, 1);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			mScreenVA->Bind();
-			glBindTexture(GL_TEXTURE_2D, mShadowbuffer->GetTextureId());
-			std::shared_ptr<graphics::Shader> shader = 
-				graphics::DefaultLibraries::GetShaderLibrary().Get("ShadowDepthShader");
-			shader->Bind();
-
-			glm::vec2 scale = mFramebufferSize / (glm::vec2)GetSize();
-			glm::mat4 model(1.0);
-			model = glm::scale(model, { scale.x, scale.y, 1.f });
-			shader->SetUniformMat4("model", model);
-			shader->SetUniformMat4("lightSpaceMatrix", Engine::Instance().GetRenderManager().lightSpaceMatrix);
-			glDrawElements(GL_TRIANGLES, mScreenVA->GetElementCount(), GL_UNSIGNED_INT, 0);
-
-			mScreenVA->Unbind();
-			glBindTexture(GL_TEXTURE_2D, 0);
-			shader->Unbind();
 		}
 	}
 

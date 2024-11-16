@@ -47,6 +47,7 @@ namespace based::core
 		void PumpEvents();
 
 		glm::ivec2 GetSize();
+		glm::vec2 GetFramebufferSize() const { return mFramebufferSize; }
 
 		inline SDL_Window* GetSDLWindow() const { return mWindow; }
 		inline SDL_GLContext GetGLContext() const { return mGLContext; }
@@ -62,7 +63,6 @@ namespace based::core
 	private:
 		void InitializeScreenRender();
 		void RenderToScreen();
-		void RenderShadowDepth();
 		void HandleResize(int width, int height);
 
 		WindowProperties mWindowProperties;
