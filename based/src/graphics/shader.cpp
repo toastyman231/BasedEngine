@@ -394,4 +394,159 @@ namespace based::graphics
 	{
 		return mGlobals;
 	}
+
+	ComputeShader::ComputeShader(const std::string& source)
+	{
+		GLint glMajor;
+		GLint glMinor;
+		glGetIntegerv(GL_MAJOR_VERSION, &glMajor); BASED_CHECK_GL_ERROR;
+		glGetIntegerv(GL_MINOR_VERSION, &glMinor); BASED_CHECK_GL_ERROR;
+		BASED_ASSERT(glMajor >= 4 && glMinor >= 3, "Cannot create compute shader with OGL version < 4.3!");
+		GLint compute = glCreateShader(GL_COMPUTE_SHADER); BASED_CHECK_GL_ERROR;
+		const GLchar* glSource = source.c_str();
+		glShaderSource(compute, 1, &glSource, NULL); BASED_CHECK_GL_ERROR;
+		glCompileShader(compute); BASED_CHECK_GL_ERROR;
+
+		mProgramId = glCreateProgram(); BASED_CHECK_GL_ERROR;
+		glAttachShader(mProgramId, compute); BASED_CHECK_GL_ERROR;
+		glLinkProgram(mProgramId); BASED_CHECK_GL_ERROR;
+		glDeleteShader(compute); BASED_CHECK_GL_ERROR;
+
+		mWorkGroups = glm::vec<3, glm::uint>(1);
+		mShaderSource = source;
+	}
+
+	ComputeShader::~ComputeShader()
+	{
+		BASED_TRACE("Deleting compute shader {}", mProgramId);
+		glUseProgram(0); BASED_CHECK_GL_ERROR;
+		glDeleteProgram(mProgramId); BASED_CHECK_GL_ERROR;
+		mProgramId = 0;
+	}
+
+	ComputeShader* ComputeShader::LoadShader(const std::string& source)
+	{
+		PROFILE_FUNCTION();
+		std::ifstream sFile(source);
+
+		BASED_ASSERT(sFile, "Could not load compute shader! Make sure your path is correct!");
+
+		if (sFile)
+		{
+			std::string temp;
+			std::string source;
+			while (std::getline(sFile, temp))
+			{
+				source = source.append(temp).append("\n");
+			}
+			sFile.close();
+
+			std::set<std::string> alreadyIncluded = {};
+			source = Shader::PreprocessShader(source, "#include ", "Assets/shaders/", alreadyIncluded);
+
+			return new ComputeShader(source);
+		}
+
+		BASED_ERROR("Failed to load compute shader with source {}", source);
+		return nullptr;
+	}
+
+	void ComputeShader::Bind() const
+	{
+		glUseProgram(mProgramId); BASED_CHECK_GL_ERROR;
+	}
+
+	void ComputeShader::Unbind()
+	{
+		glUseProgram(0); BASED_CHECK_GL_ERROR;
+	}
+
+	void ComputeShader::AddTexture(std::shared_ptr<Texture> texture, std::string location)
+	{
+		mTextures.emplace_back(texture);
+		if (!location.empty())
+		{
+			const int index = static_cast<int>(mTextures.size() - 1);
+			SetUniformInt(location, index);
+			mTextureOrder[location] = index;
+		}
+	}
+
+	void ComputeShader::RemoveTexture(std::string location)
+	{
+		if (mTextureOrder.find(location) == mTextureOrder.end()) return;
+
+		const int index = mTextureOrder[location];
+		mTextures.erase(mTextures.begin() + index);
+		mTextureOrder.erase(location);
+		SetUniformInt(location, 0);
+	}
+
+	void ComputeShader::SetUniformInt(const std::string& name, int val)
+	{
+		glUseProgram(mProgramId); BASED_CHECK_GL_ERROR;
+		glUniform1i(GetUniformLocation(name), val); BASED_CHECK_GL_ERROR;
+	}
+
+	void ComputeShader::SetUniformFloat(const std::string& name, float val)
+	{
+		glUseProgram(mProgramId); BASED_CHECK_GL_ERROR;
+		glUniform1f(GetUniformLocation(name), val); BASED_CHECK_GL_ERROR;
+	}
+
+	void ComputeShader::SetUniformFloat2(const std::string& name, float val1, float val2)
+	{
+		glUseProgram(mProgramId); BASED_CHECK_GL_ERROR;
+		glUniform2f(GetUniformLocation(name), val1, val2); BASED_CHECK_GL_ERROR;
+	}
+
+	void ComputeShader::SetUniformFloat2(const std::string& name, const glm::vec2& val)
+	{
+		SetUniformFloat2(name, val.x, val.y);
+	}
+
+	void ComputeShader::SetUniformFloat3(const std::string& name, float val1, float val2, float val3)
+	{
+		glUseProgram(mProgramId); BASED_CHECK_GL_ERROR;
+		glUniform3f(GetUniformLocation(name), val1, val2, val3); BASED_CHECK_GL_ERROR;
+	}
+
+	void ComputeShader::SetUniformFloat3(const std::string& name, const glm::vec3& val)
+	{
+		SetUniformFloat3(name, val.x, val.y, val.z);
+	}
+
+	void ComputeShader::SetUniformFloat4(const std::string& name, float val1, float val2, float val3, float val4)
+	{
+		glUseProgram(mProgramId); BASED_CHECK_GL_ERROR;
+		glUniform4f(GetUniformLocation(name), val1, val2, val3, val4); BASED_CHECK_GL_ERROR;
+	}
+
+	void ComputeShader::SetUniformFloat4(const std::string& name, const glm::vec4& val)
+	{
+		SetUniformFloat4(name, val.x, val.y, val.z, val.w);
+	}
+
+	void ComputeShader::SetUniformMat3(const std::string& name, const glm::mat3& mat)
+	{
+		glUseProgram(mProgramId); BASED_CHECK_GL_ERROR;
+		glUniformMatrix3fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat)); BASED_CHECK_GL_ERROR;
+	}
+
+	void ComputeShader::SetUniformMat4(const std::string& name, const glm::mat4& mat)
+	{
+		glUseProgram(mProgramId); BASED_CHECK_GL_ERROR;
+		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat)); BASED_CHECK_GL_ERROR;
+	}
+
+	int ComputeShader::GetUniformLocation(const std::string& name)
+	{
+		auto it = mUniformLocations.find(name);
+		if (it == mUniformLocations.end())
+		{
+			mUniformLocations[name] = glGetUniformLocation(mProgramId, name.c_str()); BASED_CHECK_GL_ERROR;
+		}
+
+		return mUniformLocations[name];
+	}
 }

@@ -6,6 +6,8 @@
 
 #include "engine.h"
 #include "glad/glad.h"
+#include "graphics/defaultassetlibraries.h"
+#include "graphics/shader.h"
 
 #include "math/basedmath.h"
 
@@ -246,6 +248,12 @@ namespace based::managers
 		return mRenderMode;
 	}
 
+	void RenderManager::AddComputeShaderDispatch(std::shared_ptr<graphics::ComputeShader> shader, glm::vec3 workGroupSize)
+	{
+		shader->SetWorkGroupSize(workGroupSize);
+		mDispatchedComputeShaders.push(shader);
+	}
+
 	void RenderManager::ConfigureShaderAndMatrices()
 	{
 		constexpr float nearPlane = 1.f;
@@ -263,9 +271,43 @@ namespace based::managers
 		lightSpaceMatrix = lightProjection * lightView;
 	}
 
+	void RenderManager::DispatchComputeShaders()
+	{
+		while (!mDispatchedComputeShaders.empty())
+		{
+			auto shader = mDispatchedComputeShaders.front();
+			mDispatchedComputeShaders.pop();
+			shader->Bind();
+			auto workGroups = shader->GetWorkGroupSize();
+
+			int index = -1;
+			for (const auto& texture : shader->GetTextures())
+			{
+				index++;
+				if (!texture) continue;
+				glActiveTexture(GL_TEXTURE0 + index); // See GL_TEXTURE macro
+				BASED_CHECK_GL_ERROR;
+				texture->Bind();
+			}
+
+			glDispatchCompute(workGroups.x, workGroups.y, workGroups.z); BASED_CHECK_GL_ERROR;
+
+			index = 0;
+			for (const auto& texture : shader->GetTextures())
+			{
+				glActiveTexture(GL_TEXTURE0 + index); BASED_CHECK_GL_ERROR;
+				index++;
+				texture->Unbind();
+			}
+			shader->Unbind();
+		}
+
+		glMemoryBarrier(GL_ALL_BARRIER_BITS); BASED_CHECK_GL_ERROR;
+	}
+
 	const based::graphics::Camera* RenderManager::GetActiveCamera() const
 	{
-		if (mCameras.size() > 0)
+		if (!mCameras.empty())
 		{
 			return mCameras.top().get();
 		}

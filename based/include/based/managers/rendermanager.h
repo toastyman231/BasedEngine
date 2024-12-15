@@ -10,6 +10,11 @@
 
 #define BASED_SUBMIT_RC(type, ...) std::move(std::make_unique<based::graphics::rendercommands::type>(__VA_ARGS__))
 
+namespace based::graphics
+{
+	class ComputeShader;
+}
+
 namespace based::managers
 {
 	enum class RenderMode : int32_t
@@ -24,6 +29,7 @@ namespace based::managers
 		friend class graphics::rendercommands::PopFramebuffer;
 		friend class graphics::rendercommands::PushCamera;
 		friend class graphics::rendercommands::PopCamera;
+		friend class graphics::ComputePass;
 
 	public:
 		RenderManager() = default;
@@ -66,9 +72,13 @@ namespace based::managers
 		static void SetRenderMode(RenderMode newMode);
 		static RenderMode GetRenderMode();
 
+		void AddComputeShaderDispatch(std::shared_ptr<graphics::ComputeShader> shader, glm::vec3 workGroupSize);
+
 		glm::mat4 lightSpaceMatrix;
 	private:
 		void ConfigureShaderAndMatrices();
+
+		void DispatchComputeShaders();
 
 		bool mAllowPassInjection;
 		uint32_t mCurrentPass = 0;
@@ -78,6 +88,7 @@ namespace based::managers
 		std::queue<std::unique_ptr<graphics::rendercommands::RenderCommand>> mRenderCommands;
 		std::stack<std::shared_ptr<graphics::Framebuffer>> mFramebuffers;
 		std::stack<std::shared_ptr<graphics::Camera>> mCameras;
+		std::queue<std::shared_ptr<graphics::ComputeShader>> mDispatchedComputeShaders;
 
 		inline static RenderMode mRenderMode;
 	};

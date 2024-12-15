@@ -61,4 +61,15 @@ namespace based::graphics
 	private:
 		std::shared_ptr<VertexArray> mVA;
 	};
+
+	class ComputePass : public CustomRenderPass
+	{
+	public:
+		ComputePass(const std::string& name);
+		~ComputePass() override = default;
+
+		void BeginRender() override;
+		void Render() override;
+		void EndRender() override;
+	};
 }

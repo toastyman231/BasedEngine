@@ -1,6 +1,11 @@
 #pragma once
 
 #include <string>
+#include <memory>
+
+#include "assetlibrary.h"
+
+#define DEFAULT_TEX_LIB based::graphics::DefaultLibraries::GetTextureLibrary()
 
 struct SDL_Surface;
 
@@ -12,6 +17,13 @@ namespace based::graphics
 		Linear
 	};
 
+	enum class TextureAccessLevel
+	{
+		ReadOnly = 0x88B8,
+		WriteOnly = 0x88B9,
+		ReadWrite = 0x88BA
+	};
+
 	class Texture
 	{
 	public:
@@ -19,6 +31,7 @@ namespace based::graphics
 		Texture(const SDL_Surface* surface, unsigned int id);
 		Texture(const Texture& other) = default;
 		Texture(unsigned int id, uint32_t width, uint32_t height);
+		Texture(uint32_t width, uint32_t height);
 		Texture() = default;
 		~Texture();
 
@@ -33,6 +46,10 @@ namespace based::graphics
 		void Unbind();
 
 		void SetTextureFilter(TextureFilter filter);
+
+		static std::shared_ptr<Texture> CreateImageTexture(const std::string& name,
+			uint32_t width, uint32_t height, TextureAccessLevel accessLevel, core::AssetLibrary<Texture>& library);
+		static uint32_t GetNextImageTextureUnit() { return mNextId++; }
 	private:
 		TextureFilter mFilter;
 
@@ -48,5 +65,7 @@ namespace based::graphics
 		unsigned char* mPixels;
 
 		void LoadTexture();
+
+		inline static uint32_t mNextId = 0;
 	};
 }

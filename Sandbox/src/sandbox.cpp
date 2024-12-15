@@ -136,6 +136,8 @@ private:
 	std::shared_ptr<MyAnimationTransition> idleToPunchTransition;
 	std::shared_ptr<animation::AnimationTransition> punchToIdleTransition;
 
+	std::shared_ptr<graphics::ComputeShader> compShader;
+
 	Rml::ElementDocument* document;
 
 public:
@@ -432,23 +434,19 @@ public:
 		arms->SetLocalPosition(glm::vec3(0.f, 0.f, -0.2f));
 		arms->SetLocalRotation(glm::vec3(0.f, 180.f, 0.f));
 
-		/*text = scene::Entity::CreateEntity<ui::TextEntity>("Text",
-			glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f),
-			"Assets/fonts/Arimo-Regular.ttf", "This is a test!", 128);*/
-		//text->SetRenderSpace(ui::RenderSpace::World);
-		//text->SetIgnoreDepth(true);
-
-		/*auto postProcessMaterial = graphics::Material::CreateMaterial(
-			LOAD_SHADER("Assets/shaders/postProcess.vert", "Assets/shaders/custom/ppTint.frag"),
-			DEFAULT_MAT_LIB, "TintMaterial");
-		auto postProcessPass = new graphics::PostProcessPass("PostProcessTint", "SceneColor",
-			postProcessMaterial);
-		Engine::Instance().GetRenderManager().InjectPass(postProcessPass, (int)graphics::PassInjectionPoint::BeforeUserInterface);*/
+		graphics::Texture::CreateImageTexture("CompTex", 512, 512,
+			graphics::TextureAccessLevel::ReadWrite, DEFAULT_TEX_LIB);
+		compShader = LOAD_COMPUTE_SHADER("Assets/shaders/test_compute.comp");
+		auto compTex = graphics::DefaultLibraries::GetTextureLibrary().Get("CompTex");
+		compShader->AddTexture(compTex, "tex");
+		Engine::Instance().GetRenderManager().AddComputeShaderDispatch(compShader, 
+			glm::vec<3, glm::uint>(compTex->GetWidth(), compTex->GetHeight(), 1));
 
 		BASED_TRACE("Done initializing");
 
 		// TODO: Fix text rendering behind sprites even when handled last
-		// TODO: Update build system to get engine location from env var, so that premake and postbuild can be included in git 
+		// TODO: Update build system to get engine location from env var, so that premake and postbuild can be included in git
+		//       (and so I can store engine shaders in a central location)
 		// TODO: Add Scriptable Components 
 		// TODO: Decide what to do about Sprites
 	}
@@ -614,6 +612,27 @@ public:
 	void ImguiRender() override
 	{
 		if (Engine::Instance().GetWindow().GetShouldRenderToScreen()) return;
+
+		if (ImGui::Begin("Compute Output"))
+		{
+			auto& window = Engine::Instance().GetWindow();
+
+			ImVec2 winsize = ImGui::GetWindowSize();
+			glm::ivec2 arsize = window.GetSizeInAspectRatio(static_cast<int>(winsize.x) - 15,
+				static_cast<int>(winsize.y) - 35);
+			ImVec2 size = { static_cast<float>(arsize.x), static_cast<float>(arsize.y) };
+			ImVec2 pos = {
+				(winsize.x - size.x) * 0.5f,
+				((winsize.y - size.y) * 0.5f) + 10
+			};
+			ImVec2 uv0 = { 0, 1 };
+			ImVec2 uv1 = { 1, 0 };
+			ImGui::SetCursorPos(pos);
+			ImGui::Image((void*)static_cast<intptr_t>(
+				graphics::DefaultLibraries::GetTextureLibrary().Get("CompTex")->GetId()),
+				size, uv0, uv1);
+		}
+		ImGui::End();
 
 		// Draw rendered frame to an ImGui image to simulate a game view window
 		if (ImGui::Begin("GameView"))

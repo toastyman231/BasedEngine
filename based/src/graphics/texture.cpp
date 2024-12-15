@@ -8,6 +8,8 @@
 
 #include <SDL2/SDL_surface.h>
 
+#include "engine.h"
+
 namespace based::graphics
 {
 	Texture::Texture(const std::string& path, bool overrideFlip)
@@ -59,6 +61,22 @@ namespace based::graphics
 	{
 	}
 
+	Texture::Texture(uint32_t width, uint32_t height)
+		: mFilter(TextureFilter::Nearest)
+		, mWidth(width)
+		, mHeight(height)
+		, mPixels(nullptr)
+	{
+		glGenTextures(1, &mId); BASED_CHECK_GL_ERROR;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); BASED_CHECK_GL_ERROR;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); BASED_CHECK_GL_ERROR;
+		SetTextureFilter(mFilter); 
+		glBindTexture(GL_TEXTURE_2D, mId); BASED_CHECK_GL_ERROR;
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, mWidth, mHeight, 0, GL_RGBA,
+			GL_FLOAT, mPixels); BASED_CHECK_GL_ERROR;
+		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
+	}
+
 	Texture::~Texture()
 	{
 		if (mStbiTex)
@@ -102,6 +120,18 @@ namespace based::graphics
 			break;
 		}
 		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
+	}
+
+	std::shared_ptr<Texture> Texture::CreateImageTexture(const std::string& name, 
+		uint32_t width, uint32_t height, TextureAccessLevel accessLevel, core::AssetLibrary<Texture>& library)
+	{
+		auto tex = std::make_shared<Texture>(width, height);
+		library.Load(name, tex);
+
+		glBindImageTexture(GetNextImageTextureUnit(), tex->GetId(), 0, GL_FALSE, 0, 
+			static_cast<GLenum>(accessLevel), GL_RGBA32F); BASED_CHECK_GL_ERROR;
+
+		return tex;
 	}
 
 	void Texture::LoadTexture()

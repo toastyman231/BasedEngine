@@ -164,4 +164,21 @@ namespace based::graphics
 	{
 		CustomRenderPass::EndRender();
 	}
+
+	ComputePass::ComputePass(const std::string& name) : CustomRenderPass(std::move(name)) {}
+
+	void ComputePass::BeginRender()
+	{
+		Engine::Instance().GetRenderManager().PushDebugGroup(mPassName);
+	}
+
+	void ComputePass::Render()
+	{
+		Engine::Instance().GetRenderManager().DispatchComputeShaders();
+	}
+
+	void ComputePass::EndRender()
+	{
+		Engine::Instance().GetRenderManager().PopDebugGroup();
+	}
 }

@@ -198,6 +198,8 @@ namespace based
                     graphics::DefaultLibraries::InitializeLibraries();
 
                     // Initialize passes
+                    auto computePass = new graphics::ComputePass("Compute Dispatches");
+                    mRenderManager.InjectPass(computePass);
                     auto shadowDepthPass = new graphics::CustomRenderPass(
                         "ShadowDepthPass", mWindow.GetShadowBuffer(),
                         graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"));
