@@ -12,6 +12,12 @@
 
 namespace based::managers
 {
+	enum class RenderMode : int32_t
+	{
+		Lit = 0,
+		Unlit
+	};
+
 	class RenderManager
 	{
 		friend class graphics::rendercommands::PushFramebuffer;
@@ -57,6 +63,9 @@ namespace based::managers
 		void PushCamera(std::shared_ptr<graphics::Camera> camera);
 		void PopCamera();
 
+		static void SetRenderMode(RenderMode newMode);
+		static RenderMode GetRenderMode();
+
 		glm::mat4 lightSpaceMatrix;
 	private:
 		void ConfigureShaderAndMatrices();
@@ -69,5 +78,7 @@ namespace based::managers
 		std::queue<std::unique_ptr<graphics::rendercommands::RenderCommand>> mRenderCommands;
 		std::stack<std::shared_ptr<graphics::Framebuffer>> mFramebuffers;
 		std::stack<std::shared_ptr<graphics::Camera>> mCameras;
+
+		inline static RenderMode mRenderMode;
 	};
 }

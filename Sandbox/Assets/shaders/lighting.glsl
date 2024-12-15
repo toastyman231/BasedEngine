@@ -19,7 +19,6 @@ struct DirectionalLight {
 #define NR_POINT_LIGHTS 8
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform DirectionalLight directionalLight;
-uniform int useLight = 1;
 uniform int castShadows = 1;
 uniform int receiveShadows = 1;
 
@@ -102,5 +101,5 @@ vec3 CalculateLighting(Material material, vec2 uvs, vec3 normal, vec3 fragPos, v
         result += CalculatePointLighting(pointLights[i], material, normal, fragPos, fragPosLightSpace, viewDir, shininess);
     }
 
-    return useLight == 1 ? result * GetDiffuseMaterial(uvs).rgb : GetDiffuseMaterial(uvs).rgb;
+    return result * GetDiffuseMaterial(uvs).rgb;
 }

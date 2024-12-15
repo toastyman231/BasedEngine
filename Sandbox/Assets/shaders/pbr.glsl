@@ -31,7 +31,6 @@ struct DirectionalLight {
 #define NR_POINT_LIGHTS 8
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform DirectionalLight directionalLight;
-uniform int useLight = 1;
 uniform int castShadows = 1;
 uniform int receiveShadows = 1;
 

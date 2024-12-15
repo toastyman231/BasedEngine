@@ -236,6 +236,16 @@ namespace based::managers
 		}
 	}
 
+	void RenderManager::SetRenderMode(RenderMode newMode)
+	{
+		mRenderMode = newMode;
+	}
+
+	RenderMode RenderManager::GetRenderMode()
+	{
+		return mRenderMode;
+	}
+
 	void RenderManager::ConfigureShaderAndMatrices()
 	{
 		constexpr float nearPlane = 1.f;

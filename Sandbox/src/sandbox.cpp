@@ -114,7 +114,8 @@ private:
 	float R = 100.f;
 	float heightCoef = 1.f;
 
-	bool useLight = true;
+	int32_t curRenderMode = 0;
+
 	bool useNormalMaps = true;
 	glm::vec3 camPos = glm::vec3(0.f, 0.f, 1.5f);
 	glm::vec3 camRot = glm::vec3(0.f);
@@ -437,12 +438,12 @@ public:
 		//text->SetRenderSpace(ui::RenderSpace::World);
 		//text->SetIgnoreDepth(true);
 
-		auto postProcessMaterial = graphics::Material::CreateMaterial(
+		/*auto postProcessMaterial = graphics::Material::CreateMaterial(
 			LOAD_SHADER("Assets/shaders/postProcess.vert", "Assets/shaders/custom/ppTint.frag"),
 			DEFAULT_MAT_LIB, "TintMaterial");
 		auto postProcessPass = new graphics::PostProcessPass("PostProcessTint", "SceneColor",
 			postProcessMaterial);
-		Engine::Instance().GetRenderManager().InjectPass(postProcessPass, (int)graphics::PassInjectionPoint::BeforeUserInterface);
+		Engine::Instance().GetRenderManager().InjectPass(postProcessPass, (int)graphics::PassInjectionPoint::BeforeUserInterface);*/
 
 		BASED_TRACE("Done initializing");
 
@@ -567,19 +568,14 @@ public:
 		const auto wallMat = matLib.Get("Wall");
 		const auto grassMat = matLib.Get("Grass");
 
-		if (boxMat && crateMat && planeMat && sphereMat && wallMat && grassMat)
+		if (boxMat && crateMat && planeMat)
 		{
 			boxMat->SetUniformValue("cratePos", crateEntity->GetTransform().Position);
-			boxMat->SetUniformValue("useLight", static_cast<int>(useLight));
 
 			crateMat->SetUniformValue("ambientStrength", ambientStrength);
-			crateMat->SetUniformValue("useLight", static_cast<int>(useLight));
 
 			planeMat->SetUniformValue("ambientStrength", ambientStrength);
 			planeMat->SetUniformValue("heightCoef", heightCoef);
-			planeMat->SetUniformValue("useLight", static_cast<int>(useLight));
-
-			sphereMat->SetUniformValue("useLight", static_cast<int>(useLight));
 		}
 
 		// Disable lights when not using lighting
@@ -596,10 +592,10 @@ public:
 		for (const auto light : lights)
 		{
 			auto ent = registry.get<scene::EntityReference>(light).entity;
-			if (auto e = ent.lock()) e->SetActive(useLight);
+			if (auto e = ent.lock()) e->SetActive(curRenderMode == 0);
 		}
 
-		UpdateShaders(grassMat, useLight, ambientStrength, heightCoef);
+		UpdateShaders(grassMat, ambientStrength, heightCoef);
 
 		// Disable normal maps when not using them
 		if (!useNormalMaps)
@@ -674,7 +670,21 @@ public:
 			ImGui::Spacing();
 
 			// Misc. parameters
-			ImGui::Checkbox("Use Light", &useLight);
+			const char* renderModes[] = {"Lit", "Unlit"};
+			if (ImGui::BeginCombo("Render Mode", renderModes[curRenderMode]))
+			{
+				for (int i = 0; i < IM_ARRAYSIZE(renderModes); i++)
+				{
+					const bool isSelected = (curRenderMode == i);
+					if (ImGui::Selectable(renderModes[i], isSelected))
+						curRenderMode = i;
+
+					if (isSelected)
+						ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
+			}
+			managers::RenderManager::SetRenderMode(static_cast<managers::RenderMode>(curRenderMode));
 
 			ImGui::DragFloat("Rolling Ball Scale", &R, 0.01f);
 			ImGui::DragFloat("Height Coefficient", &heightCoef, 0.01f);
@@ -904,13 +914,11 @@ public:
 		return {attitude, heading, bank};
 	}
 
-	static void UpdateShaders(const std::shared_ptr<graphics::Material>& mat, const bool useLight, float ambientStrength, float height)
+	static void UpdateShaders(const std::shared_ptr<graphics::Material>& mat, float ambientStrength, float height)
 	{
 		mat->SetUniformValue("ambientStrength", ambientStrength);
 
 		mat->SetUniformValue("heightCoef", height);
-
-		mat->SetUniformValue("useLight", static_cast<int>(useLight));
 	}
 };
 

@@ -11,7 +11,9 @@ namespace based::graphics
 		glm::vec4 eyePos;
 		glm::vec4 eyeForward;
 		float time;
+		int32_t renderMode;
 	};
+
 	class Shader
 	{
 	public:

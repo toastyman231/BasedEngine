@@ -108,6 +108,7 @@ namespace based::graphics
 		mGlobals.eyePos = glm::vec4(Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetTransform().Position, 1.f);
 		mGlobals.eyeForward = glm::vec4(Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetForward(), 1.f);
 		mGlobals.time = based::core::Time::GetTime();
+		mGlobals.renderMode = static_cast<int32_t>(managers::RenderManager::GetRenderMode());
 
 		glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[0]); BASED_CHECK_GL_ERROR;
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ShaderGlobals), &mGlobals); BASED_CHECK_GL_ERROR;

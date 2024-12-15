@@ -21,5 +21,12 @@ void main()
         normal = normal * 2.0 - 1.0;
         normal = normalize(TBN * normal);
     }
-    outColor = vec4(CalculateLighting(material, uvs, normal, fragPos, viewDir, fragPosLightSpace), 1.0);
+
+    if (renderMode == 0) {
+        outColor = vec4(CalculateLighting(material, uvs, normal, fragPos, viewDir, fragPosLightSpace), 1.0);
+    } else if (renderMode == 1) {
+        outColor = GetDiffuseMaterial(uvs);
+    } else {
+        outColor = vec4(1.0, 0.0, 1.0, 1.0);
+    }
 }

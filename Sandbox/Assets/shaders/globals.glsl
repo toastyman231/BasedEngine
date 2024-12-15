@@ -12,4 +12,5 @@ layout (std140) uniform Globals
     vec4 eyeForward;// 16              // 144
 
     float time;     // 4               // 148
+    int renderMode; // 4               // 152
 };

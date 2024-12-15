@@ -71,5 +71,11 @@ void main() {
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
 
-    outColor = useLight == 1 ? vec4(color, 1.0) : vec4(albedo, 1.0);
+    if (renderMode == 0) {
+        outColor = vec4(color, 1.0);
+    } else if (renderMode == 1) {
+        outColor = vec4(albedo, 1.0);
+    } else {
+        outColor = vec4(1.0, 0.0, 1.0, 1.0);
+    }
 }
