@@ -1,5 +1,9 @@
-engineLocation = "ENGINE_LOCATION"
-include "project-dependencies.lua"
+engineLocation = os.getenv("BASED_ENGINE_HOME")
+if not engineLocation then
+    error("BASED_ENGINE_HOME environment variable is not set. Please try restarting your terminal, or configure it to point to the engine directory.")
+end
+
+include (engineLocation .. "\\dependencies.lua")
 externalBuild = true
 
 workspace "PROJ_NAME"
@@ -16,12 +20,12 @@ tdir = "bin/%{cfg.buildcfg}/%{prj.name}"
 odir = "bin-obj/%{cfg.buildcfg}/%{prj.name}"
 
 group "Engine"
-    include "ENGINE_LOCATION\based"
+    include (engineLocation .. "\\based")
 group ""
 
 group "Dependencies"
-    include "ENGINE_LOCATION\external\glad"
-    include "ENGINE_LOCATION\external\yaml-cpp"
+    include (engineLocation .. "\\external\\glad")
+    include (engineLocation .. "\\external\\yaml-cpp")
 group ""
 
 group "Projects"
@@ -43,11 +47,11 @@ group "Projects"
 
         includedirs
         {
-            "ENGINE_LOCATION\based\include",
-            "ENGINE_LOCATION\%{externals.spdlog}",
-            "ENGINE_LOCATION\%{externals.rmlui}",
-            "ENGINE_LOCATION\%{externals.tracy}",
-            "ENGINE_LOCATION\%{externals.yaml_cpp}"
+            engineLocation .. "\\based\\include",
+            engineLocation .. "\\%{externals.spdlog}",
+            engineLocation .. "\\%{externals.rmlui}",
+            engineLocation .. "\\%{externals.tracy}",
+            engineLocation .. "\\%{externals.yaml_cpp}"
         }
 
         flags

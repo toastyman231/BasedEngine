@@ -1,4 +1,4 @@
-import globals, sys, subprocess, os
+import globals, sys, subprocess, os, sethome
 
 args = globals.ProcessArguments(sys.argv)
 prj = globals.GetArgumentValue(args, "prj", "New Project")
@@ -13,17 +13,17 @@ def CopyBuildFiles(dest, project):
     try:
         # Copy premake5 template
         premakeFile = open("{}/Templates/premakeTemplate.txt".format(os.getcwd()), "r").read();
-        premakeFile = premakeFile.replace("ENGINE_LOCATION", os.getcwd())
+        #premakeFile = premakeFile.replace("ENGINE_LOCATION", os.getcwd())
         premakeFile = premakeFile.replace("PROJ_NAME", project)
-        premakeFile = premakeFile.replace("\\", "\\\\")
+        #premakeFile = premakeFile.replace("\\", "\\\\")
         finalFile = open("{}/premake5.lua".format(dest), "x")
         finalFile.write(premakeFile)
         finalFile.close()
 
         # Copy postbuild script
         postBuiltTemplate = open("{}/Templates/postbuildTemplate.txt".format(os.getcwd()), "r").read();
-        postBuiltTemplate = postBuiltTemplate.replace("ENGINE_LOCATION", os.getcwd())
-        postBuiltTemplate = postBuiltTemplate.replace("\\", "\\\\")
+        #postBuiltTemplate = postBuiltTemplate.replace("ENGINE_LOCATION", os.getcwd())
+        #postBuiltTemplate = postBuiltTemplate.replace("\\", "\\\\")
         finalFile = open("{}/postbuild.py".format(dest), "x")
         finalFile.write(postBuiltTemplate)
         finalFile.close()
@@ -31,6 +31,8 @@ def CopyBuildFiles(dest, project):
         print("Could not find premake build file!")
         ret = 1
     return
+
+sethome.SetHome()
 
 if (os.path.exists(TEMPLATE_DIR) and globals.IsWindows()):
     dest = "{}/{}".format(location, prj)

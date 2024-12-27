@@ -156,17 +156,8 @@ namespace based
     {
         if (!mEngineLocation.empty()) return mEngineLocation;
 
-#ifdef BASED_PLATFORM_WINDOWS
-        char path[PATH_MAX];
-        GetModuleFileNameA(nullptr, path, PATH_MAX);
-        mEngineLocation = path;
-        mEngineLocation = mEngineLocation.substr(0, mEngineLocation.find_last_of("\\/"));
-#else
-        char path[PATH_MAX];
-        ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
-        std::string fullPath(path, (count > 0) ? count : 0);
-        mEngineLocation = fullPath.substr(0, fullPath.find_last_of("\\/"));
-#endif
+        mEngineLocation = getenv("BASED_ENGINE_HOME");
+
         return mEngineLocation;
     }
 

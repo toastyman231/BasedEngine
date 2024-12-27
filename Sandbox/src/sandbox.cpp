@@ -452,8 +452,6 @@ public:
 		BASED_TRACE("Done initializing");
 
 		// TODO: Fix text rendering behind sprites even when handled last
-		// TODO: Update build system to get engine location from env var, so that premake and postbuild can be included in git
-		//       (and so I can store engine shaders in a central location)
 		// TODO: Add Scriptable Components 
 		// TODO: Decide what to do about Sprites
 	}

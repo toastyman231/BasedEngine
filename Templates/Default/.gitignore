@@ -9,5 +9,3 @@
 # Files to ignore
 *.vcxproj
 *.sln
-premake5.lua
-postbuild.py
