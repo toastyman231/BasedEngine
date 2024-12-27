@@ -5,7 +5,7 @@
         <link type="text/rcss" href="window.rcss"/>
     </head>
     <body>
-        <label>Click and drag to rotate cube</label><br />
+        <label>Click TEST and drag to rotate cube</label><br />
         <label>Use WASD to fly around</label><br />
         <label>Use R to toggle camera rotation</label><br />
         <label>Use the mouse to rotate the camera</label><br />

@@ -25,7 +25,7 @@ namespace based::ui
 		SetAlignment(Middle);
 		SetRenderSpace(RenderSpace::Screen);
 
-		auto shader = LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag");
+		auto shader = LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), ASSET_PATH("Shaders/basic_unlit.vert"));
 		mMaterial = std::make_shared<graphics::Material>(shader);
 		mMaterial->mMaterialName = std::string("TextEntityMaterial-") + GetEntityName();
 		mMaterial->AddTexture(mTexture, "material.diffuseMat.tex");

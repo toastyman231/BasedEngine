@@ -397,7 +397,7 @@ namespace based::graphics
 				mShaderLibrary.Load("TexturedRect", std::make_shared<graphics::Shader>(vertexShader, fragmentShader));
 			}
 			{
-				mShaderLibrary.Load("Model", LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag"));
+				mShaderLibrary.Load("Model", LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), ASSET_PATH("Shaders/basic_lit.frag")));
 			}
 			{
 				auto vertexShader = R"(

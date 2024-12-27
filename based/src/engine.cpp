@@ -17,6 +17,15 @@
 #include "basedtime.h"
 #include "math/basedmath.h"
 
+#ifdef BASED_PLATFORM_WINDOWS
+#include <windows.h>
+#else
+#include <unistd.h>
+#include <limits.h>
+#endif
+
+constexpr size_t PATH_MAX = 50;
+
 bool logging_enabled = false;
 
 namespace based
@@ -141,6 +150,24 @@ namespace based
     uint64_t Engine::GetEngineTicks()
     {
         return SDL_GetTicks64();
+    }
+
+    std::string Engine::GetEngineDirectory()
+    {
+        if (!mEngineLocation.empty()) return mEngineLocation;
+
+#ifdef BASED_PLATFORM_WINDOWS
+        char path[PATH_MAX];
+        GetModuleFileNameA(nullptr, path, PATH_MAX);
+        mEngineLocation = path;
+        mEngineLocation = mEngineLocation.substr(0, mEngineLocation.find_last_of("\\/"));
+#else
+        char path[PATH_MAX];
+        ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
+        std::string fullPath(path, (count > 0) ? count : 0);
+        mEngineLocation = fullPath.substr(0, fullPath.find_last_of("\\/"));
+#endif
+        return mEngineLocation;
     }
 
     bool Engine::Initialize()

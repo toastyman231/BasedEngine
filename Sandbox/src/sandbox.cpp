@@ -202,7 +202,7 @@ public:
 		// Set up crate object and material
 		const auto crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
 		const auto crateMat = graphics::Material::CreateMaterial(
-			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag"), 
+			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), ASSET_PATH("Shaders/basic_lit.frag")),
 			DEFAULT_MAT_LIB, "Crate");
 		crateMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		crateMat->SetUniformValue("material.shininessMat.color", glm::vec4(128.f));
@@ -219,7 +219,7 @@ public:
 
 		// Set up second cube object
 		const auto distanceMat = graphics::Material::CreateMaterial(
-			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/custom/cube_distance.frag"),
+			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), "Assets/shaders/custom/cube_distance.frag"),
 			DEFAULT_MAT_LIB, "DistCube");
 		distanceMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		distanceMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
@@ -238,7 +238,7 @@ public:
 
 		const auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
 		const auto skybox = graphics::Material::CreateMaterial(
-			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"),
+			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), ASSET_PATH("Shaders/basic_unlit.frag")),
 			DEFAULT_MAT_LIB, "Skybox");
 		skybox->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		skybox->SetUniformValue("material.diffuseMat.useSampler", 1);
@@ -315,7 +315,7 @@ public:
 
 		// Set up light placeholder
 		const auto cubeMat = graphics::Material::CreateMaterial(
-			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_unlit.frag"),
+			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), ASSET_PATH("Shaders/basic_unlit.frag")),
 			DEFAULT_MAT_LIB, "Cube");
 		cubeMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		cubeMat->SetUniformValue("material.diffuseMat.useSampler", 0);
@@ -347,7 +347,7 @@ public:
 		const auto wallDiffuseTex = std::make_shared<graphics::Texture>("Assets/brick-wall/brickwall-diff.jpg", true);
 		const auto wallNormalMapTex = std::make_shared<graphics::Texture>("Assets/brick-wall/brickwall-norm.jpg", true);
 		const auto wallMat = graphics::Material::CreateMaterial(
-			LOAD_SHADER("Assets/shaders/basic_lit.vert", "Assets/shaders/basic_lit.frag"),
+			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), ASSET_PATH("Shaders/basic_lit.frag")),
 			DEFAULT_MAT_LIB, "Wall");
 		wallMat->AddTexture(wallDiffuseTex, "material.diffuseMat.tex");
 		wallMat->SetUniformValue("material.diffuseMat.useSampler", 1);
@@ -365,7 +365,7 @@ public:
 
 		// Create arms material
 		const auto armsMat = graphics::Material::CreateMaterial(
-			LOAD_SHADER("Assets/shaders/basic_lit_bones.vert", "Assets/shaders/basic_lit.frag"),
+			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit_bones.vert"), ASSET_PATH("Shaders/basic_lit.frag")),
 			DEFAULT_MAT_LIB, "Arms");
 		const auto armsTex = std::make_shared<graphics::Texture>("Assets/Models/Base Color Palette Diffuse.png", true);
 		armsMat->AddTexture(armsTex, "material.diffuseMat.tex");
@@ -404,7 +404,7 @@ public:
 		arms->SetEntityName("Arms");
 
 		const auto sphereMat = graphics::Material::CreateMaterial(
-			LOAD_SHADER("Assets/shaders/pbr_lit.vert", "Assets/shaders/pbr_lit.frag"),
+			LOAD_SHADER(ASSET_PATH("Shaders/pbr_lit.vert"), ASSET_PATH("Shaders/pbr_lit.frag")),
 			DEFAULT_MAT_LIB, "Sphere");
 		const auto sandAlbedo = std::make_shared<graphics::Texture>("Assets/sand_albedo.png");
 		const auto sandRoughness = std::make_shared<graphics::Texture>("Assets/sand_roughness.png");

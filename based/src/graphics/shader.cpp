@@ -141,9 +141,9 @@ namespace based::graphics
 			fsFile.close();
 
 			std::set<std::string> alreadyIncluded = {};
-			vertexSource = PreprocessShader(vertexSource, "#include ", "Assets/shaders/", alreadyIncluded);
+			vertexSource = PreprocessShader(vertexSource, "#include ", ASSET_PATH("Shaders/"), alreadyIncluded);
 			alreadyIncluded = {};
-			fragSource = PreprocessShader(fragSource, "#include ", "Assets/shaders/", alreadyIncluded);
+			fragSource = PreprocessShader(fragSource, "#include ", ASSET_PATH("Shaders/"), alreadyIncluded);
 
 			return new Shader(vertexSource, fragSource);
 		}

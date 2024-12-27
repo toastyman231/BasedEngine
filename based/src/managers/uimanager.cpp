@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "managers/uimanager.h"
 
+#include "engine.h"
 #include "based/ui/uisysteminterface.h"
 #include "based/ui/uirenderinterface.h"
 #include "input/keyboard.h"
@@ -18,7 +19,7 @@ namespace based::managers
 
 		Rml::Initialise();
 
-		Rml::LoadFontFace("Assets/fonts/Arimo-Regular.ttf");
+		Rml::LoadFontFace(ASSET_PATH("Fonts/Arimo-Regular.ttf"));
 	}
 
 	void UiManager::ProcessEvents(SDL_Event e) const

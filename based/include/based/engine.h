@@ -7,6 +7,8 @@
 #include "graphics/renderpass.h"
 #include "memory/arena.h"
 
+#define ASSET_PATH(usrPath) Engine::Instance().GetEngineDirectory().append("/Assets/").append(usrPath)
+
 namespace based
 {
 	class App;
@@ -27,6 +29,8 @@ namespace based
         static inline Engine* GetRawEngineInstance() { return mInstance; }
 
         static uint64_t GetEngineTicks();
+
+        std::string GetEngineDirectory();
 
         // Managers
         inline managers::RenderManager& GetRenderManager() { return mRenderManager; }
@@ -50,6 +54,8 @@ namespace based
 
         core::Window mWindow;
         App* mApp;
+
+        std::string mEngineLocation;
 
         // Managers
         managers::LogManager mLogManager;
