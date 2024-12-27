@@ -7,6 +7,13 @@
 
 namespace based::managers
 {
+	struct DocumentInfo
+	{
+		Rml::ElementDocument* document;
+		std::string path;
+		Rml::Context* context;
+	};
+
 	class UiManager
 	{
 	public:
@@ -19,7 +26,7 @@ namespace based::managers
 		void Render() const;
 		void Shutdown();
 
-		Rml::ElementDocument* LoadWindow(const std::string& path, Rml::Context* context) const;
+		DocumentInfo* LoadWindow(const std::string& path, Rml::Context* context);
 		Rml::Context* CreateContext(const std::string& name, glm::ivec2 size);
 		void RemoveContext(const Rml::Context* context);
 		void SetPathPrefix(const std::string& path);
@@ -27,10 +34,13 @@ namespace based::managers
 		Rml::SystemInterface& GetSystemInterface() const { return *mSystemInterface; }
 		Rml::RenderInterface& GetRenderInterface() const { return *mRenderInterface; }
 	private:
+		void HotReloadDocuments() const;
+
 		Rml::SystemInterface* mSystemInterface;
 		Rml::RenderInterface* mRenderInterface;
 
 		std::vector<Rml::Context*> mContexts;
+		std::vector<DocumentInfo*> mDocuments;
 
 		Rml::String mPathPrefix;
 

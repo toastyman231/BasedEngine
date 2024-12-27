@@ -24,6 +24,7 @@
 #include "based/scene/audio.h"
 #include "based/ui/textentity.h"
 #include "Models-Surfaces/Generators.h"
+#include "Water/water.h"
 
 using namespace based;
 
@@ -138,7 +139,7 @@ private:
 
 	std::shared_ptr<graphics::ComputeShader> compShader;
 
-	Rml::ElementDocument* document;
+	managers::DocumentInfo* document;
 
 public:
 	core::WindowProperties GetWindowProperties() override
@@ -169,7 +170,7 @@ public:
 			input::CursorMode::Confined : input::CursorMode::Free);
 
 		// UI Setup
-		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main", 
+		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main",
 			Engine::Instance().GetWindow().GetSize());
 
 		if (Rml::DataModelConstructor constructor = context->CreateDataModel("animals"))
@@ -183,7 +184,7 @@ public:
 		Engine::Instance().GetUiManager().SetPathPrefix("Assets/ui/");
 
 		document = Engine::Instance().GetUiManager().LoadWindow("help_screen", context);
-		document->Hide();
+		document->document->Hide();
 
 		// Old stuff, plus setting camera to perspective mode
 		cubeRot = glm::vec3(0.f);
@@ -214,6 +215,7 @@ public:
 		crateEntity->AddComponent<scene::MeshRenderer>(crateMesh);
 		crateEntity->SetPosition(glm::vec3(2.7f, 1.f, 1.7f));
 		crateEntity->SetEntityName("Crate");
+		crateEntity->SetActive(false);
 
 		// Set up second cube object
 		const auto distanceMat = graphics::Material::CreateMaterial(
@@ -258,7 +260,7 @@ public:
 		planeEntity = scene::Entity::CreateEntity<scene::Entity>("Plane");
 		planeEntity->SetPosition({-50.f, 0.f, -50.f});
 		planeMesh->material = graphics::Material::CreateMaterial(
-			LOAD_SHADER("Assets/shaders/custom/heightmap.vert", "Assets/shaders/custom/terrain.frag"),
+			LOAD_SHADER("Assets/shaders/custom/water.vert", "Assets/shaders/custom/water.frag"),
 			DEFAULT_MAT_LIB, "Plane");
 		planeMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		planeMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
@@ -267,6 +269,9 @@ public:
 		planeMesh->material->AddTexture(heightMap);
 		planeEntity->AddComponent<scene::MeshRenderer>(planeMesh);
 		planeEntity->SetEntityName("Ground");
+
+		waterMaterial = planeMesh->material;
+		UpdateWaterShader();
 
 		// Load grass mesh and set up material
 		const auto grassMesh = graphics::Model::LoadSingleMesh("Assets/Models/grass_highPoly.obj");
@@ -306,7 +311,7 @@ public:
 				grassInstanceMesh->AddInstance(scene::Transform(pos, rot, glm::vec3(1)));
 			}
 		}
-		//grassInstance->SetActive(false);
+		grassInstance->SetActive(false);
 
 		// Set up light placeholder
 		const auto cubeMat = graphics::Material::CreateMaterial(
@@ -356,6 +361,7 @@ public:
 		wallMesh->material = wallMat;
 		wallEntity->AddComponent<scene::MeshRenderer>(wallMesh);
 		wallEntity->SetEntityName("Wall");
+		wallEntity->SetActive(false);
 
 		// Create arms material
 		const auto armsMat = graphics::Material::CreateMaterial(
@@ -424,6 +430,7 @@ public:
 		sphere->AddComponent<scene::MeshRenderer>(sphereMesh);
 		sphere->SetEntityName("Sphere");
 		sphere->SetPosition({ 0.f, 2.f, 0.f });
+		sphere->SetActive(false);
 
 		// TODO: Add a way to tie object lifetimes to scene lifetime (scene serialization)
 
@@ -544,8 +551,8 @@ public:
 		// Show/Hide UI
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_H))
 		{
-			if (document->IsVisible()) document->Hide();
-			else document->Show();
+			if (document->document->IsVisible()) document->document->Hide();
+			else document->document->Show();
 		}
 
 		// Set light position and pass info to shaders
@@ -612,27 +619,6 @@ public:
 	void ImguiRender() override
 	{
 		if (Engine::Instance().GetWindow().GetShouldRenderToScreen()) return;
-
-		if (ImGui::Begin("Compute Output"))
-		{
-			auto& window = Engine::Instance().GetWindow();
-
-			ImVec2 winsize = ImGui::GetWindowSize();
-			glm::ivec2 arsize = window.GetSizeInAspectRatio(static_cast<int>(winsize.x) - 15,
-				static_cast<int>(winsize.y) - 35);
-			ImVec2 size = { static_cast<float>(arsize.x), static_cast<float>(arsize.y) };
-			ImVec2 pos = {
-				(winsize.x - size.x) * 0.5f,
-				((winsize.y - size.y) * 0.5f) + 10
-			};
-			ImVec2 uv0 = { 0, 1 };
-			ImVec2 uv1 = { 1, 0 };
-			ImGui::SetCursorPos(pos);
-			ImGui::Image((void*)static_cast<intptr_t>(
-				graphics::DefaultLibraries::GetTextureLibrary().Get("CompTex")->GetId()),
-				size, uv0, uv1);
-		}
-		ImGui::End();
 
 		// Draw rendered frame to an ImGui image to simulate a game view window
 		if (ImGui::Begin("GameView"))
@@ -705,10 +691,18 @@ public:
 			}
 			managers::RenderManager::SetRenderMode(static_cast<managers::RenderMode>(curRenderMode));
 
+			static bool wireFrame = false;
+			ImGui::Checkbox("Wireframe", &wireFrame);
+			Engine::Instance().GetRenderManager().SetWireframeMode(wireFrame);
+
 			ImGui::DragFloat("Rolling Ball Scale", &R, 0.01f);
 			ImGui::DragFloat("Height Coefficient", &heightCoef, 0.01f);
 
 			entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+
+			WaterSettings();
+			UpdateShaderVisuals();
+			UpdateWaterShader();
 
 			// Lighting controls
 			if (ImGui::CollapsingHeader("Lights"))

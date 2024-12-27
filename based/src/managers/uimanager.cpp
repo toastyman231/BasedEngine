@@ -3,6 +3,7 @@
 
 #include "based/ui/uisysteminterface.h"
 #include "based/ui/uirenderinterface.h"
+#include "input/keyboard.h"
 
 namespace based::managers
 {
@@ -32,6 +33,11 @@ namespace based::managers
 	void UiManager::Update() const
 	{
 		PROFILE_FUNCTION();
+#ifdef BASED_CONFIG_DEBUG
+		if (input::Keyboard::Key(BASED_INPUT_KEY_LALT) && input::Keyboard::KeyDown(BASED_INPUT_KEY_R))
+			HotReloadDocuments();
+#endif
+
 		for (const auto context : mContexts)
 		{
 			context->Update();
@@ -57,7 +63,7 @@ namespace based::managers
 		delete mSystemInterface;
 	}
 
-	Rml::ElementDocument* UiManager::LoadWindow(const std::string& path, Rml::Context* context) const
+	DocumentInfo* UiManager::LoadWindow(const std::string& path, Rml::Context* context)
 	{
 		PROFILE_FUNCTION();
 		Rml::String documentPath = path + Rml::String(".rml");
@@ -67,15 +73,18 @@ namespace based::managers
 		if (!document)
 		{
 			BASED_ERROR("Failed to load document at {}", documentPath);
-			return nullptr;
+			return new DocumentInfo();
 		}
 
 		if (Rml::Element* title = document->GetElementById("title"))
 			title->SetInnerRML(document->GetTitle());
 
+		document->SetId(std::to_string(context->GetNumDocuments() - 1));
 		document->Show();
 
-		return document;
+		mDocuments.emplace_back(new DocumentInfo{ document, documentPath, context });
+
+		return mDocuments.back();
 	}
 
 	Rml::Context* UiManager::CreateContext(const std::string& name, glm::ivec2 size)
@@ -112,7 +121,7 @@ namespace based::managers
 
 	void UiManager::SetPathPrefix(const std::string& path)
 	{
-		if (path == "")
+		if (path.empty())
 		{
 			mUsePathPrefix = false;
 			mPathPrefix = "";
@@ -121,5 +130,34 @@ namespace based::managers
 
 		mPathPrefix = path;
 		mUsePathPrefix = true;
+	}
+
+	void UiManager::HotReloadDocuments() const
+	{
+		for (auto docInfo : mDocuments)
+		{
+			Rml::ElementDocument* rawPointer = docInfo->document;
+			Rml::Context* context = docInfo->context;
+			const auto& path = docInfo->path;
+
+			bool isShown = rawPointer->IsVisible();
+
+			Rml::ElementDocument* document = context->LoadDocument(path);
+			document->ReloadStyleSheet();
+			if (!document)
+			{
+				BASED_ERROR("Failed to hot reload document at {}", path);
+				continue;
+			}
+
+			if (Rml::Element* title = document->GetElementById("title"))
+				title->SetInnerRML(document->GetTitle());
+
+			if (isShown)
+				document->Show();
+
+			rawPointer->Close();
+			docInfo->document = document;
+		}
 	}
 }
