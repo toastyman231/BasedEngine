@@ -19,7 +19,7 @@ namespace based::graphics
 			core::AssetLibrary<Material>& assetLibrary, const std::string& name = "New Material");
 
 		inline std::weak_ptr<Shader> GetShader() const { return mShader; }
-		inline std::vector<std::shared_ptr<Texture>> GetTextures() const { return mTextures; }
+		inline std::vector<std::shared_ptr<Texture>>& GetTextures() { return mTextures; }
 
 		void SetShader(std::shared_ptr<Shader> shader);
 		void AddTexture(std::shared_ptr<Texture> texture, std::string location = "");
@@ -86,6 +86,14 @@ namespace based::graphics
 				static_assert(false, "Unsupported data type in Material::SetUniformValue()");
 			}
 		}
+
+		std::unordered_map<std::string, int> GetUniformInts() const { return mUniformInts; }
+		std::unordered_map<std::string, float> GetUniformFloats() const { return mUniformFloats; }
+		std::unordered_map<std::string, glm::vec2> GetUniformFloat2s() const { return mUniformFloat2s; }
+		std::unordered_map<std::string, glm::vec3> GetUniformFloat3s() const { return mUniformFloat3s; }
+		std::unordered_map<std::string, glm::vec4> GetUniformFloat4s() const { return mUniformFloat4s; }
+		std::unordered_map<std::string, glm::mat3> GetUniformMat3s() const { return mUniformMat3s; }
+		std::unordered_map<std::string, glm::mat4> GetUniformMat4s() const { return mUniformMat4s; }
 	private:
 		std::shared_ptr<Shader> mShader;
 		std::vector<std::shared_ptr<Texture>> mTextures;
@@ -99,5 +107,7 @@ namespace based::graphics
 		std::unordered_map<std::string, glm::vec4> mUniformFloat4s;
 		std::unordered_map<std::string, glm::mat3> mUniformMat3s;
 		std::unordered_map<std::string, glm::mat4> mUniformMat4s;
+
+		friend class SceneSerializer;
 	};
 }

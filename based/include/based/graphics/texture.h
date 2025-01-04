@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "assetlibrary.h"
+#include "uuid.h"
 
 #define DEFAULT_TEX_LIB based::graphics::DefaultLibraries::GetTextureLibrary()
 
@@ -36,6 +37,8 @@ namespace based::graphics
 		~Texture();
 
 		inline uint32_t GetId() const { return mId; }
+		inline uint64_t GetUUID() const { return mUUID; }
+		inline std::string GetName() const { return mName; }
 		inline uint32_t GetWidth() const { return mWidth; }
 		inline uint32_t GetHeight() const { return mHeight; }
 		inline uint32_t GetNumChannels() const { return mNumChannels; }
@@ -46,6 +49,7 @@ namespace based::graphics
 		void Unbind();
 
 		void SetTextureFilter(TextureFilter filter);
+		void SetName(const std::string& name) { mName = name; }
 
 		static std::shared_ptr<Texture> CreateImageTexture(const std::string& name,
 			uint32_t width, uint32_t height, TextureAccessLevel accessLevel, core::AssetLibrary<Texture>& library);
@@ -54,7 +58,9 @@ namespace based::graphics
 		TextureFilter mFilter;
 
 		std::string mPath = "";
+		std::string mName = "New Texture";
 		uint32_t mId;
+		core::UUID mUUID;
 		uint32_t mWidth, mHeight;
 		uint32_t mNumChannels;
 		uint32_t mRmask;
@@ -65,7 +71,10 @@ namespace based::graphics
 		unsigned char* mPixels;
 
 		void LoadTexture();
+		void ResetUUID(uint64_t id);
 
 		inline static uint32_t mNextId = 0;
+
+		friend class SceneSerializer;
 	};
 }

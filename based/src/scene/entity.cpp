@@ -26,6 +26,23 @@ namespace based::scene
 		if (mRegistry.valid(mEntity)) mRegistry.destroy(mEntity);
 	}
 
+	std::shared_ptr<Entity> Entity::CreateEntity(const std::string& name)
+	{
+		return CreateEntityWithUUID(name, core::UUID());
+	}
+
+	std::shared_ptr<Entity> Entity::CreateEntityWithUUID(const std::string& name, core::UUID uuid)
+	{
+		auto newEntity = std::make_shared<Entity>();
+		newEntity->SetEntityName(name);
+		newEntity->AddComponent<EntityReference>(newEntity);
+		newEntity->AddComponent<IDComponent>(uuid);
+
+		newEntity->Initialize();
+
+		return newEntity;
+	}
+
 	void Entity::DestroyEntity(std::shared_ptr<Entity> ent)
 	{
 		if (!ent) return;

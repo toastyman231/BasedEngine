@@ -172,7 +172,7 @@ public:
 		input::Mouse::SetCursorVisible(!Engine::Instance().GetWindow().GetShouldRenderToScreen());
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
-#if 0
+#if 1
 		// UI Setup
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main",
 			Engine::Instance().GetWindow().GetSize());
@@ -368,19 +368,20 @@ public:
 		wallEntity->SetActive(false);
 
 		// Create arms material
-		const auto armsMat = graphics::Material::CreateMaterial(
+		/*const auto armsMat = graphics::Material::CreateMaterial(
 			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit_bones.vert"), ASSET_PATH("Shaders/basic_lit.frag")),
 			DEFAULT_MAT_LIB, "Arms");
 		const auto armsTex = std::make_shared<graphics::Texture>("Assets/Models/Base Color Palette Diffuse.png", true);
+		armsTex->SetName("ArmsTexture");
 		armsMat->AddTexture(armsTex, "material.diffuseMat.tex");
 		armsMat->SetUniformValue("material.diffuseMat.tint", glm::vec4(0.77f, 0.4f, 0.35f, 1.f));
 		armsMat->SetUniformValue("material.diffuseMat.useSampler", 1);
-		armsMat->SetUniformValue("receiveShadows", 0);
+		armsMat->SetUniformValue("receiveShadows", 0);*/
 		// Create arms
 		const auto armModel = graphics::Model::CreateModel(
 			"Assets/Models/Arms.fbx", DEFAULT_MODEL_LIB, "ArmsModel");
 		auto lib = graphics::DefaultLibraries::GetModelLibrary();
-		armModel->SetMaterial(armsMat);
+		//armModel->SetMaterial(armsMat);
 		arms = scene::Entity::CreateEntity<scene::Entity>("Arms");
 		arms->AddComponent<scene::ModelRenderer>(armModel);
 		arms->SetPosition({ 0, 5, 0 });
@@ -467,9 +468,15 @@ public:
 #endif
 
 		scene::SceneSerializer serializer(persistentScene);
-		serializer.Deserialize("Assets/Scenes/Test.bscn");
-		entityStorage = serializer.GetEntityStorage();
-		/*serializer.Serialize("Assets/Scenes/Test.bscn");*/
+		const auto armsMat = serializer.DeserializeMaterial("Assets/Materials/Test.bmat");
+		armModel->SetMaterial(armsMat);
+		/*YAML::Emitter out;
+		scene::SceneSerializer::SerializeMaterial(out, armsMat);
+		std::ofstream fout("Assets/Materials/Test.bmat");
+		fout << out.c_str();*/
+		//serializer.Deserialize("Assets/Scenes/Test.bscn");
+		//entityStorage = serializer.GetEntityStorage();
+		//serializer.Serialize("Assets/Scenes/Test.bscn");
 
 		BASED_TRACE("Done initializing");
 
@@ -682,6 +689,34 @@ public:
 				}
 			}
 		}
+
+		// Draw rendered frame to an ImGui image to simulate a game view window
+		if (ImGui::Begin("GameView"))
+		{
+			if (ImGui::IsWindowHovered())
+			{
+				ImGui::CaptureMouseFromApp(false);
+			}
+
+			auto& window = Engine::Instance().GetWindow();
+
+			ImVec2 winsize = ImGui::GetWindowSize();
+			glm::ivec2 arsize = window.GetSizeInAspectRatio(static_cast<int>(winsize.x) - 15,
+				static_cast<int>(winsize.y) - 35);
+			ImVec2 size = { static_cast<float>(arsize.x), static_cast<float>(arsize.y) };
+			ImVec2 pos = {
+				(winsize.x - size.x) * 0.5f,
+				((winsize.y - size.y) * 0.5f) + 10
+			};
+			ImVec2 uv0 = { 0, 1 };
+			ImVec2 uv1 = { 1, 0 };
+			ImGui::SetCursorPos(pos);
+			ImGui::Image((void*)static_cast<intptr_t>(
+				graphics::DefaultLibraries::GetRenderPassOutputs().Get("SceneColor")),
+				size, uv0, uv1);
+		}
+		ImGui::End();
+
 		return;
 
 		if (Engine::Instance().GetWindow().GetShouldRenderToScreen()) return;

@@ -16,6 +16,10 @@ namespace based::scene
 		Entity(entt::entity handle, entt::registry& registry);
 		virtual ~Entity();
 
+		static std::shared_ptr<Entity> CreateEntity(const std::string& name);
+
+		static std::shared_ptr<Entity> CreateEntityWithUUID(const std::string& name, core::UUID uuid);
+
 		template<typename Type, typename... Args>
 		static inline std::shared_ptr<Type> CreateEntity(const std::string& name = "New Entity", 
 			glm::vec3 pos = glm::vec3(0.f), glm::vec3 rot = glm::vec3(0.f), 
@@ -24,6 +28,7 @@ namespace based::scene
 			auto newEntity = std::make_shared<Type>(args...);
 			newEntity->SetEntityName(name);
 			newEntity->template AddComponent<EntityReference>(newEntity);
+			newEntity->template AddComponent<IDComponent>(core::UUID());
 
 			newEntity->SetTransform(pos, rot, scale);
 			newEntity->Initialize();
@@ -69,6 +74,8 @@ namespace based::scene
 		{
 			return mRegistry.get<Type>(mEntity);
 		}
+
+		inline core::UUID GetUUID() { return GetComponent<IDComponent>().uuid; }
 
 		inline bool IsActive() const { return mIsEnabled; }
 

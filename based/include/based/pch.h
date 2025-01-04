@@ -17,6 +17,7 @@
 #include <sstream>
 #include <utility>
 #include <algorithm>
+#include <random>
 
 // GLM stuff
 #include <external/glm/fwd.hpp>

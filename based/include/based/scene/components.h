@@ -5,6 +5,8 @@
 #include <external/glm/vec2.hpp>
 #include <external/glm/vec3.hpp>
 
+#include "based/core/uuid.h"
+
 namespace based::ui
 {
 	class TextEntity;
@@ -34,6 +36,14 @@ namespace based::scene
 		EntityReference() = default;
 		EntityReference(const EntityReference&) = default;
 		EntityReference(const std::shared_ptr<Entity>& entityPtr) : entity(entityPtr) {}
+	};
+
+	struct IDComponent
+	{
+		based::core::UUID uuid;
+
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
 	};
 
 	struct Transform

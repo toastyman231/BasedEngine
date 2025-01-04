@@ -21,6 +21,7 @@ namespace based::graphics
 		, mStbiTex(true)
 		, mSdlSurface(false)
 		, mPixels(nullptr)
+		, mUUID(core::UUID())
 	{
 		int width, height, numChannels;
 		if (overrideFlip) stbi_set_flip_vertically_on_load(0);
@@ -47,6 +48,7 @@ namespace based::graphics
 		, mStbiTex(false)
 		, mSdlSurface(true)
 		, mPixels((unsigned char*)surface->pixels)
+		, mUUID(core::UUID())
 	{
 		LoadTexture();
 	}
@@ -58,6 +60,7 @@ namespace based::graphics
 		, mHeight(height)
 		, mNumChannels(4)
 		, mPixels(nullptr)
+		, mUUID(core::UUID())
 	{
 	}
 
@@ -66,6 +69,7 @@ namespace based::graphics
 		, mWidth(width)
 		, mHeight(height)
 		, mPixels(nullptr)
+		, mUUID(core::UUID())
 	{
 		glGenTextures(1, &mId); BASED_CHECK_GL_ERROR;
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); BASED_CHECK_GL_ERROR;
@@ -192,5 +196,10 @@ namespace based::graphics
 			BASED_WARN("Unable to load texture: {} - defaulting to checkerboard", mPath.c_str());
 		}
 		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
+	}
+
+	void Texture::ResetUUID(uint64_t id)
+	{
+		mUUID = id;
 	}
 }

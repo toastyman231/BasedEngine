@@ -80,6 +80,14 @@ namespace based::graphics
 		glDeleteShader(fragmentShaderId); BASED_CHECK_GL_ERROR;
 	}
 
+	Shader::Shader(const std::string& vertex, const std::string& fragment, const std::string& vSrc,
+		const std::string& fSrc)
+		: Shader(vertex, fragment)
+	{
+		mVertexPath = vSrc;
+		mFragmentPath = fSrc;
+	}
+
 	Shader::Shader(const Shader& other) : Shader(other.mVertexShader, other.mFragmentShader) {}
 
 	Shader::~Shader()
@@ -145,7 +153,7 @@ namespace based::graphics
 			alreadyIncluded = {};
 			fragSource = PreprocessShader(fragSource, "#include ", ASSET_PATH("Shaders/"), alreadyIncluded);
 
-			return new Shader(vertexSource, fragSource);
+			return new Shader(vertexSource, fragSource, vsPath, fsPath);
 		}
 
 		BASED_ERROR("Failed to load shader with source {}, {}", vsPath, fsPath);

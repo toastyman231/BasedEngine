@@ -21,6 +21,7 @@ namespace based::graphics
 	{
 	public:
 		Shader(const std::string& vertex, const std::string& fragment);
+		Shader(const std::string& vertex, const std::string& fragment, const std::string& vSrc, const std::string& fSrc);
 		Shader(const Shader& other);
 		~Shader();
 
@@ -32,6 +33,8 @@ namespace based::graphics
 
 		inline const std::string& GetVertexShaderSource() const { return mVertexShader; }
 		inline const std::string& GetFragmentShaderSource() const { return mFragmentShader; }
+		inline const std::string& GetVertexPath() const { return mVertexPath; }
+		inline const std::string& GetFragmentPath() const { return mFragmentPath; }
 
 		void Bind();
 		void Unbind();
@@ -59,6 +62,8 @@ namespace based::graphics
 		uint32_t mProgramId;
 		std::string mVertexShader;
 		std::string mFragmentShader;
+		std::string mVertexPath;
+		std::string mFragmentPath;
 
 		std::unordered_map<std::string, int> mUniformLocations;
 	};
