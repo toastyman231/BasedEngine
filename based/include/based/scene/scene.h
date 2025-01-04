@@ -1,9 +1,17 @@
 #pragma once
 
 #include <external/entt/entt.hpp>
+#include "based/core/assetlibrary.h"
+
+namespace based::graphics
+{
+	class Camera;
+}
 
 namespace based::scene
 {
+	class Entity;
+
 	class Scene
 	{
 	public:
@@ -18,10 +26,14 @@ namespace based::scene
 
 		inline entt::registry& GetRegistry() { return mRegistry; }
 		inline std::shared_ptr<graphics::Camera> GetActiveCamera() const { return mActiveCamera; }
+		inline core::AssetLibrary<Entity> GetEntityStorage() const { return mAssetStorage; }
 
-		inline void SetActiveCamera(std::shared_ptr<graphics::Camera> cam) { mActiveCamera = std::move(cam); }
+		void SetActiveCamera(std::shared_ptr<graphics::Camera> cam);
 	private:
 		entt::registry mRegistry;
 		std::shared_ptr<graphics::Camera> mActiveCamera;
+		core::AssetLibrary<Entity> mAssetStorage;
+
+		friend class SceneSerializer;
 	};
 }

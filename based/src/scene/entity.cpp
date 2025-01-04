@@ -15,6 +15,11 @@ namespace based::scene
 		SetActive(true);
 	}
 
+	Entity::Entity(entt::entity handle, entt::registry& registry)
+		: mRegistry(registry), mEntity(handle), mIsEnabled(true)
+	{
+	}
+
 	Entity::~Entity()
 	{
 		BASED_TRACE("Destroying entity {}", GetEntityName());

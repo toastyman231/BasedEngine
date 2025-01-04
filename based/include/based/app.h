@@ -5,6 +5,7 @@
 #include "graphics/camera.h"
 #include "scene/scene.h"
 #include "memory/memoryhelpers.h"
+#include "scene/sceneserializer.h"
 
 namespace based
 {

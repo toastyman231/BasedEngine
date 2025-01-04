@@ -13,6 +13,7 @@ namespace based::scene
 	public:
 		Entity();
 		Entity(entt::registry& registry);
+		Entity(entt::entity handle, entt::registry& registry);
 		virtual ~Entity();
 
 		template<typename Type, typename... Args>

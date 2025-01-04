@@ -25,6 +25,8 @@
 #include "based/ui/textentity.h"
 #include "Models-Surfaces/Generators.h"
 #include "Water/water.h"
+#include "external/entt/core/hashed_string.hpp"
+#include "based/scene/sceneserializer.h"
 
 using namespace based;
 
@@ -141,6 +143,8 @@ private:
 
 	managers::DocumentInfo* document;
 
+	core::AssetLibrary<scene::Entity> entityStorage;
+
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -168,7 +172,7 @@ public:
 		input::Mouse::SetCursorVisible(!Engine::Instance().GetWindow().GetShouldRenderToScreen());
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
-
+#if 0
 		// UI Setup
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main",
 			Engine::Instance().GetWindow().GetSize());
@@ -441,13 +445,31 @@ public:
 		arms->SetLocalPosition(glm::vec3(0.f, 0.f, -0.2f));
 		arms->SetLocalRotation(glm::vec3(0.f, 180.f, 0.f));
 
-		graphics::Texture::CreateImageTexture("CompTex", 512, 512,
-			graphics::TextureAccessLevel::ReadWrite, DEFAULT_TEX_LIB);
-		compShader = LOAD_COMPUTE_SHADER("Assets/shaders/test_compute.comp");
-		auto compTex = graphics::DefaultLibraries::GetTextureLibrary().Get("CompTex");
-		compShader->AddTexture(compTex, "tex");
-		Engine::Instance().GetRenderManager().AddComputeShaderDispatch(compShader, 
-			glm::vec<3, glm::uint>(compTex->GetWidth(), compTex->GetHeight(), 1));
+		for (auto&& curr : GetCurrentScene()->GetRegistry().storage())
+		{
+			entt::id_type id = curr.first;
+
+			if (auto& storage = curr.second; storage.contains(arms->GetEntityHandle()))
+			{
+				entt::type_info ctype = storage.type();
+				auto by_type_id = entt::resolve(ctype.index());
+				BASED_TRACE("Arms has component id: {} with type: {}", id, ctype.name());
+				std::string_view cname = ctype.name().substr(ctype.name().find_last_of(':') + 1);
+				void* data = storage.get(arms->GetEntityHandle());
+				BASED_TRACE("Short type: {}", cname);
+				if (cname == "Transform")
+				{
+					scene::Transform* name = static_cast<scene::Transform*>(data);
+					BASED_TRACE("Arms pos: {} {} {}", name->Position.x, name->Position.y, name->Position.z);
+				}
+			}
+		}
+#endif
+
+		scene::SceneSerializer serializer(persistentScene);
+		serializer.Deserialize("Assets/Scenes/Test.bscn");
+		entityStorage = serializer.GetEntityStorage();
+		/*serializer.Serialize("Assets/Scenes/Test.bscn");*/
 
 		BASED_TRACE("Done initializing");
 
@@ -464,6 +486,7 @@ public:
 	void Update(float deltaTime) override
 	{
 		App::Update(deltaTime);
+		return;
 
 		// Movement input
 		if (input::Keyboard::Key(BASED_INPUT_KEY_W))
@@ -616,6 +639,51 @@ public:
 
 	void ImguiRender() override
 	{
+		auto& registry = GetCurrentScene()->GetRegistry();
+		// Object controls
+		if (ImGui::CollapsingHeader("Objects"))
+		{
+			const auto objects = registry.view<
+				scene::Transform, scene::EntityReference>(entt::exclude<scene::PointLight, scene::DirectionalLight>);
+
+			int i = 0;
+			for (const auto obj : objects)
+			{
+				auto ent = registry.get<scene::EntityReference>(obj).entity;
+				scene::Transform trans = registry.get<scene::Transform>(obj);
+
+				if (auto e = ent.lock())
+				{
+					glm::vec3 position = trans.Position;
+					glm::vec3 rotation = trans.Rotation;
+					glm::vec3 scale = trans.Scale;
+					glm::vec3 localPos = trans.LocalPosition;
+					glm::vec3 localRot = trans.LocalRotation;
+					glm::vec3 localScale = trans.LocalScale;
+					bool enabled = e->IsActive();
+					ImGui::PushID(i);
+					ImGui::Checkbox("", &enabled);
+					ImGui::SameLine();
+					ImGui::Text(e->GetEntityName().c_str());
+					ImGui::DragFloat3("Position", glm::value_ptr(position), 0.01f);
+					ImGui::DragFloat3("Rotation", glm::value_ptr(rotation), 0.01f);
+					ImGui::DragFloat3("Scale", glm::value_ptr(scale), 0.01f);
+					if (!e->Parent.expired())
+					{
+						ImGui::DragFloat3("Local Position", glm::value_ptr(localPos), 0.01f);
+						ImGui::DragFloat3("Local Rotation", glm::value_ptr(localRot), 0.01f);
+						ImGui::DragFloat3("Local Scale", glm::value_ptr(localScale), 0.01f);
+					}
+					ImGui::PopID();
+					e->SetTransform(position, rotation, scale);
+					if (!e->Parent.expired()) e->SetLocalTransform(localPos, localRot, localScale);
+					e->SetActive(enabled);
+					i++;
+				}
+			}
+		}
+		return;
+
 		if (Engine::Instance().GetWindow().GetShouldRenderToScreen()) return;
 
 		// Draw rendered frame to an ImGui image to simulate a game view window

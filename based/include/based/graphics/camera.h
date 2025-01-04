@@ -17,6 +17,7 @@ namespace based::graphics
 		Camera(const Camera& other);
 
 		Projection projection = ORTHOGRAPHIC;
+		bool main = false;
 
 		inline float GetAspectRatio() const { return mAspectRatio; }
 		inline float GetHeight() const { return mHeight; }
@@ -47,6 +48,8 @@ namespace based::graphics
 		const glm::vec3 GetUp() { return mUp; }
 		const glm::vec3 ScreenToWorldPoint(float x, float y) const;
 		const glm::vec3 ScreenToWorldPoint(glm::vec2 point) const;
+
+		Projection GetProjectionType() const { return projection; }
 	private:
 		float mAspectRatio;
 		float mHeight, mNear, mFar;

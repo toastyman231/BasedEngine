@@ -193,4 +193,11 @@ namespace based::scene
 			}
 		}
 	}
+
+	void Scene::SetActiveCamera(std::shared_ptr<graphics::Camera> cam)
+	{
+		if (mActiveCamera) mActiveCamera->main = false;
+		mActiveCamera = std::move(cam);
+		mActiveCamera->main = true;
+	}
 }
