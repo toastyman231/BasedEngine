@@ -24,6 +24,8 @@ namespace based::scene
 		std::shared_ptr<Scene> mScene;
 
 		std::unordered_map<core::UUID, std::shared_ptr<Entity>> mLoadedEntities;
+		std::unordered_map<core::UUID, std::shared_ptr<graphics::Material>> mLoadedMaterials;
+		std::unordered_map<core::UUID, std::shared_ptr<graphics::Mesh>> mLoadedMeshes;
 		std::unordered_map<core::UUID, std::shared_ptr<graphics::Texture>> mLoadedTextures;
 	};
 }

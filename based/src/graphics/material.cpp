@@ -1,20 +1,31 @@
 #include "pch.h"
 #include "graphics/material.h"
+
+#include "app.h"
+#include "engine.h"
 #include "graphics/shader.h"
 #include "graphics/texture.h"
+#include "scene/sceneserializer.h"
 
 namespace based::graphics
 {
 	Material::Material(const std::shared_ptr<Shader>& shader, const std::string& name)
-		: mMaterialName(name), mShader(shader)
+		: mMaterialName(name), mShader(shader), mUUID(core::UUID())
 	{
 		BASED_ASSERT(mShader, "Attempting to instantiate a material with a nullptr shader");
+	}
+
+	Material::Material(const std::shared_ptr<Shader>& shader, core::UUID uuid, const std::string& name)
+		: Material(shader, name)
+	{
+		mUUID = uuid;
 	}
 
 	Material::Material(const Material& other)
 	{
 		mShader = std::make_shared<graphics::Shader>(*other.mShader);
 		mTextures = other.mTextures;
+		mUUID = other.GetUUID();
 
 		// Data
 		mUniformInts = other.mUniformInts;
@@ -38,6 +49,17 @@ namespace based::graphics
 	{
 		assetLibrary.Load(name, std::make_shared<Material>(shader, name));
 		return assetLibrary.Get(name);
+	}
+
+	std::shared_ptr<Material> Material::LoadMaterialFromFile(const std::string& filepath,
+		core::AssetLibrary<Material>& assetLibrary)
+	{
+		scene::SceneSerializer serializer(Engine::Instance().GetApp().GetCurrentScene());
+		auto material = serializer.DeserializeMaterial(filepath);
+		BASED_ASSERT(material != nullptr, "Material is null!");
+		material->mMaterialSource = filepath;
+		assetLibrary.Load(material->mMaterialName, material);
+		return material;
 	}
 
 	void Material::SetShader(std::shared_ptr<Shader> shader)

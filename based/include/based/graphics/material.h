@@ -1,5 +1,6 @@
 #pragma once
 
+#include "based/core/uuid.h"
 #include "based/core/assetlibrary.h"
 
 #define DEFAULT_MAT_LIB based::graphics::DefaultLibraries::GetMaterialLibrary()
@@ -12,14 +13,18 @@ namespace based::graphics
 	{
 	public:
 		Material(const std::shared_ptr<Shader>& shader, const std::string& name = "New Material");
+		Material(const std::shared_ptr<Shader>& shader, core::UUID uuid, const std::string& name = "New Material");
 		Material(const Material& other);
 		~Material();
 
 		static std::shared_ptr<Material> CreateMaterial(const std::shared_ptr<Shader>& shader,
 			core::AssetLibrary<Material>& assetLibrary, const std::string& name = "New Material");
+		static std::shared_ptr<Material> LoadMaterialFromFile(const std::string& filepath,
+			core::AssetLibrary<Material>& assetLibrary);
 
 		inline std::weak_ptr<Shader> GetShader() const { return mShader; }
 		inline std::vector<std::shared_ptr<Texture>>& GetTextures() { return mTextures; }
+		inline core::UUID GetUUID() const { return mUUID; }
 
 		void SetShader(std::shared_ptr<Shader> shader);
 		void AddTexture(std::shared_ptr<Texture> texture, std::string location = "");
@@ -27,6 +32,9 @@ namespace based::graphics
 		void UpdateShaderUniforms() const;
 
 		std::unordered_map<std::string, int> GetTextureOrder() const { return mTextureOrder; }
+
+		bool IsFileMaterial() const { return !mMaterialSource.empty(); }
+		std::string GetMaterialSource() const { return mMaterialSource; }
 
 		std::string mMaterialName;
 
@@ -95,9 +103,12 @@ namespace based::graphics
 		std::unordered_map<std::string, glm::mat3> GetUniformMat3s() const { return mUniformMat3s; }
 		std::unordered_map<std::string, glm::mat4> GetUniformMat4s() const { return mUniformMat4s; }
 	private:
+		core::UUID mUUID;
 		std::shared_ptr<Shader> mShader;
 		std::vector<std::shared_ptr<Texture>> mTextures;
 		std::unordered_map<std::string, int> mTextureOrder;
+
+		std::string mMaterialSource;
 
 		// Data
 		std::unordered_map<std::string, int> mUniformInts;

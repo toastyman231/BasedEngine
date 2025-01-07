@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "based/scene/sceneserializer.h"
 
+#include "graphics/mesh.h"
 #include "scene/entity.h"
 #include "scene/components.h"
 
@@ -13,8 +14,8 @@ namespace based::scene
 
 	std::string ShortenPath(const std::string& input)
 	{
-		std::size_t pos = input.find("BasedEngine/Assets") + std::string("BasedEngine/Assets").length() + 1;
-		if (pos != std::string::npos) return input.substr(pos);
+		std::size_t pos = input.find("BasedEngine/Assets");
+		if (pos != std::string::npos) return input.substr(pos + std::string("BasedEngine/Assets").length() + 1);
 		return input;
 	}
 
@@ -22,6 +23,7 @@ namespace based::scene
 	{
 		out << YAML::BeginMap; // Material
 		out << YAML::Key << "Material" << YAML::Value << material->mMaterialName;
+		out << YAML::Key << "ID" << YAML::Value << material->GetUUID();
 
 		if (auto shader = material->GetShader().lock())
 		{
@@ -145,9 +147,9 @@ namespace based::scene
 
 		auto shader = LOAD_SHADER(vertexSource, fragmentSource);
 
-		auto material = graphics::Material::CreateMaterial(
-			shader, mScene->GetMaterialStorage(), materialName
-		);
+		auto id = data["ID"] ? data["ID"].as<uint64_t>() : core::UUID();
+		auto material = std::make_shared<graphics::Material>(shader, id, materialName);
+		mScene->GetMaterialStorage().Load(materialName, material);
 
 		if (auto uniformInts = data["UniformInts"])
 		{
@@ -279,6 +281,36 @@ namespace based::scene
 			out << YAML::EndMap; // CameraComponent
 		}
 
+		if (entity->HasComponent<MeshRenderer>())
+		{
+			auto meshRenderer = entity->GetComponent<MeshRenderer>();
+			auto mesh = meshRenderer.mesh;
+
+			if (auto m = mesh.lock())
+			{
+				if (!m->GetMeshSource().empty())
+				{
+					out << YAML::Key << "MeshRenderer" << YAML::BeginMap; // MeshRenderer
+
+					out << YAML::Key << "Mesh" << YAML::BeginMap; // Mesh
+					out << YAML::Key << "ID" << YAML::Value << m->GetUUID();
+					auto shortPath = ShortenPath(m->GetMeshSource());
+					out << YAML::Key << "Path" << YAML::Value << shortPath;
+					out << YAML::Key << "IsEngineAsset" << YAML::Value << (m->GetMeshSource() != shortPath);
+					out << YAML::EndMap; // Mesh
+
+					out << YAML::Key << "Material" << YAML::BeginMap; // Material
+					out << YAML::Key << "ID" << YAML::Value << m->material->GetUUID();
+					shortPath = ShortenPath(m->material->GetMaterialSource());
+					out << YAML::Key << "Path" << YAML::Value << shortPath;
+					out << YAML::Key << "IsEngineAsset" << YAML::Value << (m->material->GetMaterialSource() != shortPath);
+					out << YAML::EndMap; // Material
+
+					out << YAML::EndMap; // MeshRenderer
+				}
+			}
+		}
+
 		out << YAML::Key << "Enabled" << YAML::Value << entity->IsActive(); // Enabled
 
 		out << YAML::EndMap; // Entity
@@ -347,15 +379,12 @@ namespace based::scene
 						trans["Position"].as<glm::vec3>(),
 						trans["Rotation"].as<glm::vec3>(),
 						trans["Scale"].as<glm::vec3>());
-					/*deserializedEntity->SetLocalTransform(
-						trans["LocalPosition"].as<glm::vec3>(),
-						trans["LocalRotation"].as<glm::vec3>(),
-						trans["LocalScale"].as<glm::vec3>());*/
 				}
 
 				if (auto& cameraComponent = entity["CameraComponent"])
 				{
-					deserializedEntity->AddComponent<CameraComponent>(std::make_shared<graphics::Camera>());
+					auto newCam = std::make_shared<graphics::Camera>();
+					deserializedEntity->AddComponent<CameraComponent>(newCam);
 					auto& cc = deserializedEntity->GetComponent<CameraComponent>();
 
 					auto& cameraProps = cameraComponent["Camera"];
@@ -370,8 +399,50 @@ namespace based::scene
 						cam->SetHeight(cameraProps["OrthographicSize"].as<float>());
 						cam->SetAspectRatio(cameraProps["AspectRatio"].as<float>());
 
-						if (cameraProps["Main"].as<bool>()) mScene->SetActiveCamera(cam);
+						if (cameraComponent["Main"].as<bool>()) mScene->SetActiveCamera(cam);
 					}
+				}
+
+				if (auto& meshRenderer = entity["MeshRenderer"])
+				{
+					auto& materialId = meshRenderer["Material"]["ID"];
+					std::shared_ptr<graphics::Material> material;
+					if (materialId)
+					{
+						auto id = materialId.as<uint64_t>();
+						if (mLoadedMaterials.find(id) != mLoadedMaterials.end())
+							material = mLoadedMaterials[id];
+						else
+						{
+							material = graphics::Material::LoadMaterialFromFile(
+								meshRenderer["Material"]["Path"].as<std::string>(),
+								mScene->GetMaterialStorage());
+							mLoadedMaterials[material->GetUUID()] = material;
+						}
+					} else
+					{
+						material = graphics::Material::CreateMaterial(
+							LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), ASSET_PATH("Shaders/basic_lit.frag")),
+							mScene->GetMaterialStorage()
+						);
+					}
+
+					auto meshId = meshRenderer["Mesh"]["ID"].as<uint64_t>();
+					std::shared_ptr<graphics::Mesh> mesh;
+					if (mLoadedMeshes.find(meshId) != mLoadedMeshes.end())
+					{
+						mesh = mLoadedMeshes[meshId];
+					} else
+					{
+						auto path = meshRenderer["Mesh"]["IsEngineAsset"].as<bool>() ?
+							ASSET_PATH(meshRenderer["Mesh"]["Path"].as<std::string>()) :
+							meshRenderer["Mesh"]["Path"].as<std::string>();
+						mesh = graphics::Mesh::LoadMeshWithUUID(path,
+							mScene->GetMeshStorage(), meshId);
+					}
+					mesh->material = material;
+
+					deserializedEntity->AddComponent<MeshRenderer>(mesh);
 				}
 
 				if (auto& enabled = entity["Enabled"]) deserializedEntity->SetActive(enabled.as<bool>());

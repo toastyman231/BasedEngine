@@ -172,7 +172,8 @@ public:
 		input::Mouse::SetCursorVisible(!Engine::Instance().GetWindow().GetShouldRenderToScreen());
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
-#if 0
+		managers::RenderManager::SetRenderMode(managers::RenderMode::Unlit);
+#if 1
 		// UI Setup
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main",
 			Engine::Instance().GetWindow().GetSize());
@@ -192,7 +193,6 @@ public:
 
 		// Old stuff, plus setting camera to perspective mode
 		cubeRot = glm::vec3(0.f);
-		sunDirection = glm::vec3(60.f, -60.f, 0.f);
 		auto camera = GetCurrentScene()->GetActiveCamera();
 		camera->SetProjection(based::graphics::PERSPECTIVE);
 
@@ -205,16 +205,11 @@ public:
 		
 		// Set up crate object and material
 		const auto crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
-		const auto crateMat = graphics::Material::CreateMaterial(
-			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), ASSET_PATH("Shaders/basic_lit.frag")),
-			DEFAULT_MAT_LIB, "Crate");
-		crateMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
-		crateMat->SetUniformValue("material.shininessMat.color", glm::vec4(128.f));
-		crateMat->SetUniformValue("material.diffuseMat.useSampler", 1);
-		crateMat->AddTexture(crateTex, "material.diffuseMat.tex");
-		const auto crateMesh = graphics::Mesh::CreateMesh(
-			graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"),
-			crateMat, DEFAULT_MESH_LIB, "CrateMesh");
+		const auto crateMat = graphics::Material::LoadMaterialFromFile("Assets/Materials/Crate.bmat", 
+			GetCurrentScene()->GetMaterialStorage());
+		const auto crateMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/cube.obj"),
+			GetCurrentScene()->GetMeshStorage());
+		crateMesh->material = crateMat;
 		crateEntity = scene::Entity::CreateEntity<scene::Entity>("Crate");
 		crateEntity->AddComponent<scene::MeshRenderer>(crateMesh);
 		crateEntity->SetPosition(glm::vec3(2.7f, 1.f, 1.7f));
@@ -346,6 +341,7 @@ public:
 		sunLight = scene::Entity::CreateEntity<scene::Entity>("Sun");
 		sunLight->AddComponent<scene::DirectionalLight>(glm::vec3(1.f));
 		sunLight->SetEntityName("Sun");
+		sunLight->SetRotation(glm::vec3(60.f, -60.f, 0.f));
 
 		// Set up brick wall material
 		const auto wallDiffuseTex = std::make_shared<graphics::Texture>("Assets/brick-wall/brickwall-diff.jpg", true);
@@ -445,26 +441,6 @@ public:
 		arms->SetParent(cameraEntity);
 		arms->SetLocalPosition(glm::vec3(0.f, 0.f, -0.2f));
 		arms->SetLocalRotation(glm::vec3(0.f, 180.f, 0.f));
-
-		for (auto&& curr : GetCurrentScene()->GetRegistry().storage())
-		{
-			entt::id_type id = curr.first;
-
-			if (auto& storage = curr.second; storage.contains(arms->GetEntityHandle()))
-			{
-				entt::type_info ctype = storage.type();
-				auto by_type_id = entt::resolve(ctype.index());
-				BASED_TRACE("Arms has component id: {} with type: {}", id, ctype.name());
-				std::string_view cname = ctype.name().substr(ctype.name().find_last_of(':') + 1);
-				void* data = storage.get(arms->GetEntityHandle());
-				BASED_TRACE("Short type: {}", cname);
-				if (cname == "Transform")
-				{
-					scene::Transform* name = static_cast<scene::Transform*>(data);
-					BASED_TRACE("Arms pos: {} {} {}", name->Position.x, name->Position.y, name->Position.z);
-				}
-			}
-		}
 #endif
 
 		scene::SceneSerializer serializer(persistentScene);
@@ -474,12 +450,9 @@ public:
 		scene::SceneSerializer::SerializeMaterial(out, armsMat);
 		std::ofstream fout("Assets/Materials/Test.bmat");
 		fout << out.c_str();*/
-		serializer.Deserialize("Assets/Scenes/Test.bscn");
-		//entityStorage = serializer.GetEntityStorage();
-		//serializer.Serialize("Assets/Scenes/Test.bscn");
+		//serializer.Deserialize("Assets/Scenes/Test.bscn");
 
-		auto wallPos = GetCurrentScene()->GetEntityStorage().Get("Wall")->GetTransform().Position;
-		BASED_TRACE("Wall Pos: {} {} {}", wallPos.x, wallPos.y, wallPos.z);
+		serializer.Serialize("Assets/Scenes/Test.bscn");
 
 		BASED_TRACE("Done initializing");
 

@@ -1,9 +1,14 @@
 #include "pch.h"
 #include "graphics/mesh.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+
 #include "app.h"
 #include "graphics/shader.h"
 #include "graphics/defaultassetlibraries.h"
+#include "graphics/model.h"
 
 namespace based::graphics
 {
@@ -33,19 +38,116 @@ namespace based::graphics
 		return asset;
 	}
 
+	std::shared_ptr<Mesh> Mesh::LoadMeshFromFile(const std::string& filepath, core::AssetLibrary<Mesh>& assetLibrary)
+	{
+		return LoadMeshWithUUID(filepath, assetLibrary, core::UUID());
+	}
+
+	std::shared_ptr<Mesh> Mesh::LoadMeshWithUUID(const std::string& filepath, core::AssetLibrary<Mesh>& assetLibrary,
+		core::UUID uuid)
+	{
+		PROFILE_FUNCTION();
+		Assimp::Importer import;
+		const aiScene * scene = import.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs);
+
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		{
+			BASED_ERROR("Assimp Error: {}", import.GetErrorString());
+			return nullptr;
+		}
+
+		if (aiMesh* mesh = scene->mMeshes[0])
+		{
+			std::vector<Vertex> vertices;
+			std::vector<unsigned int> indices;
+			std::vector<Texture> textures;
+
+			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+			{
+				Vertex vertex;
+
+				//SetVertexBoneDataToDefault(vertex);
+
+				// process vertex positions, normals and texture coordinates
+				glm::vec3 vector;
+				vector.x = mesh->mVertices[i].x;
+				vector.y = mesh->mVertices[i].y;
+				vector.z = mesh->mVertices[i].z;
+				vertex.Position = vector;
+
+				vector.x = mesh->mNormals[i].x;
+				vector.y = mesh->mNormals[i].y;
+				vector.z = mesh->mNormals[i].z;
+				vertex.Normal = vector;
+
+				if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
+				{
+					glm::vec2 vec;
+					vec.x = mesh->mTextureCoords[0][i].x;
+					vec.y = mesh->mTextureCoords[0][i].y;
+					vertex.TexCoords = vec;
+				}
+				else
+					vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+
+				// process vertex tangent space
+				if (mesh->mTangents)
+				{
+					vector.x = mesh->mTangents[i].x;
+					vector.y = mesh->mTangents[i].y;
+					vector.z = mesh->mTangents[i].z;
+					vertex.Tangent = vector;
+				}
+
+				vertices.emplace_back(vertex);
+			}
+
+			// process indices
+			for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+			{
+				aiFace face = mesh->mFaces[i];
+				for (unsigned int j = 0; j < face.mNumIndices; j++)
+					indices.emplace_back(face.mIndices[j]);
+			}
+
+			auto loadedMesh = std::make_shared<Mesh>(vertices, indices, textures, uuid);
+			loadedMesh->mMeshSource = filepath;
+			assetLibrary.Load(scene->mName.C_Str(), loadedMesh);
+			return loadedMesh;
+		}
+
+		BASED_ERROR("No meshes found in loaded file");
+		return nullptr;
+	}
+
 	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned>& indices, const std::vector<Texture>& textures)
 	{
 		this->vertices = vertices;
 		this->indices = indices;
 		this->textures = textures;
+		mUUID = core::UUID();
 
 		SetupMesh();
+	}
+
+	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices,
+		const std::vector<Texture>& textures, core::UUID uuid)
+			: Mesh(vertices, indices, textures)
+	{
+		mUUID = uuid;
 	}
 
 	Mesh::Mesh(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<Material>& mat)
 	{
 		mVA = va;
 		material = mat;
+		mUUID = core::UUID();
+	}
+
+	Mesh::Mesh(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<Material>& mat, core::UUID uuid)
+		: Mesh(va, mat)
+	{
+		mUUID = uuid;
 	}
 
 	void Mesh::Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material)
@@ -142,6 +244,44 @@ namespace based::graphics
 			BASED_ERROR("ERROR: Trying to render mesh with no material set!");
 			// TODO: Replace this with default material
 		}
+	}
+
+	void Mesh::ProcessNode(aiNode* node, const aiScene* scene)
+	{
+		PROFILE_FUNCTION();
+
+		if (node->mNumMeshes > 0)
+		{
+			aiMesh* mesh = scene->mMeshes[node->mMeshes[0]];
+			ProcessMesh(mesh, scene);
+			return;
+		}
+
+		// then do the same for each of its children
+		for (unsigned int i = 0; i < node->mNumChildren; i++)
+		{
+			ProcessNode(node->mChildren[i], scene);
+		}
+	}
+
+	void Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+	{
+		PROFILE_FUNCTION();
+		
+
+		// process material
+		/*if (mesh->mMaterialIndex >= 0)
+		{
+			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+
+			std::shared_ptr<Material> meshMaterial = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+
+			mMaterials.insert(mMaterials.end(), meshMaterial);
+		}
+
+		ExtractBoneWeightForVertices(vertices, mesh, scene);*/
+
+		//meshes.emplace_back(std::make_shared<Mesh>(vertices, indices, textures));
 	}
 
 	void Mesh::SetupMesh(bool upload)
