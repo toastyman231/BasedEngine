@@ -1,6 +1,6 @@
 Scene: Unnamed Scene
 Entities:
-  - Entity: 14141904086682906472
+  - Entity: 6927051778707703474
     Name: Sphere
     Transform:
       Position: [0, 2, 0]
@@ -10,8 +10,9 @@ Entities:
       LocalRotation: [0, 0, 0]
       LocalScale: [1, 1, 1]
     Enabled: false
-  - Entity: 12498523921144921609
+  - Entity: 2535991079738968841
     Name: Arms
+    Parent: 1377934235173247421
     Transform:
       Position: [-1, 2, 3.79999995]
       Rotation: [6, 233, 0]
@@ -20,7 +21,7 @@ Entities:
       LocalRotation: [0, 180, 0]
       LocalScale: [0.00999999978, 0.00999999978, 0.00999999978]
     Enabled: true
-  - Entity: 9011506231440535861
+  - Entity: 16048062079873276709
     Name: Wall
     Transform:
       Position: [5, 3.5, 0]
@@ -30,7 +31,7 @@ Entities:
       LocalRotation: [0, 0, 0]
       LocalScale: [1, 1, 1]
     Enabled: false
-  - Entity: 13701488117006771149
+  - Entity: 62749154664799468
     Name: Sun
     Transform:
       Position: [0, 0, 0]
@@ -40,7 +41,7 @@ Entities:
       LocalRotation: [0, 0, 0]
       LocalScale: [1, 1, 1]
     Enabled: true
-  - Entity: 10696784983031698878
+  - Entity: 558668483662595473
     Name: LIGHT 2
     Transform:
       Position: [1.79999995, 2.4000001, 2.20000005]
@@ -50,7 +51,7 @@ Entities:
       LocalRotation: [0, 0, 0]
       LocalScale: [1, 1, 1]
     Enabled: true
-  - Entity: 2821001609681538270
+  - Entity: 4964426958974072787
     Name: LIGHT 1
     Transform:
       Position: [1, 1.20000005, 0.300000012]
@@ -60,7 +61,7 @@ Entities:
       LocalRotation: [0, 0, 0]
       LocalScale: [1, 1, 1]
     Enabled: true
-  - Entity: 12148905601894194335
+  - Entity: 4537627387834200136
     Name: Grass
     Transform:
       Position: [0, 0, 0]
@@ -70,7 +71,7 @@ Entities:
       LocalRotation: [0, 0, 0]
       LocalScale: [1, 1, 1]
     Enabled: false
-  - Entity: 16060625502458418652
+  - Entity: 4473546669306090123
     Name: Ground
     Transform:
       Position: [-50, 0, -50]
@@ -80,7 +81,7 @@ Entities:
       LocalRotation: [0, 0, 0]
       LocalScale: [1, 1, 1]
     Enabled: true
-  - Entity: 10169890990194419455
+  - Entity: 4242095599796230699
     Name: Skybox
     Transform:
       Position: [0, 0, 0]
@@ -90,7 +91,7 @@ Entities:
       LocalRotation: [0, 0, 0]
       LocalScale: [1, 1, 1]
     Enabled: true
-  - Entity: 676155125730667715
+  - Entity: 7104291210413437581
     Name: Box
     Transform:
       Position: [0, 2, 0]
@@ -100,7 +101,7 @@ Entities:
       LocalRotation: [0, 0, 0]
       LocalScale: [1, 1, 1]
     Enabled: false
-  - Entity: 18389693338081900540
+  - Entity: 17312794181504727427
     Name: Crate
     Transform:
       Position: [2.70000005, 1, 1.70000005]
@@ -110,7 +111,7 @@ Entities:
       LocalRotation: [0, 0, 0]
       LocalScale: [1, 1, 1]
     Enabled: false
-  - Entity: 9937483589484425202
+  - Entity: 1377934235173247421
     Name: Camera
     Transform:
       Position: [-1, 2, 4]

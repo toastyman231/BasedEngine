@@ -172,7 +172,7 @@ public:
 		input::Mouse::SetCursorVisible(!Engine::Instance().GetWindow().GetShouldRenderToScreen());
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
-#if 1
+#if 0
 		// UI Setup
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main",
 			Engine::Instance().GetWindow().GetSize());
@@ -368,7 +368,7 @@ public:
 		wallEntity->SetActive(false);
 
 		// Create arms material
-		/*const auto armsMat = graphics::Material::CreateMaterial(
+		const auto armsMat = graphics::Material::CreateMaterial(
 			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit_bones.vert"), ASSET_PATH("Shaders/basic_lit.frag")),
 			DEFAULT_MAT_LIB, "Arms");
 		const auto armsTex = std::make_shared<graphics::Texture>("Assets/Models/Base Color Palette Diffuse.png", true);
@@ -376,12 +376,12 @@ public:
 		armsMat->AddTexture(armsTex, "material.diffuseMat.tex");
 		armsMat->SetUniformValue("material.diffuseMat.tint", glm::vec4(0.77f, 0.4f, 0.35f, 1.f));
 		armsMat->SetUniformValue("material.diffuseMat.useSampler", 1);
-		armsMat->SetUniformValue("receiveShadows", 0);*/
+		armsMat->SetUniformValue("receiveShadows", 0);
 		// Create arms
 		const auto armModel = graphics::Model::CreateModel(
 			"Assets/Models/Arms.fbx", DEFAULT_MODEL_LIB, "ArmsModel");
 		auto lib = graphics::DefaultLibraries::GetModelLibrary();
-		//armModel->SetMaterial(armsMat);
+		armModel->SetMaterial(armsMat);
 		arms = scene::Entity::CreateEntity<scene::Entity>("Arms");
 		arms->AddComponent<scene::ModelRenderer>(armModel);
 		arms->SetPosition({ 0, 5, 0 });
@@ -468,15 +468,18 @@ public:
 #endif
 
 		scene::SceneSerializer serializer(persistentScene);
-		const auto armsMat = serializer.DeserializeMaterial("Assets/Materials/Test.bmat");
-		armModel->SetMaterial(armsMat);
+		/*const auto armsMat = serializer.DeserializeMaterial("Assets/Materials/Test.bmat");
+		armModel->SetMaterial(armsMat);*/
 		/*YAML::Emitter out;
 		scene::SceneSerializer::SerializeMaterial(out, armsMat);
 		std::ofstream fout("Assets/Materials/Test.bmat");
 		fout << out.c_str();*/
-		//serializer.Deserialize("Assets/Scenes/Test.bscn");
+		serializer.Deserialize("Assets/Scenes/Test.bscn");
 		//entityStorage = serializer.GetEntityStorage();
 		//serializer.Serialize("Assets/Scenes/Test.bscn");
+
+		auto wallPos = GetCurrentScene()->GetEntityStorage().Get("Wall")->GetTransform().Position;
+		BASED_TRACE("Wall Pos: {} {} {}", wallPos.x, wallPos.y, wallPos.z);
 
 		BASED_TRACE("Done initializing");
 

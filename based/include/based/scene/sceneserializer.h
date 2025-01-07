@@ -23,6 +23,7 @@ namespace based::scene
 	private:
 		std::shared_ptr<Scene> mScene;
 
+		std::unordered_map<core::UUID, std::shared_ptr<Entity>> mLoadedEntities;
 		std::unordered_map<core::UUID, std::shared_ptr<graphics::Texture>> mLoadedTextures;
 	};
 }

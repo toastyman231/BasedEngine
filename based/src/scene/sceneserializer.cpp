@@ -234,6 +234,8 @@ namespace based::scene
 		out << YAML::Key << "Entity";
 		out << YAML::Value << entity->GetUUID();
 		out << YAML::Key << "Name" << YAML::Value << entity->GetEntityName();
+		if (auto parent = entity->Parent.lock()) 
+			out << YAML::Key << "Parent" << YAML::Value << parent->GetUUID();
 
 		if (entity->HasComponent<Transform>())
 		{
@@ -320,6 +322,8 @@ namespace based::scene
 		std::string sceneName = data["Scene"].as<std::string>();
 		BASED_TRACE("Deserializing scene {}", sceneName);
 
+		std::unordered_map<core::UUID, core::UUID> parentMap;
+
 		if (auto entities = data["Entities"])
 		{
 			for (auto entity : entities)
@@ -332,16 +336,21 @@ namespace based::scene
 
 				auto deserializedEntity = Entity::CreateEntityWithUUID(name, uuid);
 
+				if (auto& parent = entity["Parent"])
+				{
+					parentMap[deserializedEntity->GetUUID()] = parent.as<uint64_t>();
+				}
+
 				if (auto& trans = entity["Transform"])
 				{
 					deserializedEntity->SetTransform(
 						trans["Position"].as<glm::vec3>(),
 						trans["Rotation"].as<glm::vec3>(),
 						trans["Scale"].as<glm::vec3>());
-					deserializedEntity->SetLocalTransform(
+					/*deserializedEntity->SetLocalTransform(
 						trans["LocalPosition"].as<glm::vec3>(),
 						trans["LocalRotation"].as<glm::vec3>(),
-						trans["LocalScale"].as<glm::vec3>());
+						trans["LocalScale"].as<glm::vec3>());*/
 				}
 
 				if (auto& cameraComponent = entity["CameraComponent"])
@@ -369,6 +378,12 @@ namespace based::scene
 				else deserializedEntity->SetActive(false);
 
 				mScene->GetEntityStorage().Load(name, deserializedEntity);
+				mLoadedEntities[deserializedEntity->GetUUID()] = deserializedEntity;
+			}
+
+			for (const auto& parentPair : parentMap)
+			{
+				mLoadedEntities[parentPair.first]->SetParent(mLoadedEntities[parentPair.second]);
 			}
 		}
 
