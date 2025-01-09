@@ -6,7 +6,6 @@ FragmentSource: Assets/shaders/custom/water.frag
 FragmentIsEngineAsset: false
 UniformInts:
   material.diffuseMat.useSampler: 0
-  height: 0
   _VertexWaveCount: 8
   _FragmentWaveCount: 40
 UniformFloats:
@@ -46,7 +45,4 @@ UniformMat3s:
 UniformMat4s:
   {}
 Textures:
-  New Texture:
-    Location: height
-    ID: 2744986107999601495
-    Path: Assets/heightmap.png
+  {}

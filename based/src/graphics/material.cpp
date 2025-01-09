@@ -59,7 +59,7 @@ namespace based::graphics
 		auto material = serializer.DeserializeMaterial(filepath);
 		BASED_ASSERT(material != nullptr, "Material is null!");
 		material->mMaterialSource = filepath;
-		assetLibrary.Load(material->mMaterialName, material);
+		assetLibrary.Load(material->mMaterialName, material, true);
 		return material;
 	}
 

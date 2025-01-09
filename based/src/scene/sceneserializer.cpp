@@ -146,7 +146,7 @@ namespace based::scene
 
 		auto id = data["ID"] ? data["ID"].as<uint64_t>() : core::UUID();
 		auto material = std::make_shared<graphics::Material>(shader, id, materialName);
-		mScene->GetMaterialStorage().Load(materialName, material);
+		mScene->GetMaterialStorage().Load(materialName, material, true);
 
 		if (auto uniformInts = data["UniformInts"])
 		{
@@ -223,7 +223,7 @@ namespace based::scene
 			}
 		}
 
-		mScene->GetMaterialStorage().Load(materialName, material);
+		mScene->GetMaterialStorage().Load(materialName, material, true);
 		return material;
 	}
 

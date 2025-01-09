@@ -265,7 +265,7 @@ public:
 		planeMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
 		planeMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
 		const auto heightMap = std::make_shared<graphics::Texture>("Assets/heightmap.png");
-		planeMesh->material->AddTexture(heightMap, "height");
+		//planeMesh->material->AddTexture(heightMap, "height");
 		planeEntity->AddComponent<scene::MeshRenderer>(planeMesh);
 		planeEntity->SetEntityName("Ground");
 
@@ -612,77 +612,6 @@ public:
 	void ImguiRender() override
 	{
 		auto& registry = GetCurrentScene()->GetRegistry();
-		// Object controls
-		if (ImGui::CollapsingHeader("Objects"))
-		{
-			const auto objects = registry.view<
-				scene::Transform, scene::EntityReference>(entt::exclude<scene::PointLight, scene::DirectionalLight>);
-
-			int i = 0;
-			for (const auto obj : objects)
-			{
-				auto ent = registry.get<scene::EntityReference>(obj).entity;
-				scene::Transform trans = registry.get<scene::Transform>(obj);
-
-				if (auto e = ent.lock())
-				{
-					glm::vec3 position = trans.Position;
-					glm::vec3 rotation = trans.Rotation;
-					glm::vec3 scale = trans.Scale;
-					glm::vec3 localPos = trans.LocalPosition;
-					glm::vec3 localRot = trans.LocalRotation;
-					glm::vec3 localScale = trans.LocalScale;
-					bool enabled = e->IsActive();
-					ImGui::PushID(i);
-					ImGui::Checkbox("", &enabled);
-					ImGui::SameLine();
-					ImGui::Text(e->GetEntityName().c_str());
-					ImGui::DragFloat3("Position", glm::value_ptr(position), 0.01f);
-					ImGui::DragFloat3("Rotation", glm::value_ptr(rotation), 0.01f);
-					ImGui::DragFloat3("Scale", glm::value_ptr(scale), 0.01f);
-					if (!e->Parent.expired())
-					{
-						ImGui::DragFloat3("Local Position", glm::value_ptr(localPos), 0.01f);
-						ImGui::DragFloat3("Local Rotation", glm::value_ptr(localRot), 0.01f);
-						ImGui::DragFloat3("Local Scale", glm::value_ptr(localScale), 0.01f);
-					}
-					ImGui::PopID();
-					e->SetTransform(position, rotation, scale);
-					if (!e->Parent.expired()) e->SetLocalTransform(localPos, localRot, localScale);
-					e->SetActive(enabled);
-					i++;
-				}
-			}
-		}
-
-		// Draw rendered frame to an ImGui image to simulate a game view window
-		if (ImGui::Begin("GameView"))
-		{
-			if (ImGui::IsWindowHovered())
-			{
-				ImGui::CaptureMouseFromApp(false);
-			}
-
-			auto& window = Engine::Instance().GetWindow();
-
-			ImVec2 winsize = ImGui::GetWindowSize();
-			glm::ivec2 arsize = window.GetSizeInAspectRatio(static_cast<int>(winsize.x) - 15,
-				static_cast<int>(winsize.y) - 35);
-			ImVec2 size = { static_cast<float>(arsize.x), static_cast<float>(arsize.y) };
-			ImVec2 pos = {
-				(winsize.x - size.x) * 0.5f,
-				((winsize.y - size.y) * 0.5f) + 10
-			};
-			ImVec2 uv0 = { 0, 1 };
-			ImVec2 uv1 = { 1, 0 };
-			ImGui::SetCursorPos(pos);
-			ImGui::Image((void*)static_cast<intptr_t>(
-				graphics::DefaultLibraries::GetRenderPassOutputs().Get("SceneColor")),
-				size, uv0, uv1);
-		}
-		ImGui::End();
-
-		return;
 
 		if (Engine::Instance().GetWindow().GetShouldRenderToScreen()) return;
 
@@ -736,7 +665,7 @@ public:
 			ImGui::SliderFloat("Time Scale", &timescale, 0.f, 2.f);
 			core::Time::SetTimeScale(timescale);
 
-			ImGui::DragFloat("Blend Speed", &animator->blendSpeed, 1.f, 0.f, 100.f);
+			//ImGui::DragFloat("Blend Speed", &animator->blendSpeed, 1.f, 0.f, 100.f);
 
 			ImGui::Spacing();
 
@@ -764,17 +693,16 @@ public:
 			ImGui::DragFloat("Rolling Ball Scale", &R, 0.01f);
 			ImGui::DragFloat("Height Coefficient", &heightCoef, 0.01f);
 
-			entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
-
-			WaterSettings();
+			/*WaterSettings();
 			UpdateShaderVisuals();
-			UpdateWaterShader();
+			UpdateWaterShader();*/
 
 			// Lighting controls
 			if (ImGui::CollapsingHeader("Lights"))
 			{
 				const auto lights = registry.view<scene::PointLight, scene::Transform, scene::EntityReference>();
 
+				ImGui::Text("Point Lights");
 				int i = 0;
 				for (const auto light : lights)
 				{
@@ -793,9 +721,25 @@ public:
 					i++;
 				}
 
-				ImGui::Text("Sun Controls");
-				ImGui::DragFloat3("Sun Direction", glm::value_ptr(sunDirection), 0.01f);
-				ImGui::DragFloat3("Sun Color", glm::value_ptr(sunColor), 0.01f);
+				ImGui::Text("Directional Lights");
+				const auto dirLights = registry.view<scene::DirectionalLight, scene::Transform, scene::EntityReference>();
+
+				for (const auto light : dirLights)
+				{
+					scene::DirectionalLight lightComponent = registry.get<scene::DirectionalLight>(light);
+					scene::Transform trans = registry.get<scene::Transform>(light);
+
+					glm::vec3 col = lightComponent.color;
+					glm::vec3 direction = trans.Rotation;
+					ImGui::PushID(i);
+					ImGui::Text("Light %d", i);
+					ImGui::DragFloat3("Light Color", glm::value_ptr(col), 0.01f);
+					ImGui::DragFloat3("Light Direction", glm::value_ptr(direction), 0.01f);
+					ImGui::PopID();
+					registry.patch<scene::Transform>(light, [direction](auto& t) { t.Rotation = direction; });
+					registry.patch<scene::DirectionalLight>(light, [col](auto& l) { l.color = col; });
+					i++;
+				}
 
 				ImGui::Text("General");
 				ImGui::DragFloat("Ambient Strength", &ambientStrength, 0.01f);
@@ -851,8 +795,9 @@ public:
 				int i = 0;
 				ImGui::Indent(10.0f);
 				// Loop over each saved material and create a dropdown for each one
-				for (const auto mat : graphics::DefaultLibraries::GetMaterialLibrary().GetAll())
+				for (const auto mat : GetCurrentScene()->GetMaterialStorage().GetAll())
 				{
+					BASED_TRACE("MATERIAL: {}", mat.first);
 					if (auto matPtr = mat.second)
 					{
 						ImGui::PushID(i);
