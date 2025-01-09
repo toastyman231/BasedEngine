@@ -797,7 +797,6 @@ public:
 				// Loop over each saved material and create a dropdown for each one
 				for (const auto mat : GetCurrentScene()->GetMaterialStorage().GetAll())
 				{
-					BASED_TRACE("MATERIAL: {}", mat.first);
 					if (auto matPtr = mat.second)
 					{
 						ImGui::PushID(i);

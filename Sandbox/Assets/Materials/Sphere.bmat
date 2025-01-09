@@ -1,5 +1,5 @@
 Material: Sphere
-ID: 2129909629317988199
+ID: 3896141016508662054
 VertexSource: Shaders/pbr_lit.vert
 VertexIsEngineAsset: true
 FragmentSource: Shaders/pbr_lit.frag
@@ -28,17 +28,17 @@ UniformMat4s:
 Textures:
   New Texture:
     Location: material.albedo.tex
-    ID: 15889658099778051091
+    ID: 15708540936755270457
     Path: Assets/sand_albedo.png
   New Texture:
     Location: material.roughness.tex
-    ID: 1900165823845073787
+    ID: 1979055450707410698
     Path: Assets/sand_roughness.png
   New Texture:
     Location: material.normal.tex
-    ID: 10131290680485828682
+    ID: 10989239534552102723
     Path: Assets/sand_normal.png
   New Texture:
     Location: material.ambientOcclusion.tex
-    ID: 15889658099778051091
+    ID: 15708540936755270457
     Path: Assets/sand_albedo.png

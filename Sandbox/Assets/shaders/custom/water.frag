@@ -87,7 +87,7 @@ void main()
     float ndotl = DotClamped(lightDir, normal);
 
     vec3 diffuseReflectance = _DiffuseReflectance / PI;
-    vec3 diffuse = pointLights[1].color * ndotl * diffuseReflectance;
+    vec3 diffuse = pointLights[0].color * ndotl * diffuseReflectance;
 
     // Schlick Fresnel
     vec3 fresnelNormal = normal;
@@ -119,5 +119,11 @@ void main()
     vec3 result = _Ambient + diffuse + specular + fresnel + tipColor;
     //result *= CalculateLighting(material, uvs, normal, fragPos, viewDir, fragPosLightSpace);
 
-    outColor = vec4(result, 1.0);
+    if (renderMode == 0) {
+        outColor = vec4(result, 1.0);
+    } else if (renderMode == 1) {
+        outColor = vec4(diffuse, 1.0);
+    } else {
+        outColor = vec4(1.0, 0.0, 1.0, 1.0);
+    }
 }

@@ -316,10 +316,9 @@ namespace based::scene
 					size = m->indices.size();
 					ofs.write(reinterpret_cast<const char*>(&size), sizeof(size_t)); // Write index size
 					ofs.write(reinterpret_cast<const char*>(m->indices.data()),
-						size * sizeof(graphics::Vertex)); // Write indices
+						size * sizeof(unsigned int)); // Write indices
 
 					out << YAML::Key << "Path" << YAML::Value << pathname;
-					out << YAML::Key << "Size" << YAML::Value << size;
 					out << YAML::Key << "IsBinary" << YAML::Value << true;
 					out << YAML::EndMap; // Mesh
 				}
@@ -506,7 +505,7 @@ namespace based::scene
 			}
 			else
 			{
-				if (auto isBinary = meshRenderer["Mesh"]["IsBinary"])
+				if (auto& isBinary = meshRenderer["Mesh"]["IsBinary"])
 				{
 					std::vector<graphics::Vertex> vertices;
 					std::vector<unsigned int> indices;
