@@ -309,9 +309,8 @@ namespace based::scene
 						CreateDirectoryIfNotExists("Assets/Materials");
 
 						shortPath = std::string("Assets/Materials/")
-							.append("Material_")
-							.append(std::to_string(CountFilesInDir("Assets/Materials"))
-							.append(".bmat"));
+							.append(m->material->mMaterialName)
+							.append(".bmat");
 						std::ofstream fout(shortPath);
 						fout << matOut.c_str();
 					}

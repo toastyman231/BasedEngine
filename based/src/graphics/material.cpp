@@ -47,7 +47,8 @@ namespace based::graphics
 	std::shared_ptr<Material> Material::CreateMaterial(const std::shared_ptr<Shader>& shader,
 		core::AssetLibrary<Material>& assetLibrary, const std::string& name)
 	{
-		assetLibrary.Load(name, std::make_shared<Material>(shader, name));
+		auto asset = std::make_shared<Material>(shader, name);
+		assetLibrary.Load(name, asset);
 		return assetLibrary.Get(name);
 	}
 
