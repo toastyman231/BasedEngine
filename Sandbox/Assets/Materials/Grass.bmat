@@ -1,0 +1,28 @@
+Material: Grass
+ID: 17614482765083486564
+VertexSource: Assets/shaders/custom/grass.vert
+VertexIsEngineAsset: false
+FragmentSource: Assets/shaders/custom/grass.frag
+FragmentIsEngineAsset: false
+UniformInts:
+  material.diffuseMat.useSampler: 0
+  castShadows: 0
+  height: 0
+UniformFloats:
+  {}
+UniformFloat2s:
+  {}
+UniformFloat3s:
+  {}
+UniformFloat4s:
+  material.diffuseMat.color: [1, 1, 1, 1]
+  material.shininessMat.color: [12, 12, 12, 12]
+UniformMat3s:
+  {}
+UniformMat4s:
+  {}
+Textures:
+  New Texture:
+    Location: height
+    ID: 3929445182286550327
+    Path: Assets/heightmap.png

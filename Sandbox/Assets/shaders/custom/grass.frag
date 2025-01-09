@@ -20,5 +20,11 @@ void main()
     vec3 diffuseColor = mix(baseColor, tipColor, heightPercent);
     vec3 viewDir = normalize(vec3(eyePos) - fragPos);
     
-    outColor = vec4(CalculateLighting(material, uvs, fragNormal, fragPos, viewDir, fragPosLightSpace) * diffuseColor, 1.0);;
+    if (renderMode == 0) {
+        outColor = vec4(CalculateLighting(material, uvs, fragNormal, fragPos, viewDir, fragPosLightSpace) * diffuseColor, 1.0);
+    } else if (renderMode == 1) {
+        outColor = vec4(diffuseColor, 1.0);
+    } else {
+        outColor = vec4(1.0, 0.0, 1.0, 1.0);
+    }
 }

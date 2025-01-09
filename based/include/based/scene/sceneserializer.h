@@ -12,7 +12,7 @@ namespace based::scene
 	public:
 		SceneSerializer(const std::shared_ptr<Scene>& scene);
 
-		static void SerializeMaterial(YAML::Emitter& out, const std::shared_ptr<graphics::Material>& material);
+		void SerializeMaterial(YAML::Emitter& out, const std::shared_ptr<graphics::Material>& material);
 		std::shared_ptr<graphics::Material> DeserializeMaterial(const std::string& filepath);
 
 		void Serialize(const std::string& filepath) override;
@@ -21,8 +21,14 @@ namespace based::scene
 		bool Deserialize(const std::string& filepath) override;
 		bool DeserializeRuntime(const std::string& filepath) override;
 	private:
+		void SerializeEntity(YAML::Emitter& out, const std::shared_ptr<Entity>& entity);
+		bool CreateDirectoryIfNotExists(const std::string& filepath);
+		int CountFilesInDir(const std::string& filepath);
+		void DeserializeEntity(YAML::detail::iterator_value entity);
+
 		std::shared_ptr<Scene> mScene;
 
+		std::unordered_map<core::UUID, core::UUID> parentMap;
 		std::unordered_map<core::UUID, std::shared_ptr<Entity>> mLoadedEntities;
 		std::unordered_map<core::UUID, std::shared_ptr<graphics::Material>> mLoadedMaterials;
 		std::unordered_map<core::UUID, std::shared_ptr<graphics::Mesh>> mLoadedMeshes;

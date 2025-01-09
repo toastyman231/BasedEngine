@@ -18,6 +18,7 @@
 #include <utility>
 #include <algorithm>
 #include <random>
+#include <filesystem>
 
 // GLM stuff
 #include <external/glm/fwd.hpp>

@@ -173,7 +173,7 @@ public:
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
 		managers::RenderManager::SetRenderMode(managers::RenderMode::Unlit);
-#if 1
+#if 0
 		// UI Setup
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main",
 			Engine::Instance().GetWindow().GetSize());
@@ -273,22 +273,17 @@ public:
 		UpdateWaterShader();
 
 		// Load grass mesh and set up material
-		const auto grassMesh = graphics::Model::LoadSingleMesh("Assets/Models/grass_highPoly.obj");
+		const auto grassMesh = graphics::Mesh::LoadMeshFromFile("Assets/Models/grass_highPoly.obj", 
+			GetCurrentScene()->GetMeshStorage());
 		graphics::DefaultLibraries::GetMeshLibrary().Load("GrassMesh", grassMesh);
-		const auto grassMatBase = graphics::Material::CreateMaterial(
-			LOAD_SHADER("Assets/shaders/custom/grass.vert", "Assets/shaders/custom/grass.frag"),
-			DEFAULT_MAT_LIB, "Grass");
+		const auto grassMatBase = graphics::Material::LoadMaterialFromFile(
+			"Assets/Materials/Grass.bmat",
+			GetCurrentScene()->GetMaterialStorage());
 		grassMesh->material = grassMatBase;
-		grassMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
-		grassMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(12.f));
-		grassMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
-		grassMesh->material->SetUniformValue("castShadows", 0);
-		grassMatBase->AddTexture(heightMap);
 
 		// Set up grass instancing
 		const auto grassInstanceMesh = graphics::Mesh::CreateInstancedMesh(
-			grassMesh->vertices, grassMesh->indices, grassMesh->textures,
-			DEFAULT_MESH_LIB, "GrassInstanceMesh");
+			grassMesh, DEFAULT_MESH_LIB, "GrassInstanceMesh");
 		grassInstanceMesh->material = grassMatBase;
 		grassInstance = scene::Entity::CreateEntity<scene::Entity>("Grass");
 		grassInstance->AddComponent<scene::MeshRenderer>(grassInstanceMesh);
@@ -444,15 +439,9 @@ public:
 #endif
 
 		scene::SceneSerializer serializer(persistentScene);
-		/*const auto armsMat = serializer.DeserializeMaterial("Assets/Materials/Test.bmat");
-		armModel->SetMaterial(armsMat);*/
-		/*YAML::Emitter out;
-		scene::SceneSerializer::SerializeMaterial(out, armsMat);
-		std::ofstream fout("Assets/Materials/Test.bmat");
-		fout << out.c_str();*/
-		//serializer.Deserialize("Assets/Scenes/Test.bscn");
 
-		serializer.Serialize("Assets/Scenes/Test.bscn");
+		serializer.Deserialize("Assets/Scenes/Test.bscn");
+		//serializer.Serialize("Assets/Scenes/Test.bscn");
 
 		BASED_TRACE("Done initializing");
 

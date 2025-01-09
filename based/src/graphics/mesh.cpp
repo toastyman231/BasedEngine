@@ -30,6 +30,15 @@ namespace based::graphics
 		return asset;
 	}
 
+	std::shared_ptr<InstancedMesh> Mesh::CreateInstancedMesh(const std::shared_ptr<Mesh>& mesh,
+		core::AssetLibrary<Mesh>& assetLibrary, const std::string& name)
+	{
+		auto asset = std::make_shared<InstancedMesh>(mesh->vertices, mesh->indices, mesh->textures);
+		asset->mMeshSource = mesh->mMeshSource;
+		assetLibrary.Load(name, asset);
+		return asset;
+	}
+
 	std::shared_ptr<Mesh> Mesh::CreateMesh(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<Material>& mat,
 	                                       core::AssetLibrary<Mesh>& assetLibrary, const std::string& name)
 	{

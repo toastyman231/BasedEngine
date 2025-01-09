@@ -58,6 +58,12 @@ namespace based::graphics
             core::AssetLibrary<Mesh>& assetLibrary,
             const std::string& name = "New Instanced Mesh");
 
+        static std::shared_ptr<InstancedMesh> CreateInstancedMesh(
+            const std::shared_ptr<Mesh>& mesh,
+            core::AssetLibrary<Mesh>& assetLibrary,
+            const std::string& name = "New Instanced Mesh"
+        );
+
         static std::shared_ptr<Mesh> CreateMesh(
             const std::shared_ptr<VertexArray>& va, 
             const std::shared_ptr<Material>& mat,
@@ -119,6 +125,7 @@ namespace based::graphics
         bool RemoveInstance(int index, bool markDirty = true);
         bool RemoveInstances(std::vector<int> indices);
         void ClearInstances();
+        std::vector<scene::Transform> GetInstanceTransforms() const { return mInstanceTransforms; }
         void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material) override;
         void Draw(scene::Transform, std::shared_ptr<Material> material) override;
 
