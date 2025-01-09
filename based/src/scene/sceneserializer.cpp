@@ -98,20 +98,17 @@ namespace based::scene
 			out << YAML::EndMap; // Mat4s
 
 			out << YAML::Key << "Textures" << YAML::BeginMap; // Textures
-			for (const auto& texInfo : material->GetTextureOrder())
+			int index = 0;
+			for (const auto& tex : material->GetTextures())
 			{
-				const auto& loc = texInfo.first;
-				const auto& index = texInfo.second;
+				out << YAML::Key << tex->GetName();
+				out << YAML::BeginMap; // Texture
+				out << YAML::Key << "Location" << YAML::Value << material->GetTextureLocationByIndex(index);
+				out << YAML::Key << "ID" << YAML::Value << tex->GetUUID();
+				out << YAML::Key << "Path" << YAML::Value << tex->GetPath();
+				out << YAML::EndMap; // Texture
 
-				if (auto& tex = material->GetTextures()[index])
-				{
-					out << YAML::Key << tex->GetName();
-					out << YAML::BeginMap; // Texture
-					out << YAML::Key << "Location" << YAML::Value << loc;
-					out << YAML::Key << "ID" << YAML::Value << tex->GetUUID();
-					out << YAML::Key << "Path" << YAML::Value << tex->GetPath();
-					out << YAML::EndMap; // Texture
-				}
+				index++;
 			}
 			out << YAML::EndMap; // Textures
 		}
@@ -288,65 +285,121 @@ namespace based::scene
 
 			if (auto m = mesh.lock())
 			{
+				out << YAML::Key << "MeshRenderer" << YAML::BeginMap; // MeshRenderer
+
 				if (!m->GetMeshSource().empty())
 				{
-					out << YAML::Key << "MeshRenderer" << YAML::BeginMap; // MeshRenderer
-
 					out << YAML::Key << "Mesh" << YAML::BeginMap; // Mesh
 					out << YAML::Key << "ID" << YAML::Value << m->GetUUID();
 					auto shortPath = ShortenPath(m->GetMeshSource());
 					out << YAML::Key << "Path" << YAML::Value << shortPath;
 					out << YAML::Key << "IsEngineAsset" << YAML::Value << (m->GetMeshSource() != shortPath);
 					out << YAML::EndMap; // Mesh
+				} else
+				{
+					out << YAML::Key << "Mesh" << YAML::BeginMap; // Mesh
+					out << YAML::Key << "ID" << YAML::Value << m->GetUUID();
 
-					out << YAML::Key << "Material" << YAML::BeginMap; // Material
-					if (!m->material->IsFileMaterial() || m->material->GetMaterialSource().empty())
-					{
-						SceneSerializer matSerializer(mScene);
-						YAML::Emitter matOut;
-						matSerializer.SerializeMaterial(matOut, m->material);
+					CreateDirectoryIfNotExists("Assets/GENERATED/Meshes");
 
-						CreateDirectoryIfNotExists("Assets/Materials");
+					std::string pathname = std::string("Assets/GENERATED/Meshes/")
+						.append("Gen_Mesh_")
+						.append(std::to_string(CountFilesInDir("Assets/GENERATED/Meshes")))
+						.append(".bin");
 
-						shortPath = std::string("Assets/Materials/")
-							.append(m->material->mMaterialName)
-							.append(".bmat");
-						std::ofstream fout(shortPath);
-						fout << matOut.c_str();
-					}
-					else shortPath = m->material->GetMaterialSource();
-					out << YAML::Key << "ID" << YAML::Value << m->material->GetUUID();
-					auto shortenedPath = ShortenPath(shortPath);
-					out << YAML::Key << "Path" << YAML::Value << shortenedPath;
-					out << YAML::Key << "IsEngineAsset" << YAML::Value << (shortenedPath != shortPath);
-					out << YAML::EndMap; // Material
+					std::ofstream ofs(pathname, std::ios::binary);
 
-					if (auto instanceMesh = 
-						std::dynamic_pointer_cast<graphics::InstancedMesh>(m))
-					{
-						// Write instance data as binary for faster speeds
-						CreateDirectoryIfNotExists("Assets/GENERATED/Transforms");
+					size_t size = m->vertices.size();
+					ofs.write(reinterpret_cast<const char*>(&size), sizeof(size_t)); // Write vertex size
+					ofs.write(reinterpret_cast<const char*>(m->vertices.data()), 
+						size * sizeof(graphics::Vertex)); // Write vertices
+					size = m->indices.size();
+					ofs.write(reinterpret_cast<const char*>(&size), sizeof(size_t)); // Write index size
+					ofs.write(reinterpret_cast<const char*>(m->indices.data()),
+						size * sizeof(graphics::Vertex)); // Write indices
 
-						std::string pathname = std::string("Assets/GENERATED/Transforms/")
-							.append("transforms_")
-							.append(std::to_string(CountFilesInDir("Assets/GENERATED/Transforms")))
-							.append(".bin");
-						auto size = instanceMesh->GetInstanceTransforms().size();
-
-						std::ofstream ofs(pathname, std::ios::binary);
-						ofs.write(reinterpret_cast<const char*>(
-							instanceMesh->GetInstanceTransforms().data()), 
-							size * sizeof(Transform));
-
-						out << YAML::Key << "Instances" << YAML::BeginMap; // Instances
-						out << YAML::Key << "Path" << YAML::Value << pathname;
-						out << YAML::Key << "Size" << YAML::Value << (int)size;
-						out << YAML::EndMap; // Instances
-					}
-
-					out << YAML::EndMap; // MeshRenderer
+					out << YAML::Key << "Path" << YAML::Value << pathname;
+					out << YAML::Key << "Size" << YAML::Value << size;
+					out << YAML::Key << "IsBinary" << YAML::Value << true;
+					out << YAML::EndMap; // Mesh
 				}
+
+				out << YAML::Key << "Material" << YAML::BeginMap; // Material
+
+				std::string shortPath;
+				if (!m->material->IsFileMaterial() || m->material->GetMaterialSource().empty())
+				{
+					SceneSerializer matSerializer(mScene);
+					YAML::Emitter matOut;
+					matSerializer.SerializeMaterial(matOut, m->material);
+
+					CreateDirectoryIfNotExists("Assets/Materials");
+
+					shortPath = std::string("Assets/Materials/")
+						.append(m->material->mMaterialName)
+						.append(".bmat");
+					std::ofstream fout(shortPath);
+					fout << matOut.c_str();
+				}
+				else shortPath = m->material->GetMaterialSource();
+				out << YAML::Key << "ID" << YAML::Value << m->material->GetUUID();
+				auto shortenedPath = ShortenPath(shortPath);
+				out << YAML::Key << "Path" << YAML::Value << shortenedPath;
+				out << YAML::Key << "IsEngineAsset" << YAML::Value << (shortenedPath != shortPath);
+				out << YAML::EndMap; // Material
+
+				if (auto instanceMesh =
+					std::dynamic_pointer_cast<graphics::InstancedMesh>(m))
+				{
+					// Write instance data as binary for faster speeds
+					CreateDirectoryIfNotExists("Assets/GENERATED/Transforms");
+
+					std::string pathname = std::string("Assets/GENERATED/Transforms/")
+						.append("transforms_")
+						.append(std::to_string(CountFilesInDir("Assets/GENERATED/Transforms")))
+						.append(".bin");
+					auto size = instanceMesh->GetInstanceTransforms().size();
+
+					std::ofstream ofs(pathname, std::ios::binary);
+					ofs.write(reinterpret_cast<const char*>(
+						instanceMesh->GetInstanceTransforms().data()),
+						size * sizeof(Transform));
+
+					out << YAML::Key << "Instances" << YAML::BeginMap; // Instances
+					out << YAML::Key << "Path" << YAML::Value << pathname;
+					out << YAML::Key << "Size" << YAML::Value << (int)size;
+					out << YAML::EndMap; // Instances
+				}
+
+				out << YAML::EndMap; // MeshRenderer
 			}
+		}
+
+		if (entity->HasComponent<PointLight>())
+		{
+			auto& pointLight = entity->GetComponent<PointLight>();
+
+			out << YAML::Key << "PointLight" << YAML::BeginMap; // Point Light
+
+			out << YAML::Key << "Color" << YAML::Value << pointLight.color;
+			out << YAML::Key << "Constant" << YAML::Value << pointLight.constant;
+			out << YAML::Key << "Intensity" << YAML::Value << pointLight.intensity;
+			out << YAML::Key << "Linear" << YAML::Value << pointLight.linear;
+			out << YAML::Key << "Quadratic" << YAML::Value << pointLight.quadratic;
+
+			out << YAML::EndMap; // Point Light
+		}
+
+		if (entity->HasComponent<DirectionalLight>())
+		{
+			auto& pointLight = entity->GetComponent<DirectionalLight>();
+
+			out << YAML::Key << "DirectionalLight" << YAML::BeginMap; // Directional Light
+
+			out << YAML::Key << "Color" << YAML::Value << pointLight.color;
+			out << YAML::Key << "Direction" << YAML::Value << pointLight.direction;
+
+			out << YAML::EndMap; // Directional Light
 		}
 
 		out << YAML::Key << "Enabled" << YAML::Value << entity->IsActive(); // Enabled
@@ -453,15 +506,36 @@ namespace based::scene
 			}
 			else
 			{
-				auto path = meshRenderer["Mesh"]["IsEngineAsset"].as<bool>() ?
-					ASSET_PATH(meshRenderer["Mesh"]["Path"].as<std::string>()) :
-					meshRenderer["Mesh"]["Path"].as<std::string>();
-				mesh = graphics::Mesh::LoadMeshWithUUID(path,
-					mScene->GetMeshStorage(), meshId);
+				if (auto isBinary = meshRenderer["Mesh"]["IsBinary"])
+				{
+					std::vector<graphics::Vertex> vertices;
+					std::vector<unsigned int> indices;
+
+					std::ifstream ifs(meshRenderer["Mesh"]["Path"].as<std::string>(), std::ios::binary);
+					size_t size;
+					ifs.read(reinterpret_cast<char*>(&size), sizeof(size_t)); // Read vertex size
+					vertices.resize(size);
+					ifs.read(reinterpret_cast<char*>(vertices.data()), size * sizeof(graphics::Vertex)); // Read vertices
+					ifs.read(reinterpret_cast<char*>(&size), sizeof(size_t)); // Read index size
+					indices.resize(size);
+					ifs.read(reinterpret_cast<char*>(indices.data()), size * sizeof(unsigned int)); // Read vertices
+
+					mesh = graphics::Mesh::CreateMesh(vertices, indices, {}, 
+						mScene->GetMeshStorage(), meshId, name);
+				} else
+				{
+					auto path = meshRenderer["Mesh"]["IsEngineAsset"].as<bool>() ?
+						ASSET_PATH(meshRenderer["Mesh"]["Path"].as<std::string>()) :
+						meshRenderer["Mesh"]["Path"].as<std::string>();
+					mesh = graphics::Mesh::LoadMeshWithUUID(path,
+						mScene->GetMeshStorage(), meshId);
+				}
+
+				mLoadedMeshes[meshId] = mesh;
 			}
 			mesh->material = material;
 
-			std::shared_ptr<graphics::InstancedMesh> instanceMesh = nullptr;
+			std::shared_ptr<graphics::InstancedMesh> instanceMesh;
 			if (auto& instances = meshRenderer["Instances"])
 			{
 				instanceMesh = graphics::Mesh::CreateInstancedMesh(mesh, mScene->GetMeshStorage());
@@ -475,6 +549,25 @@ namespace based::scene
 
 			if (instanceMesh) deserializedEntity->AddComponent<MeshRenderer>(instanceMesh);
 			else deserializedEntity->AddComponent<MeshRenderer>(mesh);
+		}
+
+		if (auto& pointLight = entity["PointLight"])
+		{
+			glm::vec3 color = pointLight["Color"].as<glm::vec3>();
+			float constant = pointLight["Constant"].as<float>();
+			float intensity = pointLight["Intensity"].as<float>();
+			float linear = pointLight["Linear"].as<float>();
+			float quadratic = pointLight["Quadratic"].as<float>();
+
+			deserializedEntity->AddComponent<PointLight>(constant, linear, quadratic, intensity, color);
+		}
+
+		if (auto& dirLight = entity["DirectionalLight"])
+		{
+			glm::vec3 color = dirLight["Color"].as<glm::vec3>();
+			glm::vec3 direction = dirLight["Direction"].as<glm::vec3>();
+
+			deserializedEntity->AddComponent<DirectionalLight>(direction, color);
 		}
 
 		if (auto& enabled = entity["Enabled"]) deserializedEntity->SetActive(enabled.as<bool>());

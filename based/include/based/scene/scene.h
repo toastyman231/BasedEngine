@@ -25,7 +25,7 @@ namespace based::scene
 		void InitializeScene() const;
 		void AnimateScene() const;
 		void RenderScene() const;
-		void UpdateScene(float deltaTime) const;
+		void UpdateScene(float deltaTime);
 		void ShutdownScene() const;
 
 		inline entt::registry& GetRegistry() { return mRegistry; }

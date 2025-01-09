@@ -128,4 +128,15 @@ namespace based::graphics
 			}
 		}
 	}
+
+	std::string Material::GetTextureLocationByIndex(int index) const
+	{
+		if (index < 0 || index > mTextures.size()) return "NONE";
+
+		for (auto& it : mTextureOrder)
+			if (it.second == index)
+				return it.first;
+
+		return "NONE";
+	}
 }

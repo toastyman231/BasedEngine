@@ -51,6 +51,14 @@ namespace based::graphics
             core::AssetLibrary<Mesh>& assetLibrary,
             const std::string& name = "New Mesh");
 
+        static std::shared_ptr<Mesh> CreateMesh(
+            const std::vector<Vertex>& vertices,
+            const std::vector<unsigned int>& indices,
+            const std::vector<Texture>& textures,
+            core::AssetLibrary<Mesh>& assetLibrary,
+            core::UUID uuid,
+            const std::string& name = "New Mesh");
+
         static std::shared_ptr<InstancedMesh> CreateInstancedMesh(
             const std::vector<Vertex>& vertices,
             const std::vector<unsigned int>& indices,
@@ -75,6 +83,7 @@ namespace based::graphics
         static std::shared_ptr<Mesh> LoadMeshWithUUID(const std::string& filepath,
             core::AssetLibrary<Mesh>& assetLibrary, core::UUID uuid);
 
+        Mesh() = default;
         Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
         Mesh(const std::vector<Vertex>& vertices, 
             const std::vector<unsigned int>& indices, 
@@ -102,12 +111,13 @@ namespace based::graphics
         core::UUID mUUID;
         std::shared_ptr<VertexArray> mVA;
         std::string mMeshSource;
-        Mesh() = default;
 
         void ProcessNode(aiNode* node, const aiScene* scene);
         void ProcessMesh(aiMesh* mesh, const aiScene* scene);
 
         void SetupMesh(bool upload = true);
+
+        friend class SceneSerializer;
 	};
 
     class InstancedMesh : public Mesh

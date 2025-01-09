@@ -31,6 +31,8 @@ namespace based::graphics
 		void RemoveTexture(std::string location);
 		void UpdateShaderUniforms() const;
 
+		std::string GetTextureLocationByIndex(int index) const;
+
 		std::unordered_map<std::string, int> GetTextureOrder() const { return mTextureOrder; }
 
 		bool IsFileMaterial() const { return !mMaterialSource.empty(); }

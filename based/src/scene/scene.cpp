@@ -129,7 +129,7 @@ namespace based::scene
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 	}
 
-	void Scene::UpdateScene(float deltaTime) const
+	void Scene::UpdateScene(float deltaTime)
 	{
 		PROFILE_FUNCTION();
 
@@ -155,6 +155,32 @@ namespace based::scene
 				if (!ent->IsActive()) continue;
 				ent->Update(deltaTime);
 			}
+		}
+
+		const auto lightView = mRegistry.view<Enabled, PointLight, Transform>();
+
+		for (const auto& entity : lightView)
+		{
+			auto& trans = mRegistry.get<Transform>(entity);
+
+			mRegistry.patch<PointLight>(entity, 
+				[this, trans](auto& l)
+				{
+					l.position = trans.Position;
+				});
+		}
+
+		const auto dirView = mRegistry.view<Enabled, DirectionalLight, Transform>();
+
+		for (const auto& entity : dirView)
+		{
+			auto& trans = mRegistry.get<Transform>(entity);
+
+			mRegistry.patch<DirectionalLight>(entity,
+				[this, trans](auto& l)
+				{
+					l.direction = trans.Rotation;
+				});
 		}
 
 		/*const auto bhvrView = mRegistry.view<Enabled, ScriptableComponent>();

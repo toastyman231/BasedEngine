@@ -172,7 +172,7 @@ public:
 		input::Mouse::SetCursorVisible(!Engine::Instance().GetWindow().GetShouldRenderToScreen());
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
-		managers::RenderManager::SetRenderMode(managers::RenderMode::Unlit);
+		//managers::RenderManager::SetRenderMode(managers::RenderMode::Unlit);
 #if 0
 		// UI Setup
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main",
@@ -222,9 +222,9 @@ public:
 			DEFAULT_MAT_LIB, "DistCube");
 		distanceMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		distanceMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
-		const auto boxMesh = graphics::Mesh::CreateMesh(
-			graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"), distanceMat,
-			DEFAULT_MESH_LIB, "BoxMesh");
+		const auto boxMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/cube.obj"),
+			GetCurrentScene()->GetMeshStorage());
+		boxMesh->material = distanceMat;
 		boxEntity = scene::Entity::CreateEntity<scene::Entity>("Box");
 		boxEntity->AddComponent<scene::MeshRenderer>(boxMesh);
 		boxEntity->SetPosition(glm::vec3(0.f, 2.f, 0.f));
@@ -241,13 +241,13 @@ public:
 			DEFAULT_MAT_LIB, "Skybox");
 		skybox->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		skybox->SetUniformValue("material.diffuseMat.useSampler", 1);
-		skybox->AddTexture(skyboxTex);
+		skybox->AddTexture(skyboxTex, "material.diffuseMat.tex");
 
 		// Generate plane mesh and skybox cube
 		const auto planeMesh = GeneratePlane(100, 100);
-		const auto skyboxMesh = graphics::Mesh::CreateMesh(
-			graphics::DefaultLibraries::GetVALibrary().Get("AtlasTextureCube"),
-			skybox, DEFAULT_MESH_LIB, "SkyboxMesh");
+		const auto skyboxMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/atlas_cube.obj"),
+			GetCurrentScene()->GetMeshStorage());
+		skyboxMesh->material = skybox;
 
 		// Skybox setup
 		skyEntity = scene::Entity::CreateEntity<scene::Entity>("Sky");
@@ -265,7 +265,7 @@ public:
 		planeMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
 		planeMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
 		const auto heightMap = std::make_shared<graphics::Texture>("Assets/heightmap.png");
-		planeMesh->material->AddTexture(heightMap);
+		planeMesh->material->AddTexture(heightMap, "height");
 		planeEntity->AddComponent<scene::MeshRenderer>(planeMesh);
 		planeEntity->SetEntityName("Ground");
 
@@ -314,9 +314,9 @@ public:
 		cubeMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
 		cubeMat->SetUniformValue("material.diffuseMat.useSampler", 0);
 		cubeMat->SetUniformValue("castShadows", 0);
-		const auto cubeMesh = graphics::Mesh::CreateMesh(
-			graphics::DefaultLibraries::GetVALibrary().Get("TexturedCube"),
-			cubeMat, DEFAULT_MESH_LIB, "LightCubeMesh");
+		const auto cubeMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/cube.obj"),
+			GetCurrentScene()->GetMeshStorage());
+		cubeMesh->material = cubeMat;
 		lightPlaceholder = scene::Entity::CreateEntity<scene::Entity>("Light1");
 		lightPlaceholder->AddComponent<scene::MeshRenderer>(cubeMesh);
 		lightPlaceholder->AddComponent<scene::PointLight>(1.0f, 0.0014f, 0.0007f, glm::vec3(1.f));
@@ -419,8 +419,8 @@ public:
 		sphereMat->SetUniformValue("material.normal.useSampler", 1);
 		sphereMat->SetUniformValue("material.ambientOcclusion.useSampler", 1);
 		//sphereMat->SetUniformValue("material.albedo.color", glm::vec4(1.0f, 0.84f, 0.0f, 1.0f));
-		const auto sphereMesh = graphics::Model::LoadSingleMesh("Assets/Models/sphere.obj");
-		graphics::DefaultLibraries::GetMeshLibrary().Load("Sphere", sphereMesh);
+		const auto sphereMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/sphere.obj"),
+			GetCurrentScene()->GetMeshStorage());
 		sphereMesh->material = sphereMat;
 		sphere = scene::Entity::CreateEntity<scene::Entity>("Sphere");
 		sphere->AddComponent<scene::MeshRenderer>(sphereMesh);
