@@ -34,19 +34,22 @@ namespace based::graphics
 		mMaterials[index] = mat;
 	}
 
-	std::shared_ptr<Mesh> Model::LoadSingleMesh(const std::string& path)
+	void Model::SetMaterials(const std::vector<std::shared_ptr<Material>>& materials)
 	{
-		const Model* model = new Model(path.c_str());
-		std::shared_ptr<Mesh> meshToCopy = model->meshes[0];
-		delete model;
-
-		return meshToCopy;
+		mMaterials = materials;
 	}
 
 	std::shared_ptr<Model> Model::CreateModel(const std::string& path, core::AssetLibrary<Model>& assetLibrary,
-		const std::string& name)
+	                                          const std::string& name)
+	{
+		return CreateModelWithUUID(path, assetLibrary, name, core::UUID());
+	}
+
+	std::shared_ptr<Model> Model::CreateModelWithUUID(const std::string& path, core::AssetLibrary<Model>& assetLibrary,
+		const std::string& name, core::UUID uuid)
 	{
 		auto model = std::make_shared<Model>(path.c_str(), name);
+		model->mUUID = uuid;
 		assetLibrary.Load(name, model);
 		return model;
 	}
@@ -63,6 +66,7 @@ namespace based::graphics
 			return;
 		}
 		mDirectory = path.substr(0, path.find_last_of('/'));
+		mModelSource = path;
 
 		ProcessNode(scene->mRootNode, scene);
 	}

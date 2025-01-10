@@ -441,6 +441,10 @@ public:
 		scene::SceneSerializer serializer(persistentScene);
 
 		serializer.Deserialize("Assets/Scenes/Test.bscn");
+		/*handsAnim = std::make_shared<animation::Animation>("Assets/Models/Arms.fbx", 
+			GetCurrentScene()->GetModelStorage().Get("ArmsModel"), 0);
+		animator = std::make_shared<animation::Animator>(handsAnim);
+		GetCurrentScene()->GetEntityStorage().Get("Arms")->AddComponent<scene::AnimatorComponent>(animator);*/
 		//serializer.Serialize("Assets/Scenes/Test.bscn");
 
 		BASED_TRACE("Done initializing");

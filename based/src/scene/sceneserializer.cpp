@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "based/scene/sceneserializer.h"
 
+#include "animation/animator.h"
 #include "graphics/mesh.h"
+#include "graphics/model.h"
 #include "scene/entity.h"
 #include "scene/components.h"
 
@@ -374,6 +376,61 @@ namespace based::scene
 			}
 		}
 
+		if (entity->HasComponent<ModelRenderer>())
+		{
+			auto& modelRenderer = entity->GetComponent<ModelRenderer>();
+			auto& model = modelRenderer.model;
+
+			if (auto& modelPtr = model.lock())
+			{
+				out << YAML::Key << "ModelRenderer" << YAML::BeginMap; // ModelRenderer
+
+				if (!modelPtr->GetModelSource().empty())
+				{
+					out << YAML::Key << "Model" << YAML::BeginMap; // Model
+					out << YAML::Key << "Name" << YAML::Value << modelPtr->GetModelName();
+					out << YAML::Key << "ID" << YAML::Value << modelPtr->GetUUID();
+					auto shortPath = ShortenPath(modelPtr->GetModelSource());
+					out << YAML::Key << "Path" << YAML::Value << shortPath;
+					out << YAML::Key << "IsEngineAsset" << YAML::Value << (modelPtr->GetModelSource() != shortPath);
+					out << YAML::EndMap; // Model
+				}
+
+				out << YAML::Key << "Materials" << YAML::BeginSeq; // Materials
+
+				for (auto& material : modelPtr->GetMaterials())
+				{
+					out << YAML::Key << "Material" << YAML::BeginMap; // Material
+
+					std::string shortPath;
+					if (!material->IsFileMaterial() || material->GetMaterialSource().empty())
+					{
+						SceneSerializer matSerializer(mScene);
+						YAML::Emitter matOut;
+						matSerializer.SerializeMaterial(matOut, material);
+
+						CreateDirectoryIfNotExists("Assets/Materials");
+
+						shortPath = std::string("Assets/Materials/")
+							.append(material->mMaterialName)
+							.append(".bmat");
+						std::ofstream fout(shortPath);
+						fout << matOut.c_str();
+					}
+					else shortPath = material->GetMaterialSource();
+					out << YAML::Key << "ID" << YAML::Value << material->GetUUID();
+					auto shortenedPath = ShortenPath(shortPath);
+					out << YAML::Key << "Path" << YAML::Value << shortenedPath;
+					out << YAML::Key << "IsEngineAsset" << YAML::Value << (shortenedPath != shortPath);
+					out << YAML::EndMap; // Material
+				}
+
+				out << YAML::EndSeq; // Materials
+
+				out << YAML::EndMap; // ModelRenderer
+			}
+		}
+
 		if (entity->HasComponent<PointLight>())
 		{
 			auto& pointLight = entity->GetComponent<PointLight>();
@@ -548,6 +605,65 @@ namespace based::scene
 
 			if (instanceMesh) deserializedEntity->AddComponent<MeshRenderer>(instanceMesh);
 			else deserializedEntity->AddComponent<MeshRenderer>(mesh);
+		}
+
+		if (auto& modelRenderer = entity["ModelRenderer"])
+		{
+			std::vector<std::shared_ptr<graphics::Material>> modelMaterials;
+			if (auto& materials = modelRenderer["Materials"])
+			{
+				for (auto& material : materials)
+				{
+					auto& materialId = material["ID"];
+					std::shared_ptr<graphics::Material> mat;
+					if (materialId)
+					{
+						auto id = materialId.as<uint64_t>();
+						if (mLoadedMaterials.find(id) != mLoadedMaterials.end())
+							mat = mLoadedMaterials[id];
+						else
+						{
+							mat = graphics::Material::LoadMaterialFromFile(
+								material["Path"].as<std::string>(),
+								mScene->GetMaterialStorage());
+							mLoadedMaterials[mat->GetUUID()] = mat;
+						}
+					}
+					else
+					{
+						mat = graphics::Material::CreateMaterial(
+							LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), ASSET_PATH("Shaders/basic_lit.frag")),
+							mScene->GetMaterialStorage()
+						);
+					}
+
+					// Set default bone matrices, in case there's no Animator component to do it
+					for (int i = 0; i < 100; ++i)
+						mat->SetUniformValue("finalBonesMatrices[" + std::to_string(i) + "]", glm::mat4(1.f));
+
+					modelMaterials.push_back(mat);
+				}
+			}
+
+			auto modelId = modelRenderer["Model"]["ID"].as<uint64_t>();
+			std::shared_ptr<graphics::Model> model;
+			if (mLoadedMeshes.find(modelId) != mLoadedMeshes.end())
+			{
+				model = mLoadedModels[modelId];
+			} else
+			{
+				auto path = modelRenderer["Model"]["IsEngineAsset"].as<bool>() ?
+					ASSET_PATH(modelRenderer["Model"]["Path"].as<std::string>()) :
+					modelRenderer["Model"]["Path"].as<std::string>();
+				model = graphics::Model::CreateModelWithUUID(path, 
+					mScene->GetModelStorage(), modelRenderer["Model"]["Name"].as<std::string>(), 
+					modelId);
+				mLoadedModels[modelId] = model;
+			}
+
+			model->SetMaterials(modelMaterials);
+
+			deserializedEntity->AddComponent<ModelRenderer>(model);
 		}
 
 		if (auto& pointLight = entity["PointLight"])

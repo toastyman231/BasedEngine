@@ -7,6 +7,8 @@
 
 #include <based/scene/entity.h>
 
+#include <utility>
+
 #define DEFAULT_MODEL_LIB based::graphics::DefaultLibraries::GetModelLibrary()
 
 struct aiMaterial;
@@ -30,7 +32,13 @@ namespace based::graphics
     {
     public:
         Model() = default;
-        Model(const char* path, std::string name = "New Model") : mModelName(std::move(name))
+        Model(const char* path, std::string name = "New Model")
+    		: mModelName(std::move(name)), mUUID(core::UUID())
+        {
+            LoadModel(path);
+        }
+        Model(const char* path, core::UUID uuid, std::string name = "New Model")
+	        : mModelName(std::move(name)), mUUID(uuid)
         {
             LoadModel(path);
         }
@@ -38,21 +46,32 @@ namespace based::graphics
         void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) const;
         void Draw(scene::Transform transform) const;
         void SetMaterial(const std::shared_ptr<Material>& mat, int index = 0);
+        void SetMaterials(const std::vector<std::shared_ptr<Material>>& materials);
 
-        static std::shared_ptr<Mesh> LoadSingleMesh(const std::string& path);
         static std::shared_ptr<Model> CreateModel(const std::string& path, 
             core::AssetLibrary<Model>& assetLibrary, const std::string& name);
+        static std::shared_ptr<Model> CreateModelWithUUID(const std::string& path,
+            core::AssetLibrary<Model>& assetLibrary, const std::string& name, core::UUID uuid);
 
         auto& GetBoneInfoMap() { return m_BoneInfoMap; }
         int& GetBoneCount() { return m_BoneCounter; }
 
         inline std::shared_ptr<Material> GetMaterial(int index = 0) const { return mMaterials[index]; }
+        inline std::vector<std::shared_ptr<Material>> GetMaterials() const { return mMaterials; }
+
+        inline bool IsFileModel() const { return !mModelSource.empty(); }
+        inline std::string GetModelSource() const { return mModelSource; }
+        inline std::string GetModelName() const { return mModelName; }
+
+        inline core::UUID GetUUID() const { return mUUID; }
     private:
         // model data
         std::vector<std::shared_ptr<Mesh>> meshes;
         std::vector<std::shared_ptr<Material>> mMaterials;
+        std::string mModelSource;
         std::string mDirectory;
         std::string mModelName;
+        core::UUID mUUID;
         std::map<std::string, BoneInfo> m_BoneInfoMap;
         int m_BoneCounter = 0;
 
