@@ -1,5 +1,5 @@
 Material: Cube
-ID: 5545578242397427476
+ID: 7106860675232446772
 VertexSource: Shaders/basic_lit.vert
 VertexIsEngineAsset: true
 FragmentSource: Shaders/basic_unlit.frag

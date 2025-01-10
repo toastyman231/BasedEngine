@@ -14,6 +14,7 @@ A simple 2D and 3D game engine based on tutorials by https://www.youtube.com/c/P
 - Assimp (Model importing, https://github.com/assimp/assimp)  
 - RmlUI (UI Rendering, https://github.com/mikke89/RmlUi)  
 - Tracy (Profiling, https://github.com/wolfpld/tracy)
+- yaml-cpp (YAML writer and parser, https://github.com/jbeder/yaml-cpp)
 
 ## My Additions
 The bulk of the engine design and implentation was done by Progrematic, if something is not listed below, it was probably done by him. You can find his original engine here: https://github.com/progrematic/hippo.
@@ -36,6 +37,7 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - Skeletal animation support with state machines
 - Physically based materials (Based on https://github.com/GarrettGunnell/Disney-PBR), with simple material editor
 - Custom Render Pass support, including post processing
+- Scene serialization and loading
 
 ## Planned Additions
 - Physics (Box2D, Jolt, Bullet?)
@@ -43,15 +45,15 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - ~~Animation System~~ Complete!
 - ~~Load shaders from file (They are hardcoded currently)~~ Complete!  
 - ~~More UI (Buttons, Sliders, Checkboxes, etc)~~ Complete!
-- Scene Save/Load (Serialization)
+- ~~Scene Save/Load (Serialization)~~ Complete!
 - ~~3D Rendering capability with PBR materials~~ Complete!
 - GUI to make creating/loading projects easier
+- Editor for authoring scenes
 - Make a game with it!
 
 ## Thoughts and Concerns
-- Currently only quads can be rendered, things like lines and circles have to be baked into a texture then rendered on a square or something. Adding dedicated render commands for those types of objects is probably worth it. Of course, this does not affect 3D rendering.
+- Currently only quads can be rendered (in terms of 2D rendering), things like lines and circles have to be baked into a texture then rendered on a square or something. Adding dedicated render commands for those types of objects is probably worth it. Of course, this does not affect 3D rendering.
 - A GUI editor would be nice to have at some point, but it's a lot of effort to make that I could be using to make actual games (or just improving the engine in general).
-- LoadScene cannot reload an already loaded scene, because all LoadScene really does is swap which scene is currently being rendered. I will need to have some way to load a scene by reading from a file of some sort to get all of it's entities, then on load create each of those entities and destroy all entities in the current scene
 - I've only tested it on Windows, theoretically it should work on Mac and Linux, but your mileage will probably vary.
 
 ## Previous Thoughts and Concerns
@@ -69,6 +71,8 @@ These items used to be grouped with the rest of the Thoughts and Concerns, but s
     - The mkproject command mentioned above takes care of this concern as well.
 - Currently all UI (just text at the moment) is rendered as an object in the world. At some point I should build a more robust UI system, with support for overlay style UI. The text also has some transparency issues, and will overwrite objects around it.
     - I added RmlUI, a very flexible UI library, to the project. There is still some optimization and simplification of the API to be done, but it's completely usable as is.
+- LoadScene cannot reload an already loaded scene, because all LoadScene really does is swap which scene is currently being rendered. I will need to have some way to load a scene by reading from a file of some sort to get all of it's entities, then on load create each of those entities and destroy all entities in the current scene
+    - I have now added scene serialization, so this is no longer a concern
 
 ## Contributing
 Feel free to contribute if you feel like it, this is my first large C++ project, so the codebase probably sucks (the parts made by me anyway). Any feedback is much appreciated.

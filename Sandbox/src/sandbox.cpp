@@ -172,8 +172,10 @@ public:
 		input::Mouse::SetCursorVisible(!Engine::Instance().GetWindow().GetShouldRenderToScreen());
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
-		//managers::RenderManager::SetRenderMode(managers::RenderMode::Unlit);
-#if 0
+
+#define SERIALIZE_SCENE 0
+
+#if SERIALIZE_SCENE
 		// UI Setup
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main",
 			Engine::Instance().GetWindow().GetSize());
@@ -445,18 +447,13 @@ public:
 
 		scene::SceneSerializer serializer(persistentScene);
 
-		/*YAML::Emitter out;
-		serializer.SerializeStateMachine(out, armsStateMachine);
-		std::ofstream ofs("Assets/TEMP/test.yaml");
-		ofs << out.c_str();*/
-
+#if SERIALIZE_SCENE
+		serializer.Serialize("Assets/Scenes/Test.bscn");
+#else
 		serializer.Deserialize("Assets/Scenes/Test.bscn");
 		animator = GetCurrentScene()->GetAnimatorStorage().Get("Animator");
-		/*handsAnim = std::make_shared<animation::Animation>("Assets/Models/Arms.fbx", 
-			GetCurrentScene()->GetModelStorage().Get("ArmsModel"), 0);
-		animator = std::make_shared<animation::Animator>(handsAnim);
-		GetCurrentScene()->GetEntityStorage().Get("Arms")->AddComponent<scene::AnimatorComponent>(animator);*/
-		//serializer.Serialize("Assets/Scenes/Test.bscn");
+		waterMaterial = GetCurrentScene()->GetMaterialStorage().Get("Plane");
+#endif
 
 		BASED_TRACE("Done initializing");
 
@@ -478,6 +475,9 @@ public:
 		{
 			animator->GetStateMachine()->SetBool("punch", true);
 		}
+
+		UpdateShaderVisuals();
+		UpdateWaterShader();
 
 		return;
 
