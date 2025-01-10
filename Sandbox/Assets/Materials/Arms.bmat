@@ -1,5 +1,5 @@
 Material: Arms
-ID: 5827412700885023649
+ID: 1045209738667575303
 VertexSource: Shaders/basic_lit_bones.vert
 VertexIsEngineAsset: true
 FragmentSource: Shaders/basic_lit.frag
@@ -23,5 +23,5 @@ UniformMat4s:
 Textures:
   ArmsTexture:
     Location: material.diffuseMat.tex
-    ID: 2186472617803428078
+    ID: 667730668907397415
     Path: Assets/Models/Base Color Palette Diffuse.png

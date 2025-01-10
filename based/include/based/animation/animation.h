@@ -20,7 +20,11 @@ namespace based::animation
     public:
         Animation() = default;
         Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model, int index = 0);
+        Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model, 
+            core::UUID uuid, int index = 0);
         Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model, const std::string& animationName);
+        Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model, 
+            core::UUID uuid, const std::string& animationName);
         ~Animation() = default;
 
         Bone* FindBone(const std::string& name);
@@ -28,6 +32,16 @@ namespace based::animation
         inline float GetTicksPerSecond() const { return static_cast<float>(m_TicksPerSecond); }
 
         inline float GetDuration() const { return m_Duration; }
+
+        inline int GetAnimationIndex() const { return m_AnimationIndex; }
+
+        inline core::UUID GetUUID() const { return m_UUID; }
+
+        std::string GetAnimationSource() const { return m_AnimationSource; }
+
+        std::string GetAnimationName() const { return m_AnimationName; }
+
+        std::shared_ptr<graphics::Model> GetSkeleton() const { return m_Skeleton.lock(); }
 
         inline const AssimpNodeData& GetRootNode() { return m_RootNode; }
 
@@ -45,14 +59,19 @@ namespace based::animation
         inline void SetPlaybackSpeed(float speed) { m_Speed = speed; }
         inline float GetPlaybackSpeed() const { return m_Speed; }
     private:
+        core::UUID m_UUID;
         bool m_IsPlaying = false;
         bool m_IsLooping = false;
         float m_Duration;
         float m_Speed = 1.f;
         int m_TicksPerSecond;
+        int m_AnimationIndex = -1;
         std::vector<Bone> m_Bones;
         AssimpNodeData m_RootNode;
+        std::string m_AnimationSource;
+        std::string m_AnimationName;
         std::map<std::string, graphics::BoneInfo> m_BoneInfoMap;
+        std::weak_ptr<graphics::Model> m_Skeleton;
 
         void ReadMissingBones(const aiAnimation* animation, graphics::Model& model);
         void ReadHierarchyData(AssimpNodeData& dest, const aiNode* src);

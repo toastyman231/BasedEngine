@@ -229,6 +229,106 @@ namespace based::scene
 		return material;
 	}
 
+	void SceneSerializer::SerializeAnimation(YAML::Emitter& out, const std::shared_ptr<animation::Animation>& animation)
+	{
+		out << YAML::BeginMap << YAML::Key << "Animation" << YAML::BeginMap; // Animation
+
+		out << YAML::Key << "ID" << YAML::Value << animation->GetUUID();
+		out << YAML::Key << "Path" << YAML::Value << animation->GetAnimationSource();
+		out << YAML::Key << "Skeleton" << YAML::Value << animation->GetSkeleton()->GetUUID();
+
+		if (animation->GetAnimationIndex() >= 0)
+		{
+			out << YAML::Key << "Index" << YAML::Value << animation->GetAnimationIndex();
+		} else
+		{
+			out << YAML::Key << "Name" << YAML::Value << animation->GetAnimationName();
+		}
+
+		out << YAML::Key << "PlaybackSpeed" << YAML::Value << animation->GetPlaybackSpeed();
+		out << YAML::Key << "Looping" << YAML::Value << animation->IsLooping();
+
+		out << YAML::EndMap << YAML::EndMap; // Animation
+	}
+
+	std::shared_ptr<animation::Animation> SceneSerializer::DeserializeAnimation(const std::string& filepath)
+	{
+		std::ifstream stream(filepath);
+		std::stringstream strStream;
+		strStream << stream.rdbuf();
+
+		YAML::Node data = YAML::Load(strStream.str());
+		if (!data["Animation"])
+		{
+			BASED_ERROR("Could not load animation at {}", filepath);
+			return nullptr;
+		}
+
+		auto& animation = data["Animation"];
+
+		auto animId = animation["ID"].as<uint64_t>();
+		auto animSource = animation["Path"].as<std::string>();
+		auto skeletonId = animation["Skeleton"].as<uint64_t>();
+
+		bool useIndex = false;
+		int index;
+		std::string animName;
+
+		if (auto& i = animation["Index"])
+		{
+			useIndex = true;
+			index = i.as<int>();
+		} else if (auto& n = animation["Name"])
+		{
+			useIndex = false;
+			animName = n.as<std::string>();
+		} else
+		{
+			BASED_ERROR("Could not find index or name of animation to load from {}!", filepath);
+		}
+
+		std::shared_ptr<graphics::Model> model;
+		if (auto& m = mLoadedModels[skeletonId]) model = m;
+		else
+		{
+			for (auto& pair : mScene->GetModelStorage().GetAll())
+			{
+				if (pair.second->GetUUID() == skeletonId)
+				{
+					model = pair.second;
+					break;
+				}
+			}
+
+			if (model == nullptr)
+			{
+				BASED_ERROR("Could not find model with ID {} when loading animation at {}!", skeletonId, filepath);
+				return nullptr;
+			}
+		}
+
+		std::shared_ptr<animation::Animation> anim;
+		if (useIndex)
+		{
+			anim = std::make_shared<animation::Animation>(animSource, model, index, animId);
+		} else
+		{
+			anim = std::make_shared<animation::Animation>(animSource, model, animId, animName);
+		}
+
+		if (auto& speed = animation["PlaybackSpeed"])
+		{
+			anim->SetPlaybackSpeed(speed.as<float>());
+		}
+
+		if (auto& looping = animation["Looping"])
+		{
+			anim->SetLooping(looping.as<bool>());
+		}
+
+		return anim;
+	}
+
 	void SceneSerializer::SerializeEntity(YAML::Emitter& out, const std::shared_ptr<Entity>& entity)
 	{
 		out << YAML::BeginMap; // Entity
@@ -400,7 +500,7 @@ namespace based::scene
 
 				for (auto& material : modelPtr->GetMaterials())
 				{
-					out << YAML::Key << "Material" << YAML::BeginMap; // Material
+					out << YAML::BeginMap << YAML::Key << "Material" << YAML::BeginMap; // Material
 
 					std::string shortPath;
 					if (!material->IsFileMaterial() || material->GetMaterialSource().empty())
@@ -422,12 +522,23 @@ namespace based::scene
 					auto shortenedPath = ShortenPath(shortPath);
 					out << YAML::Key << "Path" << YAML::Value << shortenedPath;
 					out << YAML::Key << "IsEngineAsset" << YAML::Value << (shortenedPath != shortPath);
-					out << YAML::EndMap; // Material
+					out << YAML::EndMap << YAML::EndMap; // Material
 				}
 
 				out << YAML::EndSeq; // Materials
 
 				out << YAML::EndMap; // ModelRenderer
+			}
+		}
+
+		if (entity->HasComponent<AnimatorComponent>())
+		{
+			auto& animatorComponent = entity->GetComponent<AnimatorComponent>();
+			auto& animator = animatorComponent.animator;
+
+			if (auto animatorPtr = animator.lock())
+			{
+				//animatorPtr->
 			}
 		}
 
@@ -612,8 +723,9 @@ namespace based::scene
 			std::vector<std::shared_ptr<graphics::Material>> modelMaterials;
 			if (auto& materials = modelRenderer["Materials"])
 			{
-				for (auto& material : materials)
+				for (auto& m : materials)
 				{
+					auto& material = m["Material"];
 					auto& materialId = material["ID"];
 					std::shared_ptr<graphics::Material> mat;
 					if (materialId)

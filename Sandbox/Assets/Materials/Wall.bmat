@@ -1,5 +1,5 @@
 Material: Wall
-ID: 4903967547075453280
+ID: 2602415951985720359
 VertexSource: Shaders/basic_lit.vert
 VertexIsEngineAsset: true
 FragmentSource: Shaders/basic_lit.frag
@@ -24,9 +24,9 @@ UniformMat4s:
 Textures:
   New Texture:
     Location: material.diffuseMat.tex
-    ID: 11322397168466472584
+    ID: 455570212099660974
     Path: Assets/brick-wall/brickwall-diff.jpg
   New Texture:
     Location: material.normalMat.tex
-    ID: 14312014818929263329
+    ID: 12175700254909917825
     Path: Assets/brick-wall/brickwall-norm.jpg

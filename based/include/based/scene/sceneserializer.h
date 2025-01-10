@@ -5,6 +5,11 @@
 #include "based/scene/scene.h"
 #include "based/core/assetlibrary.h"
 
+namespace based::animation
+{
+	class Animation;
+}
+
 namespace based::scene
 {
 	class SceneSerializer : public core::Serializer
@@ -14,6 +19,9 @@ namespace based::scene
 
 		void SerializeMaterial(YAML::Emitter& out, const std::shared_ptr<graphics::Material>& material);
 		std::shared_ptr<graphics::Material> DeserializeMaterial(const std::string& filepath);
+
+		void SerializeAnimation(YAML::Emitter& out, const std::shared_ptr<animation::Animation>& animation);
+		std::shared_ptr<animation::Animation> DeserializeAnimation(const std::string& filepath);
 
 		void Serialize(const std::string& filepath) override;
 		void SerializeRuntime(const std::string& filepath) override;

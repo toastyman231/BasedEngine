@@ -15,11 +15,31 @@ namespace based::animation
 		const auto animation = scene->mAnimations[index];
 		m_Duration = static_cast<float>(animation->mDuration);
 		m_TicksPerSecond = static_cast<int>(animation->mTicksPerSecond);
+		m_Skeleton = model;
+		m_AnimationIndex = index;
+		m_UUID = core::UUID();
+		m_AnimationSource = animationPath;
+		m_AnimationName = animation->mName.C_Str();
 		ReadHierarchyData(m_RootNode, scene->mRootNode);
 		ReadMissingBones(animation, *model);
 	}
 
-	Animation::Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model, const std::string& animationName)
+	Animation::Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model,
+		core::UUID uuid, int index)
+		: Animation(animationPath, model, index)
+	{
+		m_UUID = uuid;
+	}
+
+	Animation::Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model,
+		core::UUID uuid, const std::string& animationName)
+		: Animation(animationPath, model, animationName)
+	{
+		m_UUID = uuid;
+	}
+
+	Animation::Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model, 
+		const std::string& animationName)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
@@ -30,6 +50,10 @@ namespace based::animation
 		{
 			m_Duration = static_cast<float>(animation->mDuration);
 			m_TicksPerSecond = static_cast<int>(animation->mTicksPerSecond);
+			m_Skeleton = model;
+			m_AnimationName = animationName;
+			m_UUID = core::UUID();
+			m_AnimationSource = animationPath;
 			ReadHierarchyData(m_RootNode, scene->mRootNode);
 			ReadMissingBones(animation, *model);
 		}

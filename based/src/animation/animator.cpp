@@ -46,7 +46,7 @@ namespace based::animation
 
 		if (auto cur = m_CurrentAnimation.lock())
 		{
-			if (!cur->IsPlaying()) return;
+			if (!cur->IsPlaying() && m_StateMachine) return;
 
 			m_CurrentTime += cur->GetTicksPerSecond() * dt * cur->GetPlaybackSpeed();
 			if (m_CurrentTime > cur->GetDuration() && !cur->IsLooping())
@@ -94,6 +94,28 @@ namespace based::animation
 					m_BlendDelta * bone->GetLocalTransform();
 			}
 			else if (bone)
+			{
+				bone->Update(m_CurrentTime);
+				nodeTransform = bone->GetLocalTransform();
+			}
+
+			const glm::mat4 globalTransformation = parentTransform * nodeTransform;
+
+			auto boneInfoMap = cur->GetBoneIDMap();
+			if (boneInfoMap.find(nodeName) != boneInfoMap.end())
+			{
+				const int index = boneInfoMap[nodeName].id;
+				const glm::mat4 offset = boneInfoMap[nodeName].offset;
+				m_FinalBoneMatrices[index] = globalTransformation * offset;
+			}
+
+			for (int i = 0; i < node->childrenCount; i++)
+				CalculateBoneTransform(&node->children[i], globalTransformation, animation);
+		} else if (anim && cur)
+		{
+			Bone* bone = anim->FindBone(nodeName);
+
+			if (bone)
 			{
 				bone->Update(m_CurrentTime);
 				nodeTransform = bone->GetLocalTransform();
