@@ -78,37 +78,18 @@ namespace based::animation
 		std::string m_Name;
 	};
 
-	class AnimationTransition
+	template <typename T>
+	struct TransitionRule
 	{
-	public:
-		AnimationTransition() = default;
-		AnimationTransition(const std::shared_ptr<AnimationState>& source, const std::shared_ptr<AnimationState>& destination, 
-			const std::shared_ptr<Animator>& animator, std::function<bool()> predicate = nullptr)
-			: m_Source(source), m_Destination(destination), m_Animator(animator)
-			, m_Predicate(std::move(predicate)) {}
-		virtual ~AnimationTransition() = default;
+		std::string name;
+		T val;
+		T defaultVal;
+	};
 
-		virtual bool ShouldStateTransition() {
-			if (m_Predicate != nullptr) return m_Predicate();
-
-			if (auto anim = m_Animator.lock())
-			{
-				if (auto source = m_Source.lock())
-					return anim->GetPlaybackTime() >= source->GetStateAnimationClip()->GetDuration();
-				BASED_WARN("Source state is invalid!");
-			}
-			else { BASED_WARN("Animator is invalid!"); }
-
-			return false;
-		}
-
-		inline std::weak_ptr<AnimationState> GetSourceState() const { return m_Source; }
-		inline std::weak_ptr<AnimationState> GetDestinationState() const { return m_Destination; }
-	private:
-		std::weak_ptr<AnimationState> m_Source;
-		std::weak_ptr<AnimationState> m_Destination;
-		std::weak_ptr<Animator> m_Animator;
-		std::function<bool()> m_Predicate;
+	enum class TransitionType : uint8_t
+	{
+		All,
+		Any
 	};
 
 	class AnimationStateMachine
@@ -132,15 +113,168 @@ namespace based::animation
 		bool GetBool(const std::string& name, bool defaultValue = false);
 		std::string GetString(const std::string& name, std::string defaultValue = "none");
 
+		void SetHasBeenReset(bool reset) { m_HasBeenReset = reset; }
+
 		inline std::vector<std::shared_ptr<AnimationState>> GetStates() const { return m_States; }
 		inline std::shared_ptr<AnimationState> GetCurrentState() const { return m_CurrentState.lock(); }
+		inline std::shared_ptr<AnimationTransition> GetLastTransition() const { return m_LastTransition; }
+		inline bool HasBeenReset() const { return m_HasBeenReset; }
 	private:
 		std::weak_ptr<Animator> m_Animator;
 		std::weak_ptr<AnimationState> m_CurrentState;
+		std::shared_ptr<AnimationTransition> m_LastTransition;
 		std::vector<std::shared_ptr<AnimationState>> m_States;
 		std::unordered_map<std::string, float> m_FloatParameters;
 		std::unordered_map<std::string, int> m_IntParameters;
 		std::unordered_map<std::string, bool> m_BoolParameters;
 		std::unordered_map<std::string, std::string> m_StringParameters;
+		bool m_HasBeenReset = true;
+	};
+
+	struct TransitionRules
+	{
+		std::vector<TransitionRule<float>> floatRules;
+		std::vector<TransitionRule<int>> intRules;
+		std::vector<TransitionRule<bool>> boolRules;
+		std::vector<TransitionRule<std::string>> stringRules;
+		TransitionType transitionType = TransitionType::All;
+
+		TransitionRules() = default;
+
+		inline bool CheckRules(const std::shared_ptr<AnimationStateMachine>& stateMachine) const
+		{
+			bool result = false;
+
+			for (auto& rule : floatRules)
+			{
+				if (stateMachine->GetFloat(rule.name, rule.defaultVal) == rule.val)
+				{
+					if (transitionType == TransitionType::Any) return true;
+					else result = true;
+				}
+				else result = false;
+			}
+
+			for (auto& rule : intRules)
+			{
+				if (stateMachine->GetInteger(rule.name, rule.defaultVal) == rule.val)
+				{
+					if (transitionType == TransitionType::Any) return true;
+					else result = true;
+				}
+				else result = false;
+			}
+
+			for (auto& rule : boolRules)
+			{
+				if (stateMachine->GetBool(rule.name, rule.defaultVal) == rule.val)
+				{
+					if (transitionType == TransitionType::Any) return true;
+					else result = true;
+				}
+				else result = false;
+			}
+
+			for (auto& rule : stringRules)
+			{
+				if (stateMachine->GetString(rule.name, rule.defaultVal) == rule.val)
+				{
+					if (transitionType == TransitionType::Any) return true;
+					else result = true;
+				}
+				else result = false;
+			}
+
+			return result;
+		}
+
+		inline void Reset(const std::shared_ptr<AnimationStateMachine>& stateMachine)
+		{
+			for (auto& rule : floatRules)
+			{
+				stateMachine->SetFloat(rule.name, rule.defaultVal);
+			}
+
+			for (auto& rule : intRules)
+			{
+				stateMachine->SetInteger(rule.name, rule.defaultVal);
+			}
+
+			for (auto& rule : boolRules)
+			{
+				stateMachine->SetBool(rule.name, rule.defaultVal);
+			}
+
+			for (auto& rule : stringRules)
+			{
+				stateMachine->SetString(rule.name, rule.defaultVal);
+			}
+		}
+	};
+
+	class AnimationTransition
+	{
+	public:
+		AnimationTransition() = default;
+		AnimationTransition(const std::shared_ptr<AnimationState>& source, const std::shared_ptr<AnimationState>& destination,
+			const std::shared_ptr<Animator>& animator, std::function<bool()> predicate = nullptr)
+			: m_Source(source), m_Destination(destination), m_Animator(animator)
+			, m_Predicate(std::move(predicate)) {}
+		AnimationTransition(
+			const std::shared_ptr<AnimationState>& source,
+			const std::shared_ptr<AnimationState>& destination,
+			const std::shared_ptr<Animator>& animator,
+			const std::shared_ptr<AnimationStateMachine>& stateMachine,
+			const TransitionRules& rules = TransitionRules(),
+			bool autoReset = false
+			)
+			: m_Source(source), m_Destination(destination), m_Animator(animator), m_StateMachine(stateMachine),
+				m_TransitionRules(rules), m_AutoReset(autoReset) {}
+			virtual ~AnimationTransition() = default;
+
+		virtual bool ShouldStateTransition() {
+			if (m_Predicate != nullptr) return m_Predicate();
+
+			auto stateMachine = m_StateMachine.lock();
+			auto anim = m_Animator.lock();
+			auto source = m_Source.lock();
+
+			if (stateMachine && anim && source)
+			{
+				if (m_TransitionRules.CheckRules(stateMachine)) return true;
+
+				bool animDone = anim->GetPlaybackTime() >= source->GetStateAnimationClip()->GetDuration();
+				if (animDone && (stateMachine->GetLastTransition() && stateMachine->GetLastTransition()->m_AutoReset) 
+					&& !stateMachine->HasBeenReset())
+				{
+					if (stateMachine->GetLastTransition())
+					{
+						stateMachine->GetLastTransition()->m_TransitionRules.Reset(stateMachine);
+						stateMachine->SetHasBeenReset(true);
+					}
+				}
+				return animDone;
+			} else if (anim && source)
+			{
+				bool animDone = anim->GetPlaybackTime() >= source->GetStateAnimationClip()->GetDuration();
+				return animDone;
+			}
+
+			return false;
+		}
+
+		inline std::weak_ptr<AnimationState> GetSourceState() const { return m_Source; }
+		inline std::weak_ptr<AnimationState> GetDestinationState() const { return m_Destination; }
+
+		inline std::function<bool()> GetPredicate() const { return m_Predicate; }
+	private:
+		std::weak_ptr<AnimationState> m_Source;
+		std::weak_ptr<AnimationState> m_Destination;
+		std::weak_ptr<Animator> m_Animator;
+		std::weak_ptr<AnimationStateMachine> m_StateMachine;
+		std::function<bool()> m_Predicate;
+
+		TransitionRules m_TransitionRules;
+		bool m_AutoReset;
 	};
 }

@@ -136,7 +136,7 @@ private:
 	std::shared_ptr<animation::AnimationStateMachine> armsStateMachine;
 	std::shared_ptr<animation::AnimationState> idleState;
 	std::shared_ptr<animation::AnimationState> punchState;
-	std::shared_ptr<MyAnimationTransition> idleToPunchTransition;
+	std::shared_ptr<animation::AnimationTransition> idleToPunchTransition;
 	std::shared_ptr<animation::AnimationTransition> punchToIdleTransition;
 
 	std::shared_ptr<graphics::ComputeShader> compShader;
@@ -173,7 +173,7 @@ public:
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
 		//managers::RenderManager::SetRenderMode(managers::RenderMode::Unlit);
-#if 0
+#if 1
 		// UI Setup
 		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main",
 			Engine::Instance().GetWindow().GetSize());
@@ -381,15 +381,19 @@ public:
 		handsAnim = std::make_shared<animation::Animation>("Assets/Models/Arms.fbx", armModel, 0);
 		handsAnim2 = std::make_shared<animation::Animation>("Assets/Models/Arms.fbx", armModel, "HumanFPS|Punch");
 		handsAnim->SetPlaybackSpeed(0.5f);
-		//handsAnim->SetLooping(true);
+		handsAnim->SetLooping(true);
 		animator = std::make_shared<animation::Animator>(handsAnim);
 		// Create state machine, states, and transitions
 		armsStateMachine = std::make_shared<animation::AnimationStateMachine>(animator);
 		idleState = std::make_shared<animation::AnimationState>(handsAnim, "IdleState");
 		punchState = std::make_shared<animation::AnimationState>(handsAnim2, "PunchState");
 
-		idleToPunchTransition = std::make_shared<MyAnimationTransition>(idleState, punchState, animator, armsStateMachine);
-		punchToIdleTransition = std::make_shared<animation::AnimationTransition>(punchState, idleState, animator);
+		idleToPunchTransition = std::make_shared<animation::AnimationTransition>(idleState, punchState, animator, 
+			armsStateMachine, animation::TransitionRules{ {}, {},
+				{animation::TransitionRule<bool>{"punch", true, false}}, {}
+			}, true);
+		punchToIdleTransition = std::make_shared<animation::AnimationTransition>(punchState, idleState, animator,
+			armsStateMachine);
 		idleState->AddTransition(idleToPunchTransition);
 		punchState->AddTransition(punchToIdleTransition);
 		armsStateMachine->AddState(idleState, true);
@@ -447,7 +451,7 @@ public:
 		//GetCurrentScene()->GetModelStorage().Load("ArmsModel", armModel);
 		//auto loadedAnim = serializer.DeserializeAnimation("Assets/Animations/HandsIdle.banim");
 
-		serializer.Deserialize("Assets/Scenes/Test.bscn");
+		//serializer.Deserialize("Assets/Scenes/Test.bscn");
 		/*handsAnim = std::make_shared<animation::Animation>("Assets/Models/Arms.fbx", 
 			GetCurrentScene()->GetModelStorage().Get("ArmsModel"), 0);
 		animator = std::make_shared<animation::Animator>(handsAnim);
@@ -469,6 +473,12 @@ public:
 	void Update(float deltaTime) override
 	{
 		App::Update(deltaTime);
+
+		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
+		{
+			animator->GetStateMachine()->SetBool("punch", true);
+		}
+
 		return;
 
 		// Movement input

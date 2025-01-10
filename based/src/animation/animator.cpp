@@ -59,8 +59,7 @@ namespace based::animation
 			} else if (m_CurrentTime >= cur->GetDuration())
 			{
 				m_CurrentTime = fmod(m_CurrentTime, cur->GetDuration());
-			}
-			CalculateBoneTransform(&cur->GetRootNode(), glm::mat4(1.0f),cur);
+			} else CalculateBoneTransform(&cur->GetRootNode(), glm::mat4(1.0f),cur);
 		}
 	}
 
@@ -164,6 +163,7 @@ namespace based::animation
 				if (transition->ShouldStateTransition())
 				{
 					shouldTransition = true;
+					m_LastTransition = transition;
 					dest = transition->GetDestinationState().lock();
 					break;
 				}
@@ -176,7 +176,7 @@ namespace based::animation
 				dest->OnStateEnter(m_Animator.lock());
 			}
 
-			return state->GetStateAnimationClip();
+			return m_CurrentState.lock()->GetStateAnimationClip();
 		} else
 		{
 			BASED_WARN("Current state or animator is invalid!");
@@ -201,21 +201,25 @@ namespace based::animation
 
 	void AnimationStateMachine::SetFloat(const std::string& name, float value)
 	{
+		m_HasBeenReset = false;
 		m_FloatParameters.insert_or_assign(name, value);
 	}
 
 	void AnimationStateMachine::SetInteger(const std::string& name, int value)
 	{
+		m_HasBeenReset = false;
 		m_IntParameters.insert_or_assign(name, value);
 	}
 
 	void AnimationStateMachine::SetBool(const std::string& name, bool value)
 	{
+		m_HasBeenReset = false;
 		m_BoolParameters.insert_or_assign(name, value);
 	}
 
 	void AnimationStateMachine::SetString(const std::string& name, std::string& value)
 	{
+		m_HasBeenReset = false;
 		m_StringParameters.insert_or_assign(name, value);
 	}
 
