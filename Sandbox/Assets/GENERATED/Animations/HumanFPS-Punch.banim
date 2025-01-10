@@ -1,0 +1,7 @@
+Animation:
+  ID: 1679383447252564974
+  Path: Assets/Models/Arms.fbx
+  Skeleton: 12285061340402715659
+  Name: HumanFPS|Punch
+  PlaybackSpeed: 1
+  Looping: false

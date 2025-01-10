@@ -1,6 +1,6 @@
 Scene: Unnamed Scene
 Entities:
-  - Entity: 3220399773623315403
+  - Entity: 14468378688108853146
     Name: Sphere
     Transform:
       Position: [0, 2, 0]
@@ -11,17 +11,17 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 2057055208580456121
+        ID: 294238013695347248
         Path: Meshes/sphere.obj
         IsEngineAsset: true
       Material:
-        ID: 16164354681151049739
-        Path: Assets/Materials/Sphere.bmat
+        ID: 11877043798828220968
+        Path: Assets/GENERATED/Materials/Sphere.bmat
         IsEngineAsset: false
     Enabled: false
-  - Entity: 4342857763547232792
+  - Entity: 7245596803707939453
     Name: Arms
-    Parent: 2282267744795263969
+    Parent: 7318748928525166087
     Transform:
       Position: [-1, 2, 3.79999995]
       Rotation: [6, 233, 0]
@@ -32,20 +32,74 @@ Entities:
     ModelRenderer:
       Model:
         Name: ArmsModel
-        ID: 12386053665357636397
+        ID: 12285061340402715659
         Path: Assets/Models/Arms.fbx
         IsEngineAsset: false
       Materials:
         - Material:
-            ID: 474915704376230013
-            Path: Assets/Materials/Arms.bmat
+            ID: 12430351634449995535
+            Path: Assets/GENERATED/Materials/Arms.bmat
             IsEngineAsset: false
     AnimatorComponent:
       Animation:
-        ID: 7110049039532166989
-        Path: Assets/Animations/Idle.banim
+        ID: 18000010389210982368
+        Path: Assets/GENERATED/Animations/Idle.banim
+      StateMachine:
+        FloatParams:
+          {}
+        IntParams:
+          {}
+        BoolParams:
+          {}
+        StringParams:
+          {}
+        States:
+          - State:
+              Name: IdleState
+              Animation:
+                ID: 18000010389210982368
+                Path: Assets/GENERATED/Animations/Idle.banim
+              Transitions:
+                - Transition:
+                    Source: 0
+                    Destination: 1
+                    TransitionRules:
+                      FloatParams:
+                        {}
+                      IntParams:
+                        {}
+                      BoolParams:
+                        - BoolRule:
+                            Name: punch
+                            Value: true
+                            Default: false
+                      StringParams:
+                        {}
+                    AutoReset: true
+              IsDefault: true
+          - State:
+              Name: PunchState
+              Animation:
+                ID: 1679383447252564974
+                Path: Assets/GENERATED/Animations/HumanFPS-Punch.banim
+              Transitions:
+                - Transition:
+                    Source: 1
+                    Destination: 0
+                    TransitionRules:
+                      FloatParams:
+                        {}
+                      IntParams:
+                        {}
+                      BoolParams:
+                        []
+                      StringParams:
+                        {}
+                    AutoReset: false
+              IsDefault: false
+      TimeMode: 1
     Enabled: true
-  - Entity: 1777905882727955839
+  - Entity: 2862288799907628561
     Name: Wall
     Transform:
       Position: [5, 3.5, 0]
@@ -56,15 +110,15 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 4130647250066231341
-        Path: Assets/GENERATED/Meshes/Gen_Mesh_2.bin
+        ID: 820958840702330497
+        Path: Assets/GENERATED/Meshes/Gen_Mesh_0.bin
         IsBinary: true
       Material:
-        ID: 167947694444379861
-        Path: Assets/Materials/Wall.bmat
+        ID: 7777325355203815523
+        Path: Assets/GENERATED/Materials/Wall.bmat
         IsEngineAsset: false
     Enabled: false
-  - Entity: 5627328637158742267
+  - Entity: 6117198534682067949
     Name: Sun
     Transform:
       Position: [0, 0, 0]
@@ -77,7 +131,7 @@ Entities:
       Color: [1, 1, 1]
       Direction: [60, 60, 0]
     Enabled: true
-  - Entity: 13492384670137487420
+  - Entity: 16592665000550960219
     Name: LIGHT 2
     Transform:
       Position: [1.79999995, 2.4000001, 2.20000005]
@@ -88,12 +142,12 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 8527378587009034341
+        ID: 349808665703988209
         Path: Meshes/cube.obj
         IsEngineAsset: true
       Material:
-        ID: 18215733205486975231
-        Path: Assets/Materials/Cube.bmat
+        ID: 5545578242397427476
+        Path: Assets/GENERATED/Materials/Cube.bmat
         IsEngineAsset: false
     PointLight:
       Color: [1, 1, 1]
@@ -102,7 +156,7 @@ Entities:
       Linear: 0.0900000036
       Quadratic: 0.0320000015
     Enabled: true
-  - Entity: 15506770877904626515
+  - Entity: 2750902307250104049
     Name: LIGHT 1
     Transform:
       Position: [1, 1.20000005, 0.300000012]
@@ -113,12 +167,12 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 8527378587009034341
+        ID: 349808665703988209
         Path: Meshes/cube.obj
         IsEngineAsset: true
       Material:
-        ID: 18215733205486975231
-        Path: Assets/Materials/Cube.bmat
+        ID: 5545578242397427476
+        Path: Assets/GENERATED/Materials/Cube.bmat
         IsEngineAsset: false
     PointLight:
       Color: [1, 1, 1]
@@ -127,7 +181,7 @@ Entities:
       Linear: 0.00139999995
       Quadratic: 0.000699999975
     Enabled: true
-  - Entity: 15298449629170041930
+  - Entity: 841308606921258303
     Name: Grass
     Transform:
       Position: [0, 0, 0]
@@ -138,7 +192,7 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 15728077824656328670
+        ID: 10949055141931024812
         Path: Assets/Models/grass_highPoly.obj
         IsEngineAsset: false
       Material:
@@ -146,10 +200,10 @@ Entities:
         Path: Assets/Materials/Grass.bmat
         IsEngineAsset: false
       Instances:
-        Path: Assets/GENERATED/Transforms/transforms_1.bin
+        Path: Assets/GENERATED/Transforms/transforms_0.bin
         Size: 100489
     Enabled: false
-  - Entity: 13241350487828981955
+  - Entity: 8154406251974964422
     Name: Ground
     Transform:
       Position: [-50, 0, -50]
@@ -160,15 +214,15 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 17975382373553545553
-        Path: Assets/GENERATED/Meshes/Gen_Mesh_3.bin
+        ID: 13481576032431623764
+        Path: Assets/GENERATED/Meshes/Gen_Mesh_1.bin
         IsBinary: true
       Material:
-        ID: 12739318593255176802
-        Path: Assets/Materials/Plane.bmat
+        ID: 5168771719059832621
+        Path: Assets/GENERATED/Materials/Plane.bmat
         IsEngineAsset: false
     Enabled: true
-  - Entity: 13562535893367043947
+  - Entity: 8711905224365354060
     Name: Skybox
     Transform:
       Position: [0, 0, 0]
@@ -179,15 +233,15 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 5156099041027044720
+        ID: 15386496098031674757
         Path: Meshes/atlas_cube.obj
         IsEngineAsset: true
       Material:
-        ID: 836112304079522801
-        Path: Assets/Materials/Skybox.bmat
+        ID: 5155681533917617956
+        Path: Assets/GENERATED/Materials/Skybox.bmat
         IsEngineAsset: false
     Enabled: true
-  - Entity: 6153539709940514913
+  - Entity: 5830941413463335563
     Name: Box
     Transform:
       Position: [0, 2, 0]
@@ -198,15 +252,15 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 14188416594219635833
+        ID: 2485967073353284262
         Path: Meshes/cube.obj
         IsEngineAsset: true
       Material:
-        ID: 17444848801102161567
-        Path: Assets/Materials/DistCube.bmat
+        ID: 11771201562802373366
+        Path: Assets/GENERATED/Materials/DistCube.bmat
         IsEngineAsset: false
     Enabled: false
-  - Entity: 15099477005584255933
+  - Entity: 10353436078965450873
     Name: Crate
     Transform:
       Position: [2.70000005, 1, 1.70000005]
@@ -217,7 +271,7 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 2090534604128832824
+        ID: 11753217686514595201
         Path: Meshes/cube.obj
         IsEngineAsset: true
       Material:
@@ -225,7 +279,7 @@ Entities:
         Path: Assets/Materials/Crate.bmat
         IsEngineAsset: false
     Enabled: false
-  - Entity: 2282267744795263969
+  - Entity: 7318748928525166087
     Name: Camera
     Transform:
       Position: [-1, 2, 4]

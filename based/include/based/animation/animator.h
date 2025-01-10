@@ -117,17 +117,26 @@ namespace based::animation
 
 		inline std::vector<std::shared_ptr<AnimationState>> GetStates() const { return m_States; }
 		inline std::shared_ptr<AnimationState> GetCurrentState() const { return m_CurrentState.lock(); }
+		inline std::shared_ptr<AnimationState> GetDefaultState() const { return m_DefaultState; }
 		inline std::shared_ptr<AnimationTransition> GetLastTransition() const { return m_LastTransition; }
 		inline bool HasBeenReset() const { return m_HasBeenReset; }
+
+		inline std::unordered_map<std::string, float> GetFloatParams() const { return m_FloatParameters; }
+		inline std::unordered_map<std::string, int> GetIntParams() const { return m_IntParameters; }
+		inline std::unordered_map<std::string, bool> GetBoolParams() const { return m_BoolParameters; }
+		inline std::unordered_map<std::string, std::string> GetStringParams() const { return m_StringParameters; }
 	private:
 		std::weak_ptr<Animator> m_Animator;
 		std::weak_ptr<AnimationState> m_CurrentState;
 		std::shared_ptr<AnimationTransition> m_LastTransition;
 		std::vector<std::shared_ptr<AnimationState>> m_States;
+		std::shared_ptr<AnimationState> m_DefaultState;
+
 		std::unordered_map<std::string, float> m_FloatParameters;
 		std::unordered_map<std::string, int> m_IntParameters;
 		std::unordered_map<std::string, bool> m_BoolParameters;
 		std::unordered_map<std::string, std::string> m_StringParameters;
+
 		bool m_HasBeenReset = true;
 	};
 
@@ -225,11 +234,11 @@ namespace based::animation
 			const std::shared_ptr<AnimationState>& destination,
 			const std::shared_ptr<Animator>& animator,
 			const std::shared_ptr<AnimationStateMachine>& stateMachine,
-			const TransitionRules& rules = TransitionRules(),
+			TransitionRules rules = TransitionRules(),
 			bool autoReset = false
 			)
 			: m_Source(source), m_Destination(destination), m_Animator(animator), m_StateMachine(stateMachine),
-				m_TransitionRules(rules), m_AutoReset(autoReset) {}
+				m_TransitionRules(std::move(rules)), m_AutoReset(autoReset) {}
 			virtual ~AnimationTransition() = default;
 
 		virtual bool ShouldStateTransition() {
@@ -267,6 +276,10 @@ namespace based::animation
 		inline std::weak_ptr<AnimationState> GetDestinationState() const { return m_Destination; }
 
 		inline std::function<bool()> GetPredicate() const { return m_Predicate; }
+
+		inline TransitionRules GetTransitionRules() const { return m_TransitionRules; }
+
+		inline bool ShouldAutoTransition() const { return m_AutoReset; }
 	private:
 		std::weak_ptr<AnimationState> m_Source;
 		std::weak_ptr<AnimationState> m_Destination;

@@ -19,7 +19,7 @@ namespace based::animation
 		m_AnimationIndex = index;
 		m_UUID = core::UUID();
 		m_AnimationSource = animationPath;
-		m_AnimationName = animation->mName.C_Str();
+		m_AnimationName = animation->mName.C_Str();//FixAnimationName(std::string(animation->mName.C_Str()));
 		ReadHierarchyData(m_RootNode, scene->mRootNode);
 		ReadMissingBones(animation, *model);
 	}
@@ -63,7 +63,7 @@ namespace based::animation
 			m_Duration = static_cast<float>(animation->mDuration);
 			m_TicksPerSecond = static_cast<int>(animation->mTicksPerSecond);
 			m_Skeleton = model;
-			m_AnimationName = animationName;
+			m_AnimationName = animation->mName.C_Str();//FixAnimationName(std::string(animationName));
 			m_UUID = core::UUID();
 			m_AnimationSource = animationPath;
 			ReadHierarchyData(m_RootNode, scene->mRootNode);
@@ -136,5 +136,17 @@ namespace based::animation
 		}
 		BASED_WARN("Could not find animation {}", name);
 		return nullptr;
+	}
+
+	std::string Animation::FixAnimationName(std::string& name)
+	{
+		size_t pos = 0;
+		while ((pos = name.find("|", pos)) != std::string::npos)
+		{
+			name.replace(pos, strlen("|"), "-");
+			pos += strlen("-");
+		}
+
+		return name;
 	}
 }

@@ -7,6 +7,8 @@
 
 namespace based::animation
 {
+	struct TransitionRules;
+	class AnimationStateMachine;
 	class Animation;
 }
 
@@ -23,6 +25,9 @@ namespace based::scene
 		void SerializeAnimation(YAML::Emitter& out, const std::shared_ptr<animation::Animation>& animation);
 		std::shared_ptr<animation::Animation> DeserializeAnimation(const std::string& filepath);
 
+		void SerializeStateMachine(YAML::Emitter& out, 
+			const std::shared_ptr<animation::AnimationStateMachine> stateMachine);
+
 		void Serialize(const std::string& filepath) override;
 		void SerializeRuntime(const std::string& filepath) override;
 
@@ -34,6 +39,17 @@ namespace based::scene
 		int CountFilesInDir(const std::string& filepath);
 		void DeserializeEntity(YAML::detail::iterator_value entity);
 
+		struct TransitionStorageData
+		{
+			int source;
+			int destination;
+			animation::TransitionRules* rules;
+			bool autoReset;
+
+			TransitionStorageData(int s, int d, animation::TransitionRules* r, bool a)
+				: source(s), destination(d), rules(r), autoReset(a) {}
+		};
+
 		std::shared_ptr<Scene> mScene;
 
 		std::unordered_map<core::UUID, core::UUID> parentMap;
@@ -43,5 +59,7 @@ namespace based::scene
 		std::unordered_map<core::UUID, std::shared_ptr<graphics::Model>> mLoadedModels;
 		std::unordered_map<core::UUID, std::shared_ptr<graphics::Texture>> mLoadedTextures;
 		std::unordered_map<core::UUID, std::shared_ptr<animation::Animation>> mLoadedAnimations;
+
+		std::vector<TransitionStorageData> mStoredTransitions;
 	};
 }

@@ -1,0 +1,48 @@
+Material: Plane
+ID: 5168771719059832621
+VertexSource: Assets/shaders/custom/water.vert
+VertexIsEngineAsset: false
+FragmentSource: Assets/shaders/custom/water.frag
+FragmentIsEngineAsset: false
+UniformInts:
+  material.diffuseMat.useSampler: 0
+  _VertexWaveCount: 8
+  _FragmentWaveCount: 40
+UniformFloats:
+  _VertexAmplitude: 1
+  _VertexSeed: 0
+  _VertexInitialSpeed: 2
+  _VertexAmplitudeMult: 0.819999993
+  _VertexSeedIter: 1253.21313
+  _VertexFrequency: 1
+  _VertexFrequencyMult: 1.17999995
+  _VertexSpeedRamp: 1.07000005
+  _VertexDrag: 1
+  _VertexHeight: 1
+  _FragmentAmplitude: 1
+  _VertexMaxPeak: 1
+  _VertexPeakOffset: 1
+  _FragmentSeed: 0
+  _FragmentSeedIter: 1253.21313
+  _FragmentFrequency: 1
+  _FragmentFrequencyMult: 1.17999995
+  _FragmentAmplitudeMult: 0.819999993
+  _FragmentInitialSpeed: 2
+  _FragmentSpeedRamp: 1.07000005
+  _FragmentDrag: 1
+  _FragmentHeight: 1
+  _FragmentMaxPeak: 1
+  _FragmentPeakOffset: 1
+UniformFloat2s:
+  {}
+UniformFloat3s:
+  {}
+UniformFloat4s:
+  material.diffuseMat.color: [1, 1, 1, 1]
+  material.shininessMat.color: [32, 32, 32, 32]
+UniformMat3s:
+  {}
+UniformMat4s:
+  {}
+Textures:
+  {}

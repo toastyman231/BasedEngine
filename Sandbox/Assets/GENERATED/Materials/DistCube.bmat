@@ -1,0 +1,23 @@
+Material: DistCube
+ID: 11771201562802373366
+VertexSource: Shaders/basic_lit.vert
+VertexIsEngineAsset: true
+FragmentSource: Assets/shaders/custom/cube_distance.frag
+FragmentIsEngineAsset: false
+UniformInts:
+  {}
+UniformFloats:
+  {}
+UniformFloat2s:
+  {}
+UniformFloat3s:
+  {}
+UniformFloat4s:
+  material.diffuseMat.color: [1, 1, 1, 1]
+  material.shininessMat.color: [32, 32, 32, 32]
+UniformMat3s:
+  {}
+UniformMat4s:
+  {}
+Textures:
+  {}

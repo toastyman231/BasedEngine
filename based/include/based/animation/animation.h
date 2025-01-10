@@ -45,6 +45,7 @@ namespace based::animation
         std::string GetAnimationFileSource() const { return m_FileSource; }
 
         std::string GetAnimationName() const { return m_AnimationName; }
+        std::string GetSafeAnimationName() { return FixAnimationName(std::string(m_AnimationName)); }
 
         std::shared_ptr<graphics::Model> GetSkeleton() const { return m_Skeleton.lock(); }
 
@@ -65,6 +66,12 @@ namespace based::animation
 
         inline void SetPlaybackSpeed(float speed) { m_Speed = speed; }
         inline float GetPlaybackSpeed() const { return m_Speed; }
+
+        inline void SetFileAnimation(const std::string& filepath)
+        {
+            m_IsFileAnimation = true;
+            m_FileSource = filepath;
+        }
     private:
         core::UUID m_UUID;
         bool m_IsPlaying = false;
@@ -85,5 +92,6 @@ namespace based::animation
         void ReadMissingBones(const aiAnimation* animation, graphics::Model& model);
         void ReadHierarchyData(AssimpNodeData& dest, const aiNode* src);
         aiAnimation* GetAnimationByName(const aiScene* scene, const std::string& name);
+        std::string FixAnimationName(std::string& name);
     };
 }

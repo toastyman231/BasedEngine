@@ -1,0 +1,44 @@
+Material: Sphere
+ID: 11877043798828220968
+VertexSource: Shaders/pbr_lit.vert
+VertexIsEngineAsset: true
+FragmentSource: Shaders/pbr_lit.frag
+FragmentIsEngineAsset: true
+UniformInts:
+  material.albedo.tex: 0
+  material.ambientOcclusion.tex: 3
+  material.normal.useSampler: 1
+  material.roughness.tex: 1
+  material.roughness.useSampler: 1
+  material.normal.tex: 2
+  material.albedo.useSampler: 1
+  material.ambientOcclusion.useSampler: 1
+UniformFloats:
+  {}
+UniformFloat2s:
+  {}
+UniformFloat3s:
+  {}
+UniformFloat4s:
+  {}
+UniformMat3s:
+  {}
+UniformMat4s:
+  {}
+Textures:
+  New Texture:
+    Location: material.albedo.tex
+    ID: 1330586085565658191
+    Path: Assets/sand_albedo.png
+  New Texture:
+    Location: material.roughness.tex
+    ID: 8404298348647213508
+    Path: Assets/sand_roughness.png
+  New Texture:
+    Location: material.normal.tex
+    ID: 9014438430589034491
+    Path: Assets/sand_normal.png
+  New Texture:
+    Location: material.ambientOcclusion.tex
+    ID: 1330586085565658191
+    Path: Assets/sand_albedo.png

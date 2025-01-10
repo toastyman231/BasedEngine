@@ -329,6 +329,157 @@ namespace based::scene
 		return anim;
 	}
 
+	void SceneSerializer::SerializeStateMachine(YAML::Emitter& out,
+		const std::shared_ptr<animation::AnimationStateMachine> stateMachine)
+	{
+		out << YAML::Key << "StateMachine" << YAML::BeginMap; // StateMachine
+
+		out << YAML::Key << "FloatParams" << YAML::BeginMap; // Floats
+		for (auto& floatParam : stateMachine->GetFloatParams())
+		{
+			out << YAML::Key << floatParam.first << YAML::Value << floatParam.second;
+		}
+		out << YAML::EndMap; // Floats
+
+		out << YAML::Key << "IntParams" << YAML::BeginMap; // Ints
+		for (auto& intParam : stateMachine->GetIntParams())
+		{
+			out << YAML::Key << intParam.first << YAML::Value << intParam.second;
+		}
+		out << YAML::EndMap; // Ints
+
+		out << YAML::Key << "BoolParams" << YAML::BeginMap; // Bools
+		for (auto& boolParam : stateMachine->GetBoolParams())
+		{
+			out << YAML::Key << boolParam.first << YAML::Value << boolParam.second;
+		}
+		out << YAML::EndMap; // Bools
+
+		out << YAML::Key << "StringParams" << YAML::BeginMap; // Strings
+		for (auto& stringParam : stateMachine->GetStringParams())
+		{
+			out << YAML::Key << stringParam.first << YAML::Value << stringParam.second;
+		}
+		out << YAML::EndMap; // Strings
+
+		out << YAML::Key << "States" << YAML::BeginSeq; // States
+
+		for (auto& state : stateMachine->GetStates())
+		{
+			out << YAML::BeginMap << YAML::Key << "State" << YAML::BeginMap; // State
+			out << YAML::Key << "Name" << YAML::Value << state->GetStateName();
+
+			auto& currentAnimation = state->GetStateAnimationClip();
+			std::string path;
+			if (!currentAnimation->IsFileAnimation())
+			{
+				SceneSerializer serializer(mScene);
+				YAML::Emitter animOut;
+				serializer.SerializeAnimation(animOut, currentAnimation);
+
+				CreateDirectoryIfNotExists("Assets/GENERATED/Animations");
+
+				path = std::string("Assets/GENERATED/Animations/")
+					.append(currentAnimation->GetSafeAnimationName())
+					.append(".banim");
+				std::ofstream ofs(path);
+				ofs << animOut.c_str();
+
+				currentAnimation->SetFileAnimation(path);
+			}
+			else path = currentAnimation->GetAnimationFileSource();
+
+			out << YAML::Key << "Animation" << YAML::BeginMap; // Animation
+			out << YAML::Key << "ID" << currentAnimation->GetUUID();
+			out << YAML::Key << "Path" << path;
+			out << YAML::EndMap; // Animation
+
+			auto stateIndex = [stateMachine](const std::shared_ptr<animation::AnimationState>& state) -> int
+				{
+					if (!state) return -1;
+					auto& states = stateMachine->GetStates();
+					auto it = std::find(states.cbegin(),
+						states.cend(), state);
+					if (it != states.cend())
+					{
+						return static_cast<int>(std::distance(states.cbegin(), it));
+					}
+					return -1;
+				};
+
+			out << YAML::Key << "Transitions" << YAML::BeginSeq; // Transitions
+			for (auto& transition : state->GetTransitions())
+			{
+				out << YAML::BeginMap << YAML::Key << "Transition" << YAML::BeginMap; // Transition
+				out << YAML::Key << "Source" << YAML::Value << stateIndex(transition->GetSourceState().lock());
+				out << YAML::Key << "Destination" << YAML::Value << stateIndex(transition->GetDestinationState().lock());
+
+				out << YAML::Key << "TransitionRules" << YAML::BeginMap; // TransitionRules
+
+				auto& transitionRules = transition->GetTransitionRules();
+
+				out << YAML::Key << "FloatParams" << YAML::BeginMap; // Floats
+				for (auto& rule : transitionRules.floatRules)
+				{
+					out << YAML::Key << "FloatRule" << YAML::BeginMap; // Rule
+					out << YAML::Key << "Name" << YAML::Value << rule.name;
+					out << YAML::Key << "Value" << YAML::Value << rule.val;
+					out << YAML::Key << "Default" << YAML::Value << rule.defaultVal;
+					out << YAML::EndMap; // Rule
+				}
+				out << YAML::EndMap; // Floats
+
+				out << YAML::Key << "IntParams" << YAML::BeginMap; // Ints
+				for (auto& rule : transitionRules.intRules)
+				{
+					out << YAML::Key << "IntRule" << YAML::BeginMap; // Rule
+					out << YAML::Key << "Name" << YAML::Value << rule.name;
+					out << YAML::Key << "Value" << YAML::Value << rule.val;
+					out << YAML::Key << "Default" << YAML::Value << rule.defaultVal;
+					out << YAML::EndMap; // Rule
+				}
+				out << YAML::EndMap; // Ints
+
+				out << YAML::Key << "BoolParams" << YAML::BeginSeq; // Bools
+				for (auto& rule : transitionRules.boolRules)
+				{
+					out << YAML::BeginMap << YAML::Key << "BoolRule" << YAML::BeginMap; // Rule
+					out << YAML::Key << "Name" << YAML::Value << rule.name;
+					out << YAML::Key << "Value" << YAML::Value << rule.val;
+					out << YAML::Key << "Default" << YAML::Value << rule.defaultVal;
+					out << YAML::EndMap << YAML::EndMap; // Rule
+				}
+				out << YAML::EndSeq; // Bools
+
+				out << YAML::Key << "StringParams" << YAML::BeginMap; // Strings
+				for (auto& rule : transitionRules.stringRules)
+				{
+					out << YAML::Key << "StringRule" << YAML::BeginMap; // Rule
+					out << YAML::Key << "Name" << YAML::Value << rule.name;
+					out << YAML::Key << "Value" << YAML::Value << rule.val;
+					out << YAML::Key << "Default" << YAML::Value << rule.defaultVal;
+					out << YAML::EndMap; // Rule
+				}
+				out << YAML::EndMap; // Strings
+
+				out << YAML::EndMap; // TransitionRules
+
+				out << YAML::Key << "AutoReset" << YAML::Value << transition->ShouldAutoTransition();
+
+				out << YAML::EndMap << YAML::EndMap;
+			}
+			out << YAML::EndSeq; // Transitions
+
+			out << YAML::Key << "IsDefault" << YAML::Value << (state == stateMachine->GetDefaultState());
+
+			out << YAML::EndMap << YAML::EndMap; // State
+		}
+
+		out << YAML::EndSeq; // States
+
+		out << YAML::EndMap; // StateMachine
+	}
+
 	void SceneSerializer::SerializeEntity(YAML::Emitter& out, const std::shared_ptr<Entity>& entity)
 	{
 		out << YAML::BeginMap; // Entity
@@ -434,9 +585,9 @@ namespace based::scene
 					YAML::Emitter matOut;
 					matSerializer.SerializeMaterial(matOut, m->material);
 
-					CreateDirectoryIfNotExists("Assets/Materials");
+					CreateDirectoryIfNotExists("Assets/GENERATED/Materials");
 
-					shortPath = std::string("Assets/Materials/")
+					shortPath = std::string("Assets/GENERATED/Materials/")
 						.append(m->material->mMaterialName)
 						.append(".bmat");
 					std::ofstream fout(shortPath);
@@ -509,9 +660,9 @@ namespace based::scene
 						YAML::Emitter matOut;
 						matSerializer.SerializeMaterial(matOut, material);
 
-						CreateDirectoryIfNotExists("Assets/Materials");
+						CreateDirectoryIfNotExists("Assets/GENERATED/Materials");
 
-						shortPath = std::string("Assets/Materials/")
+						shortPath = std::string("Assets/GENERATED/Materials/")
 							.append(material->mMaterialName)
 							.append(".bmat");
 						std::ofstream fout(shortPath);
@@ -551,13 +702,15 @@ namespace based::scene
 						YAML::Emitter animOut;
 						serializer.SerializeAnimation(animOut, currentAnimation);
 
-						CreateDirectoryIfNotExists("Assets/Animations");
+						CreateDirectoryIfNotExists("Assets/GENERATED/Animations");
 
-						path = std::string("Assets/Animations/")
-							.append(currentAnimation->GetAnimationName())
+						path = std::string("Assets/GENERATED/Animations/")
+							.append(currentAnimation->GetSafeAnimationName())
 							.append(".banim");
 						std::ofstream ofs(path);
 						ofs << animOut.c_str();
+
+						currentAnimation->SetFileAnimation(path);
 					}
 					else path = currentAnimation->GetAnimationFileSource();
 
@@ -567,6 +720,13 @@ namespace based::scene
 					out << YAML::Key << "Path" << YAML::Value << path;
 
 					out << YAML::EndMap; // Animation
+
+					if (auto& stateMachine = animatorPtr->GetStateMachine())
+					{
+						SerializeStateMachine(out, stateMachine);
+					}
+
+					out << YAML::Key << "TimeMode" << YAML::Value << (int)animatorPtr->GetTimeMode();
 				}
 
 				out << YAML::EndMap; // AnimatorComponent;
@@ -828,6 +988,173 @@ namespace based::scene
 
 				auto animator = std::make_shared<animation::Animator>(anim);
 				mScene->GetAnimatorStorage().Load("Animator", animator);
+
+				if (auto& timeMode = animatorComponent["TimeMode"])
+					animator->SetTimeMode((animation::TimeMode)timeMode.as<int>());
+
+				if (auto& sm = animatorComponent["StateMachine"])
+				{
+					auto stateMachine = std::make_shared<animation::AnimationStateMachine>(animator);
+
+					if (auto& fp = sm["FloatParams"])
+					{
+						for (auto& floatParam : fp)
+						{
+							stateMachine->SetFloat(floatParam.first.as<std::string>(), 
+								floatParam.second.as<float>());
+						}
+					}
+
+					if (auto& ip = sm["IntParams"])
+					{
+						for (auto& intParam : ip)
+						{
+							stateMachine->SetInteger(intParam.first.as<std::string>(),
+								intParam.second.as<int>());
+						}
+					}
+
+					if (auto& bp = sm["BoolParams"])
+					{
+						for (auto& boolParam : bp)
+						{
+							stateMachine->SetBool(boolParam.first.as<std::string>(),
+								boolParam.second.as<bool>());
+						}
+					}
+
+					if (auto& sp = sm["StringParams"])
+					{
+						for (auto& stringParam : sp)
+						{
+							stateMachine->SetString(stringParam.first.as<std::string>(),
+								stringParam.second.as<std::string>());
+						}
+					}
+
+					if (auto& states = sm["States"])
+					{
+						for (auto& stateIter : states)
+						{
+							auto& state = stateIter["State"];
+							std::string stateName = state["Name"].as<std::string>();
+
+							auto& animNode = state["Animation"];
+							std::shared_ptr<animation::Animation> anim;
+							core::UUID animId = animNode["ID"].as<uint64_t>();
+							auto path = animNode["Path"].as<std::string>();
+
+							if (mLoadedAnimations.find(animId) != mLoadedAnimations.end())
+								anim = mLoadedAnimations[animId];
+							else
+							{
+								anim = animation::Animation::LoadAnimationFromFile(path, 
+									mScene->GetAnimationStorage());
+								BASED_ASSERT(anim, "Loaded animation is not valid!");
+								mLoadedAnimations[animId] = anim;
+							}
+
+							auto animState = std::make_shared<animation::AnimationState>(anim, stateName);
+							auto isDefault = state["IsDefault"].as<bool>();
+							stateMachine->AddState(animState, isDefault);
+
+							if (auto& transitions = state["Transitions"])
+							{
+								for (auto& transitionIter : transitions)
+								{
+									auto& transition = transitionIter["Transition"];
+									auto source = transition["Source"].as<int>();
+									auto destination = transition["Destination"].as<int>();
+									
+									auto rules = new animation::TransitionRules();
+
+									auto& transitionRules = transition["TransitionRules"];
+									if (auto& fp = transitionRules["FloatParams"])
+									{
+										for (auto& floatParamIter : fp)
+										{
+											auto& floatParam = floatParamIter["FloatRule"];
+											rules->floatRules.emplace_back(
+												animation::TransitionRule<float>
+												{
+												floatParam["Name"].as<std::string>(),
+													floatParam["Value"].as<float>(),
+													floatParam["Default"].as<float>()
+												}
+											);
+										}
+									}
+
+									if (auto& ip = transitionRules["IntParams"])
+									{
+										for (auto& intParamIter : ip)
+										{
+											auto& intParam = intParamIter["IntRule"];
+											rules->intRules.emplace_back(
+												animation::TransitionRule<int>
+											{
+												intParam["Name"].as<std::string>(),
+													intParam["Value"].as<int>(),
+													intParam["Default"].as<int>()
+											}
+											);
+										}
+									}
+
+									if (auto& bp = transitionRules["BoolParams"])
+									{
+										for (auto& boolParamIter : bp)
+										{
+											auto& boolParam = boolParamIter["BoolRule"];
+											rules->boolRules.emplace_back(
+												animation::TransitionRule<bool>
+											{
+												boolParam["Name"].as<std::string>(),
+													boolParam["Value"].as<bool>(),
+													boolParam["Default"].as<bool>()
+											}
+											);
+										}
+									}
+
+									if (auto& sp = transitionRules["StringParams"])
+									{
+										for (auto& stringParamIter : sp)
+										{
+											auto& stringParam = stringParamIter["StringRule"];
+											rules->stringRules.emplace_back(
+												animation::TransitionRule<std::string>
+											{
+												stringParam["Name"].as<std::string>(),
+													stringParam["Value"].as<std::string>(),
+													stringParam["Default"].as<std::string>()
+											}
+											);
+										}
+									}
+
+									mStoredTransitions.emplace_back(source, destination, rules,
+										transition["AutoReset"].as<bool>());
+								}
+							}
+						}
+
+						for (auto& transitionData : mStoredTransitions)
+						{
+							auto animTransition = std::make_shared<animation::AnimationTransition>(
+								stateMachine->GetStates()[transitionData.source], 
+								stateMachine->GetStates()[transitionData.destination], 
+								animator, stateMachine, *transitionData.rules,
+								transitionData.autoReset
+							);
+							delete transitionData.rules;
+							transitionData.rules = nullptr;
+							stateMachine->GetStates()[transitionData.source]->AddTransition(animTransition);
+						}
+
+						animator->SetStateMachine(stateMachine);
+					}
+				}
 
 				deserializedEntity->AddComponent<AnimatorComponent>(animator);
 			}

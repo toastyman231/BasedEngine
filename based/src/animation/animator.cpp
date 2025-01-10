@@ -190,6 +190,7 @@ namespace based::animation
 		m_States.emplace_back(state);
 		if (isDefault) 
 		{
+			m_DefaultState = state;
 			m_CurrentState = state;
 			if (auto anim = m_Animator.lock())
 			{
