@@ -38,8 +38,20 @@ namespace based::animation
 		m_UUID = uuid;
 	}
 
+	std::shared_ptr<Animation> Animation::LoadAnimationFromFile(const std::string& filepath,
+		core::AssetLibrary<Animation>& assetLibrary)
+	{
+		scene::SceneSerializer serializer(Engine::Instance().GetApp().GetCurrentScene());
+		auto anim = serializer.DeserializeAnimation(filepath);
+		anim->m_IsFileAnimation = true;
+		anim->m_FileSource = filepath;
+		assetLibrary.Load(anim->GetAnimationName(), anim);
+
+		return anim;
+	}
+
 	Animation::Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model, 
-		const std::string& animationName)
+	                     const std::string& animationName)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);

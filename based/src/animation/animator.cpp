@@ -21,6 +21,8 @@ namespace based::animation
 
 	void Animator::UpdateAnimation(float dt)
 	{
+		bool wasFirstFrame = m_FirstFrame;
+		if (m_FirstFrame) m_FirstFrame = false;
 		m_DeltaTime = dt;
 		m_BlendDelta = math::Clamp01(m_BlendDelta + m_DeltaTime * blendSpeed);
 
@@ -48,6 +50,7 @@ namespace based::animation
 		{
 			if (!cur->IsPlaying() && m_StateMachine) return;
 
+			if (wasFirstFrame) dt = 0;
 			m_CurrentTime += cur->GetTicksPerSecond() * dt * cur->GetPlaybackSpeed();
 			if (m_CurrentTime > cur->GetDuration() && !cur->IsLooping())
 			{

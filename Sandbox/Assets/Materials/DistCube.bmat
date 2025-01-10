@@ -1,5 +1,5 @@
 Material: DistCube
-ID: 15278731817937735445
+ID: 17444848801102161567
 VertexSource: Shaders/basic_lit.vert
 VertexIsEngineAsset: true
 FragmentSource: Assets/shaders/custom/cube_distance.frag

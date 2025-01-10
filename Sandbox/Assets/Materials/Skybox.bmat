@@ -1,5 +1,5 @@
 Material: Skybox
-ID: 17180746201067328442
+ID: 836112304079522801
 VertexSource: Shaders/basic_lit.vert
 VertexIsEngineAsset: true
 FragmentSource: Shaders/basic_unlit.frag
@@ -22,5 +22,5 @@ UniformMat4s:
 Textures:
   New Texture:
     Location: material.diffuseMat.tex
-    ID: 2720158364166892681
+    ID: 2479712586793757876
     Path: Assets/skybox_tex.png

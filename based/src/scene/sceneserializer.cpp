@@ -310,7 +310,7 @@ namespace based::scene
 		std::shared_ptr<animation::Animation> anim;
 		if (useIndex)
 		{
-			anim = std::make_shared<animation::Animation>(animSource, model, index, animId);
+			anim = std::make_shared<animation::Animation>(animSource, model, animId, index);
 		} else
 		{
 			anim = std::make_shared<animation::Animation>(animSource, model, animId, animName);
@@ -538,7 +538,38 @@ namespace based::scene
 
 			if (auto animatorPtr = animator.lock())
 			{
-				//animatorPtr->
+				out << YAML::Key << "AnimatorComponent" << YAML::BeginMap; // AnimatorComponent
+
+				auto currentAnimation = animatorPtr->GetCurrentAnimation();
+
+				if (currentAnimation)
+				{
+					std::string path;
+					if (!currentAnimation->IsFileAnimation())
+					{
+						SceneSerializer serializer(mScene);
+						YAML::Emitter animOut;
+						serializer.SerializeAnimation(animOut, currentAnimation);
+
+						CreateDirectoryIfNotExists("Assets/Animations");
+
+						path = std::string("Assets/Animations/")
+							.append(currentAnimation->GetAnimationName())
+							.append(".banim");
+						std::ofstream ofs(path);
+						ofs << animOut.c_str();
+					}
+					else path = currentAnimation->GetAnimationFileSource();
+
+					out << YAML::Key << "Animation" << YAML::BeginMap; // Animation
+
+					out << YAML::Key << "ID" << YAML::Value << currentAnimation->GetUUID();
+					out << YAML::Key << "Path" << YAML::Value << path;
+
+					out << YAML::EndMap; // Animation
+				}
+
+				out << YAML::EndMap; // AnimatorComponent;
 			}
 		}
 
@@ -776,6 +807,30 @@ namespace based::scene
 			model->SetMaterials(modelMaterials);
 
 			deserializedEntity->AddComponent<ModelRenderer>(model);
+		}
+
+		if (auto& animatorComponent = entity["AnimatorComponent"])
+		{
+			if (auto& animation = animatorComponent["Animation"])
+			{
+				std::shared_ptr<animation::Animation> anim;
+				core::UUID animId = animation["ID"].as<uint64_t>();
+				auto path = animation["Path"].as<std::string>();
+
+				if (mLoadedAnimations.find(animId) != mLoadedAnimations.end())
+					anim = mLoadedAnimations[animId];
+				else
+				{
+					anim = animation::Animation::LoadAnimationFromFile(path, mScene->GetAnimationStorage());
+					BASED_ASSERT(anim, "Loaded animation is not valid!");
+					mLoadedAnimations[animId] = anim;
+				}
+
+				auto animator = std::make_shared<animation::Animator>(anim);
+				mScene->GetAnimatorStorage().Load("Animator", animator);
+
+				deserializedEntity->AddComponent<AnimatorComponent>(animator);
+			}
 		}
 
 		if (auto& pointLight = entity["PointLight"])

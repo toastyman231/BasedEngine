@@ -1,6 +1,6 @@
 Scene: Unnamed Scene
 Entities:
-  - Entity: 5482433701783563373
+  - Entity: 3220399773623315403
     Name: Sphere
     Transform:
       Position: [0, 2, 0]
@@ -11,17 +11,17 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 9085554985391338718
+        ID: 2057055208580456121
         Path: Meshes/sphere.obj
         IsEngineAsset: true
       Material:
-        ID: 14509237351249241356
+        ID: 16164354681151049739
         Path: Assets/Materials/Sphere.bmat
         IsEngineAsset: false
     Enabled: false
-  - Entity: 14045991290744719518
+  - Entity: 4342857763547232792
     Name: Arms
-    Parent: 8587044774878311695
+    Parent: 2282267744795263969
     Transform:
       Position: [-1, 2, 3.79999995]
       Rotation: [6, 233, 0]
@@ -32,16 +32,20 @@ Entities:
     ModelRenderer:
       Model:
         Name: ArmsModel
-        ID: 3602820998523868860
+        ID: 12386053665357636397
         Path: Assets/Models/Arms.fbx
         IsEngineAsset: false
       Materials:
         - Material:
-            ID: 1045209738667575303
+            ID: 474915704376230013
             Path: Assets/Materials/Arms.bmat
             IsEngineAsset: false
+    AnimatorComponent:
+      Animation:
+        ID: 7110049039532166989
+        Path: Assets/Animations/Idle.banim
     Enabled: true
-  - Entity: 1077502966503981750
+  - Entity: 1777905882727955839
     Name: Wall
     Transform:
       Position: [5, 3.5, 0]
@@ -52,15 +56,15 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 9183516997383473556
+        ID: 4130647250066231341
         Path: Assets/GENERATED/Meshes/Gen_Mesh_2.bin
         IsBinary: true
       Material:
-        ID: 2602415951985720359
+        ID: 167947694444379861
         Path: Assets/Materials/Wall.bmat
         IsEngineAsset: false
     Enabled: false
-  - Entity: 8064087366642429585
+  - Entity: 5627328637158742267
     Name: Sun
     Transform:
       Position: [0, 0, 0]
@@ -73,7 +77,7 @@ Entities:
       Color: [1, 1, 1]
       Direction: [60, 60, 0]
     Enabled: true
-  - Entity: 16789579783924671985
+  - Entity: 13492384670137487420
     Name: LIGHT 2
     Transform:
       Position: [1.79999995, 2.4000001, 2.20000005]
@@ -84,11 +88,11 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 16593890790862453885
+        ID: 8527378587009034341
         Path: Meshes/cube.obj
         IsEngineAsset: true
       Material:
-        ID: 7505185684415748201
+        ID: 18215733205486975231
         Path: Assets/Materials/Cube.bmat
         IsEngineAsset: false
     PointLight:
@@ -98,7 +102,7 @@ Entities:
       Linear: 0.0900000036
       Quadratic: 0.0320000015
     Enabled: true
-  - Entity: 3820074622933451037
+  - Entity: 15506770877904626515
     Name: LIGHT 1
     Transform:
       Position: [1, 1.20000005, 0.300000012]
@@ -109,11 +113,11 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 16593890790862453885
+        ID: 8527378587009034341
         Path: Meshes/cube.obj
         IsEngineAsset: true
       Material:
-        ID: 7505185684415748201
+        ID: 18215733205486975231
         Path: Assets/Materials/Cube.bmat
         IsEngineAsset: false
     PointLight:
@@ -123,7 +127,7 @@ Entities:
       Linear: 0.00139999995
       Quadratic: 0.000699999975
     Enabled: true
-  - Entity: 17468932234216536192
+  - Entity: 15298449629170041930
     Name: Grass
     Transform:
       Position: [0, 0, 0]
@@ -134,7 +138,7 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 14834219021508094763
+        ID: 15728077824656328670
         Path: Assets/Models/grass_highPoly.obj
         IsEngineAsset: false
       Material:
@@ -145,7 +149,7 @@ Entities:
         Path: Assets/GENERATED/Transforms/transforms_1.bin
         Size: 100489
     Enabled: false
-  - Entity: 5529491571715967098
+  - Entity: 13241350487828981955
     Name: Ground
     Transform:
       Position: [-50, 0, -50]
@@ -156,15 +160,15 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 11937090746540739323
+        ID: 17975382373553545553
         Path: Assets/GENERATED/Meshes/Gen_Mesh_3.bin
         IsBinary: true
       Material:
-        ID: 9128078171948541563
+        ID: 12739318593255176802
         Path: Assets/Materials/Plane.bmat
         IsEngineAsset: false
     Enabled: true
-  - Entity: 629117018485482231
+  - Entity: 13562535893367043947
     Name: Skybox
     Transform:
       Position: [0, 0, 0]
@@ -175,15 +179,15 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 1984742924128762277
+        ID: 5156099041027044720
         Path: Meshes/atlas_cube.obj
         IsEngineAsset: true
       Material:
-        ID: 17180746201067328442
+        ID: 836112304079522801
         Path: Assets/Materials/Skybox.bmat
         IsEngineAsset: false
     Enabled: true
-  - Entity: 3130043900163688894
+  - Entity: 6153539709940514913
     Name: Box
     Transform:
       Position: [0, 2, 0]
@@ -194,15 +198,15 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 13655021445189863540
+        ID: 14188416594219635833
         Path: Meshes/cube.obj
         IsEngineAsset: true
       Material:
-        ID: 15278731817937735445
+        ID: 17444848801102161567
         Path: Assets/Materials/DistCube.bmat
         IsEngineAsset: false
     Enabled: false
-  - Entity: 12940951828411623284
+  - Entity: 15099477005584255933
     Name: Crate
     Transform:
       Position: [2.70000005, 1, 1.70000005]
@@ -213,7 +217,7 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 5881662257616453855
+        ID: 2090534604128832824
         Path: Meshes/cube.obj
         IsEngineAsset: true
       Material:
@@ -221,7 +225,7 @@ Entities:
         Path: Assets/Materials/Crate.bmat
         IsEngineAsset: false
     Enabled: false
-  - Entity: 8587044774878311695
+  - Entity: 2282267744795263969
     Name: Camera
     Transform:
       Position: [-1, 2, 4]

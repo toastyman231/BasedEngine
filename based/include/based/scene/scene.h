@@ -3,6 +3,12 @@
 #include <external/entt/entt.hpp>
 #include "based/core/assetlibrary.h"
 
+namespace based::animation
+{
+	class Animator;
+	class Animation;
+}
+
 namespace based::graphics
 {
 	class Texture;
@@ -36,6 +42,8 @@ namespace based::scene
 		inline core::AssetLibrary<graphics::Mesh>& GetMeshStorage() { return mMeshStorage; }
 		inline core::AssetLibrary<graphics::Model>& GetModelStorage() { return mModelStorage; }
 		inline core::AssetLibrary<Entity>& GetEntityStorage() { return mEntityStorage; }
+		inline core::AssetLibrary<animation::Animation>& GetAnimationStorage() { return mAnimationStorage; }
+		inline core::AssetLibrary<animation::Animator>& GetAnimatorStorage() { return mAnimatorStorage; }
 
 		void SetActiveCamera(std::shared_ptr<graphics::Camera> cam);
 	private:
@@ -47,6 +55,8 @@ namespace based::scene
 		core::AssetLibrary<graphics::Mesh> mMeshStorage;
 		core::AssetLibrary<graphics::Model> mModelStorage;
 		core::AssetLibrary<Entity> mEntityStorage;
+		core::AssetLibrary<animation::Animation> mAnimationStorage;
+		core::AssetLibrary<animation::Animator> mAnimatorStorage;
 
 		friend class SceneSerializer;
 	};

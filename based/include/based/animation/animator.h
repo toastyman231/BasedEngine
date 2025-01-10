@@ -29,6 +29,8 @@ namespace based::animation
 		std::vector<glm::mat4> GetFinalBoneMatrices();
 		float blendSpeed = 5.f;
 
+		std::shared_ptr<Animation> GetCurrentAnimation() const { return m_CurrentAnimation.lock(); }
+
 		TimeMode GetTimeMode() const { return m_TimeMode; }
 		void SetTimeMode(TimeMode mode) { m_TimeMode = mode; }
 
@@ -44,6 +46,7 @@ namespace based::animation
 		float m_CurrentTime;
 		float m_DeltaTime;
 		float m_BlendDelta;
+		bool m_FirstFrame = true;
 
 		TimeMode m_TimeMode;
 	};

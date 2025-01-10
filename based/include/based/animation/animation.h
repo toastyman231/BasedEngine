@@ -27,6 +27,9 @@ namespace based::animation
             core::UUID uuid, const std::string& animationName);
         ~Animation() = default;
 
+        static std::shared_ptr<Animation> LoadAnimationFromFile(const std::string& filepath,
+            core::AssetLibrary<Animation>& assetLibrary);
+
         Bone* FindBone(const std::string& name);
 
         inline float GetTicksPerSecond() const { return static_cast<float>(m_TicksPerSecond); }
@@ -39,6 +42,8 @@ namespace based::animation
 
         std::string GetAnimationSource() const { return m_AnimationSource; }
 
+        std::string GetAnimationFileSource() const { return m_FileSource; }
+
         std::string GetAnimationName() const { return m_AnimationName; }
 
         std::shared_ptr<graphics::Model> GetSkeleton() const { return m_Skeleton.lock(); }
@@ -49,6 +54,8 @@ namespace based::animation
         {
             return m_BoneInfoMap;
         }
+
+        inline bool IsFileAnimation() const { return m_IsFileAnimation; }
 
         inline bool IsPlaying() const { return m_IsPlaying; }
         inline bool IsLooping() const { return m_IsLooping; }
@@ -62,6 +69,7 @@ namespace based::animation
         core::UUID m_UUID;
         bool m_IsPlaying = false;
         bool m_IsLooping = false;
+        bool m_IsFileAnimation = false;
         float m_Duration;
         float m_Speed = 1.f;
         int m_TicksPerSecond;
@@ -69,6 +77,7 @@ namespace based::animation
         std::vector<Bone> m_Bones;
         AssimpNodeData m_RootNode;
         std::string m_AnimationSource;
+        std::string m_FileSource;
         std::string m_AnimationName;
         std::map<std::string, graphics::BoneInfo> m_BoneInfoMap;
         std::weak_ptr<graphics::Model> m_Skeleton;
