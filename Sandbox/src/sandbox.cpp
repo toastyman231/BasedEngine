@@ -56,35 +56,6 @@ private:
 	std::string val;
 };
 
-class MyAnimationTransition : public animation::AnimationTransition
-{
-public:
-	MyAnimationTransition(
-		const std::shared_ptr<animation::AnimationState>& source,
-		const std::shared_ptr<animation::AnimationState>& destination,
-		const std::shared_ptr<animation::Animator>& animator,
-		const std::shared_ptr<animation::AnimationStateMachine>& stateMachine)
-		: AnimationTransition(source, destination, animator)
-		, mStateMachine(stateMachine) {}
-	~MyAnimationTransition() override = default;
-
-	bool ShouldStateTransition() override
-	{
-		if (auto stateMachine = mStateMachine.lock())
-		{
-			return stateMachine->GetBool("punch", false);
-		}
-		else
-		{
-			BASED_WARN("State machine invalid!");
-			return false;
-		}
-	}
-
-private:
-	std::weak_ptr<animation::AnimationStateMachine> mStateMachine;
-};
-
 class Sandbox : public based::App
 {
 private:
@@ -665,20 +636,23 @@ public:
 
 		if (ImGui::Begin("Settings"))
 		{
-			// Camera Settings
-			float fov = persistentScene->GetActiveCamera()->GetFOV();
-			ImGui::DragFloat("FOV", &fov, 0.5f);
-			persistentScene->GetActiveCamera()->SetFOV(fov);
+			if (persistentScene->GetActiveCamera())
+			{
+				// Camera Settings
+				float fov = persistentScene->GetActiveCamera()->GetFOV();
+				ImGui::DragFloat("FOV", &fov, 0.5f);
+				persistentScene->GetActiveCamera()->SetFOV(fov);
 
-			ImGui::DragFloat("Sensitivity", &sensitivity, 0.5f);
+				ImGui::DragFloat("Sensitivity", &sensitivity, 0.5f);
 
-			float nearPlane = persistentScene->GetActiveCamera()->GetNear();
-			ImGui::DragFloat("Near", &nearPlane, 0.5f);
-			persistentScene->GetActiveCamera()->SetNear(nearPlane);
+				float nearPlane = persistentScene->GetActiveCamera()->GetNear();
+				ImGui::DragFloat("Near", &nearPlane, 0.5f);
+				persistentScene->GetActiveCamera()->SetNear(nearPlane);
 
-			float farPlane = persistentScene->GetActiveCamera()->GetFar();
-			ImGui::DragFloat("Far", &farPlane, 0.5f);
-			persistentScene->GetActiveCamera()->SetFar(farPlane);
+				float farPlane = persistentScene->GetActiveCamera()->GetFar();
+				ImGui::DragFloat("Far", &farPlane, 0.5f);
+				persistentScene->GetActiveCamera()->SetFar(farPlane);
+			}
 
 			// Other settings
 

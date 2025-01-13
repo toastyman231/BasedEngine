@@ -109,18 +109,9 @@ namespace based::graphics
 		mBufferIds.emplace_back(globalsUbo);
 	}
 
-	void Shader::UpdateUniformBuffers()
+	unsigned int Shader::GetGlobalBufferID()
 	{
-		mGlobals.proj = Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetProjectionMatrix();
-		mGlobals.view = Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetViewMatrix();
-		mGlobals.eyePos = glm::vec4(Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetTransform().Position, 1.f);
-		mGlobals.eyeForward = glm::vec4(Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetForward(), 1.f);
-		mGlobals.time = based::core::Time::GetTime();
-		mGlobals.renderMode = static_cast<int32_t>(managers::RenderManager::GetRenderMode());
-
-		glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[0]); BASED_CHECK_GL_ERROR;
-		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ShaderGlobals), &mGlobals); BASED_CHECK_GL_ERROR;
-		glBindBuffer(GL_UNIFORM_BUFFER, 0); BASED_CHECK_GL_ERROR;
+		return mBufferIds[0];
 	}
 
 	Shader* Shader::LoadShader(const std::string& vsPath, const std::string& fsPath)
@@ -401,6 +392,11 @@ namespace based::graphics
 	ShaderGlobals Shader::GetShaderGlobals()
 	{
 		return mGlobals;
+	}
+
+	void Shader::SetShaderGlobals(ShaderGlobals globals)
+	{
+		mGlobals = globals;
 	}
 
 	ComputeShader::ComputeShader(const std::string& source)

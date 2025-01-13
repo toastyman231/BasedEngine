@@ -52,8 +52,9 @@ namespace based::managers
 	void RenderManager::Clear()
 	{
 		PROFILE_FUNCTION();
-		BASED_ASSERT(mRenderCommands.size() == 0, "Unflushed render commands in queue!");
-		while (mRenderCommands.size() > 0)
+		/*if (!mRenderCommands.empty()) 
+			BASED_WARN("Unflushed render commands in queue! Emptying queue without executing!");*/
+		while (!mRenderCommands.empty())
 		{
 			mRenderCommands.pop();
 		}
@@ -231,7 +232,7 @@ namespace based::managers
 	void RenderManager::PopCamera()
 	{
 		PROFILE_FUNCTION();
-		BASED_ASSERT(mCameras.size() > 0, "RenderManager::PopCamera - empty stack");
+		//BASED_ASSERT(mCameras.size() > 0, "RenderManager::PopCamera - empty stack");
 		if (mCameras.size() > 0)
 		{
 			mCameras.pop();
@@ -305,13 +306,13 @@ namespace based::managers
 		glMemoryBarrier(GL_ALL_BARRIER_BITS); BASED_CHECK_GL_ERROR;
 	}
 
-	const based::graphics::Camera* RenderManager::GetActiveCamera() const
+	std::shared_ptr<graphics::Camera> RenderManager::GetActiveCamera() const
 	{
 		if (!mCameras.empty())
 		{
-			return mCameras.top().get();
+			return mCameras.top();
 		}
 
-		return nullptr;
+		return Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera();
 	}
 }

@@ -812,6 +812,7 @@ namespace based::scene
 		if (auto& cameraComponent = entity["CameraComponent"])
 		{
 			auto newCam = std::make_shared<graphics::Camera>();
+			mScene->GetCameraStorage().Load("Camera", newCam);
 			deserializedEntity->AddComponent<CameraComponent>(newCam);
 			auto& cc = deserializedEntity->GetComponent<CameraComponent>();
 

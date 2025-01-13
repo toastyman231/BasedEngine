@@ -3,6 +3,7 @@
 #include "graphics/rendercommands.h"
 
 #include "app.h"
+#include "basedtime.h"
 #include "engine.h"
 
 #include "graphics/camera.h"
@@ -339,6 +340,27 @@ namespace based::graphics::rendercommands
 		rm.PopDebugGroup();
 	}
 
+	void UpdateGlobals::Execute()
+	{
+		PROFILE_FUNCTION();
+		ShaderGlobals globals;
+
+		if (auto cam = Engine::Instance().GetRenderManager().GetActiveCamera())
+		{
+			globals.proj = cam->GetProjectionMatrix();
+			globals.view = cam->GetViewMatrix();
+			globals.eyePos = glm::vec4(cam->GetTransform().Position, 1.f);
+			globals.eyeForward = glm::vec4(cam->GetForward(), 1.f);
+		}
+
+		globals.time = based::core::Time::GetTime();
+		globals.renderMode = static_cast<int32_t>(managers::RenderManager::GetRenderMode());
+
+		glBindBuffer(GL_UNIFORM_BUFFER, graphics::Shader::GetGlobalBufferID()); BASED_CHECK_GL_ERROR;
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ShaderGlobals), &globals); BASED_CHECK_GL_ERROR;
+		glBindBuffer(GL_UNIFORM_BUFFER, 0); BASED_CHECK_GL_ERROR;
+	}
+
 	void PushCamera::Execute()
 	{
 		PROFILE_FUNCTION();
@@ -349,7 +371,7 @@ namespace based::graphics::rendercommands
 		}
 		else
 		{
-			BASED_WARN("Attempting to execute a RenderMesh with invalid data");
+			BASED_WARN("Attempting to push a camera with invalid data!");
 		}
 	}
 

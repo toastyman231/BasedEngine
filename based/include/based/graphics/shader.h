@@ -9,10 +9,10 @@ namespace based::graphics
 
 	struct ShaderGlobals
 	{
-		glm::mat4 proj;
-		glm::mat4 view;
-		glm::vec4 eyePos;
-		glm::vec4 eyeForward;
+		glm::mat4 proj = glm::mat4(1.f);
+		glm::mat4 view = glm::mat4(1.f);
+		glm::vec4 eyePos = glm::vec4(0.f, 0.f, 0.f, 1.f);
+		glm::vec4 eyeForward = glm::vec4(0.f, 0.f, -1.f, 1.f);
 		float time;
 		int32_t renderMode;
 	};
@@ -26,7 +26,7 @@ namespace based::graphics
 		~Shader();
 
 		static void InitializeUniformBuffers();
-		static void UpdateUniformBuffers();
+		static unsigned int GetGlobalBufferID();
 		static Shader* LoadShader(const std::string& vsPath, const std::string& fsPath);
 		static std::string PreprocessShader(const std::string source, const std::string includeIdentifier,
 			const std::string includeSearchDir, std::set<std::string>& alreadyIncluded);
@@ -58,6 +58,7 @@ namespace based::graphics
 		static void UpdateShaderDirectionalLighting(std::weak_ptr<Shader> shader);
 
 		static ShaderGlobals GetShaderGlobals();
+		static void SetShaderGlobals(ShaderGlobals globals);
 	private:
 		uint32_t mProgramId;
 		std::string mVertexShader;

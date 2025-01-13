@@ -77,11 +77,13 @@ namespace based::ui
 		// Clear VAs at the start of the next frame (we can't clear in EndFrame because that actually runs before
 		// the scene is even rendered, so we still need the VAs after that point)
 		mVAs.clear();
+
+		auto& cam = Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera();
 		mProjection = glm::ortho(0.f,
 			static_cast<float>(Engine::Instance().GetWindow().GetSize().x),
 			static_cast<float>(Engine::Instance().GetWindow().GetSize().y), 0.f,
-			Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetNear(),
-			Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetFar());
+			cam ? cam->GetNear() : 0.001f,
+			cam ? cam->GetFar() : 1000.f);
 		SetTransform(nullptr);
 	}
 

@@ -44,11 +44,11 @@ namespace based
 			auto& window = Engine::Instance().GetWindow();
 			window.SetShouldRenderToScreen(true);
 
-			mCamera = std::make_shared<graphics::Camera>();
-			mCamera->SetHeight(2.f);
+			/*mCamera = std::make_shared<graphics::Camera>();
+			mCamera->SetHeight(2.f);*/
 
 			persistentScene = std::make_shared<scene::Scene>();
-			persistentScene->SetActiveCamera(mCamera);
+			//persistentScene->SetActiveCamera(mCamera);
 			LoadScene(persistentScene);
 		}
 		virtual void Shutdown() {}

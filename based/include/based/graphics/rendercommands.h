@@ -167,6 +167,13 @@ namespace based::graphics
 			virtual void Execute() override;
 		};
 
+		class UpdateGlobals : public RenderCommand
+		{
+		public:
+			UpdateGlobals(){}
+			virtual void Execute() override;
+		};
+
 		class PushCamera : public RenderCommand
 		{
 		public:

@@ -53,19 +53,19 @@ namespace based
 
     void Engine::Render()
     {
-        graphics::Shader::UpdateUniformBuffers();
-
         mWindow.BeginRender();
 
         for (const auto& pass : mRenderManager.GetRenderPasses())
         {
             pass->BeginRender();
+            GetRenderManager().Submit(BASED_SUBMIT_RC(UpdateGlobals));
             pass->Render();
             pass->EndRender();
             mRenderManager.IncrementPassCount();
         }
         mRenderManager.ResetPassCount();
 
+        GetRenderManager().Submit(BASED_SUBMIT_RC(UpdateGlobals));
         mApp->Render();
 
         mWindow.EndRender();

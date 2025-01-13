@@ -44,6 +44,7 @@ namespace based::scene
 		inline core::AssetLibrary<Entity>& GetEntityStorage() { return mEntityStorage; }
 		inline core::AssetLibrary<animation::Animation>& GetAnimationStorage() { return mAnimationStorage; }
 		inline core::AssetLibrary<animation::Animator>& GetAnimatorStorage() { return mAnimatorStorage; }
+		inline core::AssetLibrary<graphics::Camera>& GetCameraStorage() { return mCameraStorage; }
 
 		void SetActiveCamera(std::shared_ptr<graphics::Camera> cam);
 	private:
@@ -57,6 +58,7 @@ namespace based::scene
 		core::AssetLibrary<Entity> mEntityStorage;
 		core::AssetLibrary<animation::Animation> mAnimationStorage;
 		core::AssetLibrary<animation::Animator> mAnimatorStorage;
+		core::AssetLibrary<graphics::Camera> mCameraStorage;
 
 		friend class SceneSerializer;
 	};

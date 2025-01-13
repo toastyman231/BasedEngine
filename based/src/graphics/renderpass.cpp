@@ -36,6 +36,13 @@ namespace based::graphics
 		, mOverrideMaterial(std::move(overrideMaterial))
 	{}
 
+	CustomRenderPass::CustomRenderPass(const std::string& name, std::shared_ptr<Framebuffer> buffer,
+		std::shared_ptr<Material> overrideMaterial, std::shared_ptr<Camera> passCam)
+			: CustomRenderPass(name, buffer, overrideMaterial)
+	{
+		mPassCamera = passCam;
+	}
+
 	std::shared_ptr<Material> CustomRenderPass::GetOverrideMaterial()
 	{
 		return mOverrideMaterial;
@@ -56,16 +63,27 @@ namespace based::graphics
 		auto& rm = Engine::Instance().GetRenderManager();
 
 		rm.Submit(BASED_SUBMIT_RC(PushFramebuffer, mPassBuffer, mPassName));
+
+		if (!mPassCamera)
+			mPassCamera = Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera();
+		rm.Submit(BASED_SUBMIT_RC(PushCamera, mPassCamera));
 	}
 
 	void CustomRenderPass::Render()
 	{
+		if (!mPassCamera)
+		{
+			BASED_ERROR("Attempting to render with invalid camera!");
+			return;
+		}
+
 		Engine::Instance().GetApp().GetCurrentScene()->RenderScene();
 	}
 
 	void CustomRenderPass::EndRender()
 	{
 		auto& rm = Engine::Instance().GetRenderManager();
+		rm.Submit(BASED_SUBMIT_RC(PopCamera));
 		rm.Submit(BASED_SUBMIT_RC(PopFramebuffer));
 		rm.Flush();
 

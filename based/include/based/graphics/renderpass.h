@@ -15,6 +15,10 @@ namespace based::graphics
 		CustomRenderPass(const std::string& name, std::shared_ptr<Framebuffer> buffer);
 		CustomRenderPass(const std::string& name, std::shared_ptr<Material> overrideMaterial);
 		CustomRenderPass(const std::string& name, std::shared_ptr<Framebuffer> buffer, std::shared_ptr<Material> overrideMaterial);
+		CustomRenderPass(
+			const std::string& name, std::shared_ptr<Framebuffer> buffer,
+			std::shared_ptr<Material> overrideMaterial,
+			std::shared_ptr<Camera> passCam);
 		virtual ~CustomRenderPass() = default;
 
 		std::shared_ptr<Material> GetOverrideMaterial();
@@ -30,6 +34,7 @@ namespace based::graphics
 		std::string mOutputName = CRP_NO_OUTPUT;
 		std::shared_ptr<Framebuffer> mPassBuffer;
 		std::shared_ptr<Material> mOverrideMaterial;
+		std::shared_ptr<Camera> mPassCamera;
 
 		static std::shared_ptr<Framebuffer> mLastFrameBuffer;
 	};

@@ -35,7 +35,7 @@ namespace based::managers
 		RenderManager() = default;
 		~RenderManager() = default;
 
-		const graphics::Camera* GetActiveCamera() const;
+		std::shared_ptr<graphics::Camera> GetActiveCamera() const;
 
 		void Initialize();;
 		void Shutdown();

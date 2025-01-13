@@ -58,7 +58,7 @@ namespace based::scene
 	void Scene::RenderScene() const
 	{
 		PROFILE_FUNCTION();
-		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera, mActiveCamera));
+		
 		const auto view = mRegistry.view<Enabled, Transform, SpriteRenderer>();
 		std::vector<std::shared_ptr<graphics::Sprite>> sprites;
 		sprites.reserve(view.size_hint());
@@ -125,8 +125,6 @@ namespace based::scene
 			ui::TextEntity* text = mRegistry.get<TextRenderer>(entity).text;
 			ui::TextEntity::DrawFont(text);
 		}
-
-		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 	}
 
 	void Scene::UpdateScene(float deltaTime)
