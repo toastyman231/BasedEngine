@@ -1,4 +1,6 @@
-﻿#include "based/pch.h"
+﻿#include <typeindex>
+
+#include "based/pch.h"
 
 #include "based/engine.h"
 #include "based/log.h"
@@ -19,6 +21,7 @@
 #include "based/animation/animation.h"
 #include "based/animation/animator.h"
 #include "based/core/basedtime.h"
+#include "based/core/yamlformatter.h"
 #include "based/graphics/sprite.h"
 #include "based/math/random.h"
 #include "based/scene/audio.h"
@@ -28,32 +31,91 @@
 #include "external/entt/core/hashed_string.hpp"
 #include "based/scene/sceneserializer.h"
 
+#include "external/entt/core/hashed_string.hpp"
+
 using namespace based;
+using namespace entt::literals;
 
-struct ApplicationData {
-	bool show_text = true;
-	Rml::String animal = "dog";
-	float my_value = 0.f;
-} my_data;
+/*namespace YAML
+{
+	template<>
+	struct convert<entt::meta_any>
+	{
+		static Node encode(const entt::meta_any& rhs)
+		{
+			Node node;
+			node.push_back(rhs.data());
+			return node;
+		}
 
-class MyListener : public Rml::EventListener
+		static bool decode(const Node& node, entt::meta_any& rhs)
+		{
+			rhs.reset();
+			rhs = entt::meta_any{ node[0] };
+			return true;
+		}
+	};
+}*/
+
+/*inline YAML::Emitter& operator<<(YAML::Emitter& out, const entt::meta_any& data)
+{
+	/*if (data.type().id() == entt::type_hash<std::string>())
+	{
+		out << data.cast<std::string>();
+	}
+	else if (data.type().id() == entt::type_hash<float>())
+	{
+		out << data.cast<float>();
+	}#1#
+	/*auto d = data.data();
+	out << reinterpret_cast<const char*>(d, data.type().size_of());#1#
+	return out;
+}*/
+
+struct ScriptComponent
+{
+	ScriptComponent() = default;
+	virtual ~ScriptComponent() = default;
+
+	virtual void OnInitialize() = 0;
+	virtual void OnUpdate(float deltaTime) = 0;
+	virtual void OnShutdown() = 0;
+
+	bool Enabled = true;
+};
+
+class SmallClass
 {
 public:
-	MyListener(Rml::String value) : val(std::move(value)) {}
-	void ProcessEvent(Rml::Event& event) override
-	{
-		if (val == "button")
-		{
-			BASED_TRACE("CLICKED!");
-		}
+	SmallClass() = default;
+	SmallClass(std::string in) : temp(in) {}
 
-		if (val == "radio")
-		{
-			BASED_TRACE("RADIO!");
-		}
+	std::string temp;
+};
+
+struct MyComponent : public ScriptComponent
+{
+	MyComponent() = default;
+
+	void OnInitialize() override
+	{
+		BASED_TRACE("Initializing My Component!");
 	}
-private:
-	std::string val;
+
+	void OnUpdate(float deltaTime) override
+	{
+		BASED_TRACE("Update! DeltaTime: {}, Id: {}", deltaTime, myId);
+	}
+
+	void OnShutdown() override
+	{
+		BASED_TRACE("Shutting down my Component!");
+	}
+
+	SmallClass myScript;
+	graphics::Projection myProj = graphics::PERSPECTIVE;
+	std::string myId = "Default";
+	float myFloat = 0;
 };
 
 class Sandbox : public based::App
@@ -143,6 +205,28 @@ public:
 		input::Mouse::SetCursorVisible(!Engine::Instance().GetWindow().GetShouldRenderToScreen());
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
+
+		entt::meta<std::string>().type(entt::type_hash<std::string>());
+		entt::meta<float>().type(entt::type_hash<float>());
+		entt::meta<int>().type(entt::type_hash<int>());
+		entt::meta<bool>().type(entt::type_hash<bool>());
+		entt::meta<SmallClass>().type(entt::type_hash<SmallClass>()).data<&SmallClass::temp>("temp"_hs);
+		entt::meta<graphics::Projection>()
+			.type(entt::type_hash<graphics::Projection>())
+			.data<graphics::Projection::ORTHOGRAPHIC>("Orthographic"_hs)
+			.data<graphics::Projection::PERSPECTIVE>("Perspective"_hs);
+		entt::meta<ScriptComponent>()
+			.type(entt::type_hash<ScriptComponent>())
+			.data<&ScriptComponent::Enabled>("Enabled"_hs);
+		entt::meta<MyComponent>()
+			.base<ScriptComponent>()
+			.type(entt::type_hash<MyComponent>())
+			.data<&MyComponent::myScript>("myScript"_hs)
+			.data<&MyComponent::myProj>("myProj"_hs)
+			.data<&MyComponent::myId>("myId"_hs)
+			.data<&MyComponent::myFloat>("myFloat"_hs);
+		entt::meta_any any{ std::string("") };
+		any.allow_cast<float>();
 
 #define SERIALIZE_SCENE 0
 
@@ -428,6 +512,36 @@ public:
 
 		BASED_TRACE("Done initializing");
 
+#define testing 0
+
+#if testing
+		MyComponent comp;
+		comp.myId = "Test";
+		comp.myFloat = 100;
+		comp.myScript = SmallClass("Test 2");
+		YAML::Emitter out;
+
+		out << YAML::BeginMap;
+
+		core::YAMLFormatter::Serialize<MyComponent>(out, comp);
+
+		out << YAML::EndMap << YAML::EndMap;
+
+		std::ofstream ofs("Temp.txt");
+		ofs << out.c_str();
+#else
+		std::ifstream ifs("Temp.txt");
+		std::stringstream ss;
+		ss << ifs.rdbuf();
+
+
+		YAML::Node data = YAML::Load(ss.str());
+
+		auto compCast = core::YAMLFormatter::Deserialize<MyComponent>(data);
+
+		BASED_TRACE("ID: {}, FLOAT: {}", compCast.myId, compCast.myFloat);
+#endif
+
 		// TODO: Fix text rendering behind sprites even when handled last
 		// TODO: Add Scriptable Components 
 		// TODO: Decide what to do about Sprites
@@ -445,6 +559,24 @@ public:
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
 		{
 			animator->GetStateMachine()->SetBool("punch", true);
+		}
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
+		{
+			auto myType = entt::resolve("MyComponent"_hs);
+			BASED_TRACE("Component Type: {}", myType.info().name());
+
+			auto myComp = myType.construct();
+
+			for (auto& [id, member] : myType.data())
+			{
+				BASED_TRACE("ID: {}", *myType.data(id).get(myComp).try_cast<std::string>());
+				auto meta_data = myType.data(id);
+				auto myData = std::string("Not Default");
+				auto res = meta_data.set(myComp, member.type().from_void(&myData));
+				BASED_TRACE("Result: {}", res);
+				BASED_TRACE("ID: {}", *myType.data(id).get(myComp).try_cast<std::string>());
+			}
 		}
 
 		UpdateShaderVisuals();
