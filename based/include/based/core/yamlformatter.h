@@ -16,33 +16,6 @@ if (memberTypeId == entt::type_hash<T>()) {            \
 
 namespace based::core::YAMLFormatter
 {
-	template <typename T>
-	bool Serialize(YAML::Emitter& out, T object)
-	{
-		auto type = entt::resolve(entt::type_hash<T>());
-		if (!type)
-		{
-			BASED_ERROR("Type could not be resolved, did you reflect it properly?");
-			return false;
-		}
-
-		auto metaObject = entt::meta_any{ object };
-
-		if (type.is_class() && type.id() != entt::type_hash<std::string>())
-		{
-			out << YAML::Key << "ObjectType" << YAML::Value << type.id();
-
-			out << YAML::Key << "Data" << YAML::BeginMap; // Data
-
-			SerializeMetaType(out, type, metaObject);
-
-			out << YAML::EndMap; // Data
-		}
-		else SerializeMetaType(out, type, metaObject);
-
-		return true;
-	}
-
 	inline void SerializeMetaType(YAML::Emitter& out, entt::meta_type type, entt::meta_any object)
 	{
 		if (type.is_class() && type.id() != entt::type_hash<std::string>())
@@ -99,20 +72,54 @@ namespace based::core::YAMLFormatter
 	}
 
 	template <typename T>
-	T Deserialize(YAML::Node data)
+	bool Serialize(YAML::Emitter& out, T object)
 	{
-		auto typeId = data["ObjectType"].as<unsigned>();
+		auto type = entt::resolve(entt::type_hash<T>());
+		if (!type)
+		{
+			BASED_ERROR("Type could not be resolved, did you reflect it properly?");
+			return false;
+		}
 
-		auto type = entt::resolve(typeId);
+		auto metaObject = entt::meta_any{ object };
 
-		BASED_ASSERT(type, "Type could not be deserialized, did you reflect it?");
+		if (type.is_class() && type.id() != entt::type_hash<std::string>())
+		{
+			out << YAML::Key << "ObjectType" << YAML::Value << type.id();
 
-		auto object = type.construct();
+			out << YAML::Key << "Data" << YAML::BeginMap; // Data
 
-		DeserializeMetaType(data, type, object);
+			SerializeMetaType(out, type, metaObject);
 
-		object.allow_cast<T>();
-		return object.cast<T>();
+			out << YAML::EndMap; // Data
+		}
+		else SerializeMetaType(out, type, metaObject);
+
+		return true;
+	}
+
+	inline bool Serialize(YAML::Emitter& out, entt::meta_any object)
+	{
+		auto type = object.type();
+		if (!type)
+		{
+			BASED_ERROR("Type could not be resolved, did you reflect it properly?");
+			return false;
+		}
+
+		if (type.is_class() && type.id() != entt::type_hash<std::string>())
+		{
+			out << YAML::Key << "ObjectType" << YAML::Value << type.id();
+
+			out << YAML::Key << "Data" << YAML::BeginMap; // Data
+
+			SerializeMetaType(out, type, object);
+
+			out << YAML::EndMap; // Data
+		}
+		else SerializeMetaType(out, type, object);
+
+		return true;
 	}
 
 	inline void DeserializeMetaType(YAML::Node data, entt::meta_type type, entt::meta_any& object)
@@ -166,5 +173,37 @@ namespace based::core::YAMLFormatter
 				BASED_WARN("Type {} cannot be deserialized!", type.id());
 			}
 		}
+	}
+
+	template <typename T>
+	T Deserialize(YAML::Node data)
+	{
+		auto typeId = data["ObjectType"].as<unsigned>();
+
+		auto type = entt::resolve(typeId);
+
+		BASED_ASSERT(type, "Type could not be deserialized, did you reflect it?");
+
+		auto object = type.construct();
+
+		DeserializeMetaType(data, type, object);
+
+		object.allow_cast<T>();
+		return object.cast<T>();
+	}
+
+	inline entt::meta_any Deserialize(YAML::Node data)
+	{
+		auto typeId = data["ObjectType"].as<unsigned>();
+
+		auto type = entt::resolve(typeId);
+
+		BASED_ASSERT(type, "Type could not be deserialized, did you reflect it?");
+
+		auto object = type.construct();
+
+		DeserializeMetaType(data, type, object);
+
+		return object;
 	}
 }

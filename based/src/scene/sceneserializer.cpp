@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "based/scene/sceneserializer.h"
 
+#include "yamlformatter.h"
 #include "animation/animator.h"
 #include "graphics/mesh.h"
 #include "graphics/model.h"
@@ -760,6 +761,37 @@ namespace based::scene
 			out << YAML::EndMap; // Directional Light
 		}
 
+		for (auto&& curr : mScene->GetRegistry().storage())
+		{
+			using namespace entt::literals;
+
+			if (auto& storage = curr.second; storage.contains(entity->GetEntityHandle()))
+			{
+				auto type = entt::resolve(storage.type().hash());
+				if (!type)
+				{
+					//BASED_WARN("Cannot serialize component with type: {}", storage.type().hash());
+					continue;
+				}
+
+				for (auto baseType : type.base())
+				{
+					if (baseType.second.id() == entt::type_hash<ScriptComponent>())
+					{
+						auto typeName = std::string(type.info().name());
+						typeName = typeName.substr(typeName.find(" ") + 1);
+						out << YAML::Key << typeName << YAML::BeginMap;
+						auto component = static_cast<ScriptComponent*>(storage.get(entity->GetEntityHandle()));
+
+						type.func("SerializeScriptComponent"_hs).invoke(*component, &out, component);
+
+						out << YAML::EndMap;
+						break;
+					}
+				}
+			}
+		}
+
 		out << YAML::Key << "Enabled" << YAML::Value << entity->IsActive(); // Enabled
 
 		out << YAML::EndMap; // Entity
@@ -1178,6 +1210,27 @@ namespace based::scene
 			glm::vec3 direction = dirLight["Direction"].as<glm::vec3>();
 
 			deserializedEntity->AddComponent<DirectionalLight>(direction, color);
+		}
+
+		for (auto& component : entity)
+		{
+			if (!component.second.IsMap()) continue;
+
+			auto componentNode = component.second;
+
+			if (!componentNode["ObjectType"]) continue;
+
+			auto comp = core::YAMLFormatter::Deserialize(componentNode);
+
+			using namespace entt::literals;
+			auto compTypeId = componentNode["ObjectType"].as<unsigned>();
+			auto compType = entt::resolve(compTypeId);
+			BASED_ASSERT(compType, "Invalid component type!");
+
+			auto compFunc = compType.func("AddComponentTest"_hs);
+			BASED_ASSERT(compFunc, "Invalid function!");
+
+			compType.invoke("AddComponentTest"_hs, {}, deserializedEntity, mScene, comp);
 		}
 
 		if (auto& enabled = entity["Enabled"]) deserializedEntity->SetActive(enabled.as<bool>());

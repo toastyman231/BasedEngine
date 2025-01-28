@@ -72,18 +72,6 @@ using namespace entt::literals;
 	return out;
 }*/
 
-struct ScriptComponent
-{
-	ScriptComponent() = default;
-	virtual ~ScriptComponent() = default;
-
-	virtual void OnInitialize() = 0;
-	virtual void OnUpdate(float deltaTime) = 0;
-	virtual void OnShutdown() = 0;
-
-	bool Enabled = true;
-};
-
 class SmallClass
 {
 public:
@@ -93,7 +81,7 @@ public:
 	std::string temp;
 };
 
-struct MyComponent : public ScriptComponent
+struct MyComponent : public scene::ScriptComponent
 {
 	MyComponent() = default;
 
@@ -117,6 +105,23 @@ struct MyComponent : public ScriptComponent
 	std::string myId = "Default";
 	float myFloat = 0;
 };
+
+template <typename T>
+void AddComponentTest(std::shared_ptr<scene::Entity> entity, std::shared_ptr<scene::Scene> scene, entt::meta_any component)
+{
+	BASED_TRACE("ADDING COMPONENT");
+	entity->AddComponent<T>();
+
+	scene->GetRegistry().patch<T>(entity->GetEntityHandle(),
+			[component](auto& c) { c = component.cast<T>(); });
+}
+
+template <typename T>
+void SerializeScriptComponent(YAML::Emitter* out, scene::ScriptComponent* component)
+{
+	auto compCast = (T*)component;
+	core::YAMLFormatter::Serialize(*out, entt::meta_any{ *compCast });
+}
 
 class Sandbox : public based::App
 {
@@ -210,21 +215,25 @@ public:
 		entt::meta<float>().type(entt::type_hash<float>());
 		entt::meta<int>().type(entt::type_hash<int>());
 		entt::meta<bool>().type(entt::type_hash<bool>());
-		entt::meta<SmallClass>().type(entt::type_hash<SmallClass>()).data<&SmallClass::temp>("temp"_hs);
+		entt::meta<SmallClass>()
+			.type(entt::type_hash<SmallClass>())
+			.data<&SmallClass::temp>("temp"_hs);
 		entt::meta<graphics::Projection>()
 			.type(entt::type_hash<graphics::Projection>())
 			.data<graphics::Projection::ORTHOGRAPHIC>("Orthographic"_hs)
 			.data<graphics::Projection::PERSPECTIVE>("Perspective"_hs);
-		entt::meta<ScriptComponent>()
-			.type(entt::type_hash<ScriptComponent>())
-			.data<&ScriptComponent::Enabled>("Enabled"_hs);
+		entt::meta<scene::ScriptComponent>()
+			.type(entt::type_hash<scene::ScriptComponent>())
+			.data<&scene::ScriptComponent::Enabled>("Enabled"_hs);
 		entt::meta<MyComponent>()
-			.base<ScriptComponent>()
+			.base<scene::ScriptComponent>()
 			.type(entt::type_hash<MyComponent>())
 			.data<&MyComponent::myScript>("myScript"_hs)
 			.data<&MyComponent::myProj>("myProj"_hs)
 			.data<&MyComponent::myId>("myId"_hs)
-			.data<&MyComponent::myFloat>("myFloat"_hs);
+			.data<&MyComponent::myFloat>("myFloat"_hs)
+			.func<&AddComponentTest<MyComponent>>("AddComponentTest"_hs)
+			.func<&SerializeScriptComponent<MyComponent>>("SerializeScriptComponent"_hs);
 		entt::meta_any any{ std::string("") };
 		any.allow_cast<float>();
 
@@ -506,6 +515,11 @@ public:
 		serializer.Serialize("Assets/Scenes/Test.bscn");
 #else
 		serializer.Deserialize("Assets/Scenes/Test.bscn");
+
+		/*auto e = GetCurrentScene()->GetEntityStorage().Get("ComponentEntity");
+		auto hasComp = e->HasComponent<MyComponent>();
+		auto e_comp = e->GetComponent<MyComponent>();*/
+
 		animator = GetCurrentScene()->GetAnimatorStorage().Get("Animator");
 		waterMaterial = GetCurrentScene()->GetMaterialStorage().Get("Plane");
 #endif
@@ -539,7 +553,17 @@ public:
 
 		auto compCast = core::YAMLFormatter::Deserialize<MyComponent>(data);
 
+		auto e = scene::Entity::CreateEntity("ComponentEntity");
+
+		entt::resolve(entt::type_hash<MyComponent>())
+			//.func("AddComponentTest"_hs)
+			.invoke("AddComponentTest"_hs, compCast, e, GetCurrentScene(), compCast);
+
+		auto otherComp = e->GetComponent<MyComponent>();
+
 		BASED_TRACE("ID: {}, FLOAT: {}", compCast.myId, compCast.myFloat);
+
+		//serializer.Serialize("Assets/Scenes/ReflectionTest.bscn");
 #endif
 
 		// TODO: Fix text rendering behind sprites even when handled last
