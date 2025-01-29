@@ -1227,10 +1227,11 @@ namespace based::scene
 			auto compType = entt::resolve(compTypeId);
 			BASED_ASSERT(compType, "Invalid component type!");
 
-			auto compFunc = compType.func("AddComponentTest"_hs);
+			auto compFunc = compType.func("AddMetaComponent"_hs);
 			BASED_ASSERT(compFunc, "Invalid function!");
 
-			compType.invoke("AddComponentTest"_hs, {}, deserializedEntity, mScene, comp);
+			compFunc.invoke({}, 
+				deserializedEntity.get(), mScene.get(), &comp);
 		}
 
 		if (auto& enabled = entity["Enabled"]) deserializedEntity->SetActive(enabled.as<bool>());

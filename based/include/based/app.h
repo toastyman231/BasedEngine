@@ -7,6 +7,8 @@
 #include "memory/memoryhelpers.h"
 #include "scene/sceneserializer.h"
 
+#define REFLECT_SIMPLE_TYPE(T) entt::meta<T>().type(entt::type_hash<T>());
+
 namespace based
 {
 	struct GameSettings
@@ -41,14 +43,33 @@ namespace based
 
 		virtual void Initialize()
 		{
+			using namespace entt::literals;
+			REFLECT_SIMPLE_TYPE(std::string)
+			REFLECT_SIMPLE_TYPE(int)
+			REFLECT_SIMPLE_TYPE(unsigned int)
+			REFLECT_SIMPLE_TYPE(float)
+			REFLECT_SIMPLE_TYPE(char)
+			REFLECT_SIMPLE_TYPE(unsigned char)
+			REFLECT_SIMPLE_TYPE(short)
+			REFLECT_SIMPLE_TYPE(unsigned short)
+			REFLECT_SIMPLE_TYPE(double)
+			REFLECT_SIMPLE_TYPE(bool)
+			REFLECT_SIMPLE_TYPE(long)
+			REFLECT_SIMPLE_TYPE(unsigned long)
+			REFLECT_SIMPLE_TYPE(long long)
+			REFLECT_SIMPLE_TYPE(unsigned long long)
+			entt::meta<graphics::Projection>()
+				.type(entt::type_hash<graphics::Projection>())
+				.data<graphics::Projection::ORTHOGRAPHIC>("Orthographic"_hs)
+				.data<graphics::Projection::PERSPECTIVE>("Perspective"_hs);
+			entt::meta<scene::ScriptComponent>()
+				.type(entt::type_hash<scene::ScriptComponent>())
+				.data<&scene::ScriptComponent::Enabled>("Enabled"_hs);
+
 			auto& window = Engine::Instance().GetWindow();
 			window.SetShouldRenderToScreen(true);
 
-			/*mCamera = std::make_shared<graphics::Camera>();
-			mCamera->SetHeight(2.f);*/
-
 			persistentScene = std::make_shared<scene::Scene>();
-			//persistentScene->SetActiveCamera(mCamera);
 			LoadScene(persistentScene);
 		}
 		virtual void Shutdown() {}

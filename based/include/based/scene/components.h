@@ -186,14 +186,12 @@ namespace based::scene
 		CameraComponent(const std::shared_ptr<graphics::Camera>& cam) : camera(cam) {}
 	};
 
+	// Kind of only exists to signal to the serializer which components
+	// need to be serialized using reflected data
 	struct ScriptComponent
 	{
 		ScriptComponent() = default;
 		virtual ~ScriptComponent() = default;
-
-		virtual void OnInitialize() = 0;
-		virtual void OnUpdate(float deltaTime) = 0;
-		virtual void OnShutdown() = 0;
 
 		bool Enabled = true;
 	};

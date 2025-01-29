@@ -34,43 +34,6 @@
 #include "external/entt/core/hashed_string.hpp"
 
 using namespace based;
-using namespace entt::literals;
-
-/*namespace YAML
-{
-	template<>
-	struct convert<entt::meta_any>
-	{
-		static Node encode(const entt::meta_any& rhs)
-		{
-			Node node;
-			node.push_back(rhs.data());
-			return node;
-		}
-
-		static bool decode(const Node& node, entt::meta_any& rhs)
-		{
-			rhs.reset();
-			rhs = entt::meta_any{ node[0] };
-			return true;
-		}
-	};
-}*/
-
-/*inline YAML::Emitter& operator<<(YAML::Emitter& out, const entt::meta_any& data)
-{
-	/*if (data.type().id() == entt::type_hash<std::string>())
-	{
-		out << data.cast<std::string>();
-	}
-	else if (data.type().id() == entt::type_hash<float>())
-	{
-		out << data.cast<float>();
-	}#1#
-	/*auto d = data.data();
-	out << reinterpret_cast<const char*>(d, data.type().size_of());#1#
-	return out;
-}*/
 
 class SmallClass
 {
@@ -85,17 +48,18 @@ struct MyComponent : public scene::ScriptComponent
 {
 	MyComponent() = default;
 
-	void OnInitialize() override
+	void OnInitialize()
 	{
 		BASED_TRACE("Initializing My Component!");
 	}
 
-	void OnUpdate(float deltaTime) override
+	void OnUpdate(float deltaTime)
 	{
+		if (!Enabled) return;
 		BASED_TRACE("Update! DeltaTime: {}, Id: {}", deltaTime, myId);
 	}
 
-	void OnShutdown() override
+	void OnShutdown()
 	{
 		BASED_TRACE("Shutting down my Component!");
 	}
@@ -105,23 +69,6 @@ struct MyComponent : public scene::ScriptComponent
 	std::string myId = "Default";
 	float myFloat = 0;
 };
-
-template <typename T>
-void AddComponentTest(std::shared_ptr<scene::Entity> entity, std::shared_ptr<scene::Scene> scene, entt::meta_any component)
-{
-	BASED_TRACE("ADDING COMPONENT");
-	entity->AddComponent<T>();
-
-	scene->GetRegistry().patch<T>(entity->GetEntityHandle(),
-			[component](auto& c) { c = component.cast<T>(); });
-}
-
-template <typename T>
-void SerializeScriptComponent(YAML::Emitter* out, scene::ScriptComponent* component)
-{
-	auto compCast = (T*)component;
-	core::YAMLFormatter::Serialize(*out, entt::meta_any{ *compCast });
-}
 
 class Sandbox : public based::App
 {
@@ -211,20 +158,10 @@ public:
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
 
-		entt::meta<std::string>().type(entt::type_hash<std::string>());
-		entt::meta<float>().type(entt::type_hash<float>());
-		entt::meta<int>().type(entt::type_hash<int>());
-		entt::meta<bool>().type(entt::type_hash<bool>());
+		using namespace entt::literals;
 		entt::meta<SmallClass>()
 			.type(entt::type_hash<SmallClass>())
 			.data<&SmallClass::temp>("temp"_hs);
-		entt::meta<graphics::Projection>()
-			.type(entt::type_hash<graphics::Projection>())
-			.data<graphics::Projection::ORTHOGRAPHIC>("Orthographic"_hs)
-			.data<graphics::Projection::PERSPECTIVE>("Perspective"_hs);
-		entt::meta<scene::ScriptComponent>()
-			.type(entt::type_hash<scene::ScriptComponent>())
-			.data<&scene::ScriptComponent::Enabled>("Enabled"_hs);
 		entt::meta<MyComponent>()
 			.base<scene::ScriptComponent>()
 			.type(entt::type_hash<MyComponent>())
@@ -232,10 +169,10 @@ public:
 			.data<&MyComponent::myProj>("myProj"_hs)
 			.data<&MyComponent::myId>("myId"_hs)
 			.data<&MyComponent::myFloat>("myFloat"_hs)
-			.func<&AddComponentTest<MyComponent>>("AddComponentTest"_hs)
-			.func<&SerializeScriptComponent<MyComponent>>("SerializeScriptComponent"_hs);
-		entt::meta_any any{ std::string("") };
-		any.allow_cast<float>();
+			.func<&scene::SceneSerializer::AddMetaComponent<MyComponent>, entt::as_void_t>("AddMetaComponent"_hs)
+			.func<&scene::SceneSerializer::SerializeScriptComponent<MyComponent>>("SerializeScriptComponent"_hs);
+		/*entt::meta_any any{ std::string("") };
+		any.allow_cast<float>();*/
 
 #define SERIALIZE_SCENE 0
 
@@ -514,7 +451,7 @@ public:
 #if SERIALIZE_SCENE
 		serializer.Serialize("Assets/Scenes/Test.bscn");
 #else
-		serializer.Deserialize("Assets/Scenes/Test.bscn");
+		serializer.Deserialize("Assets/Scenes/ReflectionTest.bscn");
 
 		/*auto e = GetCurrentScene()->GetEntityStorage().Get("ComponentEntity");
 		auto hasComp = e->HasComponent<MyComponent>();
@@ -553,15 +490,22 @@ public:
 
 		auto compCast = core::YAMLFormatter::Deserialize<MyComponent>(data);
 
-		auto e = scene::Entity::CreateEntity("ComponentEntity");
+		auto e = GetCurrentScene()->GetEntityStorage().Get("ComponentEntity");
+		//scene::Entity::CreateEntity("ComponentEntity");
 
-		entt::resolve(entt::type_hash<MyComponent>())
-			//.func("AddComponentTest"_hs)
-			.invoke("AddComponentTest"_hs, compCast, e, GetCurrentScene(), compCast);
+		/*auto anyComp = entt::forward_as_meta(compCast);
+		auto myFunc = entt::resolve(entt::type_hash<MyComponent>())
+			.func("AddComponentTest"_hs)
+			.invoke({}, e.get(), GetCurrentScene().get(), &anyComp);
+		if (!myFunc) BASED_TRACE("INVALID FUNCTION");*/
+		/*e->AddComponent<MyComponent>();
+		GetCurrentScene()->GetRegistry().patch<MyComponent>(e->GetEntityHandle(),
+			[compCast](auto& c) { c = compCast; });*/
 
+		//auto e = GetCurrentScene()->GetEntityStorage().Get("ComponentEntity");
 		auto otherComp = e->GetComponent<MyComponent>();
 
-		BASED_TRACE("ID: {}, FLOAT: {}", compCast.myId, compCast.myFloat);
+		//BASED_TRACE("ID: {}, FLOAT: {}", compCast.myId, compCast.myFloat);
 
 		//serializer.Serialize("Assets/Scenes/ReflectionTest.bscn");
 #endif
@@ -580,27 +524,15 @@ public:
 	{
 		App::Update(deltaTime);
 
+		auto compView = GetCurrentScene()->GetRegistry().view<MyComponent>();
+		for (auto& e : compView)
+		{
+			GetCurrentScene()->GetRegistry().get<MyComponent>(e).OnUpdate(deltaTime);
+		}
+
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
 		{
 			animator->GetStateMachine()->SetBool("punch", true);
-		}
-
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
-		{
-			auto myType = entt::resolve("MyComponent"_hs);
-			BASED_TRACE("Component Type: {}", myType.info().name());
-
-			auto myComp = myType.construct();
-
-			for (auto& [id, member] : myType.data())
-			{
-				BASED_TRACE("ID: {}", *myType.data(id).get(myComp).try_cast<std::string>());
-				auto meta_data = myType.data(id);
-				auto myData = std::string("Not Default");
-				auto res = meta_data.set(myComp, member.type().from_void(&myData));
-				BASED_TRACE("Result: {}", res);
-				BASED_TRACE("ID: {}", *myType.data(id).get(myComp).try_cast<std::string>());
-			}
 		}
 
 		UpdateShaderVisuals();

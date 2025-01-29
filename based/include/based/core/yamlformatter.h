@@ -1,6 +1,7 @@
 #pragma once
 #include "yaml-cpp/emitter.h"
 
+
 #define SERIALIZE_SIMPLE_TYPE(T)                                    \
 if (type.id() == entt::type_hash<T>()) {                            \
 	object.allow_cast<T>();                                         \

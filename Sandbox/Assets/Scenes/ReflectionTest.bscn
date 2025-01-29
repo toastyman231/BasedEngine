@@ -1,6 +1,6 @@
 Scene: Unnamed Scene
 Entities:
-  - Entity: 1618839026815516447
+  - Entity: 15416356092275353438
     Name: ComponentEntity
     Transform:
       Position: [0, 0, 0]
@@ -120,7 +120,7 @@ Entities:
     MeshRenderer:
       Mesh:
         ID: 3429905236434317018
-        Path: Assets/GENERATED/Meshes/Gen_Mesh_16.bin
+        Path: Assets/GENERATED/Meshes/Gen_Mesh_1.bin
         IsBinary: true
       Material:
         ID: 1441015027254117014
@@ -138,7 +138,7 @@ Entities:
       LocalScale: [1, 1, 1]
     MeshRenderer:
       Mesh:
-        ID: 12265868181087308424
+        ID: 8263363158852696456
         Path: Assets/Models/grass_highPoly.obj
         IsEngineAsset: false
       Material:
@@ -146,7 +146,7 @@ Entities:
         Path: Assets/Materials/Grass.bmat
         IsEngineAsset: false
       Instances:
-        Path: Assets/GENERATED/Transforms/transforms_8.bin
+        Path: Assets/GENERATED/Transforms/transforms_0.bin
         Size: 100489
     Enabled: false
   - Entity: 2537592266530565750
@@ -224,7 +224,7 @@ Entities:
     MeshRenderer:
       Mesh:
         ID: 2057328756062805454
-        Path: Assets/GENERATED/Meshes/Gen_Mesh_17.bin
+        Path: Assets/GENERATED/Meshes/Gen_Mesh_0.bin
         IsBinary: true
       Material:
         ID: 5368686166159654454

@@ -4,6 +4,7 @@
 #include "based/core/serializer.h"
 #include "based/scene/scene.h"
 #include "based/core/assetlibrary.h"
+#include "based/core/yamlformatter.h"
 
 namespace based::animation
 {
@@ -14,6 +15,8 @@ namespace based::animation
 
 namespace based::scene
 {
+	struct ScriptComponent;
+
 	class SceneSerializer : public core::Serializer
 	{
 	public:
@@ -33,6 +36,24 @@ namespace based::scene
 
 		bool Deserialize(const std::string& filepath) override;
 		bool DeserializeRuntime(const std::string& filepath) override;
+
+		template <typename T>
+		static void SerializeScriptComponent(YAML::Emitter* out, scene::ScriptComponent* component)
+		{
+			BASED_TRACE("Serializing scriptable component");
+			auto compCast = (T*)component;
+			core::YAMLFormatter::Serialize(*out, entt::meta_any{ *compCast });
+		}
+
+		template <typename T>
+		static void AddMetaComponent(scene::Entity* entity, scene::Scene* scene, entt::meta_any* component)
+		{
+			BASED_TRACE("Adding reflected meta component");
+			entity->AddComponent<T>();
+
+			scene->GetRegistry().patch<T>(entity->GetEntityHandle(),
+				[component](auto& c) { c = component->cast<T>(); });
+		}
 	private:
 		void SerializeEntity(YAML::Emitter& out, const std::shared_ptr<Entity>& entity);
 		bool CreateDirectoryIfNotExists(const std::string& filepath);
