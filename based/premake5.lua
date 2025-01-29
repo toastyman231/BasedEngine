@@ -73,6 +73,7 @@ project "based"
     filter {"system:windows", "configurations:*"}
         systemversion "latest"
         defines "BASED_PLATFORM_WINDOWS"
+        buildoptions "/bigobj"
 
     filter {"system:macosx", "configurations:*"}
         xcodebuildsettings
