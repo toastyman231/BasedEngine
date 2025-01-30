@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scene/components.h"
+#include "based/scene/components.h"
 
 namespace based::graphics
 {
