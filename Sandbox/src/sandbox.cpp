@@ -2,10 +2,8 @@
 
 #include "based/pch.h"
 
-#include "based/engine.h"
-#include "based/log.h"
-#include "based/main.h"
 #include "based/core/assetlibrary.h"
+#include "based/engine.h"
 #include "based/graphics/camera.h"
 #include "based/graphics/defaultassetlibraries.h"
 #include "based/graphics/framebuffer.h"
@@ -13,6 +11,8 @@
 #include "based/graphics/model.h"
 #include "based/input/keyboard.h"
 #include "based/input/mouse.h"
+#include "based/log.h"
+#include "based/main.h"
 #include "based/math/basedmath.h"
 #include "based/scene/components.h"
 #include "based/scene/entity.h"
@@ -25,13 +25,13 @@
 #include "based/graphics/sprite.h"
 #include "based/math/random.h"
 #include "based/scene/audio.h"
+#include "based/scene/sceneserializer.h"
 #include "based/ui/textentity.h"
+#include "external/entt/core/hashed_string.hpp"
 #include "Models-Surfaces/Generators.h"
 #include "Water/water.h"
-#include "external/entt/core/hashed_string.hpp"
-#include "based/scene/sceneserializer.h"
 
-#include "external/entt/core/hashed_string.hpp"
+#include "fmod.hpp"
 
 using namespace based;
 
@@ -130,6 +130,11 @@ private:
 
 	core::AssetLibrary<scene::Entity> entityStorage;
 
+	FMOD::System* system;
+	FMOD::Sound* sound1;
+	FMOD::Channel* channel = 0;
+	FMOD_RESULT       result;
+
 public:
 	core::WindowProperties GetWindowProperties() override
 	{
@@ -158,21 +163,32 @@ public:
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
 
-		using namespace entt::literals;
-		entt::meta<SmallClass>()
-			.type(entt::type_hash<SmallClass>())
-			.data<&SmallClass::temp>("temp"_hs);
-		entt::meta<MyComponent>()
-			.base<scene::ScriptComponent>()
-			.type(entt::type_hash<MyComponent>())
-			.data<&MyComponent::myScript>("myScript"_hs)
-			.data<&MyComponent::myProj>("myProj"_hs)
-			.data<&MyComponent::myId>("myId"_hs)
-			.data<&MyComponent::myFloat>("myFloat"_hs)
-			.func<&scene::SceneSerializer::AddMetaComponent<MyComponent>, entt::as_void_t>("AddMetaComponent"_hs)
-			.func<&scene::SceneSerializer::SerializeScriptComponent<MyComponent>>("SerializeScriptComponent"_hs);
-		/*entt::meta_any any{ std::string("") };
-		any.allow_cast<float>();*/
+		{
+			using namespace entt::literals;
+			entt::meta<SmallClass>()
+				.type(entt::type_hash<SmallClass>())
+				.data<&SmallClass::temp>("temp"_hs);
+			entt::meta<MyComponent>()
+				.base<scene::ScriptComponent>()
+				.type(entt::type_hash<MyComponent>())
+				.data<&MyComponent::myScript>("myScript"_hs)
+				.data<&MyComponent::myProj>("myProj"_hs)
+				.data<&MyComponent::myId>("myId"_hs)
+				.data<&MyComponent::myFloat>("myFloat"_hs)
+				.func<&scene::SceneSerializer::AddMetaComponent<MyComponent>, entt::as_void_t>("AddMetaComponent"_hs)
+				.func<&scene::SceneSerializer::SerializeScriptComponent<MyComponent>>("SerializeScriptComponent"_hs);
+			/*entt::meta_any any{ std::string("") };
+			any.allow_cast<float>();*/
+		}
+
+		result = FMOD::System_Create(&system);
+		BASED_ASSERT(result == FMOD_OK, "Error creating FMOD system!");
+
+		result = system->init(32, FMOD_INIT_NORMAL, nullptr);
+		BASED_ASSERT(result == FMOD_OK, "Error initializing FMOD system!");
+
+		result = system->createSound("Assets/sounds/TestSound.wav", FMOD_DEFAULT, 0, &sound1);
+		BASED_ASSERT(result == FMOD_OK, "Error creating FMOD sound!");
 
 #define SERIALIZE_SCENE 0
 
@@ -451,64 +467,13 @@ public:
 #if SERIALIZE_SCENE
 		serializer.Serialize("Assets/Scenes/Test.bscn");
 #else
-		serializer.Deserialize("Assets/Scenes/ReflectionTest.bscn");
-
-		/*auto e = GetCurrentScene()->GetEntityStorage().Get("ComponentEntity");
-		auto hasComp = e->HasComponent<MyComponent>();
-		auto e_comp = e->GetComponent<MyComponent>();*/
+		serializer.Deserialize("Assets/Scenes/Test.bscn");
 
 		animator = GetCurrentScene()->GetAnimatorStorage().Get("Animator");
 		waterMaterial = GetCurrentScene()->GetMaterialStorage().Get("Plane");
 #endif
 
 		BASED_TRACE("Done initializing");
-
-#define testing 0
-
-#if testing
-		MyComponent comp;
-		comp.myId = "Test";
-		comp.myFloat = 100;
-		comp.myScript = SmallClass("Test 2");
-		YAML::Emitter out;
-
-		out << YAML::BeginMap;
-
-		core::YAMLFormatter::Serialize<MyComponent>(out, comp);
-
-		out << YAML::EndMap << YAML::EndMap;
-
-		std::ofstream ofs("Temp.txt");
-		ofs << out.c_str();
-#else
-		std::ifstream ifs("Temp.txt");
-		std::stringstream ss;
-		ss << ifs.rdbuf();
-
-
-		YAML::Node data = YAML::Load(ss.str());
-
-		auto compCast = core::YAMLFormatter::Deserialize<MyComponent>(data);
-
-		auto e = GetCurrentScene()->GetEntityStorage().Get("ComponentEntity");
-		//scene::Entity::CreateEntity("ComponentEntity");
-
-		/*auto anyComp = entt::forward_as_meta(compCast);
-		auto myFunc = entt::resolve(entt::type_hash<MyComponent>())
-			.func("AddComponentTest"_hs)
-			.invoke({}, e.get(), GetCurrentScene().get(), &anyComp);
-		if (!myFunc) BASED_TRACE("INVALID FUNCTION");*/
-		/*e->AddComponent<MyComponent>();
-		GetCurrentScene()->GetRegistry().patch<MyComponent>(e->GetEntityHandle(),
-			[compCast](auto& c) { c = compCast; });*/
-
-		//auto e = GetCurrentScene()->GetEntityStorage().Get("ComponentEntity");
-		auto otherComp = e->GetComponent<MyComponent>();
-
-		//BASED_TRACE("ID: {}, FLOAT: {}", compCast.myId, compCast.myFloat);
-
-		//serializer.Serialize("Assets/Scenes/ReflectionTest.bscn");
-#endif
 
 		// TODO: Fix text rendering behind sprites even when handled last
 		// TODO: Add Scriptable Components 
@@ -524,15 +489,15 @@ public:
 	{
 		App::Update(deltaTime);
 
-		auto compView = GetCurrentScene()->GetRegistry().view<MyComponent>();
-		for (auto& e : compView)
-		{
-			GetCurrentScene()->GetRegistry().get<MyComponent>(e).OnUpdate(deltaTime);
-		}
-
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
 		{
 			animator->GetStateMachine()->SetBool("punch", true);
+		}
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
+		{
+			result = system->playSound(sound1, 0, false, &channel);
+			BASED_ASSERT(result == FMOD_OK, "Error playing sound!");
 		}
 
 		UpdateShaderVisuals();

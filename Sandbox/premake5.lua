@@ -23,6 +23,8 @@ project "Sandbox"
         "%{externals.yaml_cpp}"
     }
 
+    include "Plugins/FMOD"
+
     flags
     {
         "FatalWarnings"
