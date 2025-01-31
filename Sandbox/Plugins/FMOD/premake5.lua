@@ -12,6 +12,6 @@ links
 
 libdirs
 {
-    "%{prj.location}/Plugins/FMOD/core/lib/x64",
-    "%{prj.location}/Plugins/FMOD/studio/lib/x64"
+    "%{prj.location}/Plugins/FMOD/core/lib/",
+    "%{prj.location}/Plugins/FMOD/studio/lib/"
 }

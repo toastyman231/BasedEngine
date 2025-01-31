@@ -7,6 +7,7 @@ import globals
 
 WIN_SOURCE_PATHS = ["PostBuildCopy", "PostBuildCopy_windows", "Assets"]
 NIX_SOURCE_PATHS = ["PostBuildCopy", "Assets"]
+PLUGIN_SOURCE_PATHS = ["Plugins"]
 
 args = globals.ProcessArguments(sys.argv)
 CONFIG = globals.GetArgumentValue(args, "config", "Debug")
@@ -23,6 +24,10 @@ if (globals.IsWindows()):
             subprocess.call(["cmd.exe", "/c", "robocopy", source, newDest, "/E"])
             continue
         subprocess.call(["cmd.exe", "/c", "robocopy", source, dest, "/E"])
+    for source in PLUGIN_SOURCE_PATHS:
+        dirs = os.listdir(source)
+        for dir in dirs:
+            subprocess.call(["cmd.exe", "/c", "robocopy", "{}/{}/{}/Binaries".format(os.getcwd(), source, dir), dest, "/E"])
 else:
     import os, shutil
 
