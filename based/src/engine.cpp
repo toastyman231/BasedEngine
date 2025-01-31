@@ -235,7 +235,7 @@ namespace based
                     mUiManager.Initialize();
 
                     // Load window icon
-                    SetIcon("Assets/icon.png");
+                    SetIcon("Assets/icon.ico");
 
                     //Initialize miniaudio
                     scene::Audio::InitEngine();

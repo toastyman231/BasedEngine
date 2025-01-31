@@ -35,6 +35,8 @@ project "Sandbox"
 
     filter {"system:windows", "configurations:*"}
         systemversion "latest"
+        files { "resources.rc", "Assets/**.ico" }
+        vpaths { ['Assets/*'] = { '*.rc', '**.ico' } }
 
         defines
         {
