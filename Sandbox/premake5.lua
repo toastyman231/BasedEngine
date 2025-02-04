@@ -20,7 +20,8 @@ project "Sandbox"
         "%{externals.spdlog}",
         "%{externals.rmlui}",
         "%{externals.tracy}",
-        "%{externals.yaml_cpp}"
+        "%{externals.yaml_cpp}",
+        "%{externals.jolt}"
     }
 
     include "Plugins/FMOD"

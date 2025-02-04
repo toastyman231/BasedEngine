@@ -10,6 +10,7 @@ externals["assimp"] = (engineLocation or "%{wks.location}") .. "/external/assimp
 externals["rmlui"] = (engineLocation or "%{wks.location}") .. "/external/rmlui/Include"
 externals["tracy"] = (engineLocation or "%{wks.location}") .. "/external/tracy"
 externals["yaml_cpp"] = (engineLocation or "%{wks.location}") .. "/external/yaml-cpp/include"
+externals["jolt"] = (engineLocation or "%{wks.location}") .. "/external/jolt/include"
 
 -- External libraries
 libraries = {}
@@ -19,3 +20,4 @@ libraries["spdlog"] = (engineLocation or "%{wks.location}") .. "/external/spdlog
 libraries["freetype"] = (engineLocation or "%{wks.location}") .. "/external/freetype/lib"
 libraries["assimp"] = (engineLocation or "%{wks.location}") .. "/external/assimp/lib"
 libraries["rmlui"] = (engineLocation or "%{wks.location}") .. "/external/rmlui/lib"
+libraries["jolt"] = (engineLocation or "%{wks.location}") .. "/external/jolt/lib/%{cfg.buildcfg}"

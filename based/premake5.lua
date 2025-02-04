@@ -35,6 +35,7 @@ project "based"
         "%{externals.rmlui}",
         "%{externals.tracy}",
         "%{externals.yaml_cpp}",
+        "%{externals.jolt}"
         --"C:/Program Files (x86)/Visual Leak Detector/include"
     }
 
@@ -55,6 +56,7 @@ project "based"
         "RmlCore",
         "RmlDebugger",
         "yaml-cpp",
+        "Jolt"
         --"vld"
     }
 
@@ -67,6 +69,7 @@ project "based"
         "%{libraries.assimp}",
         "%{libraries.rmlui}",
         "%{libraries.tracy}",
+        "%{libraries.jolt}"
         --"C:/Program Files (x86)/Visual Leak Detector/lib"
     }
 

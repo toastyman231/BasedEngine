@@ -47,6 +47,9 @@
 // entt stuff
 #include <external/entt/entt.hpp>
 
+// jolt stuff
+#include <Jolt/Jolt.h>
+
 // Based stuff
 #include "based/log.h"
 #include "based/core/profiler.h"

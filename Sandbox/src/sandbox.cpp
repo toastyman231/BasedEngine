@@ -32,6 +32,9 @@
 #include "Water/water.h"
 
 #include "fmod.hpp"
+#include <Jolt/Physics/Collision/Shape/Shape.h>
+#include <Jolt/Physics/Collision/Shape/BoxShape.h>
+#include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
 
 using namespace based;
 
@@ -134,6 +137,8 @@ private:
 	FMOD::Sound* sound1;
 	FMOD::Channel* channel = 0;
 	FMOD_RESULT       result;
+
+	const JPH::Shape* boxShape;
 
 public:
 	core::WindowProperties GetWindowProperties() override
@@ -471,7 +476,20 @@ public:
 
 		animator = GetCurrentScene()->GetAnimatorStorage().Get("Animator");
 		waterMaterial = GetCurrentScene()->GetMaterialStorage().Get("Plane");
+		crateEntity = GetCurrentScene()->GetEntityStorage().Get("Crate");
 #endif
+
+		boxShape = JPH::RotatedTranslatedShapeSettings(
+			JPH::Vec3(
+				crateEntity->GetTransform().Position.x,
+				crateEntity->GetTransform().Position.y,
+				crateEntity->GetTransform().Position.z),
+			JPH::Quat::sEulerAngles(
+				JPH::Vec3(
+					crateEntity->GetTransform().Rotation.x,
+					crateEntity->GetTransform().Rotation.y,
+					crateEntity->GetTransform().Rotation.z)),
+			new JPH::BoxShape(JPH::Vec3(1, 1, 1))).Create().Get();
 
 		BASED_TRACE("Done initializing");
 
