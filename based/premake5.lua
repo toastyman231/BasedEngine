@@ -56,7 +56,7 @@ project "based"
         "RmlCore",
         "RmlDebugger",
         "yaml-cpp",
-        "Jolt"
+        "jolt"
         --"vld"
     }
 
@@ -69,7 +69,7 @@ project "based"
         "%{libraries.assimp}",
         "%{libraries.rmlui}",
         "%{libraries.tracy}",
-        "%{libraries.jolt}"
+        --"%{libraries.jolt}"
         --"C:/Program Files (x86)/Visual Leak Detector/lib"
     }
 

@@ -32,9 +32,18 @@
 #include "Water/water.h"
 
 #include "fmod.hpp"
+#include <Jolt/Physics/PhysicsSystem.h>
+#include <Jolt/Physics/Body/Body.h>
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Collision/Shape/Shape.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
+#include <Jolt/Physics/Collision/ObjectLayer.h>
+#include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
+
+#include "Jolt/RegisterTypes.h"
+#include "Jolt/Core/JobSystemThreadPool.h"
+#include "Jolt/Renderer/DebugRenderer.h"
 
 using namespace based;
 
@@ -71,6 +80,100 @@ struct MyComponent : public scene::ScriptComponent
 	graphics::Projection myProj = graphics::PERSPECTIVE;
 	std::string myId = "Default";
 	float myFloat = 0;
+};
+
+namespace Layers
+{
+	static constexpr JPH::ObjectLayer UNUSED1 = 0; // 4 unused values so that broadphase layers values don't match with object layer values (for testing purposes)
+	static constexpr JPH::ObjectLayer UNUSED2 = 1;
+	static constexpr JPH::ObjectLayer UNUSED3 = 2;
+	static constexpr JPH::ObjectLayer UNUSED4 = 3;
+	static constexpr JPH::ObjectLayer STATIC = 4;
+	static constexpr JPH::ObjectLayer MOVING = 5;
+	static constexpr JPH::ObjectLayer NUM_LAYERS = 6;
+};
+
+namespace BroadPhaseLayers
+{
+	static constexpr JPH::BroadPhaseLayer STATIC(0);
+	static constexpr JPH::BroadPhaseLayer MOVING(1);
+	static constexpr JPH::BroadPhaseLayer UNUSED(2);
+	static constexpr JPH::uint NUM_LAYERS(3);
+};
+
+/// BroadPhaseLayerInterface implementation
+class BPLayerInterfaceImpl final : public JPH::BroadPhaseLayerInterface
+{
+public:
+	BPLayerInterfaceImpl()
+	{
+		// Create a mapping table from object to broad phase layer
+		mObjectToBroadPhase[Layers::UNUSED1] = BroadPhaseLayers::UNUSED;
+		mObjectToBroadPhase[Layers::UNUSED2] = BroadPhaseLayers::UNUSED;
+		mObjectToBroadPhase[Layers::UNUSED3] = BroadPhaseLayers::UNUSED;
+		mObjectToBroadPhase[Layers::UNUSED4] = BroadPhaseLayers::UNUSED;
+		mObjectToBroadPhase[Layers::STATIC] = BroadPhaseLayers::STATIC;
+		mObjectToBroadPhase[Layers::MOVING] = BroadPhaseLayers::MOVING;
+	}
+
+	virtual JPH::uint					GetNumBroadPhaseLayers() const override
+	{
+		return BroadPhaseLayers::NUM_LAYERS;
+	}
+
+	virtual JPH::BroadPhaseLayer			GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
+	{
+		JPH_ASSERT(inLayer < Layers::NUM_LAYERS);
+		return mObjectToBroadPhase[inLayer];
+	}
+
+private:
+	JPH::BroadPhaseLayer					mObjectToBroadPhase[Layers::NUM_LAYERS];
+};
+
+class ObjectVsBroadPhaseLayerFilterImpl : public JPH::ObjectVsBroadPhaseLayerFilter
+{
+public:
+	virtual bool ShouldCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2) const override
+	{
+		switch (inLayer1)
+		{
+		case Layers::STATIC:
+			return inLayer2 == BroadPhaseLayers::MOVING;
+		case Layers::MOVING:
+			return inLayer2 == BroadPhaseLayers::STATIC || inLayer2 == BroadPhaseLayers::MOVING;
+		case Layers::UNUSED1:
+		case Layers::UNUSED2:
+		case Layers::UNUSED3:
+			return false;
+		default:
+			JPH_ASSERT(false);
+			return false;
+		}
+	}
+};
+
+class ObjectLayerPairFilterImpl : public JPH::ObjectLayerPairFilter
+{
+public:
+	virtual bool ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const override
+	{
+		switch (inObject1)
+		{
+		case Layers::UNUSED1:
+		case Layers::UNUSED2:
+		case Layers::UNUSED3:
+		case Layers::UNUSED4:
+			return false;
+		case Layers::STATIC:
+			return inObject2 == Layers::MOVING;
+		case Layers::MOVING:
+			return inObject2 == Layers::STATIC || inObject2 == Layers::MOVING;
+		default:
+			JPH_ASSERT(false);
+			return false;
+		}
+	}
 };
 
 class Sandbox : public based::App
@@ -138,7 +241,15 @@ private:
 	FMOD::Channel* channel = 0;
 	FMOD_RESULT       result;
 
+	JPH::TempAllocator* tempAllocator;
+	JPH::JobSystem* jobSystem;
+	JPH::PhysicsSystem* physicsSystem;
 	const JPH::Shape* boxShape;
+	BPLayerInterfaceImpl broadphaseLayer;
+	ObjectVsBroadPhaseLayerFilterImpl layerFilter;
+	ObjectLayerPairFilterImpl objectLayerFilter;
+	JPH::PhysicsSettings physicsSettings;
+	JPH::BodyID boxID;
 
 public:
 	core::WindowProperties GetWindowProperties() override
@@ -167,6 +278,18 @@ public:
 		input::Mouse::SetCursorVisible(!Engine::Instance().GetWindow().GetShouldRenderToScreen());
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
+
+		JPH::RegisterDefaultAllocator();
+		JPH::Factory::sInstance = new JPH::Factory();
+		tempAllocator = new JPH::TempAllocatorImpl(32 * 1024 * 1024);
+		jobSystem = new JPH::JobSystemThreadPool(2048, 8, 
+			std::thread::hardware_concurrency() - 1);
+		JPH::RegisterTypes();
+		physicsSystem = new JPH::PhysicsSystem();
+		physicsSystem->Init(10240, 0, 65536, 20480, 
+			broadphaseLayer, layerFilter, objectLayerFilter);
+		physicsSystem->SetPhysicsSettings(physicsSettings);
+		physicsSystem->SetGravity(JPH::Vec3(0, -9.81f, 0));
 
 		{
 			using namespace entt::literals;
@@ -476,36 +599,42 @@ public:
 
 		animator = GetCurrentScene()->GetAnimatorStorage().Get("Animator");
 		waterMaterial = GetCurrentScene()->GetMaterialStorage().Get("Plane");
+		GetCurrentScene()->GetEntityStorage().Get("Ground")->SetActive(false);
+		GetCurrentScene()->GetEntityStorage().Get("Crate")->SetActive(true);
 		crateEntity = GetCurrentScene()->GetEntityStorage().Get("Crate");
+		crateEntity->SetPosition(crateEntity->GetTransform().Position + glm::vec3(0, 1000.f, 0));
 #endif
 
-		boxShape = JPH::RotatedTranslatedShapeSettings(
+		boxShape = new JPH::BoxShape(JPH::Vec3(1, 1, 1));
+		boxID = physicsSystem->GetBodyInterface().CreateAndAddBody(JPH::BodyCreationSettings(boxShape,
 			JPH::Vec3(
 				crateEntity->GetTransform().Position.x,
 				crateEntity->GetTransform().Position.y,
 				crateEntity->GetTransform().Position.z),
-			JPH::Quat::sEulerAngles(
-				JPH::Vec3(
-					crateEntity->GetTransform().Rotation.x,
-					crateEntity->GetTransform().Rotation.y,
-					crateEntity->GetTransform().Rotation.z)),
-			new JPH::BoxShape(JPH::Vec3(1, 1, 1))).Create().Get();
+			JPH::Quat::sIdentity(), JPH::EMotionType::Dynamic, Layers::MOVING),
+			JPH::EActivation::Activate);
 
 		BASED_TRACE("Done initializing");
 
 		// TODO: Fix text rendering behind sprites even when handled last
-		// TODO: Add Scriptable Components 
 		// TODO: Decide what to do about Sprites
 	}
 
 	void Shutdown() override
 	{
 		App::Shutdown();
+
+		delete physicsSystem;
 	}
 
 	void Update(float deltaTime) override
 	{
 		App::Update(deltaTime);
+
+		physicsSystem->Update(deltaTime, 1, tempAllocator, jobSystem);
+		auto boxPos = physicsSystem->GetBodyInterface().GetPosition(boxID);
+		BASED_TRACE("Box Pos: {} {} {}", boxPos.GetX(), boxPos.GetY(), boxPos.GetZ());
+		crateEntity->SetPosition(glm::vec3(boxPos.GetX(), boxPos.GetY(), boxPos.GetZ()));
 
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
 		{

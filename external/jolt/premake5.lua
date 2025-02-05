@@ -1,15 +1,23 @@
 project "jolt"
     kind "StaticLib"
     language "C++"
-    staticruntime "on"
+    if externalBuild then location "%{wks.location}/ProjectFiles" end
+
+    if externalBuild then targetdir("%{wks.location}/ProjectFiles/" .. tdir) else targetdir(tdir) end
+    if externalBuild then objdir("%{wks.location}/ProjectFiles/" .. odir) else objdir(odir) end
 
     targetdir ("bin/%{cfg.buildcfg}/%{prj.name}")
     objdir ("bin-obj/%{cfg.buildcfg}/%{prj.name}")
 
     files 
     {
-        "Jolt/**.h",
-        "Jolt/**.cpp"
+        "include/**.h",
+        "include/**.cpp"
+    }
+
+    includedirs
+    {
+        "include"
     }
     
     flags "NoPCH"
@@ -17,6 +25,7 @@ project "jolt"
     filter "system:windows"
 		systemversion "latest"
 		cppdialect "C++17"
+        staticruntime "on"
 
 	filter "system:linux"
 		pic "On"
@@ -26,6 +35,10 @@ project "jolt"
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "on"
+        defines
+        {
+            "JPH_DEBUG_RENDERER"
+        }
 
 	filter "configurations:Release"
 		runtime "Release"

@@ -25,6 +25,7 @@ group "Core"
 group ""
 
 group "Dependencies"
+    include "external/jolt"
     include "external/glad"
     include "external/yaml-cpp"
 group ""
