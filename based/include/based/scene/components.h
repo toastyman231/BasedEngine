@@ -193,8 +193,7 @@ namespace based::scene
 		BoxShapeComponent(glm::vec3 hExtent) : PhysicsShapeComponent()
 		{
 			halfExtent = hExtent;
-			shape = JPH::BoxShapeSettings(convert(hExtent)).Create().Get();
-			//shape = new JPH::BoxShape(convert(hExtent));
+			shape = new JPH::BoxShape(convert(hExtent));
 		}
 
 		BoxShapeComponent(glm::vec3 hExtent, glm::vec3 position, glm::vec3 rot)
@@ -203,11 +202,7 @@ namespace based::scene
 			center = position;
 			rotation = rot;
 			halfExtent = hExtent;
-			//shape = new JPH::BoxShape(convert(hExtent));
-			shape = JPH::RotatedTranslatedShapeSettings(
-				convert(position), JPH::Quat::sEulerAngles(convert(rot)),
-				new JPH::BoxShape(convert(hExtent))
-			).Create().Get();
+			shape = new JPH::BoxShape(convert(hExtent));
 		}
 	};
 

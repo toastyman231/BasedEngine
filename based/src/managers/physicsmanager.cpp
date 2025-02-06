@@ -2,12 +2,14 @@
 #include "based/managers/physicsmanager.h"
 
 #include "app.h"
+#include "basedtime.h"
 #include "engine.h"
 #include "Jolt/RegisterTypes.h"
 #include "Jolt/Core/JobSystemThreadPool.h"
 
 #include "based/physics/physicsconversions.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
+#include "math/basedmath.h"
 #include "scene/entity.h"
 
 namespace based::managers
@@ -32,6 +34,7 @@ namespace based::managers
 	void PhysicsManager::Update(float deltaTime)
 	{
 		PROFILE_FUNCTION();
+		if (core::Time::TimeScale() == 0.f) return;
 
 		auto& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
 		auto physicsEntityView = registry.view<scene::EntityReference, scene::RigidbodyComponent>();
@@ -44,12 +47,13 @@ namespace based::managers
 				auto& rigidbody = registry.get<scene::RigidbodyComponent>(e);
 				auto id = rigidbody.rigidbodyID;
 				entity->SetTransform(convert(bodyInterface.GetPosition(id)),
-					convert(bodyInterface.GetRotation(id).GetEulerAngles()),
+					convert(bodyInterface.GetRotation(id).GetEulerAngles()) * math::Rad2Deg,
 					entity->GetTransform().Scale);
 			}
 		}
 
-		mPhysicsSystem->Update(1.f / 60.0f, 1, mTempAllocator, mJobSystem);
+		mPhysicsSystem->Update((1.f / mPhysicsStepFrequency) * (mUseUnscaledTime ? 1.f : core::Time::TimeScale()), 
+			1, mTempAllocator, mJobSystem);
 	}
 
 	void PhysicsManager::Shutdown()

@@ -20,11 +20,16 @@ namespace based::managers
 		JPH::PhysicsSystem& GetPhysicsSystem() const { return *mPhysicsSystem; }
 
 		void SetGravity(glm::vec3 gravity) const;
+		void SetStepFrequency(float freq) { mPhysicsStepFrequency = freq; }
+		void SetTimeMode(bool useUnscaled) { mUseUnscaledTime = useUnscaled; }
 
 		JPH::BodyID AddBody(const JPH::Shape* shape, glm::vec3 position, glm::vec3 rotation,
 		                    JPH::EMotionType type, uint16_t layer, JPH::EActivation activation = JPH::EActivation::Activate) const;
 
 	protected:
+		float mPhysicsStepFrequency = 60.f;
+		bool mUseUnscaledTime = false;
+
 		JPH::PhysicsSystem* mPhysicsSystem = nullptr;
 		JPH::JobSystem* mJobSystem = nullptr;
 		JPH::BodyInterface* mBodyInterface = nullptr;

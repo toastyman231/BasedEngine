@@ -44,6 +44,8 @@
 #include "based/physics/physicslayers.h"
 #include "Jolt/RegisterTypes.h"
 #include "Jolt/Core/JobSystemThreadPool.h"
+#include "Jolt/Physics/Collision/CastResult.h"
+#include "Jolt/Physics/Collision/RayCast.h"
 #include "Jolt/Renderer/DebugRenderer.h"
 
 using namespace based;
@@ -511,7 +513,7 @@ public:
 		boxComp = floorEntity->GetComponent<scene::BoxShapeComponent>();
 		floorEntity->AddComponent<scene::RigidbodyComponent>(boxComp, JPH::EMotionType::Static, physics::Layers::STATIC);
 
-		//core::Time::SetTimeScale(0);
+		core::Time::SetTimeScale(0);
 		BASED_TRACE("Done initializing");
 
 		// TODO: Fix text rendering behind sprites even when handled last
@@ -573,10 +575,25 @@ public:
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
 		{
 			animator->GetStateMachine()->SetBool("punch", true);
+			JPH::RRayCast ray{
+				convert(cameraEntity->GetTransform().Position),
+				convert(glm::normalize(GetCurrentScene()->GetActiveCamera()->GetForward())) * 1000.f
+			};
+
+			JPH::RayCastResult hit;
+			auto res = Engine::Instance().GetPhysicsManager().GetPhysicsSystem().GetNarrowPhaseQuery().CastRay(ray, hit);
+			BASED_TRACE("HIT FRAC: {}", hit.mFraction);
+
+			if (res)
+			{
+				auto hitPos = ray.GetPointOnRay(hit.mFraction);
+				BASED_TRACE("RAY HIT: {} {} {}", hitPos.GetX(), hitPos.GetY(), hitPos.GetZ());
+			}
 		}
 
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
 		{
+			core::Time::SetTimeScale(1);
 			result = system->playSound(sound1, 0, false, &channel);
 			BASED_ASSERT(result == FMOD_OK, "Error playing sound!");
 		}
