@@ -711,11 +711,11 @@ public:
 		static auto va = std::make_shared<graphics::VertexArray>();
 
 		static bool loadFile = true;
-		std::shared_ptr<graphics::Material> mat;
+		static std::shared_ptr<graphics::Material> mat = graphics::Material::LoadMaterialFromFile(
+			ASSET_PATH("Materials/DefaultLine.bmat"), GetCurrentScene()->GetMaterialStorage());
 		if (loadFile)
 		{
-			mat = graphics::Material::LoadMaterialFromFile(
-				ASSET_PATH("Materials/Unlit.bmat"), GetCurrentScene()->GetMaterialStorage());
+			mat->SetUniformValue("color", glm::vec4{ 1, 0, 0, 1 });
 			loadFile = false;
 
 			BASED_CREATE_VERTEX_BUFFER(line, float);
@@ -723,13 +723,10 @@ public:
 			line->PushVertex({ 1.f, 0.f, 0.f });
 			line->SetLayout({ 3 });
 			va->PushBuffer(std::move(line));
-			va->SetElements({ 0, 1, 0 });
 			va->Upload();
 		}
-		else
-			mat = GetCurrentScene()->GetMaterialStorage().Get("Unlit");
 
-		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, va, mat));
+		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderLineMaterial, va, mat));
 	}
 
 	void ImguiRender() override

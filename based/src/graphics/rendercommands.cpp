@@ -200,6 +200,75 @@ namespace based::graphics::rendercommands
 		}
 	}
 
+	void RenderLineMaterial::Execute()
+	{
+		PROFILE_FUNCTION();
+		std::shared_ptr<VertexArray> va = mVertexArray.lock();
+		std::shared_ptr<Material> mat = mMaterial.lock();
+
+		if (va && mat)
+		{
+			BASED_ASSERT(va->IsValid(), "Attempting to execute invalid RenderVertexArrayMaterial - did you forget to call VertexArray::Upload()?");
+			if (va->IsValid())
+			{
+				va->Bind();
+
+				std::shared_ptr<Shader> shader = mat->GetShader().lock();
+				BASED_ASSERT(shader, "Attempting to execute invalid RenderVertexArrayMaterial - shader is nullptr");
+				if (shader)
+				{
+					managers::RenderManager::SetDepthFunction(mDepthFunc);
+					mat->UpdateShaderUniforms();
+					shader->Bind();
+
+					glLineWidth(mat->GetUniformValue<float>("width"));
+
+					if (!mInstanced)
+					{
+						shader->SetUniformMat4("model", mModelMatrix);
+					}
+
+					if (va->GetElementCount() > 0)
+					{
+						if (!mInstanced)
+						{
+							glDrawElements(GL_LINES, va->GetElementCount(), GL_UNSIGNED_INT, 0);
+							BASED_CHECK_GL_ERROR;
+						}
+						else
+						{
+							glDrawElementsInstanced(
+								GL_LINES, va->GetElementCount(),
+								GL_UNSIGNED_INT, 0, mInstanceCount);
+							BASED_CHECK_GL_ERROR;
+						}
+					}
+					else
+					{
+						if (!mInstanced)
+						{
+							glDrawArrays(GL_LINES, 0, va->GetVertexCount());
+							BASED_CHECK_GL_ERROR;
+						}
+						else
+						{
+							glDrawArraysInstanced(GL_LINES, 0, va->GetVertexCount(), mInstanceCount);
+							BASED_CHECK_GL_ERROR;
+						}
+					}
+
+					glLineWidth(1);
+					managers::RenderManager::SetDepthFunction(GL_LEQUAL);
+				}
+				va->Unbind();
+			}
+		}
+		else
+		{
+			BASED_WARN("Attempting to execute RenderVertexArrayMaterial with invalid data");
+		}
+	}
+
 	void RenderVertexArrayPostProcess::Execute()
 	{
 		PROFILE_FUNCTION();

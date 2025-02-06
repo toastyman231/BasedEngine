@@ -105,6 +105,34 @@ namespace based::graphics
 			int mIndex;
 		};
 
+		class RenderLineMaterial : public RenderCommand
+		{
+		public:
+			RenderLineMaterial(std::weak_ptr<VertexArray> vertexArray, std::weak_ptr<Material> material,
+				const glm::mat4 modelMatrix = glm::mat4(1.f), const uint32_t depthFunc = GL_LEQUAL,
+				const bool instanced = false, const int count = 0,
+				const int index = 0)
+				: mVertexArray(std::move(vertexArray))
+				, mMaterial(std::move(material))
+				, mModelMatrix(modelMatrix)
+				, mInstanced(instanced)
+				, mDepthFunc(depthFunc)
+				, mInstanceCount(count)
+				, mIndex(index)
+			{
+			}
+
+			virtual void Execute() override;
+		private:
+			std::weak_ptr<VertexArray> mVertexArray;
+			std::weak_ptr<Material> mMaterial;
+			glm::mat4 mModelMatrix;
+			bool mInstanced;
+			uint32_t mDepthFunc;
+			int mInstanceCount;
+			int mIndex;
+		};
+
 		class RenderVertexArrayPostProcess : public RenderCommand
 		{
 		public:
