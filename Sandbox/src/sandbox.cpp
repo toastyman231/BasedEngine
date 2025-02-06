@@ -94,6 +94,7 @@ private:
 	std::shared_ptr<scene::Entity> planeEntity;*/
 	std::shared_ptr<scene::Entity> crateEntity;
 	std::shared_ptr<scene::Entity> floorEntity;
+	std::shared_ptr<scene::Entity> cameraEntity;
 	/*std::shared_ptr<scene::Entity> lightPlaceholder;
 	std::shared_ptr<scene::Entity> otherLight;
 	std::shared_ptr<scene::Entity> grassInstance;
@@ -101,7 +102,6 @@ private:
 	std::shared_ptr<scene::Entity> arms;
 	std::shared_ptr<scene::Entity> sphere;
 	std::shared_ptr<scene::Entity> wallEntity;
-	std::shared_ptr<scene::Entity> cameraEntity;
 	std::shared_ptr<scene::Entity> iconEntity;
 	std::shared_ptr<ui::TextEntity> text;*/
 
@@ -489,8 +489,10 @@ public:
 		waterMaterial = GetCurrentScene()->GetMaterialStorage().Get("Plane");
 		GetCurrentScene()->GetEntityStorage().Get("Ground")->SetActive(false);
 		GetCurrentScene()->GetEntityStorage().Get("Crate")->SetActive(true);
+		cameraEntity = GetCurrentScene()->GetEntityStorage().Get("Camera");
 		crateEntity = GetCurrentScene()->GetEntityStorage().Get("Crate");
 		crateEntity->SetPosition(crateEntity->GetTransform().Position + glm::vec3(0, 30.f, 0));
+		crateEntity->SetRotation(glm::vec3(45.f, 0.f, 0.f));
 #endif
 
 		crateEntity->AddComponent<scene::BoxShapeComponent>(
@@ -509,6 +511,7 @@ public:
 		boxComp = floorEntity->GetComponent<scene::BoxShapeComponent>();
 		floorEntity->AddComponent<scene::RigidbodyComponent>(boxComp, JPH::EMotionType::Static, physics::Layers::STATIC);
 
+		//core::Time::SetTimeScale(0);
 		BASED_TRACE("Done initializing");
 
 		// TODO: Fix text rendering behind sprites even when handled last
@@ -524,23 +527,6 @@ public:
 	{
 		App::Update(deltaTime);
 
-		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
-		{
-			animator->GetStateMachine()->SetBool("punch", true);
-		}
-
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
-		{
-			result = system->playSound(sound1, 0, false, &channel);
-			BASED_ASSERT(result == FMOD_OK, "Error playing sound!");
-		}
-
-		UpdateShaderVisuals();
-		UpdateWaterShader();
-
-		return;
-
-		/*// Movement input
 		if (input::Keyboard::Key(BASED_INPUT_KEY_W))
 		{
 			const auto& transform = cameraEntity->GetTransform();
@@ -566,13 +552,6 @@ public:
 			cameraEntity->SetPosition(transform.Position + speed * core::Time::UnscaledDeltaTime() * camera->GetRight());
 		}
 
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
-		{
-			//if (core::Time::TimeScale() == 0.1f) core::Time::SetTimeScale(1.0f);
-			//else core::Time::SetTimeScale(0.1f);
-			core::Time::SetTimeScale(1.0f - core::Time::TimeScale());
-		}
-
 		// Enable/disable mouse control
 		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_R))
 		{
@@ -589,6 +568,31 @@ public:
 
 			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
 			cameraEntity->SetRotation(glm::vec3(yaw, pitch, camera->GetTransform().Rotation.z));
+		}
+
+		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
+		{
+			animator->GetStateMachine()->SetBool("punch", true);
+		}
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
+		{
+			result = system->playSound(sound1, 0, false, &channel);
+			BASED_ASSERT(result == FMOD_OK, "Error playing sound!");
+		}
+
+		UpdateShaderVisuals();
+		UpdateWaterShader();
+
+		return;
+
+		/*// Movement input
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
+		{
+			//if (core::Time::TimeScale() == 0.1f) core::Time::SetTimeScale(1.0f);
+			//else core::Time::SetTimeScale(0.1f);
+			core::Time::SetTimeScale(1.0f - core::Time::TimeScale());
 		}
 
 		// Save initial mouse position for rolling ball

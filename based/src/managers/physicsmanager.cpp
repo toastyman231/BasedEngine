@@ -14,6 +14,7 @@ namespace based::managers
 {
 	void PhysicsManager::Initialize()
 	{
+		PROFILE_FUNCTION();
 		JPH::RegisterDefaultAllocator();
 		JPH::Factory::sInstance = new JPH::Factory();
 		mTempAllocator = new JPH::TempAllocatorImpl(32 * 1024 * 1024);
@@ -30,7 +31,7 @@ namespace based::managers
 
 	void PhysicsManager::Update(float deltaTime)
 	{
-		mPhysicsSystem->Update(deltaTime, 1, mTempAllocator, mJobSystem);
+		PROFILE_FUNCTION();
 
 		auto& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
 		auto physicsEntityView = registry.view<scene::EntityReference, scene::RigidbodyComponent>();
@@ -43,10 +44,12 @@ namespace based::managers
 				auto& rigidbody = registry.get<scene::RigidbodyComponent>(e);
 				auto id = rigidbody.rigidbodyID;
 				entity->SetTransform(convert(bodyInterface.GetPosition(id)),
-					convert(bodyInterface.GetRotation(id).GetEulerAngles()), 
+					convert(bodyInterface.GetRotation(id).GetEulerAngles()),
 					entity->GetTransform().Scale);
 			}
 		}
+
+		mPhysicsSystem->Update(1.f / 60.0f, 1, mTempAllocator, mJobSystem);
 	}
 
 	void PhysicsManager::Shutdown()

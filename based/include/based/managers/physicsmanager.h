@@ -17,6 +17,8 @@ namespace based::managers
 		void Update(float deltaTime);
 		void Shutdown();
 
+		JPH::PhysicsSystem& GetPhysicsSystem() const { return *mPhysicsSystem; }
+
 		void SetGravity(glm::vec3 gravity) const;
 
 		JPH::BodyID AddBody(const JPH::Shape* shape, glm::vec3 position, glm::vec3 rotation,

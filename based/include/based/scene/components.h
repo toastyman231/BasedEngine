@@ -181,18 +181,20 @@ namespace based::scene
 
 	struct PhysicsShapeComponent
 	{
-		JPH::Shape* shape;
+		JPH::Ref<JPH::Shape> shape;
 		glm::vec3 center;
 		glm::vec3 rotation;
-		glm::vec3 halfExtent;
 	};
 
 	struct BoxShapeComponent : public PhysicsShapeComponent
 	{
+		glm::vec3 halfExtent;
+
 		BoxShapeComponent(glm::vec3 hExtent) : PhysicsShapeComponent()
 		{
 			halfExtent = hExtent;
-			shape = new JPH::BoxShape(convert(hExtent));
+			shape = JPH::BoxShapeSettings(convert(hExtent)).Create().Get();
+			//shape = new JPH::BoxShape(convert(hExtent));
 		}
 
 		BoxShapeComponent(glm::vec3 hExtent, glm::vec3 position, glm::vec3 rot)
@@ -201,7 +203,11 @@ namespace based::scene
 			center = position;
 			rotation = rot;
 			halfExtent = hExtent;
-			shape = new JPH::BoxShape(convert(hExtent));
+			//shape = new JPH::BoxShape(convert(hExtent));
+			shape = JPH::RotatedTranslatedShapeSettings(
+				convert(position), JPH::Quat::sEulerAngles(convert(rot)),
+				new JPH::BoxShape(convert(hExtent))
+			).Create().Get();
 		}
 	};
 
