@@ -708,6 +708,28 @@ public:
 
 	void Render() override
 	{
+		static auto va = std::make_shared<graphics::VertexArray>();
+
+		static bool loadFile = true;
+		std::shared_ptr<graphics::Material> mat;
+		if (loadFile)
+		{
+			mat = graphics::Material::LoadMaterialFromFile(
+				ASSET_PATH("Materials/Unlit.bmat"), GetCurrentScene()->GetMaterialStorage());
+			loadFile = false;
+
+			BASED_CREATE_VERTEX_BUFFER(line, float);
+			line->PushVertex({ 0.f, 0.f, 0.f });
+			line->PushVertex({ 1.f, 0.f, 0.f });
+			line->SetLayout({ 3 });
+			va->PushBuffer(std::move(line));
+			va->SetElements({ 0, 1, 0 });
+			va->Upload();
+		}
+		else
+			mat = GetCurrentScene()->GetMaterialStorage().Get("Unlit");
+
+		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, va, mat));
 	}
 
 	void ImguiRender() override

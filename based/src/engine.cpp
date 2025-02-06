@@ -65,8 +65,13 @@ namespace based
         }
         mRenderManager.ResetPassCount();
 
-        GetRenderManager().Submit(BASED_SUBMIT_RC(UpdateGlobals));
+        mRenderManager.Submit(BASED_SUBMIT_RC(UpdateGlobals));
+        mRenderManager.Submit(BASED_SUBMIT_RC(PushFramebuffer, mWindow.GetFramebuffer(), "UserRender", false));
+        mRenderManager.Submit(BASED_SUBMIT_RC(PushCamera, mApp->GetCurrentScene()->GetActiveCamera()));
         mApp->Render();
+        mRenderManager.Submit(BASED_SUBMIT_RC(PopCamera));
+        mRenderManager.Submit(BASED_SUBMIT_RC(PopFramebuffer));
+        mRenderManager.Flush();
 
         mWindow.EndRender();
     }
