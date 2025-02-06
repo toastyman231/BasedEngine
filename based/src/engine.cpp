@@ -110,6 +110,10 @@ namespace based
                 core::Time::UpdateTime();
                 const float timeDelta = core::Time::GetTime() - core::Time::mLastFrameTime;
                 core::Time::SetDelta(timeDelta);
+
+                // Physics Step
+                mPhysicsManager.Update(timeDelta);
+
                 Update(timeDelta);
                 Render();
                 ClearArena(&mFrameArena);
@@ -243,6 +247,9 @@ namespace based
                     // Initialize buffer objects
                     graphics::Shader::InitializeUniformBuffers();
 
+                    // Initialize physics system
+                    mPhysicsManager.Initialize();
+
                     // Initialize client
                     mApp->Initialize();
                 }
@@ -266,6 +273,9 @@ namespace based
         // Shutdown client
         mApp->GetCurrentScene()->ShutdownScene();
         mApp->Shutdown();
+
+        // Shutdown Physics
+        mPhysicsManager.Shutdown();
 
         // Shutdown Audio
         scene::Audio::ShutdownEngine();

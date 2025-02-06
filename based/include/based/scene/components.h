@@ -6,6 +6,14 @@
 #include <external/glm/vec3.hpp>
 
 #include "based/core/uuid.h"
+#include "based/physics/physicsconversions.h"
+#include "based/engine.h"
+
+#include <Jolt/Jolt.h>
+#include "Jolt/Physics/Collision/Shape/BoxShape.h"
+#include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
+#include <Jolt/Physics/Body/MotionType.h>
+#include <Jolt/Physics/EActivation.h>
 
 namespace based::ui
 {
@@ -97,31 +105,6 @@ namespace based::scene
 		Velocity(const glm::vec2& vel) : dx(vel.x), dy(vel.y) {}
 	};
 
-	/*class ScriptableBehavior
-	{
-	protected:
-		std::weak_ptr<scene::Entity> mOwner;
-
-	public:
-		virtual void Initialize() = 0;
-		virtual void Update(float deltaTime) = 0;
-		virtual void Shutdown() = 0;
-
-		ScriptableBehavior() = default;
-		ScriptableBehavior(const std::shared_ptr<scene::Entity>& owner) : mOwner(owner) {}
-		virtual ~ScriptableBehavior() = default;
-	};
-
-	struct ScriptableComponent
-	{
-		std::weak_ptr<scene::ScriptableBehavior> behavior;
-
-		ScriptableComponent() = default;
-		ScriptableComponent(const ScriptableComponent& other) = default;
-		ScriptableComponent(const std::shared_ptr<ScriptableBehavior>& bhvr) : behavior(bhvr) {}
-		~ScriptableComponent() = default;
-	};*/
-
 	struct SpriteRenderer
 	{
 		std::weak_ptr<graphics::Sprite> sprite;
@@ -194,6 +177,45 @@ namespace based::scene
 		virtual ~ScriptComponent() = default;
 
 		bool Enabled = true;
+	};
+
+	struct PhysicsShapeComponent
+	{
+		JPH::Shape* shape;
+		glm::vec3 center;
+		glm::vec3 rotation;
+		glm::vec3 halfExtent;
+	};
+
+	struct BoxShapeComponent : public PhysicsShapeComponent
+	{
+		BoxShapeComponent(glm::vec3 hExtent) : PhysicsShapeComponent()
+		{
+			halfExtent = hExtent;
+			shape = new JPH::BoxShape(convert(hExtent));
+		}
+
+		BoxShapeComponent(glm::vec3 hExtent, glm::vec3 position, glm::vec3 rot)
+			: PhysicsShapeComponent()
+		{
+			center = position;
+			rotation = rot;
+			halfExtent = hExtent;
+			shape = new JPH::BoxShape(convert(hExtent));
+		}
+	};
+
+	struct RigidbodyComponent
+	{
+		JPH::BodyID rigidbodyID;
+
+		RigidbodyComponent(PhysicsShapeComponent shape, 
+			JPH::EMotionType type, uint16_t layer, JPH::EActivation activation = JPH::EActivation::Activate)
+		{
+			rigidbodyID = Engine::Instance().GetPhysicsManager().AddBody(
+				shape.shape, shape.center, shape.rotation, type, layer, activation
+			);
+		}
 	};
 
 	struct TextRenderer

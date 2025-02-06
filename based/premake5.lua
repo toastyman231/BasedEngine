@@ -91,7 +91,11 @@ project "based"
         defines "BASED_PLATFORM_LINUX"
 
     filter "configurations:Debug"
-        defines "BASED_CONFIG_DEBUG"
+        defines 
+        {
+            "BASED_CONFIG_DEBUG",
+            "JPH_DEBUG_RENDERER"
+        }
         runtime "Debug"
         editandcontinue "off"
         symbols "on"
