@@ -15,6 +15,7 @@ A simple 2D and 3D game engine based on tutorials by https://www.youtube.com/c/P
 - RmlUI (UI Rendering, https://github.com/mikke89/RmlUi)  
 - Tracy (Profiling, https://github.com/wolfpld/tracy)
 - yaml-cpp (YAML writer and parser, https://github.com/jbeder/yaml-cpp)
+- Jolt (Physics, https://github.com/jrouwe/JoltPhysics)
 
 ## My Additions
 The bulk of the engine design and implentation was done by Progrematic, if something is not listed below, it was probably done by him. You can find his original engine here: https://github.com/progrematic/hippo.
@@ -38,9 +39,10 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - Physically based materials (Based on https://github.com/GarrettGunnell/Disney-PBR), with simple material editor
 - Custom Render Pass support, including post processing
 - Scene serialization and loading
+- Easy support for physics using Jolt
 
 ## Planned Additions
-- Physics (Box2D, Jolt, Bullet?)
+- ~~Physics~~ Complete!
 - ~~Audio capabilities (maybe ffmpeg?)~~ Complete!
 - ~~Animation System~~ Complete!
 - ~~Load shaders from file (They are hardcoded currently)~~ Complete!  
@@ -53,8 +55,10 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 
 ## Thoughts and Concerns
 - Currently only quads can be rendered (in terms of 2D rendering), things like lines and circles have to be baked into a texture then rendered on a square or something. Adding dedicated render commands for those types of objects is probably worth it. Of course, this does not affect 3D rendering.
+    - I recently added a line renderer! It's really intended for debug stuff, but a more gameplay optimized one will likely come at some point.
 - A GUI editor would be nice to have at some point, but it's a lot of effort to make that I could be using to make actual games (or just improving the engine in general).
 - I've only tested it on Windows, theoretically it should work on Mac and Linux, but your mileage will probably vary.
+    - I did try to compile it with clang and it generated an insane amount of errors, so the project is definitely not portable.
 
 ## Previous Thoughts and Concerns
 These items used to be grouped with the rest of the Thoughts and Concerns, but since they've been resolved I decided to move them here for organizational purposes.
