@@ -1,0 +1,22 @@
+Material: DebugGeometry
+ID: 3560332728017973358
+VertexSource: Shaders/debug_geometry.vert
+VertexIsEngineAsset: true
+FragmentSource: Shaders/debug_geometry.frag
+FragmentIsEngineAsset: true
+UniformInts:
+  {}
+UniformFloats:
+  {}
+UniformFloat2s:
+  {}
+UniformFloat3s:
+  {}
+UniformFloat4s:
+  {}
+UniformMat3s:
+  {}
+UniformMat4s:
+  {}
+Textures:
+  {}

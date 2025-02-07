@@ -202,6 +202,15 @@ namespace based::graphics
 			virtual void Execute() override;
 		};
 
+		class SetWireframe : public RenderCommand
+		{
+		public:
+			SetWireframe(bool wireframe) : mWireframe(wireframe) {}
+			virtual void Execute() override;
+		private:
+			bool mWireframe;
+		};
+
 		class PushCamera : public RenderCommand
 		{
 		public:

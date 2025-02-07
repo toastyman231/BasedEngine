@@ -6,6 +6,7 @@
 #include "based/engine.h"
 #include "based/graphics/camera.h"
 #include "based/graphics/defaultassetlibraries.h"
+#include "based/graphics/linerenderer.h"
 #include "based/graphics/framebuffer.h"
 #include "based/graphics/mesh.h"
 #include "based/graphics/model.h"
@@ -41,12 +42,14 @@
 #include <Jolt/Physics/Collision/ObjectLayer.h>
 #include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
 
+#include "based/physics/debugrenderer.h"
 #include "based/physics/physicslayers.h"
 #include "Jolt/RegisterTypes.h"
 #include "Jolt/Core/JobSystemThreadPool.h"
 #include "Jolt/Physics/Collision/CastResult.h"
 #include "Jolt/Physics/Collision/RayCast.h"
 #include "Jolt/Renderer/DebugRenderer.h"
+#include "Jolt/Renderer/DebugRendererSimple.h"
 
 using namespace based;
 
@@ -106,8 +109,6 @@ private:
 	std::shared_ptr<scene::Entity> wallEntity;
 	std::shared_ptr<scene::Entity> iconEntity;
 	std::shared_ptr<ui::TextEntity> text;*/
-
-	std::shared_ptr<graphics::Mesh> temp;
 
 	bool mouseControl = false;
 	float speed = 2.5f;
@@ -498,7 +499,7 @@ public:
 #endif
 
 		crateEntity->AddComponent<scene::BoxShapeComponent>(
-			crateEntity->GetTransform().Scale / 2.f,
+			crateEntity->GetTransform().Scale,
 			crateEntity->GetTransform().Position,
 			crateEntity->GetTransform().Rotation);
 		auto boxComp = crateEntity->GetComponent<scene::BoxShapeComponent>();
@@ -506,12 +507,16 @@ public:
 
 		floorEntity = scene::Entity::CreateEntity("Floor");
 		floorEntity->SetScale(glm::vec3(10.f, 0.3f, 10.f));
+		floorEntity->AddComponent<scene::MeshRenderer>(graphics::Mesh::LoadMeshFromFile(
+			ASSET_PATH("Meshes/cube.obj"),
+			GetCurrentScene()->GetMeshStorage()));
 		floorEntity->AddComponent<scene::BoxShapeComponent>(
-			floorEntity->GetTransform().Scale / 2.f,
+			floorEntity->GetTransform().Scale,
 			floorEntity->GetTransform().Position,
 			floorEntity->GetTransform().Rotation);
 		boxComp = floorEntity->GetComponent<scene::BoxShapeComponent>();
 		floorEntity->AddComponent<scene::RigidbodyComponent>(boxComp, JPH::EMotionType::Static, physics::Layers::STATIC);
+		Engine::Instance().GetPhysicsManager().SetRenderDebug(true);
 
 		core::Time::SetTimeScale(0);
 		BASED_TRACE("Done initializing");
@@ -533,13 +538,13 @@ public:
 		{
 			const auto& transform = cameraEntity->GetTransform();
 			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
-			cameraEntity->SetPosition(transform.Position - speed * core::Time::UnscaledDeltaTime() * camera->GetForward());
+			cameraEntity->SetPosition(transform.Position + speed * core::Time::UnscaledDeltaTime() * camera->GetForward());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_S))
 		{
 			const auto& transform = cameraEntity->GetTransform();
 			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
-			cameraEntity->SetPosition(transform.Position + speed * core::Time::UnscaledDeltaTime() * camera->GetForward());
+			cameraEntity->SetPosition(transform.Position - speed * core::Time::UnscaledDeltaTime() * camera->GetForward());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_A))
 		{
@@ -582,12 +587,15 @@ public:
 
 			JPH::RayCastResult hit;
 			auto res = Engine::Instance().GetPhysicsManager().GetPhysicsSystem().GetNarrowPhaseQuery().CastRay(ray, hit);
-			BASED_TRACE("HIT FRAC: {}", hit.mFraction);
+
+			graphics::DebugLineRenderer::DrawDebugLine(convert(ray.mOrigin),
+				convert(ray.mOrigin + ray.mDirection), 3, { 1, 0, 0, 1 }, 5);
 
 			if (res)
 			{
 				auto hitPos = ray.GetPointOnRay(hit.mFraction);
-				BASED_TRACE("RAY HIT: {} {} {}", hitPos.GetX(), hitPos.GetY(), hitPos.GetZ());
+				Engine::Instance().GetPhysicsManager().GetDebugRenderer()->DrawMarker(
+					hitPos, JPH::Color::sGreen, 0.3f);
 			}
 		}
 
@@ -708,25 +716,6 @@ public:
 
 	void Render() override
 	{
-		static auto va = std::make_shared<graphics::VertexArray>();
-
-		static bool loadFile = true;
-		static std::shared_ptr<graphics::Material> mat = graphics::Material::LoadMaterialFromFile(
-			ASSET_PATH("Materials/DefaultLine.bmat"), GetCurrentScene()->GetMaterialStorage());
-		if (loadFile)
-		{
-			mat->SetUniformValue("color", glm::vec4{ 1, 0, 0, 1 });
-			loadFile = false;
-
-			BASED_CREATE_VERTEX_BUFFER(line, float);
-			line->PushVertex({ 0.f, 0.f, 0.f });
-			line->PushVertex({ 1.f, 0.f, 0.f });
-			line->SetLayout({ 3 });
-			va->PushBuffer(std::move(line));
-			va->Upload();
-		}
-
-		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderLineMaterial, va, mat));
 	}
 
 	void ImguiRender() override

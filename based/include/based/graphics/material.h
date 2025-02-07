@@ -20,7 +20,8 @@ namespace based::graphics
 		static std::shared_ptr<Material> CreateMaterial(const std::shared_ptr<Shader>& shader,
 			core::AssetLibrary<Material>& assetLibrary, const std::string& name = "New Material");
 		static std::shared_ptr<Material> LoadMaterialFromFile(const std::string& filepath,
-			core::AssetLibrary<Material>& assetLibrary);
+			core::AssetLibrary<Material>& assetLibrary, const std::string& saveAs = "");
+		static std::shared_ptr<Material> LoadFileMaterialWithoutSaving(const std::string& filepath);
 
 		inline std::weak_ptr<Shader> GetShader() const { return mShader; }
 		inline std::vector<std::shared_ptr<Texture>>& GetTextures() { return mTextures; }

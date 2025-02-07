@@ -103,3 +103,19 @@ vec3 CalculateLighting(Material material, vec2 uvs, vec3 normal, vec3 fragPos, v
 
     return result * GetDiffuseMaterial(uvs).rgb;
 }
+
+vec3 CalculateLighting(vec3 color, vec2 uvs, vec3 normal, vec3 fragPos, vec3 viewDir, vec4 fragPosLightSpace) {
+    float shininess = GetShininessMaterial(uvs);
+
+    vec3 result = vec3(0);
+
+    if (directionalLight.direction != vec3(0)) {
+        result += CalculateDirectionalLighting(directionalLight, normal, viewDir, shininess);
+    }
+    for (int i = 0; i < 8; i++) {
+        if (pointLights[i].color == vec3(0)) continue;
+        result += CalculatePointLighting(pointLights[i], material, normal, fragPos, fragPosLightSpace, viewDir, shininess);
+    }
+
+    return result * color;
+}

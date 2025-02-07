@@ -430,6 +430,11 @@ namespace based::graphics::rendercommands
 		glBindBuffer(GL_UNIFORM_BUFFER, 0); BASED_CHECK_GL_ERROR;
 	}
 
+	void SetWireframe::Execute()
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, mWireframe ? GL_LINE : GL_FILL); BASED_CHECK_GL_ERROR;
+	}
+
 	void PushCamera::Execute()
 	{
 		PROFILE_FUNCTION();

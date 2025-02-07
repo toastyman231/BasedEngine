@@ -149,7 +149,7 @@ namespace based::scene
 
 		auto id = data["ID"] ? data["ID"].as<uint64_t>() : core::UUID();
 		auto material = std::make_shared<graphics::Material>(shader, id, materialName);
-		mScene->GetMaterialStorage().Load(materialName, material, true);
+		if (mScene) mScene->GetMaterialStorage().Load(materialName, material, true);
 
 		if (auto uniformInts = data["UniformInts"])
 		{
@@ -221,12 +221,12 @@ namespace based::scene
 				auto tex = std::make_shared<graphics::Texture>(texture.second["Path"].as<std::string>(), true);
 				tex->SetName(texture.first.as<std::string>());
 				mLoadedTextures[id] = tex;
-				mScene->GetTextureStorage().Load(tex->GetName(), tex);
+				if (mScene) mScene->GetTextureStorage().Load(tex->GetName(), tex);
 				material->AddTexture(tex, texture.first.as<std::string>());
 			}
 		}
 
-		mScene->GetMaterialStorage().Load(materialName, material, true);
+		if (mScene) mScene->GetMaterialStorage().Load(materialName, material, true);
 		return material;
 	}
 

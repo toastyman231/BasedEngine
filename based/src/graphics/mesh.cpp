@@ -131,6 +131,9 @@ namespace based::graphics
 
 			auto loadedMesh = std::make_shared<Mesh>(vertices, indices, textures, uuid);
 			loadedMesh->mMeshSource = filepath;
+			loadedMesh->material = Material::LoadMaterialFromFile(
+				ASSET_PATH("Materials/Unlit.bmat"),
+				Engine::Instance().GetApp().GetCurrentScene()->GetMaterialStorage());
 			assetLibrary.Load(scene->mName.C_Str(), loadedMesh);
 			return loadedMesh;
 		}

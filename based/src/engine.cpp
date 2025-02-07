@@ -15,6 +15,7 @@
 #include "scene/audio.h"
 
 #include "basedtime.h"
+#include "graphics/linerenderer.h"
 #include "math/basedmath.h"
 
 #ifdef BASED_PLATFORM_WINDOWS
@@ -68,7 +69,11 @@ namespace based
         mRenderManager.Submit(BASED_SUBMIT_RC(UpdateGlobals));
         mRenderManager.Submit(BASED_SUBMIT_RC(PushFramebuffer, mWindow.GetFramebuffer(), "UserRender", false));
         mRenderManager.Submit(BASED_SUBMIT_RC(PushCamera, mApp->GetCurrentScene()->GetActiveCamera()));
+
         mApp->Render();
+        graphics::DebugLineRenderer::DrawLines();
+        mPhysicsManager.DrawDebugBodies();
+
         mRenderManager.Submit(BASED_SUBMIT_RC(PopCamera));
         mRenderManager.Submit(BASED_SUBMIT_RC(PopFramebuffer));
         mRenderManager.Flush();
@@ -117,7 +122,13 @@ namespace based
                 core::Time::SetDelta(timeDelta);
 
                 // Physics Step
+                /*mRenderManager.Submit(BASED_SUBMIT_RC(UpdateGlobals));
+                mRenderManager.Submit(BASED_SUBMIT_RC(PushFramebuffer, mWindow.GetFramebuffer(), "PhysicsDebug", false));
+                mRenderManager.Submit(BASED_SUBMIT_RC(PushCamera, mApp->GetCurrentScene()->GetActiveCamera()));*/
                 mPhysicsManager.Update(timeDelta);
+                /*mRenderManager.Submit(BASED_SUBMIT_RC(PopCamera));
+                mRenderManager.Submit(BASED_SUBMIT_RC(PopFramebuffer));
+                mRenderManager.Flush();*/
 
                 Update(timeDelta);
                 Render();

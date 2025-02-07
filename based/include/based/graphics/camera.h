@@ -43,7 +43,7 @@ namespace based::graphics
 
 		const glm::mat4& GetProjectionMatrix() const { return mProjectionMatrix; }
 		const glm::mat4& GetViewMatrix() const { return mViewMatrix; }
-		glm::vec3 GetForward() const { return mForward; }
+		glm::vec3 GetForward() const { return -mForward; }
 		const glm::vec3 GetRight() { return mRight; }
 		const glm::vec3 GetUp() { return mUp; }
 		const glm::vec3 ScreenToWorldPoint(float x, float y) const;

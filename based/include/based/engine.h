@@ -1,12 +1,12 @@
 #pragma once
 
-#include "core/window.h"
-#include "managers/logmanager.h"
-#include "managers/rendermanager.h"
+#include "based/core/window.h"
+#include "based/managers/logmanager.h"
+#include "based/managers/rendermanager.h"
 #include "based/managers/uimanager.h"
-#include "graphics/renderpass.h"
-#include "managers/physicsmanager.h"
-#include "memory/arena.h"
+#include "based/graphics/renderpass.h"
+#include "based/managers/physicsmanager.h"
+#include "based/memory/arena.h"
 
 #define ASSET_PATH(usrPath) Engine::Instance().GetEngineDirectory().append("/Assets/").append(usrPath)
 

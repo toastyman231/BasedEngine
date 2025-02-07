@@ -10,6 +10,7 @@
 #include "based/physics/physicsconversions.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "math/basedmath.h"
+#include "physics/debugrenderer.h"
 #include "scene/entity.h"
 
 namespace based::managers
@@ -29,11 +30,14 @@ namespace based::managers
 			mBroadphaseLayerInterface, mObjBroadphaseLayerFilter, mObjLayerPairFilter);
 		mPhysicsSystem->SetPhysicsSettings(mPhysicsSettings);
 		mPhysicsSystem->SetGravity(JPH::Vec3(0, -9.81f, 0));
+
+		mDebugRenderer = new physics::JoltDebugRendererImpl();
 	}
 
 	void PhysicsManager::Update(float deltaTime)
 	{
 		PROFILE_FUNCTION();
+
 		if (core::Time::TimeScale() == 0.f) return;
 
 		auto& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
@@ -79,5 +83,16 @@ namespace based::managers
 				layer
 				), activation
 		);
+	}
+
+	void PhysicsManager::DrawDebugBodies()
+	{
+		if (mRenderDebug)
+		{
+			JPH::BodyManager::DrawSettings settings;
+			settings.mDrawShapeWireframe = true;
+
+			mPhysicsSystem->DrawBodies(settings, mDebugRenderer);
+		}
 	}
 }
