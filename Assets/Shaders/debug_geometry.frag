@@ -1,4 +1,4 @@
-#version 430 core
+#version 410 core
 
 out vec4 outColor;
 
@@ -17,12 +17,5 @@ void main()
     vec3 normal = fragNormal;
     vec3 viewDir = normalize(vec3(eyePos) - fragPos);
 
-    /*if (renderMode == 0) {
-        outColor = vertColor;//vec4(CalculateLighting(vec3(vertColor), uvs, normal, fragPos, viewDir, fragPosLightSpace), 1.0);
-    } else if (renderMode == 1) {
-        outColor = GetDiffuseMaterial(uvs);
-    } else {
-        outColor = vec4(1.0, 0.0, 1.0, 1.0);
-    }*/
-    outColor = vec4(0, 1, 0, 1);//vertColor;
+    outColor = vec4(0, 1, 0, 1);
 }
