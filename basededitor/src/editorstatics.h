@@ -1,5 +1,10 @@
 #pragma once
 
+namespace based::scene
+{
+	class Entity;
+}
+
 namespace based::graphics
 {
 	class Camera;
@@ -17,5 +22,7 @@ namespace editor
 		static std::shared_ptr<based::graphics::Camera> GetEditorCamera() { return mEditorCamera; }
 	private:
 		inline static std::shared_ptr<based::graphics::Camera> mEditorCamera;
+
+		inline static std::shared_ptr<based::scene::Entity> mEditorPlayer;
 	};
 }

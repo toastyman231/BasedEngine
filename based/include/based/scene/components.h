@@ -15,6 +15,8 @@
 #include <Jolt/Physics/Body/MotionType.h>
 #include <Jolt/Physics/EActivation.h>
 
+#include "based/math/basedmath.h"
+
 namespace based::ui
 {
 	class TextEntity;
@@ -216,7 +218,7 @@ namespace based::scene
 			JPH::EMotionType type, uint16_t layer, JPH::EActivation activation = JPH::EActivation::Activate)
 		{
 			rigidbodyID = Engine::Instance().GetPhysicsManager().AddBody(
-				shape.shape, shape.center, shape.rotation, type, layer, activation
+				shape.shape, shape.center, shape.rotation * based::math::Deg2Rad, type, layer, activation
 			);
 		}
 	};

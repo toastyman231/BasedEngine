@@ -12,7 +12,10 @@
 #include "based/graphics/mesh.h"
 #include "based/input/mouse.h"
 #include "based/scene/entity.h"
+#include "external/imgui/imgui_internal.h"
 #include "Panels/gameview.h"
+#include "Panels/menubar.h"
+#include "Player/editorplayer.h"
 
 using namespace based;
 
@@ -21,6 +24,7 @@ class Editor : public App
 public:
 	editor::panels::GameView* mSceneView;
 	editor::panels::GameView* mGameView;
+	editor::panels::MenuBar* mMenuBar;
 
 	std::shared_ptr<scene::Entity> mTestCube;
 	glm::vec3 mCubePos;
@@ -71,6 +75,7 @@ public:
 			gameCamera, "Scene View", editorSceneBuffer);
 		mGameView = new editor::panels::GameView(
 			editor::Statics::GetEditorCamera(), "Game View", Engine::Instance().GetWindow().GetFramebuffer());
+		mMenuBar = new editor::panels::MenuBar("Menu");
 
 		mTestCube = GetCurrentScene()->GetEntityStorage().Get("Cube");
 	}
@@ -84,6 +89,7 @@ public:
 	{
 		App::Update(deltaTime);
 
+		editor::EditorPlayerUpdateSystem(GetCurrentScene()->GetRegistry(), *mSceneView);
 		mTestCube->SetPosition(mCubePos);
 	}
 
@@ -94,6 +100,37 @@ public:
 
 	void ImguiRender() override
 	{
+		ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar;
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+		ImGui::Begin("MainWindow", nullptr, flags);
+
+		if (ImGui::DockBuilderGetNode(ImGui::GetID("MainDockspace")) == NULL)
+		{
+			ImGuiID dockspaceId = ImGui::GetID("MainDockspace");
+			ImGui::DockBuilderRemoveNode(dockspaceId);
+			ImGui::DockBuilderAddNode(dockspaceId, ImGuiDockNodeFlags_DockSpace | ImGuiDockNodeFlags_NoTabBar);
+			ImGui::DockBuilderSetNodeSize(dockspaceId, ImGui::GetWindowSize());
+
+			ImGuiID mainDockspaceId = dockspaceId;
+			ImGuiID leftBarId = ImGui::DockBuilderSplitNode(dockspaceId,
+				ImGuiDir_Left, 0.225f, nullptr, &mainDockspaceId);
+
+			ImGui::DockBuilderDockWindow("Game View", mainDockspaceId);
+			ImGui::DockBuilderDockWindow("Scene View", mainDockspaceId);
+			ImGui::DockBuilderDockWindow("Test", leftBarId);
+			ImGui::DockBuilderFinish(dockspaceId);
+		}
+
+		ImGui::DockSpace(ImGui::GetID("MainDockspace"), ImVec2(0.0f, 0.0f), 0);
+		ImGui::End();
+
+		mMenuBar->Render();
 		mGameView->Render();
 		mSceneView->Render();
 

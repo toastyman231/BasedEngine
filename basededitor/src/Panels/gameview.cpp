@@ -3,7 +3,6 @@
 
 #include "based/app.h"
 #include "based/engine.h"
-#include "based/graphics/defaultassetlibraries.h"
 
 namespace editor::panels
 {
@@ -32,6 +31,7 @@ namespace editor::panels
 			ImGui::Image((void*)static_cast<intptr_t>(mBackingBuffer->GetTextureId()),
 				size, uv0, uv1);
 		}
+		mIsFocused = ImGui::IsWindowFocused();
 		ImGui::End();
 	}
 }

@@ -9,6 +9,7 @@ namespace editor::panels
 		virtual ~Panel() = default;
 
 		std::string GetPanelTitle() const { return mPanelTitle; }
+		bool IsFocused() const { return mIsFocused; }
 
 		virtual void Initialize() = 0;
 		virtual void Update(float deltaTime) = 0;
@@ -17,5 +18,6 @@ namespace editor::panels
 
 	protected:
 		std::string mPanelTitle = "Untitled Panel";
+		bool mIsFocused = false;
 	};
 }
