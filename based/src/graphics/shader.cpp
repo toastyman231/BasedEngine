@@ -384,6 +384,7 @@ namespace based::graphics
 
 				shdr->SetUniformFloat3("directionalLight.direction", light.direction);
 				shdr->SetUniformFloat3("directionalLight.color", light.color);
+				shdr->SetUniformFloat("directionalLight.intensity", light.intensity);
 				break;
 			}
 		}

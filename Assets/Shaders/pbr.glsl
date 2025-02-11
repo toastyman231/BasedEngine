@@ -27,6 +27,7 @@ struct PointLight {
 struct DirectionalLight {
     vec3 direction;
     vec3 color;
+    float intensity;
 };
 #define NR_POINT_LIGHTS 8
 uniform PointLight pointLights[NR_POINT_LIGHTS];

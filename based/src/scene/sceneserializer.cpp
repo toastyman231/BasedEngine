@@ -765,12 +765,13 @@ namespace based::scene
 
 		if (entity->HasComponent<DirectionalLight>())
 		{
-			auto& pointLight = entity->GetComponent<DirectionalLight>();
+			auto& directionalLight = entity->GetComponent<DirectionalLight>();
 
 			out << YAML::Key << "DirectionalLight" << YAML::BeginMap; // Directional Light
 
-			out << YAML::Key << "Color" << YAML::Value << pointLight.color;
-			out << YAML::Key << "Direction" << YAML::Value << pointLight.direction;
+			out << YAML::Key << "Color" << YAML::Value << directionalLight.color;
+			out << YAML::Key << "Direction" << YAML::Value << directionalLight.direction;
+			out << YAML::Key << "Intensity" << YAML::Value << directionalLight.intensity;
 
 			out << YAML::EndMap; // Directional Light
 		}
@@ -1233,8 +1234,13 @@ namespace based::scene
 		{
 			glm::vec3 color = dirLight["Color"].as<glm::vec3>();
 			glm::vec3 direction = dirLight["Direction"].as<glm::vec3>();
+			float intensity = 1.f;
+			if (auto intensityData = dirLight["Intensity"])
+			{
+				intensity = intensityData.as<float>();
+			}
 
-			deserializedEntity->AddComponent<DirectionalLight>(direction, color);
+			deserializedEntity->AddComponent<DirectionalLight>(direction, color, intensity);
 		}
 
 		for (auto& component : entity)

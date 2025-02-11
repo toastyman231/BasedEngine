@@ -48,6 +48,7 @@ void main() {
     }
 
     vec3 Do = vec3(0.0);
+    float intensityMult = 1.0;
 
     if (directionalLight.direction != vec3(0)) {
         if (directionalLight.color != vec3(0.0)) {
@@ -56,13 +57,11 @@ void main() {
             vec3 H = normalize(L + V);
 
             float NdotL = DotClamped(N, L);
-            float NdotV = DotClamped(N, V);
-            float NdotH = DotClamped(N, H);
-            float VdotH = DotClamped(V, H);
 
             BRDFResults res = DisneyBRDF(albedo, L, V, N, X, Y);
 
-            Do += (lightColor * (res.diffuse + res.specular + res.clearcoat)) * NdotL * (1.0 - shadow);
+            Do += (lightColor * (res.diffuse + res.specular + res.clearcoat)) * (NdotL + ambientStrength) * (1.0 - shadow);
+            intensityMult = directionalLight.intensity;
         }
     }
 
@@ -70,6 +69,7 @@ void main() {
     vec3 ambient = vec3(ambientStrength) * albedo;
     if (ao > 0.0) ambient *= ao;
     vec3 color = ambient + Do + Lo;
+    color *= intensityMult;
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
 

@@ -12,6 +12,7 @@ Entities:
     DirectionalLight:
       Color: [1, 1, 1]
       Direction: [60, 60, 0]
+      Intensity: 2
     Enabled: true
   - Entity: 7779597734032396087
     Name: Skybox

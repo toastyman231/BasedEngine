@@ -157,7 +157,9 @@ namespace based::scene
 	{
 		glm::vec3 direction;
 		glm::vec3 color;
+		float intensity = 1.f;
 
+		DirectionalLight(glm::vec3 dir, glm::vec3 col, float i) : direction(dir), color(col), intensity(i) {}
 		DirectionalLight(glm::vec3 dir, glm::vec3 col) : direction(dir), color(col) {}
 		DirectionalLight(glm::vec3 col) : direction(glm::vec3(60.f, 60.f, 0.f)), color(col) {}
 	};
