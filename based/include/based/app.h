@@ -37,6 +37,7 @@ namespace based
 		inline std::shared_ptr<scene::Scene> GetCurrentScene() const { return mCurrentScene; }
 		inline void LoadScene(std::shared_ptr<scene::Scene> newScene) 
 		{
+			mCurrentScene.reset();
 			mCurrentScene = std::move(newScene);
 			mCurrentScene->InitializeScene();
 		}

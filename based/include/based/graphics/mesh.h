@@ -91,10 +91,16 @@ namespace based::graphics
             core::UUID uuid);
         Mesh(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<Material>& mat);
         Mesh(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<Material>& mat, core::UUID uuid);
-        Mesh(const Mesh& other) = default;
+
+		Mesh(const Mesh& other) = delete;
+        Mesh& operator = (const Mesh& other) = delete;
+
+        Mesh(Mesh&& other) = default;
+        Mesh& operator = (Mesh&& other) = default;
+
         virtual ~Mesh()
         {
-            BASED_TRACE("Destroying mesh");
+            BASED_TRACE("Destroying mesh {}", mMeshSource);
         }
         virtual void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material);
         virtual void Draw(scene::Transform transform, std::shared_ptr<Material> material);

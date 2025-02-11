@@ -8,7 +8,7 @@
 #include "based/managers/physicsmanager.h"
 #include "based/memory/arena.h"
 
-#define ASSET_PATH(usrPath) Engine::Instance().GetEngineDirectory().append("/Assets/").append(usrPath)
+#define ASSET_PATH(usrPath) based::Engine::Instance().GetEngineDirectory().append("/Assets/").append(usrPath)
 
 namespace based
 {

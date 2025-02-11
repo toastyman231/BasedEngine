@@ -1,6 +1,7 @@
 #include "based/pch.h"
 #include "menubar.h"
 
+#include "../editorstatics.h"
 #include "external/imgui/imgui.h"
 
 namespace editor::panels
@@ -11,8 +12,9 @@ namespace editor::panels
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				ImGui::MenuItem("Open Scene", nullptr);
-				ImGui::MenuItem("Save Scene", nullptr);
+				if (ImGui::MenuItem("New Scene", nullptr)) Statics::NewScene();
+				if (ImGui::MenuItem("Open Scene", nullptr)) Statics::OpenScene();
+				if (ImGui::MenuItem("Save Scene", nullptr)) Statics::SaveScene();
 				ImGui::EndMenu();
 			}
 

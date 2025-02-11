@@ -4,6 +4,7 @@
 #include "based/app.h"
 #include "based/graphics/camera.h"
 #include "based/scene/entity.h"
+#include "external/tfd/tinyfiledialogs.h"
 #include "Player/editorplayer.h"
 
 namespace editor
@@ -19,9 +20,137 @@ namespace editor
 		mEditorPlayer->AddComponent<editor::EditorPlayer>();
 	}
 
+	bool Statics::NewScene()
+	{
+		if (mEditorSceneDirty)
+		{
+			auto shouldSave = tinyfd_messageBox(
+				"Save Current Scene?",
+				"You have unsaved changes, would you like to save the current scene?",
+				"yesno",
+				"question",
+				1
+			);
+
+			if (shouldSave == 1)
+			{
+				auto saveResult = SaveScene();
+				if (!saveResult)
+				{
+					BASED_WARN("Scene did not save properly, aborting create new scene!");
+					return false;
+				}
+			}
+		}
+
+		BASED_TRACE("Creating new scene!");
+		auto newScene = std::make_shared<based::scene::Scene>();
+		based::Engine::Instance().GetApp().LoadScene(newScene);
+		
+		auto res = LoadScene(ASSET_PATH("Scenes/Default3D.bscn"));
+
+		if (!res)
+		{
+			BASED_WARN("Error deserializing default scene, aborting!");
+			return false;
+		}
+
+		mEditorSceneDirty = true;
+		return true;
+	}
+
+	bool Statics::OpenScene()
+	{
+		if (mEditorSceneDirty)
+		{
+			auto shouldSave = tinyfd_messageBox(
+				"Save Current Scene?",
+				"You have unsaved changes, would you like to save the current scene?",
+				"yesno",
+				"question",
+				1
+			);
+
+			if (shouldSave == 1)
+			{
+				auto saveResult = SaveScene();
+				if (!saveResult)
+				{
+					BASED_WARN("Scene did not save properly, aborting create new scene!");
+					return false;
+				}
+			}
+		}
+
+		static char const* patterns = { "*.bscn" };
+		const char* fileLocation = tinyfd_openFileDialog(
+			"Select Scene",
+			nullptr,
+			1,
+			&patterns,
+			NULL,
+			0
+		);
+
+		if (!fileLocation)
+		{
+			BASED_WARN("Invalid scene chosen, aborting!");
+			return false;
+		}
+
+		BASED_TRACE("Creating new scene!");
+		auto newScene = std::make_shared<based::scene::Scene>();
+		based::Engine::Instance().GetApp().LoadScene(newScene);
+
+		auto res = LoadScene(fileLocation);
+
+		if (!res)
+		{
+			BASED_WARN("Error deserializing default scene, aborting!");
+			return false;
+		}
+
+		mEditorSceneDirty = true;
+		return true;
+	}
+
 	bool Statics::LoadScene(const std::string& path)
 	{
 		auto serializer = based::scene::SceneSerializer(based::Engine::Instance().GetApp().GetCurrentScene());
-		return serializer.Deserialize(path);
+		auto res = serializer.Deserialize(path);
+
+		if (!res)
+		{
+			BASED_ERROR("Error loading scene {}!", path);
+			return false;
+		}
+
+		mEditorSceneDirty = false;
+		return true;
+	}
+
+	bool Statics::SaveScene()
+	{
+		if (!mEditorSceneDirty) return false;
+
+		static char const* patterns = { "*.bscn" };
+		const char* saveLocation = tinyfd_saveFileDialog(
+			"Select Save Location",
+			"NewScene",
+			1,
+			&patterns,
+			"*.bscn"
+		);
+
+		if (!saveLocation)
+		{
+			BASED_WARN("Invalid save location chosen, aborting!");
+			return false;
+		}
+
+		auto serializer = based::scene::SceneSerializer(based::Engine::Instance().GetApp().GetCurrentScene());
+		serializer.Serialize(saveLocation);
+		mEditorSceneDirty = false;
+		return true;
 	}
 }

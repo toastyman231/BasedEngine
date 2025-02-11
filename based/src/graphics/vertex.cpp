@@ -21,6 +21,7 @@ namespace based::graphics
 
 	RawVertexBuffer::~RawVertexBuffer()
 	{
+		BASED_TRACE("Deleting vertex buffer {}", mVbo);
 		glDeleteBuffers(1, &mVbo); BASED_CHECK_GL_ERROR;
 	}
 

@@ -77,7 +77,10 @@ public:
 			editor::Statics::GetEditorCamera(), "Game View", Engine::Instance().GetWindow().GetFramebuffer());
 		mMenuBar = new editor::panels::MenuBar("Menu");
 
-		mTestCube = GetCurrentScene()->GetEntityStorage().Get("Cube");
+		mTestCube = based::scene::Entity::CreateEntity("Cube 2");//GetCurrentScene()->GetEntityStorage().Get("Cube");
+		mTestCube->AddComponent<based::scene::MeshRenderer>(
+			based::graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/cube.obj"),
+				GetCurrentScene()->GetMeshStorage()));
 	}
 
 	void Shutdown() override
