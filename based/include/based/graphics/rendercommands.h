@@ -22,9 +22,10 @@ namespace based::graphics
 
 	enum class PassInjectionPoint : uint8_t
 	{
-		BeforeShadowDepth = 0,
-		BeforeMainColor = 1,
-		BeforeUserInterface = 2
+		BeforeCompute = 0,
+		BeforeShadowDepth = 1,
+		BeforeMainColor = 2,
+		BeforeUserInterface = 3
 	};
 
 	namespace rendercommands

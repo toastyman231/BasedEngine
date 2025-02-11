@@ -1,0 +1,72 @@
+Scene: Default 3D Scene
+Entities:
+  - Entity: 17318832736367330816
+    Name: Directional Light
+    Transform:
+      Position: [0, 0, 0]
+      Rotation: [60, -60, 0]
+      Scale: [1, 1, 1]
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalScale: [1, 1, 1]
+    DirectionalLight:
+      Color: [1, 1, 1]
+      Direction: [60, 60, 0]
+    Enabled: true
+  - Entity: 7779597734032396087
+    Name: Skybox
+    Transform:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [500, 500, 500]
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalScale: [1, 1, 1]
+    MeshRenderer:
+      Mesh:
+        ID: 8917086276875011835
+        Path: Meshes/atlas_cube.obj
+        IsEngineAsset: true
+      Material:
+        ID: 8791179182723528054
+        Path: Materials/Skybox.bmat
+        IsEngineAsset: true
+    Enabled: true
+  - Entity: 10729926632577167004
+    Name: Cube
+    Transform:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalScale: [1, 1, 1]
+    MeshRenderer:
+      Mesh:
+        ID: 4213753685933482109
+        Path: Meshes/cube.obj
+        IsEngineAsset: true
+      Material:
+        ID: 3560332728017973357
+        Path: Materials/Lit.bmat
+        IsEngineAsset: true
+    Enabled: true
+  - Entity: 10225888076360808852
+    Name: Main Camera
+    Transform:
+      Position: [0, 0, 10]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalScale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 60
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+        OrthographicSize: 2
+        AspectRatio: 1.77777779
+      Main: true
+    Enabled: true

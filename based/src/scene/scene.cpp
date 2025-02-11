@@ -181,29 +181,12 @@ namespace based::scene
 				});
 		}
 
-		/*const auto bhvrView = mRegistry.view<Enabled, ScriptableComponent>();
-
-		for (const auto& entity : bhvrView)
-		{
-			auto behavior = mRegistry.get<ScriptableComponent>(entity).behavior.lock();
-			if (!behavior) continue;
-			behavior->Update(deltaTime);
-		}*/
-
 		AnimateScene();
 	}
 
 	void Scene::ShutdownScene() const
 	{
 		PROFILE_FUNCTION();
-		/*const auto bhvrView = mRegistry.view<Enabled, ScriptableComponent>();
-
-		for (const auto& entity : bhvrView)
-		{
-			auto behavior = mRegistry.get<ScriptableComponent>(entity).behavior.lock();
-			if (!behavior) continue;
-			behavior->Shutdown();
-		}*/
 
 		const auto entityView = mRegistry.view<EntityReference>();
 

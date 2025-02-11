@@ -1,0 +1,22 @@
+Material: Unlit
+ID: 3560342728017973358
+VertexSource: Shaders/pbr_lit.vert
+VertexIsEngineAsset: true
+FragmentSource: Shaders/pbr_lit.frag
+FragmentIsEngineAsset: true
+UniformInts:
+  {}
+UniformFloats:
+  {}
+UniformFloat2s:
+  {}
+UniformFloat3s:
+  {}
+UniformFloat4s:
+  material.albedo.color: [1, 1, 1, 1]
+UniformMat3s:
+  {}
+UniformMat4s:
+  {}
+Textures:
+  {}

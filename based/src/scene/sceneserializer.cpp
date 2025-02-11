@@ -127,15 +127,26 @@ namespace based::scene
 
 		YAML::Node data = YAML::Load(strStream.str());
 		if (!data["Material"])
+		{
+			BASED_ERROR("No valid material data found at {}", filepath);
 			return nullptr;
+		}
 
 		std::string materialName = data["Material"].as<std::string>();
 		BASED_TRACE("Deserializing material {}", materialName);
 
 		auto vSrc = data["VertexSource"];
-		if (!vSrc) return nullptr;
+		if (!vSrc)
+		{
+			BASED_ERROR("No valid material vertex source found!");
+			return nullptr;
+		}
 		auto fSrc = data["FragmentSource"];
-		if (!fSrc) return nullptr;
+		if (!fSrc)
+		{
+			BASED_ERROR("No valid material fragment source found!");
+			return nullptr;
+		}
 
 		std::string vertexSource;
 		std::string fragmentSource;
@@ -218,7 +229,10 @@ namespace based::scene
 					continue;
 				}
 
-				auto tex = std::make_shared<graphics::Texture>(texture.second["Path"].as<std::string>(), true);
+				auto path = texture.second["Path"].as<std::string>();
+				if (texture.second["IsEngineAsset"] && texture.second["IsEngineAsset"].as<bool>())
+					path = ASSET_PATH(path);
+				auto tex = std::make_shared<graphics::Texture>(path, true);
 				tex->SetName(texture.first.as<std::string>());
 				mLoadedTextures[id] = tex;
 				if (mScene) mScene->GetTextureStorage().Load(tex->GetName(), tex);
@@ -844,11 +858,18 @@ namespace based::scene
 		if (auto& cameraComponent = entity["CameraComponent"])
 		{
 			auto newCam = std::make_shared<graphics::Camera>();
-			mScene->GetCameraStorage().Load("Camera", newCam);
 			deserializedEntity->AddComponent<CameraComponent>(newCam);
 			auto& cc = deserializedEntity->GetComponent<CameraComponent>();
 
 			auto& cameraProps = cameraComponent["Camera"];
+			if (cameraComponent["Main"] && cameraComponent["Main"].as<bool>())
+			{
+				mScene->GetCameraStorage().Load("MainCamera", newCam);
+			} else
+			{
+				mScene->GetCameraStorage().Load("Camera", newCam);
+			}
+
 			if (auto cam = cc.camera.lock())
 			{
 				cam->SetProjection((graphics::Projection)cameraProps["ProjectionType"].as<int>());
@@ -875,8 +896,12 @@ namespace based::scene
 					material = mLoadedMaterials[id];
 				else
 				{
+					auto materialPath = meshRenderer["Material"]["Path"].as<std::string>();
+					if (meshRenderer["Material"]["IsEngineAsset"]
+						&& meshRenderer["Material"]["IsEngineAsset"].as<bool>())
+						materialPath = ASSET_PATH(materialPath);
 					material = graphics::Material::LoadMaterialFromFile(
-						meshRenderer["Material"]["Path"].as<std::string>(),
+						materialPath,
 						mScene->GetMaterialStorage());
 					mLoadedMaterials[material->GetUUID()] = material;
 				}

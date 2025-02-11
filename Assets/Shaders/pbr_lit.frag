@@ -66,7 +66,9 @@ void main() {
         }
     }
 
-    vec3 ambient = vec3(ambientStrength) * albedo * GetMaterialAmbientOcclusion(uvs);
+    float ao = GetMaterialAmbientOcclusion(uvs);
+    vec3 ambient = vec3(ambientStrength) * albedo;
+    if (ao > 0.0) ambient *= ao;
     vec3 color = ambient + Do + Lo;
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));

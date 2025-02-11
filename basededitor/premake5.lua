@@ -20,7 +20,8 @@ project "BasedEditor"
         "%{externals.spdlog}",
         "%{externals.rmlui}",
         "%{externals.tracy}",
-        "%{externals.yaml_cpp}"
+        "%{externals.yaml_cpp}",
+        "%{externals.jolt}"
     }
 
     flags
@@ -38,7 +39,9 @@ project "BasedEditor"
 
         defines
         {
-            "BASED_PLATFORM_WINDOWS"
+            "BASED_PLATFORM_WINDOWS",
+            "_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING",
+            "JPH_DEBUG_RENDERER"
         }
 
     filter {"system:macosx", "configurations:*"}

@@ -122,13 +122,7 @@ namespace based
                 core::Time::SetDelta(timeDelta);
 
                 // Physics Step
-                /*mRenderManager.Submit(BASED_SUBMIT_RC(UpdateGlobals));
-                mRenderManager.Submit(BASED_SUBMIT_RC(PushFramebuffer, mWindow.GetFramebuffer(), "PhysicsDebug", false));
-                mRenderManager.Submit(BASED_SUBMIT_RC(PushCamera, mApp->GetCurrentScene()->GetActiveCamera()));*/
                 mPhysicsManager.Update(timeDelta);
-                /*mRenderManager.Submit(BASED_SUBMIT_RC(PopCamera));
-                mRenderManager.Submit(BASED_SUBMIT_RC(PopFramebuffer));
-                mRenderManager.Flush();*/
 
                 Update(timeDelta);
                 Render();
