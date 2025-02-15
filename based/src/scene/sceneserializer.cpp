@@ -907,11 +907,7 @@ namespace based::scene
 					else truePath = mProjectDirectory + materialPath;
 					material = DeserializeMaterial(truePath);
 					BASED_ASSERT(material != nullptr, "Material is null!");
-					material->SetMaterialSource(materialPath);
-						/*graphics::Material::LoadMaterialFromFile(
-						materialPath,
-						mScene->GetMaterialStorage(),
-						mProjectDirectory);*/
+					material->SetMaterialSource(truePath);
 					mLoadedMaterials[material->GetUUID()] = material;
 				}
 			}
@@ -1002,7 +998,7 @@ namespace based::scene
 							else truePath = mProjectDirectory + materialPath;
 							mat = DeserializeMaterial(truePath);
 							BASED_ASSERT(mat != nullptr, "Material is null!");
-							mat->SetMaterialSource(materialPath);
+							mat->SetMaterialSource(truePath);
 							mLoadedMaterials[mat->GetUUID()] = mat;
 						}
 					}
@@ -1058,8 +1054,6 @@ namespace based::scene
 					anim = DeserializeAnimation(mProjectDirectory + path);
 					anim->SetFileAnimation(path);
 					mScene->GetAnimationStorage().Load(anim->GetAnimationName(), anim);
-					/*animation::Animation::LoadAnimationFromFile(mProjectDirectory + path,
-						mScene->GetAnimationStorage());*/
 					BASED_ASSERT(anim, "Loaded animation is not valid!");
 					mLoadedAnimations[animId] = anim;
 				}
@@ -1299,7 +1293,7 @@ namespace based::scene
 		YAML::Emitter out;
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene";
-		out << YAML::Value << "Unnamed Scene";
+		out << YAML::Value << mScene->GetSceneName();
 		out << YAML::Key << "Entities";
 		out << YAML::Value << YAML::BeginSeq;
 		for (auto ent: mScene->GetRegistry().view<EntityReference>())
@@ -1310,7 +1304,9 @@ namespace based::scene
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
 
-		CreateDirectoryIfNotExists(filepath.substr(0, filepath.find_last_of("/")));
+		auto pathEnd = filepath.find_last_of("/");
+		if (pathEnd == std::string::npos) pathEnd = filepath.find_last_of("\\");
+		if (pathEnd == std::string::npos) CreateDirectoryIfNotExists(filepath.substr(0, pathEnd));
 
 		std::ofstream fout(filepath);
 		fout << out.c_str();
@@ -1333,6 +1329,7 @@ namespace based::scene
 
 		std::string sceneName = data["Scene"].as<std::string>();
 		BASED_TRACE("Deserializing scene {}", sceneName);
+		mScene->mSceneName = sceneName;
 
 		if (auto entities = data["Entities"])
 		{

@@ -26,6 +26,10 @@ namespace based::scene
 	{
 	public:
 		Scene() = default;
+		Scene(const std::string& name) : Scene()
+		{
+			mSceneName = name;
+		}
 		~Scene() = default;
 
 		void InitializeScene() const;
@@ -36,6 +40,7 @@ namespace based::scene
 
 		inline entt::registry& GetRegistry() { return mRegistry; }
 		inline std::shared_ptr<graphics::Camera> GetActiveCamera() const { return mActiveCamera; }
+		inline std::string GetSceneName() const { return mSceneName; }
 
 		inline core::AssetLibrary<graphics::Texture>& GetTextureStorage() { return mTextureStorage; }
 		inline core::AssetLibrary<graphics::Material>& GetMaterialStorage() { return mMaterialStorage; }
@@ -47,12 +52,14 @@ namespace based::scene
 		inline core::AssetLibrary<graphics::Camera>& GetCameraStorage() { return mCameraStorage; }
 
 		void SetActiveCamera(std::shared_ptr<graphics::Camera> cam);
+		void SetSceneName(const std::string& name) { mSceneName = name; }
 
 		static bool LoadScene(const std::string& path);
 		static bool LoadSceneAdditive(const std::string& path);
 	private:
 		entt::registry mRegistry;
 		std::shared_ptr<graphics::Camera> mActiveCamera;
+		std::string mSceneName = "Unnamed Scene";
 
 		core::AssetLibrary<graphics::Texture> mTextureStorage;
 		core::AssetLibrary<graphics::Material> mMaterialStorage;

@@ -23,6 +23,12 @@ namespace editor
 		static bool SaveScene();
 
 		static std::shared_ptr<based::graphics::Camera> GetEditorCamera() { return mEditorCamera; }
+		static std::vector<std::weak_ptr<based::scene::Entity>> GetSelectedEntities() { return mSelectedEntities; }
+
+		static void SetSelectedEntities(const std::vector<std::weak_ptr<based::scene::Entity>>& entities) { mSelectedEntities = entities; }
+		static void SetSceneDirty(bool dirty);
+
+		static bool SelectedEntitiesContains(std::shared_ptr<based::scene::Entity> entity);
 	private:
 		inline static std::shared_ptr<based::graphics::Camera> mEditorCamera;
 
@@ -31,5 +37,7 @@ namespace editor
 		inline static bool mEditorSceneDirty = false;
 
 		inline static std::string mProjectDirectory;
+
+		inline static std::vector<std::weak_ptr<based::scene::Entity>> mSelectedEntities;
 	};
 }

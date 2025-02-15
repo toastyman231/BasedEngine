@@ -48,6 +48,7 @@ namespace based::core
 
 		glm::ivec2 GetSize();
 		glm::vec2 GetFramebufferSize() const { return mFramebufferSize; }
+		std::string GetWindowTitle() const { return mWindowProperties.title; }
 
 		inline SDL_Window* GetSDLWindow() const { return mWindow; }
 		inline SDL_GLContext GetGLContext() const { return mGLContext; }
@@ -55,6 +56,7 @@ namespace based::core
 		inline std::shared_ptr<graphics::Framebuffer> GetFramebuffer() { return mFramebuffer; }
 		inline std::shared_ptr<graphics::Framebuffer> GetShadowBuffer() { return mShadowbuffer; }
 		void SetMaintainAspectRatio(bool newMaintain);
+		void SetWindowTitle(const std::string& title);
 
 		void BeginRender();
 		void EndRender();

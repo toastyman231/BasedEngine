@@ -57,7 +57,7 @@ namespace editor
 			return false;
 		}
 
-		mEditorSceneDirty = true;
+		SetSceneDirty(true);
 		return true;
 	}
 
@@ -112,13 +112,14 @@ namespace editor
 			return false;
 		}
 
-		mEditorSceneDirty = true;
+		SetSceneDirty(false);
 		return true;
 	}
 
 	bool Statics::LoadScene(const std::string& path)
 	{
-		auto serializer = based::scene::SceneSerializer(based::Engine::Instance().GetApp().GetCurrentScene());
+		auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
+		auto serializer = based::scene::SceneSerializer(scene);
 		serializer.SetProjectDirectory(mProjectDirectory);
 		auto res = serializer.Deserialize(path);
 
@@ -128,7 +129,9 @@ namespace editor
 			return false;
 		}
 
-		mEditorSceneDirty = false;
+		based::Engine::Instance().GetWindow().SetWindowTitle("Based Editor - " + scene->GetSceneName());
+
+		SetSceneDirty(false);
 		return true;
 	}
 
@@ -151,9 +154,45 @@ namespace editor
 			return false;
 		}
 
+		auto sceneName = std::string(saveLocation);
+		auto startIndex = sceneName.find_last_of("\\") + 1;
+		auto endIndex = sceneName.find(".bscn");
+		sceneName = sceneName.substr(startIndex, endIndex - startIndex);
+
+		based::Engine::Instance().GetApp().GetCurrentScene()->SetSceneName(sceneName);
+		based::Engine::Instance().GetWindow().SetWindowTitle("Based Editor - " + sceneName);
+
 		auto serializer = based::scene::SceneSerializer(based::Engine::Instance().GetApp().GetCurrentScene());
 		serializer.Serialize(saveLocation);
-		mEditorSceneDirty = false;
+		SetSceneDirty(false);
 		return true;
+	}
+
+	void Statics::SetSceneDirty(bool dirty)
+	{
+		if (mEditorSceneDirty == dirty) return;
+
+		mEditorSceneDirty = dirty;
+		auto& window = based::Engine::Instance().GetWindow();
+		if (dirty)
+		{
+			window.SetWindowTitle(window.GetWindowTitle() + "*");
+		} else
+		{
+			window.GetWindowTitle().pop_back();
+		}
+	}
+
+	bool Statics::SelectedEntitiesContains(std::shared_ptr<based::scene::Entity> entity)
+	{
+		for (auto& e : mSelectedEntities)
+		{
+			if (auto ent = e.lock())
+			{
+				if (ent->GetEntityHandle() == entity->GetEntityHandle()) return true;
+			}
+		}
+
+		return false;
 	}
 }

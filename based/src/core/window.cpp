@@ -150,6 +150,12 @@ namespace based::core
 		HandleResize(GetSize().x, GetSize().y);
 	}
 
+	void Window::SetWindowTitle(const std::string& title)
+	{
+		SDL_SetWindowTitle(mWindow, title.c_str());
+		mWindowProperties.title = title;
+	}
+
 	void Window::BeginRender()
 	{
 		PROFILE_FUNCTION();

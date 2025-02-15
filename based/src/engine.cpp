@@ -157,7 +157,7 @@ namespace based
         }
         else
         {
-            BASED_WARN("No icon.png image found at path {}", path.c_str());
+            BASED_WARN("No icon.ico image found at path {}", path.c_str());
         }
     }
 

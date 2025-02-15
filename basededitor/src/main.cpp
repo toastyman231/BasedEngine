@@ -8,6 +8,7 @@
 #include "external/glm/gtc/type_ptr.hpp"
 
 #include "editorstatics.h"
+#include "../scenehierarchy.h"
 #include "based/core/basedtime.h"
 #include "based/graphics/mesh.h"
 #include "based/input/mouse.h"
@@ -25,6 +26,7 @@ public:
 	editor::panels::GameView* mSceneView;
 	editor::panels::GameView* mGameView;
 	editor::panels::MenuBar* mMenuBar;
+	editor::panels::SceneHierarchy* mSceneHierarchy;
 
 	std::shared_ptr<scene::Entity> mTestCube;
 	glm::vec3 mCubePos;
@@ -100,11 +102,7 @@ public:
 		mGameView = new editor::panels::GameView(
 			editor::Statics::GetEditorCamera(), "Game View", Engine::Instance().GetWindow().GetFramebuffer());
 		mMenuBar = new editor::panels::MenuBar("Menu");
-
-		mTestCube = based::scene::Entity::CreateEntity("Cube 2");//GetCurrentScene()->GetEntityStorage().Get("Cube");
-		mTestCube->AddComponent<based::scene::MeshRenderer>(
-			based::graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/cube.obj"),
-				GetCurrentScene()->GetMeshStorage()));
+		mSceneHierarchy = new editor::panels::SceneHierarchy("Hierarchy");
 	}
 
 	void Shutdown() override
@@ -117,7 +115,6 @@ public:
 		App::Update(deltaTime);
 
 		editor::EditorPlayerUpdateSystem(GetCurrentScene()->GetRegistry(), *mSceneView);
-		mTestCube->SetPosition(mCubePos);
 	}
 
 	void Render() override
@@ -145,12 +142,18 @@ public:
 			ImGui::DockBuilderSetNodeSize(dockspaceId, ImGui::GetWindowSize());
 
 			ImGuiID mainDockspaceId = dockspaceId;
-			ImGuiID leftBarId = ImGui::DockBuilderSplitNode(dockspaceId,
-				ImGuiDir_Left, 0.225f, nullptr, &mainDockspaceId);
+			ImGuiID rightBarId = ImGui::DockBuilderSplitNode(dockspaceId,
+				ImGuiDir_Right, 0.25f, nullptr, &mainDockspaceId);
+			ImGuiID bottomBarId = ImGui::DockBuilderSplitNode(mainDockspaceId,
+				ImGuiDir_Down, 0.25f, nullptr, &mainDockspaceId);
+			ImGuiID leftBarId = ImGui::DockBuilderSplitNode(mainDockspaceId,
+				ImGuiDir_Left, 0.25f, nullptr, &mainDockspaceId);
 
+			ImGui::DockBuilderDockWindow("Details", rightBarId);
+			ImGui::DockBuilderDockWindow("Files", bottomBarId);
+			ImGui::DockBuilderDockWindow("Hierarchy", leftBarId);
 			ImGui::DockBuilderDockWindow("Game View", mainDockspaceId);
 			ImGui::DockBuilderDockWindow("Scene View", mainDockspaceId);
-			ImGui::DockBuilderDockWindow("Test", leftBarId);
 			ImGui::DockBuilderFinish(dockspaceId);
 		}
 
@@ -160,10 +163,17 @@ public:
 		mMenuBar->Render();
 		mGameView->Render();
 		mSceneView->Render();
+		mSceneHierarchy->Render();
 
-		if (ImGui::Begin("Test"))
+		if (ImGui::Begin("Files"))
 		{
-			ImGui::DragFloat3("Cube Pos", glm::value_ptr(mCubePos), 0.01f);
+			ImGui::Text("File browser!");
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("Details"))
+		{
+			ImGui::Text("Sidebar!");
 		}
 		ImGui::End();
 	}
