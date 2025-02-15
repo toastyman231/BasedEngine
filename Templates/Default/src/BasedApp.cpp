@@ -1,13 +1,7 @@
+#include "based/pch.h"
 #include "based/log.h"
 #include "based/main.h"
-
-#include <memory>
-
-#include "based/graphics/defaultassetlibraries.h"
-
-#include "based/core/assetlibrary.h"
 #include "based/graphics/mesh.h"
-
 #include "based/scene/components.h"
 #include "based/input/mouse.h"
 #include "based/scene/entity.h"
@@ -44,18 +38,18 @@ public:
 		input::Mouse::SetCursorVisible(!Engine::Instance().GetWindow().GetShouldRenderToScreen());
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
+		auto mainCamera = std::make_shared<graphics::Camera>();
+		GetCurrentScene()->SetActiveCamera(mainCamera);
 
-		auto texture = std::make_shared<graphics::Texture>("Assets/icon.png");
-		auto material = graphics::Material::CreateMaterial(
-			graphics::DefaultLibraries::GetShaderLibrary().Get("TexturedRect"),
-			DEFAULT_MAT_LIB, "Icon");
-		material->AddTexture(texture, "tex");
-		material->SetUniformValue("col", glm::vec4{ 1.f, 1.f, 1.f, 1.f });
+		auto material = graphics::Material::LoadMaterialFromFile(
+			ASSET_PATH("Materials/Unlit.bmat"),
+			GetCurrentScene()->GetMaterialStorage());
 		auto mesh = graphics::Mesh::CreateMesh(
 			graphics::DefaultLibraries::GetVALibrary().Get("TexturedRect"),
 			material, DEFAULT_MESH_LIB, "IconMesh");
 		iconEntity = scene::Entity::CreateEntity<scene::Entity>("Icon");
 		iconEntity->AddComponent<scene::MeshRenderer>(mesh);
+		iconEntity->SetScale({ 500, 500, 1 });
 
 		GetCurrentScene()->GetActiveCamera()->SetPosition({ 0.f, 0.f, 10.f });
 	}
@@ -73,6 +67,10 @@ public:
 	void Render() override
 	{
 		App::Render();
+	}
+
+	void ImguiRender() override
+	{
 	}
 };
 

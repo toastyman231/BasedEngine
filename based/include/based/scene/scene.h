@@ -47,6 +47,9 @@ namespace based::scene
 		inline core::AssetLibrary<graphics::Camera>& GetCameraStorage() { return mCameraStorage; }
 
 		void SetActiveCamera(std::shared_ptr<graphics::Camera> cam);
+
+		static bool LoadScene(const std::string& path);
+		static bool LoadSceneAdditive(const std::string& path);
 	private:
 		entt::registry mRegistry;
 		std::shared_ptr<graphics::Camera> mActiveCamera;

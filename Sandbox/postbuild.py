@@ -25,6 +25,7 @@ if (globals.IsWindows()):
             continue
         subprocess.call(["cmd.exe", "/c", "robocopy", source, dest, "/E"])
     for source in PLUGIN_SOURCE_PATHS:
+        if not os.path.isdir(source): continue
         dirs = os.listdir(source)
         for dir in dirs:
             subprocess.call(["cmd.exe", "/c", "robocopy", "{}/{}/{}/Binaries".format(os.getcwd(), source, dir), dest, "/E"])

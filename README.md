@@ -16,6 +16,7 @@ A simple 2D and 3D game engine based on tutorials by https://www.youtube.com/c/P
 - Tracy (Profiling, https://github.com/wolfpld/tracy)
 - yaml-cpp (YAML writer and parser, https://github.com/jbeder/yaml-cpp)
 - Jolt (Physics, https://github.com/jrouwe/JoltPhysics)
+- Tiny File Dialogs (File Loading and Saving in the editor, https://sourceforge.net/projects/tinyfiledialogs/)
 
 ## My Additions
 The bulk of the engine design and implentation was done by Progrematic, if something is not listed below, it was probably done by him. You can find his original engine here: https://github.com/progrematic/hippo.

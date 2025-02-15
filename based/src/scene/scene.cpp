@@ -207,4 +207,19 @@ namespace based::scene
 		mActiveCamera = std::move(cam);
 		mActiveCamera->main = true;
 	}
+
+	bool Scene::LoadScene(const std::string& path)
+	{
+		auto scene = std::make_shared<Scene>();
+		Engine::Instance().GetApp().LoadScene(scene);
+
+		auto serializer = SceneSerializer(scene);
+		return serializer.Deserialize(path);
+	}
+
+	bool Scene::LoadSceneAdditive(const std::string& path)
+	{
+		auto serializer = SceneSerializer(Engine::Instance().GetApp().GetCurrentScene());
+		return serializer.Deserialize(path);
+	}
 }

@@ -24,6 +24,7 @@ group "Engine"
 group ""
 
 group "Dependencies"
+    include (engineLocation .. "\\external\\jolt")
     include (engineLocation .. "\\external\\glad")
     include (engineLocation .. "\\external\\yaml-cpp")
 group ""
@@ -51,7 +52,8 @@ group "Projects"
             engineLocation .. "\\%{externals.spdlog}",
             engineLocation .. "\\%{externals.rmlui}",
             engineLocation .. "\\%{externals.tracy}",
-            engineLocation .. "\\%{externals.yaml_cpp}"
+            engineLocation .. "\\%{externals.yaml_cpp}",
+            engineLocation .. "\\%{externals.jolt}"
         }
 
         flags
@@ -74,7 +76,9 @@ group "Projects"
 
             defines
             {
-                "BASED_PLATFORM_WINDOWS"
+                "BASED_PLATFORM_WINDOWS",
+                "_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING",
+                "JPH_DEBUG_RENDERER"
             }
 
         filter {"system:windows", "configurations:Release"}
