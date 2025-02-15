@@ -152,9 +152,9 @@ namespace based::scene
 		std::string fragmentSource;
 
 		if (data["VertexIsEngineAsset"].as<bool>()) vertexSource = ASSET_PATH(vSrc.as<std::string>());
-		else vertexSource = vSrc.as<std::string>();
+		else vertexSource = mProjectDirectory + vSrc.as<std::string>();
 		if (data["FragmentIsEngineAsset"].as<bool>()) fragmentSource = ASSET_PATH(fSrc.as<std::string>());
-		else fragmentSource = fSrc.as<std::string>();
+		else fragmentSource = mProjectDirectory + fSrc.as<std::string>();
 
 		auto shader = LOAD_SHADER(vertexSource, fragmentSource);
 
@@ -232,6 +232,8 @@ namespace based::scene
 				auto path = texture.second["Path"].as<std::string>();
 				if (texture.second["IsEngineAsset"] && texture.second["IsEngineAsset"].as<bool>())
 					path = ASSET_PATH(path);
+				else
+					path = mProjectDirectory + path;
 				auto tex = std::make_shared<graphics::Texture>(path, true);
 				tex->SetName(texture.first.as<std::string>());
 				mLoadedTextures[id] = tex;
@@ -282,7 +284,7 @@ namespace based::scene
 		auto& animation = data["Animation"];
 
 		auto animId = animation["ID"].as<uint64_t>();
-		auto animSource = animation["Path"].as<std::string>();
+		auto animSource = mProjectDirectory + animation["Path"].as<std::string>();
 		auto skeletonId = animation["Skeleton"].as<uint64_t>();
 
 		bool useIndex = false;
@@ -898,12 +900,18 @@ namespace based::scene
 				else
 				{
 					auto materialPath = meshRenderer["Material"]["Path"].as<std::string>();
+					auto truePath = materialPath;
 					if (meshRenderer["Material"]["IsEngineAsset"]
 						&& meshRenderer["Material"]["IsEngineAsset"].as<bool>())
-						materialPath = ASSET_PATH(materialPath);
-					material = graphics::Material::LoadMaterialFromFile(
+						truePath = ASSET_PATH(materialPath);
+					else truePath = mProjectDirectory + materialPath;
+					material = DeserializeMaterial(truePath);
+					BASED_ASSERT(material != nullptr, "Material is null!");
+					material->SetMaterialSource(materialPath);
+						/*graphics::Material::LoadMaterialFromFile(
 						materialPath,
-						mScene->GetMaterialStorage());
+						mScene->GetMaterialStorage(),
+						mProjectDirectory);*/
 					mLoadedMaterials[material->GetUUID()] = material;
 				}
 			}
@@ -928,7 +936,7 @@ namespace based::scene
 					std::vector<graphics::Vertex> vertices;
 					std::vector<unsigned int> indices;
 
-					std::ifstream ifs(meshRenderer["Mesh"]["Path"].as<std::string>(), std::ios::binary);
+					std::ifstream ifs(mProjectDirectory + meshRenderer["Mesh"]["Path"].as<std::string>(), std::ios::binary);
 					size_t size;
 					ifs.read(reinterpret_cast<char*>(&size), sizeof(size_t)); // Read vertex size
 					vertices.resize(size);
@@ -943,7 +951,7 @@ namespace based::scene
 				{
 					auto path = meshRenderer["Mesh"]["IsEngineAsset"].as<bool>() ?
 						ASSET_PATH(meshRenderer["Mesh"]["Path"].as<std::string>()) :
-						meshRenderer["Mesh"]["Path"].as<std::string>();
+						mProjectDirectory + meshRenderer["Mesh"]["Path"].as<std::string>();
 					mesh = graphics::Mesh::LoadMeshWithUUID(path,
 						mScene->GetMeshStorage(), meshId);
 				}
@@ -957,7 +965,7 @@ namespace based::scene
 			{
 				instanceMesh = graphics::Mesh::CreateInstancedMesh(mesh, mScene->GetMeshStorage());
 				instanceMesh->material = material;
-				std::ifstream ifs(instances["Path"].as<std::string>(), std::ios::binary);
+				std::ifstream ifs(mProjectDirectory + instances["Path"].as<std::string>(), std::ios::binary);
 				auto size = instances["Size"].as<int>();
 				std::vector<Transform> transforms(size);
 				ifs.read(reinterpret_cast<char*>(transforms.data()), size * sizeof(Transform));
@@ -981,13 +989,20 @@ namespace based::scene
 					if (materialId)
 					{
 						auto id = materialId.as<uint64_t>();
+						auto materialPath = material["Path"].as<std::string>();
+
 						if (mLoadedMaterials.find(id) != mLoadedMaterials.end())
 							mat = mLoadedMaterials[id];
 						else
 						{
-							mat = graphics::Material::LoadMaterialFromFile(
-								material["Path"].as<std::string>(),
-								mScene->GetMaterialStorage());
+							auto truePath = materialPath;
+							if (material["IsEngineAsset"]
+								&& material["IsEngineAsset"].as<bool>())
+								truePath = ASSET_PATH(materialPath);
+							else truePath = mProjectDirectory + materialPath;
+							mat = DeserializeMaterial(truePath);
+							BASED_ASSERT(mat != nullptr, "Material is null!");
+							mat->SetMaterialSource(materialPath);
 							mLoadedMaterials[mat->GetUUID()] = mat;
 						}
 					}
@@ -1016,7 +1031,7 @@ namespace based::scene
 			{
 				auto path = modelRenderer["Model"]["IsEngineAsset"].as<bool>() ?
 					ASSET_PATH(modelRenderer["Model"]["Path"].as<std::string>()) :
-					modelRenderer["Model"]["Path"].as<std::string>();
+					mProjectDirectory + modelRenderer["Model"]["Path"].as<std::string>();
 				model = graphics::Model::CreateModelWithUUID(path, 
 					mScene->GetModelStorage(), modelRenderer["Model"]["Name"].as<std::string>(), 
 					modelId);
@@ -1040,7 +1055,11 @@ namespace based::scene
 					anim = mLoadedAnimations[animId];
 				else
 				{
-					anim = animation::Animation::LoadAnimationFromFile(path, mScene->GetAnimationStorage());
+					anim = DeserializeAnimation(mProjectDirectory + path);
+					anim->SetFileAnimation(path);
+					mScene->GetAnimationStorage().Load(anim->GetAnimationName(), anim);
+					/*animation::Animation::LoadAnimationFromFile(mProjectDirectory + path,
+						mScene->GetAnimationStorage());*/
 					BASED_ASSERT(anim, "Loaded animation is not valid!");
 					mLoadedAnimations[animId] = anim;
 				}
@@ -1107,8 +1126,11 @@ namespace based::scene
 								anim = mLoadedAnimations[animId];
 							else
 							{
-								anim = animation::Animation::LoadAnimationFromFile(path, 
-									mScene->GetAnimationStorage());
+								anim = DeserializeAnimation(mProjectDirectory + path);
+								anim->SetFileAnimation(path);
+								mScene->GetAnimationStorage().Load(anim->GetAnimationName(), anim);
+								/*animation::Animation::LoadAnimationFromFile(mProjectDirectory + path,
+									mScene->GetAnimationStorage());*/
 								BASED_ASSERT(anim, "Loaded animation is not valid!");
 								mLoadedAnimations[animId] = anim;
 							}

@@ -161,6 +161,29 @@ namespace based
         }
     }
 
+    void Engine::SetArgs(int argc, char* argv[])
+    {
+        if (mNumArgs != -99) return;
+
+	    mNumArgs = argc;
+	    for (int index{}; index != argc; ++index)
+	    {
+	        //BASED_TRACE("Placing back arg {}", argv[index]);
+	        mArgs.emplace_back(argv[index]);
+	    }
+    }
+
+    std::string Engine::GetArg(int index)
+    {
+        if (index < 0 || index > mNumArgs - 1)
+        {
+            BASED_WARN("Cannot access arg index {}! Out of range {}!", index, mNumArgs);
+            return "";
+        }
+
+        return mArgs[index];
+    }
+
     uint64_t Engine::GetEngineTicks()
     {
         return SDL_GetTicks64();

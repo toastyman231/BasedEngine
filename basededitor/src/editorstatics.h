@@ -29,5 +29,7 @@ namespace editor
 		inline static std::shared_ptr<based::scene::Entity> mEditorPlayer;
 
 		inline static bool mEditorSceneDirty = false;
+
+		inline static std::string mProjectDirectory;
 	};
 }

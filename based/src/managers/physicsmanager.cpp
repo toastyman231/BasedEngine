@@ -41,7 +41,7 @@ namespace based::managers
 		if (core::Time::TimeScale() == 0.f) return;
 
 		auto& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
-		auto physicsEntityView = registry.view<scene::EntityReference, scene::RigidbodyComponent>();
+		auto physicsEntityView = registry.view<scene::Enabled, scene::EntityReference, scene::RigidbodyComponent>();
 		auto& bodyInterface = mPhysicsSystem->GetBodyInterface();
 
 		for (auto& e : physicsEntityView)
@@ -89,10 +89,19 @@ namespace based::managers
 	{
 		if (mRenderDebug)
 		{
-			JPH::BodyManager::DrawSettings settings;
-			settings.mDrawShapeWireframe = true;
+			auto& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+			auto view = registry.view<scene::Enabled, scene::RigidbodyComponent>();
 
-			mPhysicsSystem->DrawBodies(settings, mDebugRenderer);
+			for (auto& e : view)
+			{
+				auto& rb = view.get<scene::RigidbodyComponent>(e);
+				auto shape = mPhysicsSystem->GetBodyInterface().GetTransformedShape(rb.rigidbodyID);
+				
+				shape.mShape->Draw(mDebugRenderer,
+					mPhysicsSystem->GetBodyInterface().GetCenterOfMassTransform(rb.rigidbodyID),
+					shape.GetShapeScale(),
+					JPH::Color::sGreen, false, true);
+			}
 		}
 	}
 }

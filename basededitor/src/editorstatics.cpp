@@ -11,6 +11,8 @@ namespace editor
 {
 	void Statics::InitializeEditorStatics()
 	{
+		mProjectDirectory = based::Engine::Instance().GetArg(1);
+
 		mEditorCamera = std::make_shared<based::graphics::Camera>();
 		mEditorCamera->SetProjection(based::graphics::Projection::PERSPECTIVE);
 		based::Engine::Instance().GetApp().GetCurrentScene()->SetActiveCamera(mEditorCamera);
@@ -117,6 +119,7 @@ namespace editor
 	bool Statics::LoadScene(const std::string& path)
 	{
 		auto serializer = based::scene::SceneSerializer(based::Engine::Instance().GetApp().GetCurrentScene());
+		serializer.SetProjectDirectory(mProjectDirectory);
 		auto res = serializer.Deserialize(path);
 
 		if (!res)

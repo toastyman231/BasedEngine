@@ -20,7 +20,8 @@ namespace based::graphics
 		static std::shared_ptr<Material> CreateMaterial(const std::shared_ptr<Shader>& shader,
 			core::AssetLibrary<Material>& assetLibrary, const std::string& name = "New Material");
 		static std::shared_ptr<Material> LoadMaterialFromFile(const std::string& filepath,
-			core::AssetLibrary<Material>& assetLibrary, const std::string& saveAs = "");
+			core::AssetLibrary<Material>& assetLibrary, const std::string& filePrefix = "", 
+			const std::string& saveAs = "");
 		static std::shared_ptr<Material> LoadFileMaterialWithoutSaving(const std::string& filepath);
 
 		inline std::weak_ptr<Shader> GetShader() const { return mShader; }
@@ -38,6 +39,8 @@ namespace based::graphics
 
 		bool IsFileMaterial() const { return !mMaterialSource.empty(); }
 		std::string GetMaterialSource() const { return mMaterialSource; }
+
+		void SetMaterialSource(const std::string& source) { mMaterialSource = source; }
 
 		std::string mMaterialName;
 

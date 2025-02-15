@@ -39,10 +39,10 @@ namespace based::animation
 	}
 
 	std::shared_ptr<Animation> Animation::LoadAnimationFromFile(const std::string& filepath,
-		core::AssetLibrary<Animation>& assetLibrary)
+		core::AssetLibrary<Animation>& assetLibrary, const std::string& filePrefix)
 	{
 		scene::SceneSerializer serializer(Engine::Instance().GetApp().GetCurrentScene());
-		auto anim = serializer.DeserializeAnimation(filepath);
+		auto anim = serializer.DeserializeAnimation(filePrefix + filepath);
 		anim->m_IsFileAnimation = true;
 		anim->m_FileSource = filepath;
 		assetLibrary.Load(anim->GetAnimationName(), anim);

@@ -53,10 +53,10 @@ namespace based::graphics
 	}
 
 	std::shared_ptr<Material> Material::LoadMaterialFromFile(const std::string& filepath,
-		core::AssetLibrary<Material>& assetLibrary, const std::string& saveAs)
+		core::AssetLibrary<Material>& assetLibrary, const std::string& filePrefix, const std::string& saveAs)
 	{
 		scene::SceneSerializer serializer(Engine::Instance().GetApp().GetCurrentScene());
-		auto material = serializer.DeserializeMaterial(filepath);
+		auto material = serializer.DeserializeMaterial(filePrefix + filepath);
 		BASED_ASSERT(material != nullptr, "Material is null!");
 		material->mMaterialSource = filepath;
 		assetLibrary.Load(saveAs.empty() ? material->mMaterialName : saveAs, material, true);

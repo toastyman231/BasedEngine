@@ -46,9 +46,33 @@ public:
 		input::Mouse::SetCursorVisible(true);
 		input::Mouse::SetCursorMode(input::CursorMode::Free);
 		core::Time::SetTimeScale(0);
-
-		editor::Statics::LoadScene(ASSET_PATH("Scenes/Default3D.bscn"));
+		
 		editor::Statics::InitializeEditorStatics();
+		std::string startupScenePath;
+
+		if (std::filesystem::exists("Config/EditorConfig.yml"))
+		{
+			std::ifstream ifs("Config/EditorConfig.yml");
+			std::stringstream stream;
+			stream << ifs.rdbuf();
+
+			YAML::Node data = YAML::Load(stream.str());
+			if (data["StartupScene"]) startupScenePath = data["StartupScene"].as<std::string>();
+		} else
+		{
+			BASED_WARN("No config file for editor!");
+		}
+
+		if (!startupScenePath.empty())
+		{
+			editor::Statics::LoadScene(startupScenePath);
+		}
+		else
+		{
+			BASED_WARN("Provided scene is invalid, falling back on default!");
+			editor::Statics::LoadScene(ASSET_PATH("Scenes/Default3D.bscn"));
+		}
+		GetCurrentScene()->SetActiveCamera(editor::Statics::GetEditorCamera());
 
 		auto editorSceneBuffer = std::make_shared<graphics::Framebuffer>(1280, 720);
 		editorSceneBuffer->SetClearColor(glm::vec4(GetWindowProperties().clearColor, 1.0));

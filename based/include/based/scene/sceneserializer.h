@@ -37,6 +37,8 @@ namespace based::scene
 		bool Deserialize(const std::string& filepath) override;
 		bool DeserializeRuntime(const std::string& filepath) override;
 
+		void SetProjectDirectory(const std::string& dir) { mProjectDirectory = dir; }
+
 		template <typename T>
 		static void SerializeScriptComponent(YAML::Emitter* out, scene::ScriptComponent* component)
 		{
@@ -71,6 +73,7 @@ namespace based::scene
 				: source(s), destination(d), rules(r), autoReset(a) {}
 		};
 
+		std::string mProjectDirectory;
 		std::shared_ptr<Scene> mScene;
 
 		std::unordered_map<core::UUID, core::UUID> parentMap;

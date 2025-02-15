@@ -6,9 +6,6 @@ project "jolt"
     if externalBuild then targetdir("%{wks.location}/ProjectFiles/" .. tdir) else targetdir(tdir) end
     if externalBuild then objdir("%{wks.location}/ProjectFiles/" .. odir) else objdir(odir) end
 
-    targetdir ("bin/%{cfg.buildcfg}/%{prj.name}")
-    objdir ("bin-obj/%{cfg.buildcfg}/%{prj.name}")
-
     files 
     {
         "include/**.h",

@@ -17,6 +17,7 @@ namespace based::animation
 
     class Animation
     {
+        friend class SceneSerializer;
     public:
         Animation() = default;
         Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model, int index = 0);
@@ -28,7 +29,7 @@ namespace based::animation
         ~Animation() = default;
 
         static std::shared_ptr<Animation> LoadAnimationFromFile(const std::string& filepath,
-            core::AssetLibrary<Animation>& assetLibrary);
+            core::AssetLibrary<Animation>& assetLibrary, const std::string& filePrefix = "");
 
         Bone* FindBone(const std::string& name);
 

@@ -6,6 +6,8 @@
 #endif
 #endif
 
+#include <iostream>
+
 #include "engine.h"
 #include "app.h"
 
@@ -18,9 +20,10 @@
 // based::App* CreateApp() { return new ClientApp(); }
 based::App* CreateApp();
 
-int main()
+int main(int argc, char* argv[])
 {
     based::App* app = CreateApp();
+    based::Engine::Instance().SetArgs(argc, argv);
     based::Engine::Instance().Run(app);
 
     delete app;

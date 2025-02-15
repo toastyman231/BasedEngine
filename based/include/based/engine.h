@@ -20,8 +20,12 @@ namespace based
         ~Engine() = default;
 
         void Run(App* app);
+        
         static void SetIcon(std::string path);
         inline void Quit() { mIsRunning = false; }
+
+        void SetArgs(int argc, char* argv[]);
+        std::string GetArg(int index);
 
         inline void SetShadowPassEnabled(bool enabled) { mShadowPassEnabled = enabled; }
 
@@ -53,6 +57,9 @@ namespace based
         bool mIsRunning;
         bool mIsInitialized;
         bool mShadowPassEnabled;
+
+        int mNumArgs = -99;
+        std::vector<std::string> mArgs;
 
         core::Window mWindow;
         App* mApp;

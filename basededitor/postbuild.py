@@ -1,22 +1,40 @@
 from genericpath import isfile
 import sys, os, subprocess
 
+ENGINE_LOCATION = os.environ["BASED_ENGINE_HOME"]
+
 TOOLS_DIR = "tools"
-sys.path.append("{}/../{}".format(os.getcwd(), TOOLS_DIR))
+sys.path.append(ENGINE_LOCATION + "\\" + TOOLS_DIR)
 import globals
 
-WIN_SOURCE_PATHS = ["PostBuildCopy", "PostBuildCopy_windows"]
-NIX_SOURCE_PATHS = ["PostBuildCopy"]
+WIN_SOURCE_PATHS = ["PostBuildCopy", "PostBuildCopy_windows", "Assets"]
+NIX_SOURCE_PATHS = ["PostBuildCopy", "Assets"]
+PLUGIN_SOURCE_PATHS = ["Plugins"]
 
 args = globals.ProcessArguments(sys.argv)
 CONFIG = globals.GetArgumentValue(args, "config", "Debug")
 PROJECT = globals.GetArgumentValue(args, "prj", globals.PROJECT_NAME)
 
+print("RUNNING EDITOR POSTBUILD FROM {}".format(os.getcwd()))
+
 dest = "{}/bin/{}/{}".format(os.getcwd(), CONFIG, PROJECT)
+print("COPYING TO {}".format(dest))
 
 if (globals.IsWindows()):
     for source in WIN_SOURCE_PATHS:
+        print(source)
+        if source == "Assets":
+            newDest = "{}/Assets".format(dest)
+            if not os.path.exists(newDest):
+                os.mkdir(newDest)
+            subprocess.call(["cmd.exe", "/c", "robocopy", source, newDest, "/E"])
+            continue
         subprocess.call(["cmd.exe", "/c", "robocopy", source, dest, "/E"])
+    for source in PLUGIN_SOURCE_PATHS:
+        if not os.path.isdir(source): continue
+        dirs = os.listdir(source)
+        for dir in dirs:
+            subprocess.call(["cmd.exe", "/c", "robocopy", "{}/{}/{}/Binaries".format(os.getcwd(), source, dir), dest, "/E"])
 else:
     import os, shutil
 

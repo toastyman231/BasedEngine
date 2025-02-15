@@ -5,8 +5,10 @@ project "BasedEditor"
     staticruntime "on"
     links "based"
 
-    targetdir(tdir)
-    objdir(odir)
+    if externalBuild then location "%{wks.location}/ProjectFiles" end
+
+    if externalBuild then targetdir("%{wks.location}/ProjectFiles/" .. tdir) else targetdir(tdir) end
+    if externalBuild then objdir("%{wks.location}/ProjectFiles/" .. odir) else objdir(odir) end
 
     files 
     {
@@ -14,15 +16,23 @@ project "BasedEditor"
         "src/**.cpp"
     }
 
-    includedirs
-    {
-        "%{wks.location}/based/include",
-        "%{externals.spdlog}",
-        "%{externals.rmlui}",
-        "%{externals.tracy}",
-        "%{externals.yaml_cpp}",
-        "%{externals.jolt}"
-    }
+    includedirs(
+        (externalBuild and {
+            (engineLocation .. "//based//include"),
+            (engineLocation .. "%{externals.spdlog}"),
+            (engineLocation .. "%{externals.rmlui}"),
+            (engineLocation .. "%{externals.tracy}"),
+            (engineLocation .. "%{externals.yaml_cpp}"),
+            (engineLocation .. "%{externals.jolt}")
+        } or {
+            "%{wks.location}/based/include",
+            "%{externals.spdlog}",
+            "%{externals.rmlui}",
+            "%{externals.tracy}",
+            "%{externals.yaml_cpp}",
+            "%{externals.jolt}"
+        }
+    ))
 
     flags
     {
@@ -70,6 +80,8 @@ project "BasedEditor"
         {
             "BASED_CONFIG_DEBUG"
         }
+
+        if externalBuild then debugargs({ "%{wks.location}/" }) end
         runtime "Debug"
         symbols "on"
 
