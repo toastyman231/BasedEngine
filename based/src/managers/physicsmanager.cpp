@@ -102,6 +102,20 @@ namespace based::managers
 					shape.GetShapeScale(),
 					JPH::Color::sGreen, false, true);
 			}
+
+			auto charView = registry.view<scene::Enabled, scene::CharacterController>();
+
+			for (auto& e : charView)
+			{
+				scene::CharacterController& character = charView.get<scene::CharacterController>(e);
+
+				character.Character->GetShape()->Draw(
+					mDebugRenderer,
+					character.Character->GetCenterOfMassTransform(),
+					character.Character->GetTransformedShape().GetShapeScale(),
+					JPH::Color::sGreen, false, true
+					);
+			}
 		}
 	}
 }

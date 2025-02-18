@@ -11,11 +11,18 @@
 
 #include <Jolt/Jolt.h>
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
+#include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
 #include <Jolt/Physics/Body/MotionType.h>
 #include <Jolt/Physics/EActivation.h>
 
 #include "based/math/basedmath.h"
+#include "Jolt/Physics/Character/CharacterVirtual.h"
+
+namespace JPH
+{
+	class CharacterVirtual;
+}
 
 namespace based::ui
 {
@@ -210,6 +217,19 @@ namespace based::scene
 		}
 	};
 
+	struct CapsuleShapeComponent: public PhysicsShapeComponent
+	{
+		float HalfHeight;
+		float Radius;
+
+		CapsuleShapeComponent(float halfHeight, float radius)
+		{
+			HalfHeight = halfHeight;
+			Radius = radius;
+			shape = new JPH::CapsuleShape(halfHeight, radius);
+		}
+	};
+
 	struct RigidbodyComponent
 	{
 		JPH::BodyID rigidbodyID;
@@ -220,6 +240,41 @@ namespace based::scene
 			rigidbodyID = Engine::Instance().GetPhysicsManager().AddBody(
 				shape.shape, shape.center, shape.rotation * based::math::Deg2Rad, type, layer, activation
 			);
+		}
+	};
+
+	struct CharacterController
+	{
+		JPH::CharacterVirtual* Character;
+		JPH::CharacterVirtualSettings Settings;
+
+		CharacterController(JPH::CharacterVirtualSettings settings, Transform transform)
+		{
+			Settings = settings;
+			Character = new JPH::CharacterVirtual(&settings, convert(transform.Position),
+				JPH::Quat::sEulerAngles(convert(transform.Rotation)), 0,
+				&Engine::Instance().GetPhysicsManager().GetPhysicsSystem());
+		}
+
+		CharacterController(Transform transform, JPH::RefConst<JPH::Shape> shape)
+		{
+			JPH::CharacterVirtualSettings settings;
+			settings.mMaxSlopeAngle = math::Deg2Rad * 45.f;
+			settings.mMaxStrength = 100.f;
+			settings.mShape = shape;
+			settings.mBackFaceMode = JPH::EBackFaceMode::CollideWithBackFaces;
+			settings.mCharacterPadding = 0.02f;
+			settings.mPenetrationRecoverySpeed = 1.f;
+			settings.mPredictiveContactDistance = 0.1f;
+			settings.mSupportingVolume = JPH::Plane(JPH::Vec3::sAxisY(), -0.3f); // Accept contacts that touch the lower sphere of the capsule
+			settings.mEnhancedInternalEdgeRemoval = false;
+			/*settings.mInnerBodyShape = sCreateInnerBody ? mInnerStandingShape : nullptr;*/
+			settings.mInnerBodyLayer = physics::Layers::MOVING;
+
+			Settings = settings;
+			Character = new JPH::CharacterVirtual(&settings, convert(transform.Position),
+				JPH::Quat::sEulerAngles(convert(transform.Rotation)), 0,
+				&Engine::Instance().GetPhysicsManager().GetPhysicsSystem());
 		}
 	};
 

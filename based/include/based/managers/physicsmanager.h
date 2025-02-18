@@ -24,6 +24,7 @@ namespace based::managers
 
 		JPH::PhysicsSystem& GetPhysicsSystem() const { return *mPhysicsSystem; }
 		JPH::DebugRenderer* GetDebugRenderer() const { return (JPH::DebugRenderer*)mDebugRenderer; }
+		JPH::TempAllocator* GetTempAllocator() const { return mTempAllocator; }
 		bool ShouldRenderDebug() const { return mRenderDebug; }
 
 		void SetGravity(glm::vec3 gravity) const;
