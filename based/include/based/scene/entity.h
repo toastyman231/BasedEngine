@@ -116,7 +116,7 @@ namespace based::scene
 		virtual void OnDisable() {}
 		virtual void OnDestroy() {}
 
-		void SetParent(const std::shared_ptr<Entity>& parentEntity)
+		void SetParent(const std::shared_ptr<Entity>& parentEntity, bool keepRelativeTransform = true)
 		{
 			auto parent = Parent.lock();
 			if (parentEntity == nullptr && parent)
@@ -128,9 +128,15 @@ namespace based::scene
 
 			Parent = parentEntity;
 			parentEntity->Children.emplace_back(shared_from_this());
-			SetLocalPosition(GetTransform().Position - parentEntity->GetTransform().Position);
-			SetLocalRotation(GetTransform().Rotation - parentEntity->GetTransform().Rotation);
-			SetLocalScale(GetTransform().Scale / parentEntity->GetTransform().Scale);
+			if (keepRelativeTransform)
+			{
+				SetLocalPosition(GetTransform().Position - parentEntity->GetTransform().Position);
+				SetLocalRotation(GetTransform().Rotation - parentEntity->GetTransform().Rotation);
+				SetLocalScale(GetTransform().Scale / parentEntity->GetTransform().Scale);
+			} else
+			{
+				SetLocalTransform({ 0, 0, 0 }, { 0, 0, 0 }, { 1, 1, 1 });
+			}
 		}
 
 		bool RemoveChild(const std::shared_ptr<Entity>& childEntity)
