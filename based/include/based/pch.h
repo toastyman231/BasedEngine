@@ -43,6 +43,7 @@
 #include <RmlUi/Core/Types.h>
 #include <RmlUi/Core/Input.h>
 #include <RmlUi/Core/Context.h>
+#include <RmlUi/Debugger.h>
 
 // entt stuff
 #include <external/entt/entt.hpp>

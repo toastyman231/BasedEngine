@@ -28,6 +28,7 @@ namespace based::managers
 
 		DocumentInfo* LoadWindow(const std::string& path, Rml::Context* context);
 		Rml::Context* CreateContext(const std::string& name, glm::ivec2 size);
+		Rml::Context* GetContext(const std::string& name);
 		void RemoveContext(const Rml::Context* context);
 		void SetPathPrefix(const std::string& path);
 

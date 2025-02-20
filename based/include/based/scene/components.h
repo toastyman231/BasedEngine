@@ -241,12 +241,26 @@ namespace based::scene
 				shape.shape, shape.center, shape.rotation * based::math::Deg2Rad, type, layer, activation
 			);
 		}
+
+		void RegisterBody(const entt::entity entity)
+		{
+			Engine::Instance()
+				.GetPhysicsManager()
+				.GetPhysicsSystem()
+				.GetBodyInterface()
+				.SetUserData(rigidbodyID, static_cast<uint32_t>(entity));
+		}
 	};
 
 	struct CharacterController
 	{
 		JPH::CharacterVirtual* Character;
 		JPH::CharacterVirtualSettings Settings;
+
+		float Speed = 6.0f;
+		float JumpForce = 4.0f;
+		bool AllowAirControl = false;
+		bool ControlEnabled = true;
 
 		CharacterController(JPH::CharacterVirtualSettings settings, Transform transform)
 		{

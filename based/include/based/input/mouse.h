@@ -38,6 +38,8 @@ namespace based::input
 
 		static std::array<bool, ButtonCount> buttons;
 		static std::array<bool, ButtonCount> buttonsLast;
+
+		inline static bool mDebugTabbedOut;
 	};
 }
 

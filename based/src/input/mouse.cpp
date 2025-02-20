@@ -25,10 +25,27 @@ namespace based::input
 	void Mouse::Update()
 	{
 		PROFILE_FUNCTION();
+
+#ifdef BASED_CONFIG_DEBUG
+		if (mDebugTabbedOut)
+		{
+			int xTemp;
+			int yTemp;
+			if (SDL_GetMouseState(&xTemp, &yTemp) & SDL_BUTTON(1))
+			{
+				SetCursorMode(CursorMode::Confined);
+				SetCursorVisible(false);
+				mDebugTabbedOut = false;
+			}
+
+			return;
+		}
+#endif
+
 		xLast = x;
 		yLast = y;
 		buttonsLast = buttons;
-		Uint32 state = mCursorMode == CursorMode::Confined ? SDL_GetMouseState(&x, &y) : SDL_GetGlobalMouseState(&x, &y);
+		Uint32 state = SDL_GetMouseState(&x, &y);
 		glm::vec2 size = based::Engine::Instance().GetWindow().GetSize();
 		if (mCursorMode == CursorMode::Confined && (x <= 1 || x >= static_cast<int>(size.x) - 1))
 		{
@@ -55,6 +72,7 @@ namespace based::input
 		{
 			SetCursorMode(CursorMode::Free);
 			SetCursorVisible(true);
+			mDebugTabbedOut = true;
 		}
 #endif
 	}

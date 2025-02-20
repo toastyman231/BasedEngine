@@ -20,6 +20,8 @@ namespace based::managers
 		Rml::Initialise();
 
 		Rml::LoadFontFace(ASSET_PATH("Fonts/Arimo-Regular.ttf"));
+
+		Engine::Instance().GetUiManager().CreateContext("main", Engine::Instance().GetWindow().GetSize());
 	}
 
 	void UiManager::ProcessEvents(SDL_Event e) const
@@ -77,10 +79,10 @@ namespace based::managers
 			return new DocumentInfo();
 		}
 
-		if (Rml::Element* title = document->GetElementById("title"))
-			title->SetInnerRML(document->GetTitle());
+		/*if (Rml::Element* title = document->GetElementById("title"))
+			title->SetInnerRML(document->GetTitle());*/
 
-		document->SetId(std::to_string(context->GetNumDocuments() - 1));
+		//document->SetId(std::to_string(context->GetNumDocuments() - 1));
 		document->Show();
 
 		mDocuments.emplace_back(new DocumentInfo{ document, documentPath, context });
@@ -100,6 +102,17 @@ namespace based::managers
 
 		mContexts.emplace_back(context);
 		return context;
+	}
+
+	Rml::Context* UiManager::GetContext(const std::string& name)
+	{
+		for (auto context : mContexts)
+		{
+			if (context->GetName() == name) return context;
+		}
+
+		BASED_WARN("Context {} does not exist! Returning null.", name);
+		return nullptr;
 	}
 
 	void UiManager::RemoveContext(const Rml::Context* context)
@@ -135,11 +148,15 @@ namespace based::managers
 
 	void UiManager::HotReloadDocuments() const
 	{
+		BASED_TRACE("Hot reloading!");
+
 		for (auto docInfo : mDocuments)
 		{
 			Rml::ElementDocument* rawPointer = docInfo->document;
 			Rml::Context* context = docInfo->context;
 			const auto& path = docInfo->path;
+
+			BASED_TRACE("Reloading {}", rawPointer->GetSourceURL());
 
 			bool isShown = rawPointer->IsVisible();
 
