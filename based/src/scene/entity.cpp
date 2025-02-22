@@ -48,8 +48,13 @@ namespace based::scene
 		if (!ent) return;
 		ent->OnDestroy();
 
-		ent->mRegistry.destroy(ent->mEntity);
+		if (auto parent = ent->Parent.lock())
+			parent->RemoveChild(ent);
 
+		auto scene = Engine::Instance().GetApp().GetCurrentScene();
+		scene->GetEntityStorage().Delete(ent->GetEntityName());
+
+		ent->mRegistry.destroy(ent->mEntity);
 		ent.reset();
 	}
 

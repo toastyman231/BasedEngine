@@ -201,8 +201,8 @@ public:
 		ImGui::End();
 
 		mMenuBar->Render();
-		mGameView->Render();
 		mSceneView->Render();
+		mGameView->Render();
 		mSceneHierarchy->Render();
 
 		if (ImGui::Begin("Files"))

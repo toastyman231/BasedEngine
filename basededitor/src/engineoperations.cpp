@@ -60,4 +60,50 @@ namespace editor
 
 		return true;
 	}
+
+	bool EngineOperations::EditorCreateEntity(std::string* outName)
+	{
+		HISTORY_PUSH(EditorCreateEntity, outName);
+		bool isSceneDirty = Statics::IsSceneDirty();
+		HISTORY_SAVE(isSceneDirty);
+
+		std::string nameBase = "New Entity";
+		auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
+
+		auto name = std::string(nameBase);
+		int iterations = 0;
+		while (scene->GetEntityStorage().Get(name))
+		{
+			name = nameBase.append(std::to_string(++iterations));
+		}
+
+		HISTORY_SAVE(name);
+		auto entity = based::scene::Entity::CreateEntity(name);
+		scene->GetEntityStorage().Load(name, entity);
+		Statics::SetSceneDirty(true);
+
+		*outName = name;
+
+		return true;
+	}
+
+	bool EngineOperations::EditorCreateEntity_Undo(std::string* outName)
+	{
+		HISTORY_POP();
+
+		std::string name;
+		HISTORY_LOAD(name);
+
+		bool isSceneDirty;
+		HISTORY_LOAD(isSceneDirty);
+
+		auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
+		auto entity = scene->GetEntityStorage().Get(name);
+
+		based::scene::Entity::DestroyEntity(entity);
+
+		Statics::SetSceneDirty(isSceneDirty);
+
+		return true;
+	}
 }

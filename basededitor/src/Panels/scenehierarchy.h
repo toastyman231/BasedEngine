@@ -20,6 +20,7 @@ namespace editor::panels
 
 	private:
 		void DrawEntity(const std::shared_ptr<based::scene::Entity>& entity);
+		void DrawRightClickMenu();
 
 		int mEmptyPayload = 0;
 		bool mReparentCooldown = false;

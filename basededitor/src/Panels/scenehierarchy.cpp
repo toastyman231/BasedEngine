@@ -56,6 +56,12 @@ namespace editor::panels
 				}
 				ImGui::EndDragDropTarget();
 			}
+
+			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1))
+			{
+				ImGui::OpenPopup("HierarchyRightClick");
+			}
+			DrawRightClickMenu();
 		}
 		ImGui::End();
 	}
@@ -104,7 +110,6 @@ namespace editor::panels
 			if (ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), textFlags))
 			{
 				Statics::EngineOperations.EditorSetEntityName(entity, std::string(buffer));
-				//entity->SetEntityName(std::string(buffer));
 				mRenameIndex = -1;
 			}
 			ImGui::SetKeyboardFocusHere(-1);
@@ -113,9 +118,7 @@ namespace editor::panels
 
 		auto isOpen = ImGui::TreeNodeEx(entity->GetEntityName().c_str(), flags);
 
-		//BASED_TRACE("Rename ID: {}, Current ID: {}", mRenameIndex, mCurrentIndex);
-
-		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0) &&
+		if (ImGui::IsItemHovered() && (ImGui::IsMouseClicked(0) || ImGui::IsMouseClicked(1)) &&
 			!(based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT)
 				|| based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)))
 		{
@@ -197,5 +200,38 @@ namespace editor::panels
 
 		if (isOpen) 
 			ImGui::TreePop();
+	}
+
+	void SceneHierarchy::DrawRightClickMenu()
+	{
+		//ImGui::SetNextWindowSize(ImVec2(200.f, 500.f));
+		if (ImGui::BeginPopup("HierarchyRightClick"))
+		{
+			if (ImGui::Button("Add Entity", ImVec2(200.f, 0.f)))
+			{
+				auto selections = Statics::GetSelectedEntities();
+				if (!selections.empty())
+				{
+					for (auto& e : selections)
+					{
+						if (auto entity = e.lock())
+						{
+							std::string name;
+							Statics::EngineOperations.EditorCreateEntity(&name);
+							auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
+							auto newEnt = scene->GetEntityStorage().Get(name);
+							newEnt->SetParent(entity);
+						}
+					}
+				} else
+				{
+					std::string name;
+					Statics::EngineOperations.EditorCreateEntity(&name);
+					mRenameIndex = 1;
+				}
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
 	}
 }
