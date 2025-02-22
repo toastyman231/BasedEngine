@@ -20,7 +20,8 @@ namespace editor::panels
 
 			bool isActive = entity->IsActive();
 			ImGui::Checkbox("", &isActive);
-			Statics::EngineOperations.EditorSetEntityActive(entity, isActive);
+			BASED_TRACE("{} Active: {}", entity->GetEntityName(), isActive);
+			//Statics::EngineOperations.EditorSetEntityActive(entity, isActive);
 
 			std::string name = entity->GetEntityName();
 			char* buffer = (char*)name.c_str();
