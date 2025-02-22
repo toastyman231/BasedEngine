@@ -22,5 +22,11 @@ namespace editor::panels
 
 		int mEmptyPayload = 0;
 		bool mReparentCooldown = false;
+
+		int mCurrentIndex = 0;
+		int mCurrentCount = 0;
+		int mCountMax = 0;
+		int32_t mMultiSelectBegin = -1;
+		int32_t mMultiSelectEnd = -1;
 	};
 }

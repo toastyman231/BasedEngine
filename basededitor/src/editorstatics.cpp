@@ -174,6 +174,24 @@ namespace editor
 		return true;
 	}
 
+	bool Statics::RemoveEntityFromSelected(const std::shared_ptr<based::scene::Entity>& entity)
+	{
+		auto it = 
+			std::find_if(mSelectedEntities.begin(), mSelectedEntities.end(), 
+				[entity](const std::weak_ptr<based::scene::Entity>& e)
+				{
+					return e.lock() == entity;
+				});
+
+		if (it != mSelectedEntities.end())
+		{
+			mSelectedEntities.erase(it);
+			return true;
+		}
+
+		return false;
+	}
+
 	void Statics::SetSceneDirty(bool dirty)
 	{
 		if (mEditorSceneDirty == dirty) return;

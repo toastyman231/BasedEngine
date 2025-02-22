@@ -19,6 +19,8 @@ namespace editor::panels
 			auto& registry = based::Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
 			auto view = registry.view<based::scene::EntityReference>();
 
+			mCurrentIndex = 0;
+			mCurrentCount = 0;
 			for (auto e : view)
 			{
 				auto ent = view.get<based::scene::EntityReference>(e).entity;
@@ -29,6 +31,7 @@ namespace editor::panels
 					if (entity->Parent.lock() != nullptr) continue;
 
 					ImGui::PushID((uint32_t)entity->GetEntityHandle());
+					++mCurrentIndex;
 					DrawEntity(entity);
 					ImGui::PopID();
 				}
@@ -38,15 +41,12 @@ namespace editor::panels
 				ImRect(ImGui::GetWindowContentRegionMin(), ImGui::GetWindowContentRegionMax()),
 				ImGui::GetWindowDockID()))
 			{
-				//BASED_TRACE("CHECKING DROP");
 				if (auto _ = ImGui::AcceptDragDropPayload("entity"))
 				{
-					BASED_TRACE("DROP");
 					for (auto& e : Statics::GetSelectedEntities())
 					{
 						if (auto ent = e.lock())
 						{
-							BASED_TRACE("Setting parent to null");
 							Statics::EngineOperations.EditorSetEntityParent(nullptr, ent);
 						}
 					}
@@ -59,25 +59,61 @@ namespace editor::panels
 
 	void SceneHierarchy::DrawEntity(const std::shared_ptr<based::scene::Entity>& entity)
 	{
-		ImGuiTreeNodeFlags flags = 0;
-		if (entity->Children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
-		if (Statics::SelectedEntitiesContains(entity)) flags |= ImGuiTreeNodeFlags_Selected;
-
-		auto isOpen = ImGui::TreeNodeEx(entity->GetEntityName().c_str(), flags);
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDown(0) &&
-			!(based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT)
-				|| based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)))
+		if (!Statics::GetSelectedEntities().empty())
 		{
-			if (!Statics::SelectedEntitiesContains(entity))
-				Statics::SetSelectedEntities({ entity });
+			if (auto back = Statics::GetSelectedEntities().back().lock())
+			{
+				if (back == entity) mMultiSelectBegin = mCurrentIndex;
+			}
 		}
-		else if (ImGui::IsItemHovered() && ImGui::IsMouseDown(0)
-			&& based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL))
+
+		int32_t min = std::min(mMultiSelectBegin, mMultiSelectEnd);
+		int32_t max = std::max(mMultiSelectBegin, mMultiSelectEnd);
+		mCountMax = max - min;
+		if (mMultiSelectEnd != -1 && mCurrentIndex >= min 
+			&& mCurrentIndex <= max)
 		{
 			auto entities = Statics::GetSelectedEntities();
 			entities.emplace_back(entity);
 			if (!Statics::SelectedEntitiesContains(entities))
 				Statics::SetSelectedEntities(entities);
+			mCurrentCount++;
+
+			if (mCurrentCount >= mCountMax + 1)
+			{
+				mMultiSelectBegin = -1;
+				mMultiSelectEnd = -1;
+			}
+		}
+
+		ImGuiTreeNodeFlags flags = 0;
+		if (entity->Children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
+		if (Statics::SelectedEntitiesContains(entity)) flags |= ImGuiTreeNodeFlags_Selected;
+
+		auto isOpen = ImGui::TreeNodeEx(entity->GetEntityName().c_str(), flags);
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0) &&
+			!(based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT)
+				|| based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)))
+		{
+			Statics::SetSelectedEntities({ entity });
+		}
+		else if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0)
+			&& based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL))
+		{
+			auto entities = Statics::GetSelectedEntities();
+			entities.emplace_back(entity);
+			if (!Statics::SelectedEntitiesContains(entity))
+			{
+				Statics::SetSelectedEntities(entities);
+			}
+			else
+			{
+				Statics::RemoveEntityFromSelected(entity);
+			}
+		} else if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)
+			&& based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT))
+		{
+			mMultiSelectEnd = mCurrentIndex;
 		}
 
 		if (ImGui::BeginDragDropSource())
@@ -124,7 +160,11 @@ namespace editor::panels
 		{
 			if (auto child = c.lock())
 			{
-				if (isOpen) DrawEntity(child);
+				if (isOpen)
+				{
+					++mCurrentIndex;
+					DrawEntity(child);
+				}
 			}
 		}
 

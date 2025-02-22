@@ -29,6 +29,7 @@ namespace editor
 		static bool IsSceneDirty() { return mEditorSceneDirty; }
 
 		static void SetSelectedEntities(const std::vector<std::weak_ptr<based::scene::Entity>>& entities) { mSelectedEntities = entities; }
+		static bool RemoveEntityFromSelected(const std::shared_ptr<based::scene::Entity>& entity);
 		static void SetSceneDirty(bool dirty);
 
 		static bool SelectedEntitiesContains(std::shared_ptr<based::scene::Entity> entity);
