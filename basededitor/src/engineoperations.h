@@ -10,5 +10,8 @@ namespace editor
 			std::shared_ptr<based::scene::Entity> child);
 		bool EditorSetEntityParent_Undo(std::shared_ptr<based::scene::Entity> parent,
 			std::shared_ptr<based::scene::Entity> child);
+
+		bool EditorSetEntityName(std::shared_ptr<based::scene::Entity> entity, const std::string& name);
+		bool EditorSetEntityName_Undo(std::shared_ptr<based::scene::Entity> entity, const std::string& name);
 	};
 }

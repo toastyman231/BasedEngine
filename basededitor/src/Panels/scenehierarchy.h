@@ -1,6 +1,7 @@
 #pragma once
 #include "based/scene/scene.h"
 #include "panelbase.h"
+#include "external/imgui/imgui.h"
 
 namespace editor::panels
 {
@@ -26,6 +27,9 @@ namespace editor::panels
 		int mCurrentIndex = 0;
 		int mCurrentCount = 0;
 		int mCountMax = 0;
+
+		int32_t mRenameIndex = -1;
+
 		int32_t mMultiSelectBegin = -1;
 		int32_t mMultiSelectEnd = -1;
 	};

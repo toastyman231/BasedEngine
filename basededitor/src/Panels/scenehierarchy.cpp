@@ -19,6 +19,9 @@ namespace editor::panels
 			auto& registry = based::Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
 			auto view = registry.view<based::scene::EntityReference>();
 
+			if (ImGui::IsMouseClicked(0))
+				mRenameIndex = -1;
+
 			mCurrentIndex = 0;
 			mCurrentCount = 0;
 			for (auto e : view)
@@ -86,16 +89,38 @@ namespace editor::panels
 			}
 		}
 
-		ImGuiTreeNodeFlags flags = 0;
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
 		if (entity->Children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
 		if (Statics::SelectedEntitiesContains(entity)) flags |= ImGuiTreeNodeFlags_Selected;
 
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+			mRenameIndex = mCurrentIndex - 1;
+
+		if (mRenameIndex == mCurrentIndex)
+		{
+			std::string temp = entity->GetEntityName();
+			char* buffer = (char*)temp.c_str();
+			ImGuiInputTextFlags textFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll;
+			if (ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), textFlags))
+			{
+				Statics::EngineOperations.EditorSetEntityName(entity, std::string(buffer));
+				//entity->SetEntityName(std::string(buffer));
+				mRenameIndex = -1;
+			}
+			ImGui::SetKeyboardFocusHere(-1);
+			return;
+		}
+
 		auto isOpen = ImGui::TreeNodeEx(entity->GetEntityName().c_str(), flags);
+
+		//BASED_TRACE("Rename ID: {}, Current ID: {}", mRenameIndex, mCurrentIndex);
+
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0) &&
 			!(based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT)
 				|| based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)))
 		{
 			Statics::SetSelectedEntities({ entity });
+			mRenameIndex = -1;
 		}
 		else if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0)
 			&& based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL))
@@ -163,7 +188,9 @@ namespace editor::panels
 				if (isOpen)
 				{
 					++mCurrentIndex;
+					ImGui::PushID((uint32_t)child->GetEntityHandle());
 					DrawEntity(child);
+					ImGui::PopID();
 				}
 			}
 		}
