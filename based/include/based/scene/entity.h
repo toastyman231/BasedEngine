@@ -119,12 +119,16 @@ namespace based::scene
 		void SetParent(const std::shared_ptr<Entity>& parentEntity, bool keepRelativeTransform = true)
 		{
 			auto parent = Parent.lock();
-			if (parentEntity == nullptr && parent)
+			if (parent && parent != parentEntity)
 			{
 				parent->RemoveChild(shared_from_this());
+			}
+			if (parentEntity == nullptr)
+			{
+				Parent = std::weak_ptr<Entity>();
 				return;
 			}
-			if (parentEntity == nullptr && Parent.expired()) return;
+			if (parentEntity == parent || parentEntity->GetEntityHandle() == mEntity) return;
 
 			Parent = parentEntity;
 			parentEntity->Children.emplace_back(shared_from_this());
@@ -141,22 +145,18 @@ namespace based::scene
 
 		bool RemoveChild(const std::shared_ptr<Entity>& childEntity)
 		{
-			int i = 0;
-			for (const auto& child : Children)
-			{
-				if (auto c = child.lock())
+			auto it = std::find_if(Children.begin(), Children.end(),
+				[childEntity](std::weak_ptr<Entity> e)
 				{
-					if (c->mEntity == childEntity->mEntity)
-					{
-						Children.erase(Children.begin() + i);
-						c->Parent.reset();
-						return true;
-					}
-					i++;
-				}
-			}
+					return e.lock() == childEntity;
+				});
 
-			return false;
+			if (it != Children.end())
+			{
+				Children.erase(it);
+				return true;
+			}
+			else return false;
 		}
 
 		std::weak_ptr<Entity> Parent;

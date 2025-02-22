@@ -14,7 +14,7 @@ namespace editor::panels
 			{
 				if (ImGui::MenuItem("New Scene", nullptr)) Statics::NewScene();
 				if (ImGui::MenuItem("Open Scene", nullptr)) Statics::OpenScene();
-				if (ImGui::MenuItem("Save Scene", nullptr)) Statics::SaveScene();
+				if (ImGui::MenuItem("Save Scene", nullptr)) Statics::SaveScene("FORCE");
 				ImGui::EndMenu();
 			}
 

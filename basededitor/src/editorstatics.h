@@ -1,4 +1,6 @@
 #pragma once
+#include "engineoperations.h"
+#include "external/history/History.h"
 
 namespace based::scene
 {
@@ -20,15 +22,23 @@ namespace editor
 		static bool NewScene();
 		static bool OpenScene();
 		static bool LoadScene(const std::string& path);
-		static bool SaveScene();
+		static bool SaveScene(const std::string& path = "");
 
 		static std::shared_ptr<based::graphics::Camera> GetEditorCamera() { return mEditorCamera; }
 		static std::vector<std::weak_ptr<based::scene::Entity>> GetSelectedEntities() { return mSelectedEntities; }
+		static bool IsSceneDirty() { return mEditorSceneDirty; }
 
 		static void SetSelectedEntities(const std::vector<std::weak_ptr<based::scene::Entity>>& entities) { mSelectedEntities = entities; }
 		static void SetSceneDirty(bool dirty);
 
 		static bool SelectedEntitiesContains(std::shared_ptr<based::scene::Entity> entity);
+		static bool SelectedEntitiesContains(std::vector<std::weak_ptr<based::scene::Entity>> entities);
+
+		static HistoryContext& GetHistory() { return mHistoryContext; }
+
+		static std::string GetCurrentSceneSaveLocation() { return mSaveLocation; }
+
+		inline static EngineOperations EngineOperations;
 	private:
 		inline static std::shared_ptr<based::graphics::Camera> mEditorCamera;
 
@@ -37,7 +47,10 @@ namespace editor
 		inline static bool mEditorSceneDirty = false;
 
 		inline static std::string mProjectDirectory;
+		inline static std::string mSaveLocation;
 
 		inline static std::vector<std::weak_ptr<based::scene::Entity>> mSelectedEntities;
+
+		inline static HistoryContext mHistoryContext;
 	};
 }

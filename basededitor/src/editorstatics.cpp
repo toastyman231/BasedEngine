@@ -5,6 +5,7 @@
 #include "based/graphics/camera.h"
 #include "based/scene/entity.h"
 #include "external/tfd/tinyfiledialogs.h"
+#include "external/history/History.h"
 #include "Player/editorplayer.h"
 
 namespace editor
@@ -20,6 +21,8 @@ namespace editor
 		mEditorPlayer = based::scene::Entity::CreateEntity("EditorPlayer");
 		mEditorPlayer->AddComponent<based::scene::CameraComponent>(mEditorCamera);
 		mEditorPlayer->AddComponent<editor::EditorPlayer>();
+
+		History::SetContext(&mHistoryContext);
 	}
 
 	bool Statics::NewScene()
@@ -132,15 +135,17 @@ namespace editor
 		based::Engine::Instance().GetWindow().SetWindowTitle("Based Editor - " + scene->GetSceneName());
 
 		SetSceneDirty(false);
+		mSaveLocation = path;
 		return true;
 	}
 
-	bool Statics::SaveScene()
+	bool Statics::SaveScene(const std::string& path)
 	{
 		if (!mEditorSceneDirty) return false;
 
 		static char const* patterns = { "*.bscn" };
-		const char* saveLocation = tinyfd_saveFileDialog(
+		const char* saveLocation = (!path.empty() && path != "FORCE") ? path.c_str() :
+			tinyfd_saveFileDialog(
 			"Select Save Location",
 			"NewScene",
 			1,
@@ -165,6 +170,7 @@ namespace editor
 		auto serializer = based::scene::SceneSerializer(based::Engine::Instance().GetApp().GetCurrentScene());
 		serializer.Serialize(saveLocation);
 		SetSceneDirty(false);
+		mSaveLocation = std::string(saveLocation);
 		return true;
 	}
 
@@ -179,20 +185,27 @@ namespace editor
 			window.SetWindowTitle(window.GetWindowTitle() + "*");
 		} else
 		{
-			window.GetWindowTitle().pop_back();
+			auto starIndex = window.GetWindowTitle().find_last_of("*");
+			window.SetWindowTitle(window.GetWindowTitle().substr(0, starIndex));
 		}
 	}
 
 	bool Statics::SelectedEntitiesContains(std::shared_ptr<based::scene::Entity> entity)
 	{
-		for (auto& e : mSelectedEntities)
-		{
-			if (auto ent = e.lock())
+		return std::any_of(mSelectedEntities.begin(), mSelectedEntities.end(), 
+			[entity](const std::weak_ptr<based::scene::Entity>& e)
 			{
-				if (ent->GetEntityHandle() == entity->GetEntityHandle()) return true;
-			}
+				return entity == e.lock();
+			});
+	}
+
+	bool Statics::SelectedEntitiesContains(std::vector<std::weak_ptr<based::scene::Entity>> entities)
+	{
+		for (const auto& e : entities)
+		{
+			if (!SelectedEntitiesContains(e.lock())) return false;
 		}
 
-		return false;
+		return true;
 	}
 }

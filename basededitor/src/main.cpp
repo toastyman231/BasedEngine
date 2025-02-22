@@ -8,12 +8,13 @@
 #include "external/glm/gtc/type_ptr.hpp"
 
 #include "editorstatics.h"
-#include "../scenehierarchy.h"
+#include "Panels/scenehierarchy.h"
 #include "based/core/basedtime.h"
 #include "based/graphics/mesh.h"
 #include "based/input/mouse.h"
 #include "based/scene/entity.h"
 #include "external/imgui/imgui_internal.h"
+#include "external/tfd/tinyfiledialogs.h"
 #include "Panels/gameview.h"
 #include "Panels/menubar.h"
 #include "Player/editorplayer.h"
@@ -51,6 +52,9 @@ public:
 		
 		editor::Statics::InitializeEditorStatics();
 		std::string startupScenePath;
+
+		mMenuBar = new editor::panels::MenuBar("Menu");
+		mSceneHierarchy = new editor::panels::SceneHierarchy("Hierarchy");
 
 		if (std::filesystem::exists("Config/EditorConfig.yml"))
 		{
@@ -101,13 +105,31 @@ public:
 			gameCamera, "Scene View", editorSceneBuffer);
 		mGameView = new editor::panels::GameView(
 			editor::Statics::GetEditorCamera(), "Game View", Engine::Instance().GetWindow().GetFramebuffer());
-		mMenuBar = new editor::panels::MenuBar("Menu");
-		mSceneHierarchy = new editor::panels::SceneHierarchy("Hierarchy");
 	}
 
 	void Shutdown() override
 	{
 		App::Shutdown();
+
+		if (editor::Statics::IsSceneDirty())
+		{
+			auto shouldSave = tinyfd_messageBox(
+				"Save Current Scene?",
+				"You have unsaved changes, would you like to save the current scene?",
+				"yesno",
+				"question",
+				1
+			);
+
+			if (shouldSave == 1)
+			{
+				auto saveResult = editor::Statics::SaveScene();
+				if (!saveResult)
+				{
+					BASED_WARN("Scene did not save properly, aborting create new scene!");
+				}
+			}
+		}
 	}
 
 	void Update(float deltaTime) override
@@ -115,6 +137,24 @@ public:
 		App::Update(deltaTime);
 
 		editor::EditorPlayerUpdateSystem(GetCurrentScene()->GetRegistry(), *mSceneView);
+
+		if (input::Keyboard::Key(BASED_INPUT_KEY_LCTRL) 
+			&& input::Keyboard::KeyDown(BASED_INPUT_KEY_Z))
+		{
+			editor::Statics::GetHistory().Undo();
+		}
+
+		if (input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)
+			&& input::Keyboard::KeyDown(BASED_INPUT_KEY_Y))
+		{
+			editor::Statics::GetHistory().Redo();
+		}
+
+		if (input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)
+			&& input::Keyboard::KeyDown(BASED_INPUT_KEY_S))
+		{
+			editor::Statics::SaveScene(editor::Statics::GetCurrentSceneSaveLocation());
+		}
 	}
 
 	void Render() override

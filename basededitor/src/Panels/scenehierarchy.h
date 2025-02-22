@@ -1,6 +1,6 @@
 #pragma once
 #include "based/scene/scene.h"
-#include "src/Panels/panelbase.h"
+#include "panelbase.h"
 
 namespace editor::panels
 {
@@ -21,5 +21,6 @@ namespace editor::panels
 		void DrawEntity(const std::shared_ptr<based::scene::Entity>& entity);
 
 		int mEmptyPayload = 0;
+		bool mReparentCooldown = false;
 	};
 }
