@@ -1,6 +1,7 @@
 #include "based/pch.h"
 #include "gameview.h"
 
+#include "../editorstatics.h"
 #include "based/app.h"
 #include "based/engine.h"
 

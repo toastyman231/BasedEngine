@@ -75,6 +75,8 @@ namespace based
 		}
 		virtual void Shutdown() {}
 
+		virtual bool ValidateShutdown() { return true; }
+
 		virtual void Update(float deltaTime) {}
 		virtual void Render() {}
 		virtual void ImguiRender() {}

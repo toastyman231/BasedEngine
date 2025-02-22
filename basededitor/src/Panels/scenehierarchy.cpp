@@ -14,7 +14,7 @@ namespace editor::panels
 {
 	void SceneHierarchy::Render()
 	{
-		if (ImGui::Begin("Hierarchy"))
+		if (ImGui::Begin(mPanelTitle.c_str()))
 		{
 			auto& registry = based::Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
 			auto view = registry.view<based::scene::EntityReference>();

@@ -108,7 +108,8 @@ namespace based::core
 			switch (e.type)
 			{
 				case SDL_QUIT:
-					Engine::Instance().Quit();
+					if (Engine::Instance().GetApp().ValidateShutdown())
+						Engine::Instance().Quit();
 					break;
 				case SDL_CONTROLLERDEVICEADDED:
 					input::Joystick::OnJoystickConnected(e.cdevice);
@@ -117,9 +118,13 @@ namespace based::core
 					input::Joystick::OnJoystickDisconnected(e.cdevice);
 					break;
 			case SDL_WINDOWEVENT:
-					if (e.window.event == SDL_WINDOWEVENT_RESIZED)
+					switch (e.window.event)
 					{
-						HandleResize(e.window.data1, e.window.data2);
+						case SDL_WINDOWEVENT_RESIZED:
+							HandleResize(e.window.data1, e.window.data2);
+							break;
+						default:
+							break;
 					}
 					break;
 				default:

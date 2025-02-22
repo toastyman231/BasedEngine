@@ -106,4 +106,28 @@ namespace editor
 
 		return true;
 	}
+
+	bool EngineOperations::EditorSetEntityActive(std::shared_ptr<based::scene::Entity> entity, bool active)
+	{
+		HISTORY_PUSH(EditorSetEntityActive, entity, active);
+		bool isSceneDirty = Statics::IsSceneDirty();
+		HISTORY_SAVE(isSceneDirty);
+
+		entity->SetActive(active);
+
+		Statics::SetSceneDirty(true);
+		return true;
+	}
+
+	bool EngineOperations::EditorSetEntityActive_Undo(std::shared_ptr<based::scene::Entity> entity, bool active)
+	{
+		HISTORY_POP();
+
+		bool isSceneDirty;
+		HISTORY_LOAD(isSceneDirty);
+
+		entity->SetActive(!active);
+
+		return true;
+	}
 }

@@ -15,6 +15,7 @@
 #include "based/scene/entity.h"
 #include "external/imgui/imgui_internal.h"
 #include "external/tfd/tinyfiledialogs.h"
+#include "Panels/detailspanel.h"
 #include "Panels/gameview.h"
 #include "Panels/menubar.h"
 #include "Player/editorplayer.h"
@@ -28,6 +29,7 @@ public:
 	editor::panels::GameView* mGameView;
 	editor::panels::MenuBar* mMenuBar;
 	editor::panels::SceneHierarchy* mSceneHierarchy;
+	editor::panels::DetailsPanel* mDetailsPanel;
 
 	std::shared_ptr<scene::Entity> mTestCube;
 	glm::vec3 mCubePos;
@@ -105,31 +107,12 @@ public:
 			gameCamera, "Scene View", editorSceneBuffer);
 		mGameView = new editor::panels::GameView(
 			editor::Statics::GetEditorCamera(), "Game View", Engine::Instance().GetWindow().GetFramebuffer());
+		mDetailsPanel = new editor::panels::DetailsPanel("Details");
 	}
 
 	void Shutdown() override
 	{
 		App::Shutdown();
-
-		if (editor::Statics::IsSceneDirty())
-		{
-			auto shouldSave = tinyfd_messageBox(
-				"Save Current Scene?",
-				"You have unsaved changes, would you like to save the current scene?",
-				"yesno",
-				"question",
-				1
-			);
-
-			if (shouldSave == 1)
-			{
-				auto saveResult = editor::Statics::SaveScene();
-				if (!saveResult)
-				{
-					BASED_WARN("Scene did not save properly, aborting create new scene!");
-				}
-			}
-		}
 	}
 
 	void Update(float deltaTime) override
@@ -211,11 +194,37 @@ public:
 		}
 		ImGui::End();
 
-		if (ImGui::Begin("Details"))
+		mDetailsPanel->Render();
+	}
+
+	bool ValidateShutdown() override
+	{
+		if (editor::Statics::IsSceneDirty())
 		{
-			ImGui::Text("Sidebar!");
+			auto shouldSave = tinyfd_messageBox(
+				"Save Current Scene?",
+				"You have unsaved changes, would you like to save the current scene?",
+				"yesnocancel",
+				"question",
+				1
+			);
+
+			if (shouldSave == 0)
+			{
+				return false;
+			}
+
+			if (shouldSave == 1)
+			{
+				auto saveResult = editor::Statics::SaveScene();
+				if (!saveResult)
+				{
+					BASED_WARN("Scene did not save properly, aborting create new scene!");
+				}
+			}
 		}
-		ImGui::End();
+
+		return true;
 	}
 };
 
