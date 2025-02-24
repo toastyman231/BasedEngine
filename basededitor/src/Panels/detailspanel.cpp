@@ -53,13 +53,17 @@ namespace editor::panels
 			{
 				static auto madeAnyChange = false;
 				static auto locationSaved = false;
+				auto anyItemEdited = false;
 				ImGui::Indent(); ImGui::Spacing();
 				ImGui::Text("Position"); ImGui::SameLine();
 				if (ImGui::DragFloat3("##Position", glm::value_ptr(pos), 0.01f)) madeAnyChange = true;
+				if (ImGui::IsItemDeactivatedAfterEdit()) anyItemEdited = true;
 				ImGui::Text("Rotation"); ImGui::SameLine();
 				if (ImGui::DragFloat3("##Rotation", glm::value_ptr(rot), 0.01f)) madeAnyChange = true;
+				if (ImGui::IsItemDeactivatedAfterEdit()) anyItemEdited = true;
 				ImGui::Text("Scale"); ImGui::SameLine(0, 29);
 				if (ImGui::DragFloat3("##Scale", glm::value_ptr(scale), 0.01f)) madeAnyChange = true;
+				if (ImGui::IsItemDeactivatedAfterEdit()) anyItemEdited = true;
 
 				if (!locationSaved || entity->HasComponent<MovedDueToUndo>())
 				{
@@ -72,13 +76,10 @@ namespace editor::panels
 					entity->SetLocalTransform(pos, rot, scale);
 				else entity->SetTransform(pos, rot, scale);
 
-				if (madeAnyChange && ImGui::IsMouseReleased(0))
+				if (madeAnyChange && (ImGui::IsMouseReleased(0) || anyItemEdited))
 				{
 					Statics::EngineOperations.EditorSetEntityTransform(entity, 
-						{
-							pos - savedTransform.Position,
-							rot - savedTransform.Rotation,
-							scale - savedTransform.Scale },
+						{ pos, rot , scale },
 						savedTransform,
 						isChild);
 					locationSaved = false;

@@ -347,13 +347,9 @@ namespace editor
 		HISTORY_SAVE(isSceneDirty);
 
 		if (!local)
-			entity->SetTransform(savedTransform.Position + transform.Position,
-				savedTransform.Rotation + transform.Rotation,
-				savedTransform.Scale + transform.Scale);
+			entity->SetTransform(transform.Position, transform.Rotation, transform.Scale);
 		else
-			entity->SetLocalTransform(savedTransform.LocalPosition + transform.Position,
-				savedTransform.LocalRotation + transform.Rotation,
-				savedTransform.LocalScale + transform.Scale);
+			entity->SetLocalTransform(transform.Position, transform.Rotation, transform.Scale);
 
 		Statics::SetSceneDirty(true);
 
