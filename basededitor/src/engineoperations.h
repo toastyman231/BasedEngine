@@ -43,6 +43,11 @@ namespace editor
 			based::scene::Transform transform,
 			based::scene::Transform savedTransform, bool local);
 
+		bool EditorSetPointLightData(std::shared_ptr<based::scene::Entity> entity,
+			based::scene::PointLight oldLightData, based::scene::PointLight newLightData);
+		bool EditorSetPointLightData_Undo(std::shared_ptr<based::scene::Entity> entity,
+			based::scene::PointLight oldLightData, based::scene::PointLight newLightData);
+
 		template <typename Type, typename ...Args>
 		static void AddComponent(based::scene::Entity* entity, Args &&... args)
 		{

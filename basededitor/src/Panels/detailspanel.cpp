@@ -220,6 +220,7 @@ namespace editor::panels
 		{
 			ImGui::Indent(); ImGui::Spacing();
 			auto light = entity->GetComponent<scene::PointLight>();
+			static auto savedLightData = light;
 			if (!hasPointLight)
 			{
 				auto meta_type = entt::resolve(entt::type_hash<scene::PointLight>());
@@ -234,17 +235,29 @@ namespace editor::panels
 				}
 			}
 
+			static auto madeAnyChange = false;
+			static auto lightSaved = false;
+			auto anyItemEdited = false;
+
+			if (!lightSaved || entity->HasComponent<LightChangedDueToUndo>())
+			{
+				lightSaved = true;
+				savedLightData = light;
+				entity->RemoveComponent<LightChangedDueToUndo>();
+			}
+
 			ImGui::Text("Color"); ImGui::SameLine();
-			ImGui::ColorEdit3("##color", glm::value_ptr(light.color));
+			if (ImGui::ColorEdit3("##color", glm::value_ptr(light.color)))
+				madeAnyChange = true;
 
 			ImGui::Text("Constant"); ImGui::SameLine();
-			ImGui::DragFloat("##constant", &light.constant, 0.01f);
+			if (ImGui::DragFloat("##constant", &light.constant, 0.01f)) madeAnyChange = true;
 			ImGui::Text("Linear"); ImGui::SameLine();
-			ImGui::DragFloat("##linear", &light.linear, 0.01f);
+			if (ImGui::DragFloat("##linear", &light.linear, 0.01f)) madeAnyChange = true;
 			ImGui::Text("Quadratic"); ImGui::SameLine();
-			ImGui::DragFloat("##quadratic", &light.quadratic, 0.01f);
+			if (ImGui::DragFloat("##quadratic", &light.quadratic, 0.01f)) madeAnyChange = true;
 			ImGui::Text("Intensity"); ImGui::SameLine();
-			ImGui::DragFloat("##intensity", &light.intensity, 0.01f);
+			if (ImGui::DragFloat("##intensity", &light.intensity, 0.01f)) madeAnyChange = true;
 
 			auto& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
 			registry.patch<scene::PointLight>(entity->GetEntityHandle(),
@@ -256,6 +269,13 @@ namespace editor::panels
 					pl.constant = light.constant;
 					pl.color = light.color;
 				});
+
+			if (madeAnyChange && (ImGui::IsMouseReleased(0) || anyItemEdited))
+			{
+				Statics::EngineOperations.EditorSetPointLightData(entity, savedLightData, light);
+				madeAnyChange = false;
+				lightSaved = false;
+			}
 
 			ImGui::Unindent();
 		}

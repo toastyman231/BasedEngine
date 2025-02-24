@@ -376,4 +376,58 @@ namespace editor
 
 		return true;
 	}
+
+	bool EngineOperations::EditorSetPointLightData(std::shared_ptr<based::scene::Entity> entity,
+		based::scene::PointLight oldLightData, based::scene::PointLight newLightData)
+	{
+		HISTORY_PUSH(EditorSetPointLightData, entity, oldLightData, newLightData);
+
+		bool isSceneDirty = Statics::IsSceneDirty();
+		HISTORY_SAVE(isSceneDirty);
+
+		using namespace based;
+
+		auto& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+		registry.patch<scene::PointLight>(entity->GetEntityHandle(),
+			[newLightData](scene::PointLight& pl)
+			{
+				pl.intensity = newLightData.intensity;
+				pl.linear = newLightData.linear;
+				pl.quadratic = newLightData.quadratic;
+				pl.constant = newLightData.constant;
+				pl.color = newLightData.color;
+			});
+
+		Statics::SetSceneDirty(true);
+
+		return true;
+	}
+
+	bool EngineOperations::EditorSetPointLightData_Undo(std::shared_ptr<based::scene::Entity> entity,
+		based::scene::PointLight oldLightData, based::scene::PointLight newLightData)
+	{
+		HISTORY_POP();
+
+		bool isSceneDirty;
+		HISTORY_LOAD(isSceneDirty);
+
+		using namespace based;
+
+		auto& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+		registry.patch<scene::PointLight>(entity->GetEntityHandle(),
+			[oldLightData](scene::PointLight& pl)
+			{
+				pl.intensity = oldLightData.intensity;
+				pl.linear = oldLightData.linear;
+				pl.quadratic = oldLightData.quadratic;
+				pl.constant = oldLightData.constant;
+				pl.color = oldLightData.color;
+			});
+
+		entity->AddComponent<LightChangedDueToUndo>();
+
+		Statics::SetSceneDirty(isSceneDirty);
+
+		return true;
+	}
 }
