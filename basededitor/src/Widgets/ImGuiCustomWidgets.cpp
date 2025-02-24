@@ -58,11 +58,12 @@ namespace ImGui
                 {
                     const bool isSelected = selectedId == id;
                     if (Selectable(material->mMaterialName.c_str(), 
-                        isSelected, 0, ImVec2(200, 0)))
+                        isSelected, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(200, 0)))
                     {
                         BASED_TRACE("Selected {}", id);
                         selectedId = id;
                         returnPointer = material;
+                        if (IsItemHovered() && IsMouseDoubleClicked(0)) CloseCurrentPopup();
                     }
 
                     if (isSelected) SetItemDefaultFocus();
@@ -112,11 +113,12 @@ namespace ImGui
                 {
                     const bool isSelected = selectedId == id;
                     if (Selectable(ShortenMeshName(mesh->GetMeshSource()).c_str(),
-                        isSelected, 0, ImVec2(200, 0)))
+                        isSelected, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(200, 0)))
                     {
                         BASED_TRACE("Selected {}", id);
                         selectedId = id;
                         returnPointer = mesh;
+                        if (IsItemHovered() && IsMouseDoubleClicked(0)) CloseCurrentPopup();
                     }
 
                     if (isSelected) SetItemDefaultFocus();
