@@ -1,9 +1,10 @@
 #include "based/pch.h"
 #include "engineoperations.h"
 
+#include "EditorComponents.h"
+#include "external/history/History.h"
 #include "editorstatics.h"
 #include "based/graphics/mesh.h"
-#include "external/history/History.h"
 
 namespace editor
 {
@@ -129,11 +130,125 @@ namespace editor
 
 		entity->SetActive(!active);
 
+		Statics::SetSceneDirty(isSceneDirty);
+
+		return true;
+	}
+
+	bool EngineOperations::EditorAddComponent(const entt::meta_type type, std::shared_ptr<based::scene::Entity> entity)
+	{
+		HISTORY_PUSH(EditorAddComponent, type, entity);
+
+		bool isSceneDirty = Statics::IsSceneDirty();
+		HISTORY_SAVE(isSceneDirty);
+
+		using namespace entt::literals;
+
+		// TODO: Evil, no good, very bad way of doing this
+		if (auto func = type.func("AddComponent"_hs))
+		{
+			func.invoke({}, entity.get());
+
+			Statics::SetSceneDirty(true);
+		} else
+		{
+			BASED_ERROR("Add Component was invalid for type {}. Have you reflected it?", type.info().name());
+		}
+
+		return true;
+	}
+
+	bool EngineOperations::EditorAddComponent_Undo(const entt::meta_type type,
+		std::shared_ptr<based::scene::Entity> entity)
+	{
+		HISTORY_POP();
+
+		bool isSceneDirty;
+		HISTORY_LOAD(isSceneDirty);
+
+		using namespace entt::literals;
+
+		if (auto func = type.func("RemoveComponent"_hs))
+		{
+			func.invoke({}, entity.get());
+
+			Statics::SetSceneDirty(isSceneDirty);
+		}
+		else
+		{
+			BASED_ERROR("Remove Component was invalid for type {}. Have you reflected it?", type.info().name());
+		}
+
+		return true;
+	}
+
+	bool EngineOperations::EditorRemoveComponent(const entt::meta_type type, std::shared_ptr<based::scene::Entity> entity)
+	{
+		HISTORY_PUSH(EditorRemoveComponent, type, entity);
+
+		bool isSceneDirty = Statics::IsSceneDirty();
+		HISTORY_SAVE(isSceneDirty);
+
+		using namespace entt::literals;
+
+		if (auto func = type.func("RemoveComponent"_hs))
+		{
+			if (type.info().name().find("MeshRenderer") != std::string::npos)
+			{
+				auto oldMeshPtr = entity->GetComponent<based::scene::MeshRenderer>().mesh.lock();
+				HISTORY_SAVE(oldMeshPtr);
+			}
+
+			func.invoke({}, entity.get());
+
+			Statics::SetSceneDirty(true);
+		}
+		else
+		{
+			BASED_ERROR("Remove Component was invalid for type {}. Have you reflected it?", type.info().name());
+		}
+		return true;
+	}
+
+	bool EngineOperations::EditorRemoveComponent_Undo(const entt::meta_type type,
+		std::shared_ptr<based::scene::Entity> entity)
+	{
+		HISTORY_POP();
+
+		bool isSceneDirty;
+		HISTORY_LOAD(isSceneDirty);
+
+		using namespace entt::literals;
+
+		if (auto func = type.func("AddComponent"_hs))
+		{
+			func.invoke({}, entity.get());
+
+			if (type.info().name().find("MeshRenderer") != std::string::npos)
+			{
+				std::shared_ptr<based::graphics::Mesh> oldMeshPtr;
+				HISTORY_LOAD(oldMeshPtr);
+
+				auto& registry = based::Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+				registry.patch<based::scene::MeshRenderer>(entity->GetEntityHandle(),
+					[oldMeshPtr](based::scene::MeshRenderer& mr)
+					{
+						mr.mesh = oldMeshPtr;
+					});
+			}
+
+			Statics::SetSceneDirty(isSceneDirty);
+		}
+		else
+		{
+			BASED_ERROR("Add Component was invalid for type {}. Have you reflected it?", type.info().name());
+		}
+
 		return true;
 	}
 
 	bool EngineOperations::EditorSetMeshMaterial(std::shared_ptr<based::graphics::Mesh> mesh,
-		std::shared_ptr<based::graphics::Material> newMat)
+	                                             std::shared_ptr<based::graphics::Material> newMat)
 	{
 		HISTORY_PUSH(EditorSetMeshMaterial, mesh, newMat);
 
@@ -144,6 +259,8 @@ namespace editor
 		HISTORY_SAVE(oldMat);
 
 		mesh->material = newMat;
+
+		Statics::SetSceneDirty(true);
 
 		return true;
 	}
@@ -160,6 +277,8 @@ namespace editor
 		HISTORY_LOAD(oldMat);
 
 		mesh->material = oldMat;
+
+		Statics::SetSceneDirty(isSceneDirty);
 
 		return true;
 	}
@@ -185,6 +304,7 @@ namespace editor
 					mr.mesh = mesh;
 				});
 
+			Statics::SetSceneDirty(true);
 			return true;
 		}
 
@@ -210,9 +330,54 @@ namespace editor
 					mr.mesh = oldMesh;
 				});
 
+			Statics::SetSceneDirty(isSceneDirty);
 			return true;
 		}
 
 		return false;
+	}
+
+	bool EngineOperations::EditorSetEntityTransform(std::shared_ptr<based::scene::Entity> entity,
+	                                                based::scene::Transform transform, 
+													based::scene::Transform savedTransform, bool local)
+	{
+		HISTORY_PUSH(EditorSetEntityTransform, entity, transform, savedTransform, local);
+
+		bool isSceneDirty = Statics::IsSceneDirty();
+		HISTORY_SAVE(isSceneDirty);
+
+		if (!local)
+			entity->SetTransform(savedTransform.Position + transform.Position,
+				savedTransform.Rotation + transform.Rotation,
+				savedTransform.Scale + transform.Scale);
+		else
+			entity->SetLocalTransform(savedTransform.LocalPosition + transform.Position,
+				savedTransform.LocalRotation + transform.Rotation,
+				savedTransform.LocalScale + transform.Scale);
+
+		Statics::SetSceneDirty(true);
+
+		return true;
+	}
+
+	bool EngineOperations::EditorSetEntityTransform_Undo(std::shared_ptr<based::scene::Entity> entity,
+		based::scene::Transform transform,
+		based::scene::Transform savedTransform, bool local)
+	{
+		HISTORY_POP();
+
+		bool isSceneDirty;
+		HISTORY_LOAD(isSceneDirty);
+
+		if (!local)
+			entity->SetTransform(savedTransform.Position, savedTransform.Rotation, savedTransform.Scale);
+		else
+			entity->SetLocalTransform(savedTransform.LocalPosition, savedTransform.LocalRotation, savedTransform.LocalScale);
+
+		entity->AddComponent<MovedDueToUndo>();
+
+		Statics::SetSceneDirty(isSceneDirty);
+
+		return true;
 	}
 }

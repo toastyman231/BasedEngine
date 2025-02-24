@@ -20,6 +20,12 @@ namespace editor
 		bool EditorSetEntityActive(std::shared_ptr<based::scene::Entity> entity, bool active);
 		bool EditorSetEntityActive_Undo(std::shared_ptr<based::scene::Entity> entity, bool active);
 
+		bool EditorAddComponent(const entt::meta_type type, std::shared_ptr<based::scene::Entity> entity);
+		bool EditorAddComponent_Undo(const entt::meta_type type, std::shared_ptr<based::scene::Entity> entity);
+
+		bool EditorRemoveComponent(const entt::meta_type type, std::shared_ptr<based::scene::Entity> entity);
+		bool EditorRemoveComponent_Undo(const entt::meta_type type, std::shared_ptr<based::scene::Entity> entity);
+
 		bool EditorSetMeshMaterial(std::shared_ptr<based::graphics::Mesh> mesh,
 			std::shared_ptr<based::graphics::Material> newMat);
 		bool EditorSetMeshMaterial_Undo(std::shared_ptr<based::graphics::Mesh> mesh,
@@ -29,5 +35,23 @@ namespace editor
 			std::shared_ptr<based::graphics::Mesh> mesh);
 		bool EditorSetMeshRendererMesh_Undo(std::shared_ptr<based::scene::Entity> entity,
 			std::shared_ptr<based::graphics::Mesh> mesh);
+
+		bool EditorSetEntityTransform(std::shared_ptr<based::scene::Entity> entity,
+			based::scene::Transform transform,
+			based::scene::Transform savedTransform, bool local);
+		bool EditorSetEntityTransform_Undo(std::shared_ptr<based::scene::Entity> entity,
+			based::scene::Transform transform,
+			based::scene::Transform savedTransform, bool local);
+
+		template <typename Type, typename ...Args>
+		static void AddComponent(based::scene::Entity* entity, Args &&... args)
+		{
+			entity->AddComponent<Type>(args...);
+		}
+		template <typename Type>
+		static void RemoveComponent(based::scene::Entity* entity)
+		{
+			entity->RemoveComponent<Type>();
+		}
 	};
 }

@@ -86,9 +86,9 @@ namespace based::scene
 
 		for (const auto entity : modelView)
 		{
-			scene::Transform trans = mRegistry.get<Transform>(entity);
 			scene::ModelRenderer renderer = mRegistry.get<ModelRenderer>(entity);
 			scene::EntityReference ent = mRegistry.get<EntityReference>(entity);
+			scene::Transform trans = ent.entity.lock()->GetTransform();//mRegistry.get<Transform>(entity);
 
 			auto m = renderer.model.lock();
 			auto e = ent.entity.lock();
@@ -106,9 +106,11 @@ namespace based::scene
 
 		for (const auto entity : meshView)
 		{
-			scene::Transform trans = mRegistry.get<Transform>(entity);
+			//scene::Transform trans = mRegistry.get<Transform>(entity);
 			scene::MeshRenderer renderer = mRegistry.get<MeshRenderer>(entity);
 			scene::EntityReference ent = mRegistry.get<EntityReference>(entity);
+			scene::Transform trans = ent.entity.lock()->GetTransform();//mRegistry.get<Transform>(entity);
+
 			if (auto m = renderer.mesh.lock())
 			{
 				m->Draw(trans);

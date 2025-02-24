@@ -29,7 +29,7 @@ namespace based::core
 
 		auto& window = Engine::Instance().GetWindow();
 		ImGui_ImplSDL2_InitForOpenGL(window.GetSDLWindow(), window.GetGLContext());
-		ImGui_ImplOpenGL3_Init("#version 410");
+		ImGui_ImplOpenGL3_Init("#version 430");
 	}
 
 	void ImguiWindow::Shutdown()

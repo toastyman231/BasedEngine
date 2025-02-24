@@ -126,7 +126,7 @@ namespace based::scene
 	{
 		std::weak_ptr<graphics::Model> model;
 
-		ModelRenderer() = delete;
+		ModelRenderer() = default;
 		ModelRenderer(const std::shared_ptr<graphics::Model>& modelPtr) : model(modelPtr) {}
 		ModelRenderer(const ModelRenderer&) = default;
 	};
@@ -143,7 +143,7 @@ namespace based::scene
 	{
 		std::weak_ptr<graphics::Mesh> mesh;
 
-		MeshRenderer() = delete;
+		MeshRenderer() = default;
 		MeshRenderer(const std::shared_ptr<graphics::Mesh>& meshPtr) : mesh(meshPtr){}
 		MeshRenderer(const MeshRenderer&) = default;
 	};
@@ -158,6 +158,7 @@ namespace based::scene
 
 		glm::vec3 color;
 
+		PointLight() = default;
 		PointLight(float c, float l, float q, glm::vec3 col) : constant(c), linear(l), quadratic(q), intensity(0.5f), color(col) {}
 		PointLight(float c, float l, float q, float i, glm::vec3 col) : constant(c), linear(l), quadratic(q), intensity(i), color(col) {}
 	};

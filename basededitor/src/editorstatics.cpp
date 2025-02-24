@@ -7,6 +7,7 @@
 #include "external/tfd/tinyfiledialogs.h"
 #include "external/history/History.h"
 #include "Player/editorplayer.h"
+#include "external/entt/core/hashed_string.hpp"
 
 namespace editor
 {
@@ -20,9 +21,19 @@ namespace editor
 
 		mEditorPlayer = based::scene::Entity::CreateEntity("EditorPlayer");
 		mEditorPlayer->AddComponent<based::scene::CameraComponent>(mEditorCamera);
-		mEditorPlayer->AddComponent<editor::EditorPlayer>();
+		mEditorPlayer->AddComponent<EditorPlayer>();
 
 		History::SetContext(&mHistoryContext);
+
+		using namespace entt::literals;
+		entt::meta<based::scene::MeshRenderer>()
+			.type(entt::type_hash<based::scene::MeshRenderer>())
+			.func<&EngineOperations::AddComponent<based::scene::MeshRenderer>>("AddComponent"_hs)
+			.func<&EngineOperations::RemoveComponent<based::scene::MeshRenderer>>("RemoveComponent"_hs);
+		entt::meta<based::scene::PointLight>()
+			.type(entt::type_hash<based::scene::PointLight>())
+			.func<&EngineOperations::AddComponent<based::scene::PointLight>>("AddComponent"_hs)
+			.func<&EngineOperations::RemoveComponent<based::scene::PointLight>>("RemoveComponent"_hs);
 	}
 
 	bool Statics::NewScene()

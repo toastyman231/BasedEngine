@@ -95,7 +95,7 @@ namespace based::scene
 
 		void SetActive(bool active);
 
-		scene::Transform GetTransform() { return GetComponent<scene::Transform>(); }
+		scene::Transform GetTransform();
 		std::string& GetEntityName() { return mEntityName; }
 		void SetEntityName(const std::string& name) { mEntityName = name; }
 		virtual void SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);

@@ -66,6 +66,11 @@ namespace based::scene
 		else { RemoveComponent<scene::Enabled>(); OnDisable(); }
 	}
 
+	scene::Transform Entity::GetTransform()
+	{
+		return GetComponent<scene::Transform>();
+	}
+
 	void Entity::SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
 	{
 		PROFILE_FUNCTION();

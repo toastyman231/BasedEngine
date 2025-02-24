@@ -1,5 +1,6 @@
 #pragma once
 #include "panelbase.h"
+#include "based/scene/scene.h"
 
 namespace editor::panels
 {
@@ -15,5 +16,9 @@ namespace editor::panels
 		void Update(float deltaTime) override {}
 		void Render() override;
 		void Shutdown() override {}
+
+	private:
+		void DrawMeshRendererComponent(std::shared_ptr<based::scene::Entity> entity);
+		void DrawPointLightComponent(std::shared_ptr<based::scene::Entity> entity);
 	};
 }
