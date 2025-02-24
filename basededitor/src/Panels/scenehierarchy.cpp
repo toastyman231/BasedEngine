@@ -109,14 +109,20 @@ namespace editor::panels
 			ImGuiInputTextFlags textFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll;
 			if (ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), textFlags))
 			{
-				Statics::EngineOperations.EditorSetEntityName(entity, std::string(buffer));
-				mRenameIndex = -1;
+				auto name = std::string(buffer);
+				if (!name.empty())
+				{
+					Statics::EngineOperations.EditorSetEntityName(entity, name);
+					mRenameIndex = -1;
+				}
 			}
 			ImGui::SetKeyboardFocusHere(-1);
 			return;
 		}
 
+		if (!entity->IsActive()) ImGui::PushStyleColor(ImGuiCol_Text, { 0.5f, 0.5f, 0.5f, 1.f });
 		auto isOpen = ImGui::TreeNodeEx(entity->GetEntityName().c_str(), flags);
+		if (!entity->IsActive()) ImGui::PopStyleColor();
 
 		if (ImGui::IsItemHovered() && (ImGui::IsMouseClicked(0) || ImGui::IsMouseClicked(1)) &&
 			!(based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT)

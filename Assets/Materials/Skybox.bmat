@@ -7,6 +7,8 @@ FragmentIsEngineAsset: true
 UniformInts:
   material.diffuseMat.useSampler: 1
   material.diffuseMat.tex: 0
+  castShadows: 0
+  receiveShadows: 0
 UniformFloats:
   {}
 UniformFloat2s:

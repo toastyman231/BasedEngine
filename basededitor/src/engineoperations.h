@@ -19,5 +19,15 @@ namespace editor
 
 		bool EditorSetEntityActive(std::shared_ptr<based::scene::Entity> entity, bool active);
 		bool EditorSetEntityActive_Undo(std::shared_ptr<based::scene::Entity> entity, bool active);
+
+		bool EditorSetMeshMaterial(std::shared_ptr<based::graphics::Mesh> mesh,
+			std::shared_ptr<based::graphics::Material> newMat);
+		bool EditorSetMeshMaterial_Undo(std::shared_ptr<based::graphics::Mesh> mesh,
+			std::shared_ptr<based::graphics::Material> newMat);
+
+		bool EditorSetMeshRendererMesh(std::shared_ptr<based::scene::Entity> entity,
+			std::shared_ptr<based::graphics::Mesh> mesh);
+		bool EditorSetMeshRendererMesh_Undo(std::shared_ptr<based::scene::Entity> entity,
+			std::shared_ptr<based::graphics::Mesh> mesh);
 	};
 }

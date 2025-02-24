@@ -37,6 +37,7 @@ namespace based::graphics
 	{
 		auto asset = std::make_shared<InstancedMesh>(vertices, indices, textures);
 		assetLibrary.Load(name, asset);
+		asset->mMeshName = name;
 		return asset;
 	}
 
@@ -46,6 +47,7 @@ namespace based::graphics
 		auto asset = std::make_shared<InstancedMesh>(mesh->vertices, mesh->indices, mesh->textures);
 		asset->mMeshSource = mesh->mMeshSource;
 		assetLibrary.Load(name, asset);
+		asset->mMeshName = name;
 		return asset;
 	}
 
@@ -54,6 +56,7 @@ namespace based::graphics
 	{
 		auto asset = std::make_shared<Mesh>(va, mat);
 		assetLibrary.Load(name, asset);
+		asset->mMeshName = name;
 		return asset;
 	}
 
@@ -134,7 +137,8 @@ namespace based::graphics
 			loadedMesh->material = Material::LoadMaterialFromFile(
 				ASSET_PATH("Materials/Lit.bmat"),
 				Engine::Instance().GetApp().GetCurrentScene()->GetMaterialStorage());
-			assetLibrary.Load(scene->mName.C_Str(), loadedMesh);
+			assetLibrary.Load(scene->mMeshes[0]->mName.C_Str(), loadedMesh);
+			loadedMesh->mMeshName = scene->mMeshes[0]->mName.C_Str();
 			return loadedMesh;
 		}
 

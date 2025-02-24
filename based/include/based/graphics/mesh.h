@@ -110,6 +110,9 @@ namespace based::graphics
         bool IsFileMesh() const { return !mMeshSource.empty(); }
         std::string GetMeshSource() const { return mMeshSource; }
 
+        void SetMeshName(const std::string& name) { mMeshName = name; }
+        std::string GetMeshName() const { return mMeshName; }
+
         core::UUID GetUUID() const { return mUUID; }
     protected:
         //  render data
@@ -117,6 +120,7 @@ namespace based::graphics
         core::UUID mUUID;
         std::shared_ptr<VertexArray> mVA;
         std::string mMeshSource;
+        std::string mMeshName;
 
         void ProcessNode(aiNode* node, const aiScene* scene);
         void ProcessMesh(aiMesh* mesh, const aiScene* scene);

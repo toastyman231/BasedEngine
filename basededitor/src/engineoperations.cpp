@@ -2,6 +2,7 @@
 #include "engineoperations.h"
 
 #include "editorstatics.h"
+#include "based/graphics/mesh.h"
 #include "external/history/History.h"
 
 namespace editor
@@ -129,5 +130,89 @@ namespace editor
 		entity->SetActive(!active);
 
 		return true;
+	}
+
+	bool EngineOperations::EditorSetMeshMaterial(std::shared_ptr<based::graphics::Mesh> mesh,
+		std::shared_ptr<based::graphics::Material> newMat)
+	{
+		HISTORY_PUSH(EditorSetMeshMaterial, mesh, newMat);
+
+		bool isSceneDirty = Statics::IsSceneDirty();
+		HISTORY_SAVE(isSceneDirty);
+
+		auto oldMat = mesh->material;
+		HISTORY_SAVE(oldMat);
+
+		mesh->material = newMat;
+
+		return true;
+	}
+
+	bool EngineOperations::EditorSetMeshMaterial_Undo(std::shared_ptr<based::graphics::Mesh> mesh,
+		std::shared_ptr<based::graphics::Material> newMat)
+	{
+		HISTORY_POP();
+
+		bool isSceneDirty;
+		HISTORY_LOAD(isSceneDirty);
+
+		std::shared_ptr<based::graphics::Material> oldMat;
+		HISTORY_LOAD(oldMat);
+
+		mesh->material = oldMat;
+
+		return true;
+	}
+
+	bool EngineOperations::EditorSetMeshRendererMesh(std::shared_ptr<based::scene::Entity> entity,
+		std::shared_ptr<based::graphics::Mesh> mesh)
+	{
+		HISTORY_PUSH(EditorSetMeshRendererMesh, entity, mesh);
+
+		bool isSceneDirty = Statics::IsSceneDirty();
+		HISTORY_SAVE(isSceneDirty);
+
+		if (entity->HasComponent<based::scene::MeshRenderer>())
+		{
+			auto renderer = entity->GetComponent<based::scene::MeshRenderer>();
+
+			auto oldMesh = renderer.mesh.lock();
+			HISTORY_SAVE(oldMesh);
+
+			auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
+			scene->GetRegistry().patch<based::scene::MeshRenderer>(entity->GetEntityHandle(), 
+				[mesh](based::scene::MeshRenderer& mr){
+					mr.mesh = mesh;
+				});
+
+			return true;
+		}
+
+		return false;
+	}
+
+	bool EngineOperations::EditorSetMeshRendererMesh_Undo(std::shared_ptr<based::scene::Entity> entity,
+		std::shared_ptr<based::graphics::Mesh> mesh)
+	{
+		HISTORY_POP();
+
+		bool isSceneDirty;
+		HISTORY_LOAD(isSceneDirty);
+
+		std::shared_ptr<based::graphics::Mesh> oldMesh;
+		HISTORY_LOAD(oldMesh);
+
+		if (entity->HasComponent<based::scene::MeshRenderer>())
+		{
+			auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
+			scene->GetRegistry().patch<based::scene::MeshRenderer>(entity->GetEntityHandle(),
+				[oldMesh](based::scene::MeshRenderer& mr) {
+					mr.mesh = oldMesh;
+				});
+
+			return true;
+		}
+
+		return false;
 	}
 }
