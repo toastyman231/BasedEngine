@@ -220,6 +220,8 @@ namespace editor::panels
 					if (dir.is_directory())
 					{
 						mSelectedDirectories = { dir.path().string() };
+						mSelectedFiles = {};
+						return;
 					}
 				}
 
