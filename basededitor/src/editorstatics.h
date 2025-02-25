@@ -39,6 +39,8 @@ namespace editor
 
 		static std::string GetCurrentSceneSaveLocation() { return mSaveLocation; }
 
+		static std::string GetProjectDirectory() { return mProjectDirectory; }
+
 		inline static EngineOperations EngineOperations;
 	private:
 		inline static std::shared_ptr<based::graphics::Camera> mEditorCamera;
@@ -47,7 +49,7 @@ namespace editor
 
 		inline static bool mEditorSceneDirty = false;
 
-		inline static std::string mProjectDirectory;
+		inline static std::string mProjectDirectory = "../Sandbox/";
 		inline static std::string mSaveLocation;
 
 		inline static std::vector<std::weak_ptr<based::scene::Entity>> mSelectedEntities;

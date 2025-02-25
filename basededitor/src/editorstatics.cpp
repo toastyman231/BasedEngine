@@ -13,7 +13,8 @@ namespace editor
 {
 	void Statics::InitializeEditorStatics()
 	{
-		mProjectDirectory = based::Engine::Instance().GetArg(1);
+		if (auto dir = based::Engine::Instance().GetArg(1); dir != "")
+			mProjectDirectory = dir;
 
 		mEditorCamera = std::make_shared<based::graphics::Camera>();
 		mEditorCamera->SetProjection(based::graphics::Projection::PERSPECTIVE);

@@ -18,6 +18,9 @@ A simple 2D and 3D game engine based on tutorials by https://www.youtube.com/c/P
 - Jolt (Physics, https://github.com/jrouwe/JoltPhysics)
 - Tiny File Dialogs (File Loading and Saving in the editor, https://sourceforge.net/projects/tinyfiledialogs/)
 
+## Additional Resources
+- Icons from https://www.flaticon.com/free-icons/ and https://icons8.com/license
+
 ## My Additions
 The bulk of the engine design and implentation was done by Progrematic, if something is not listed below, it was probably done by him. You can find his original engine here: https://github.com/progrematic/hippo.
 
@@ -41,6 +44,7 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - Custom Render Pass support, including post processing
 - Scene serialization and loading
 - Easy support for physics using Jolt
+- Editor for scene authoring
 
 ## Planned Additions
 - ~~Physics~~ Complete!
@@ -51,7 +55,7 @@ The bulk of the engine design and implentation was done by Progrematic, if somet
 - ~~Scene Save/Load (Serialization)~~ Complete!
 - ~~3D Rendering capability with PBR materials~~ Complete!
 - GUI to make creating/loading projects easier
-- Editor for authoring scenes
+- Editor for authoring scenes - In Progress!
 - Make a game with it!
 
 ## Thoughts and Concerns

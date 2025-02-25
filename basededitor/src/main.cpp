@@ -16,6 +16,7 @@
 #include "external/imgui/imgui_internal.h"
 #include "external/tfd/tinyfiledialogs.h"
 #include "Panels/detailspanel.h"
+#include "Panels/filebrowser.h"
 #include "Panels/gameview.h"
 #include "Panels/menubar.h"
 #include "Player/editorplayer.h"
@@ -30,6 +31,7 @@ public:
 	editor::panels::MenuBar* mMenuBar;
 	editor::panels::SceneHierarchy* mSceneHierarchy;
 	editor::panels::DetailsPanel* mDetailsPanel;
+	editor::panels::FileBrowser* mFileBrowser;
 
 	std::shared_ptr<scene::Entity> mTestCube;
 	glm::vec3 mCubePos;
@@ -61,6 +63,7 @@ public:
 
 		mMenuBar = new editor::panels::MenuBar("Menu");
 		mSceneHierarchy = new editor::panels::SceneHierarchy("Hierarchy");
+		mFileBrowser = new editor::panels::FileBrowser("File Browser");
 
 		if (std::filesystem::exists("Config/EditorConfig.yml"))
 		{
@@ -172,12 +175,12 @@ public:
 			ImGuiID rightBarId = ImGui::DockBuilderSplitNode(dockspaceId,
 				ImGuiDir_Right, 0.25f, nullptr, &mainDockspaceId);
 			ImGuiID bottomBarId = ImGui::DockBuilderSplitNode(mainDockspaceId,
-				ImGuiDir_Down, 0.25f, nullptr, &mainDockspaceId);
+				ImGuiDir_Down, 0.35f, nullptr, &mainDockspaceId);
 			ImGuiID leftBarId = ImGui::DockBuilderSplitNode(mainDockspaceId,
 				ImGuiDir_Left, 0.25f, nullptr, &mainDockspaceId);
 
 			ImGui::DockBuilderDockWindow("Details", rightBarId);
-			ImGui::DockBuilderDockWindow("Files", bottomBarId);
+			ImGui::DockBuilderDockWindow("File Browser", bottomBarId);
 			ImGui::DockBuilderDockWindow("Hierarchy", leftBarId);
 			ImGui::DockBuilderDockWindow("Game View", mainDockspaceId);
 			ImGui::DockBuilderDockWindow("Scene View", mainDockspaceId);
@@ -191,13 +194,7 @@ public:
 		mSceneView->Render();
 		mGameView->Render();
 		mSceneHierarchy->Render();
-
-		if (ImGui::Begin("Files"))
-		{
-			ImGui::Text("File browser!");
-		}
-		ImGui::End();
-
+		mFileBrowser->Render();
 		mDetailsPanel->Render();
 	}
 

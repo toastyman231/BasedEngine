@@ -5,8 +5,6 @@
 #include "../editorstatics.h"
 #include "../Widgets/ImGuiCustomWidgets.h"
 #include "based/graphics/mesh.h"
-#include "based/input/joystick.h"
-#include "based/input/keyboard.h"
 
 namespace editor::panels
 {
