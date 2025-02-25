@@ -12,30 +12,35 @@
 
 namespace based::graphics
 {
-	std::shared_ptr<Mesh> Mesh::CreateMesh(const std::vector<Vertex>& vertices,
-		const std::vector<unsigned int>& indices, const std::vector<Texture>& textures,
-		core::AssetLibrary<Mesh>& assetLibrary, const std::string& name)
+	std::shared_ptr<Mesh> Mesh::CreateMesh(
+		const std::vector<Vertex>& vertices,
+		const std::vector<unsigned int>& indices, 
+		core::AssetLibrary<Mesh>& assetLibrary, 
+		const std::string& name)
 	{
-		auto asset = std::make_shared<Mesh>(vertices, indices, textures);
+		auto asset = std::make_shared<Mesh>(vertices, indices);
 		assetLibrary.Load(name, asset);
 		return asset;
 	}
 
-	std::shared_ptr<Mesh> Mesh::CreateMesh(const std::vector<Vertex>& vertices,
-		const std::vector<unsigned int>& indices, const std::vector<Texture>& textures,
-		core::AssetLibrary<Mesh>& assetLibrary, core::UUID uuid, const std::string& name)
+	std::shared_ptr<Mesh> Mesh::CreateMesh(
+		const std::vector<Vertex>& vertices,
+		const std::vector<unsigned int>& indices, 
+		core::AssetLibrary<Mesh>& assetLibrary, 
+		core::UUID uuid, const std::string& name)
 	{
-		auto asset = std::make_shared<Mesh>(vertices, indices, textures);
+		auto asset = std::make_shared<Mesh>(vertices, indices);
 		asset->mUUID = uuid;
 		assetLibrary.Load(name, asset);
 		return asset;
 	}
 
-	std::shared_ptr<InstancedMesh> Mesh::CreateInstancedMesh(const std::vector<Vertex>& vertices,
-	                                                         const std::vector<unsigned int>& indices, const std::vector<Texture>& textures,
-	                                                         core::AssetLibrary<Mesh>& assetLibrary, const std::string& name)
+	std::shared_ptr<InstancedMesh> Mesh::CreateInstancedMesh(
+		const std::vector<Vertex>& vertices,
+		const std::vector<unsigned int>& indices, 
+		core::AssetLibrary<Mesh>& assetLibrary, const std::string& name)
 	{
-		auto asset = std::make_shared<InstancedMesh>(vertices, indices, textures);
+		auto asset = std::make_shared<InstancedMesh>(vertices, indices);
 		assetLibrary.Load(name, asset);
 		asset->mMeshName = name;
 		return asset;
@@ -44,17 +49,18 @@ namespace based::graphics
 	std::shared_ptr<InstancedMesh> Mesh::CreateInstancedMesh(const std::shared_ptr<Mesh>& mesh,
 		core::AssetLibrary<Mesh>& assetLibrary, const std::string& name)
 	{
-		auto asset = std::make_shared<InstancedMesh>(mesh->vertices, mesh->indices, mesh->textures);
+		auto asset = std::make_shared<InstancedMesh>(mesh->vertices, mesh->indices);
 		asset->mMeshSource = mesh->mMeshSource;
 		assetLibrary.Load(name, asset);
 		asset->mMeshName = name;
 		return asset;
 	}
 
-	std::shared_ptr<Mesh> Mesh::CreateMesh(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<Material>& mat,
-	                                       core::AssetLibrary<Mesh>& assetLibrary, const std::string& name)
+	std::shared_ptr<Mesh> Mesh::CreateMesh( const std::shared_ptr<VertexArray>& va,
+											core::AssetLibrary<Mesh>& assetLibrary, 
+											const std::string& name)
 	{
-		auto asset = std::make_shared<Mesh>(va, mat);
+		auto asset = std::make_shared<Mesh>(va);
 		assetLibrary.Load(name, asset);
 		asset->mMeshName = name;
 		return asset;
@@ -82,7 +88,6 @@ namespace based::graphics
 		{
 			std::vector<Vertex> vertices;
 			std::vector<unsigned int> indices;
-			std::vector<Texture> textures;
 
 			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			{
@@ -132,11 +137,8 @@ namespace based::graphics
 					indices.emplace_back(face.mIndices[j]);
 			}
 
-			auto loadedMesh = std::make_shared<Mesh>(vertices, indices, textures, uuid);
+			auto loadedMesh = std::make_shared<Mesh>(vertices, indices, uuid);
 			loadedMesh->mMeshSource = filepath;
-			loadedMesh->material = Material::LoadMaterialFromFile(
-				ASSET_PATH("Materials/Lit.bmat"),
-				Engine::Instance().GetApp().GetCurrentScene()->GetMaterialStorage());
 			assetLibrary.Load(scene->mMeshes[0]->mName.C_Str(), loadedMesh);
 			loadedMesh->mMeshName = scene->mMeshes[0]->mName.C_Str();
 			return loadedMesh;
@@ -146,32 +148,29 @@ namespace based::graphics
 		return nullptr;
 	}
 
-	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned>& indices, const std::vector<Texture>& textures)
+	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 	{
 		this->vertices = vertices;
 		this->indices = indices;
-		this->textures = textures;
 		mUUID = core::UUID();
 
 		SetupMesh();
 	}
 
-	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices,
-		const std::vector<Texture>& textures, core::UUID uuid)
-			: Mesh(vertices, indices, textures)
+	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, core::UUID uuid)
+			: Mesh(vertices, indices)
 	{
 		mUUID = uuid;
 	}
 
-	Mesh::Mesh(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<Material>& mat)
+	Mesh::Mesh(const std::shared_ptr<VertexArray>& va)
 	{
 		mVA = va;
-		material = mat;
 		mUUID = core::UUID();
 	}
 
-	Mesh::Mesh(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<Material>& mat, core::UUID uuid)
-		: Mesh(va, mat)
+	Mesh::Mesh(const std::shared_ptr<VertexArray>& va, core::UUID uuid)
+		: Mesh(va)
 	{
 		mUUID = uuid;
 	}
@@ -245,69 +244,6 @@ namespace based::graphics
 			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model));
 		}
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
-	}
-
-	void Mesh::Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
-	{
-		if (material)
-		{
-			Draw(position, rotation, scale, material);
-		} else
-		{
-			BASED_ERROR("ERROR: Trying to render mesh with no material set!");
-			// TODO: Replace this with default material
-		}
-	}
-
-	void Mesh::Draw(scene::Transform transform)
-	{
-		if (material)
-		{
-			Draw(transform, material);
-		}
-		else
-		{
-			BASED_ERROR("ERROR: Trying to render mesh with no material set!");
-			// TODO: Replace this with default material
-		}
-	}
-
-	void Mesh::ProcessNode(aiNode* node, const aiScene* scene)
-	{
-		PROFILE_FUNCTION();
-
-		if (node->mNumMeshes > 0)
-		{
-			aiMesh* mesh = scene->mMeshes[node->mMeshes[0]];
-			ProcessMesh(mesh, scene);
-			return;
-		}
-
-		// then do the same for each of its children
-		for (unsigned int i = 0; i < node->mNumChildren; i++)
-		{
-			ProcessNode(node->mChildren[i], scene);
-		}
-	}
-
-	void Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
-	{
-		PROFILE_FUNCTION();
-		
-
-		// process material
-		/*if (mesh->mMaterialIndex >= 0)
-		{
-			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-
-			std::shared_ptr<Material> meshMaterial = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-
-			mMaterials.insert(mMaterials.end(), meshMaterial);
-		}
-
-		ExtractBoneWeightForVertices(vertices, mesh, scene);*/
-
-		//meshes.emplace_back(std::make_shared<Mesh>(vertices, indices, textures));
 	}
 
 	void Mesh::SetupMesh(bool upload)

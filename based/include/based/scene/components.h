@@ -16,6 +16,7 @@
 #include <Jolt/Physics/Body/MotionType.h>
 #include <Jolt/Physics/EActivation.h>
 
+//#include "based/app.h"
 #include "based/math/basedmath.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 
@@ -142,9 +143,22 @@ namespace based::scene
 	struct MeshRenderer
 	{
 		std::weak_ptr<graphics::Mesh> mesh;
+		std::weak_ptr<graphics::Material> material;
 
-		MeshRenderer() = default;
-		MeshRenderer(const std::shared_ptr<graphics::Mesh>& meshPtr) : mesh(meshPtr){}
+		MeshRenderer();
+
+		MeshRenderer(const std::shared_ptr<graphics::Mesh>& meshPtr) : MeshRenderer()
+		{
+			mesh = meshPtr;
+		}
+
+		MeshRenderer(const std::shared_ptr<graphics::Mesh>& meshPtr, 
+			const std::shared_ptr<graphics::Material>& mat)
+		{
+			mesh = meshPtr;
+			material = mat;
+		}
+
 		MeshRenderer(const MeshRenderer&) = default;
 	};
 

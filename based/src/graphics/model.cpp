@@ -154,7 +154,7 @@ namespace based::graphics
 
 		ExtractBoneWeightForVertices(vertices, mesh, scene);
 
-		meshes.emplace_back(std::make_shared<Mesh>(vertices, indices, textures));
+		meshes.emplace_back(std::make_shared<Mesh>(vertices, indices));
 	}
 
 	std::shared_ptr<Material> Model::LoadMaterialTextures(aiMaterial* mat, int type, std::string typeName)

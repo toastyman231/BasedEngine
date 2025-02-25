@@ -106,14 +106,16 @@ namespace based::scene
 
 		for (const auto entity : meshView)
 		{
-			//scene::Transform trans = mRegistry.get<Transform>(entity);
+			scene::Transform trans = mRegistry.get<Transform>(entity);
 			scene::MeshRenderer renderer = mRegistry.get<MeshRenderer>(entity);
 			scene::EntityReference ent = mRegistry.get<EntityReference>(entity);
-			scene::Transform trans = ent.entity.lock()->GetTransform();//mRegistry.get<Transform>(entity);
 
-			if (auto m = renderer.mesh.lock())
+			auto m = renderer.mesh.lock();
+			auto material = renderer.material.lock();
+
+			if (m && material)
 			{
-				m->Draw(trans);
+				m->Draw(trans, material);
 			} else
 			{
 				BASED_WARN("Could not lock mesh for entity {}", ent.entity.lock()->GetEntityName());

@@ -171,7 +171,7 @@ namespace editor::panels
 			}
 
 			auto mesh = renderer.mesh.lock();
-			auto material = mesh ? mesh->material : nullptr;
+			auto material = renderer.material.lock();
 
 			if (auto pickedMesh =
 				ImGui::ObjectPicker<based::graphics::Mesh>("Mesh", mesh))
@@ -185,25 +185,28 @@ namespace editor::panels
 				if (auto pickedMat =
 					ImGui::ObjectPicker<based::graphics::Material>("Material", material))
 				{
-					Statics::EngineOperations.EditorSetMeshMaterial(mesh, pickedMat);
+					Statics::EngineOperations.EditorSetMeshMaterial(entity, pickedMat);
 				}
 				ImGui::Spacing();
 
-				if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen))
+				if (material)
 				{
-					ImGui::Indent();
-					bool castShadows = mesh->material->GetUniformValue("castShadows", 1);
-					if (ImGui::Checkbox("Cast Shadows", &castShadows))
+					if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen))
 					{
-						mesh->material->SetUniformValue("castShadows", (int)castShadows);
-					}
+						ImGui::Indent();
+						bool castShadows = material->GetUniformValue("castShadows", 1);
+						if (ImGui::Checkbox("Cast Shadows", &castShadows))
+						{
+							material->SetUniformValue("castShadows", (int)castShadows);
+						}
 
-					bool receiveShadows = mesh->material->GetUniformValue("receiveShadows", 1);
-					if (ImGui::Checkbox("Receive Shadows", &receiveShadows))
-					{
-						mesh->material->SetUniformValue("receiveShadows", (int)receiveShadows);
+						bool receiveShadows = material->GetUniformValue("receiveShadows", 1);
+						if (ImGui::Checkbox("Receive Shadows", &receiveShadows))
+						{
+							material->SetUniformValue("receiveShadows", (int)receiveShadows);
+						}
+						ImGui::Unindent();
 					}
-					ImGui::Unindent();
 				}
 			}
 

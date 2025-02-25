@@ -48,7 +48,7 @@ Entities:
         Path: Meshes/cube.obj
         IsEngineAsset: true
       Material:
-        ID: 3560332728017973357
+        ID: 3560342728017973358
         Path: Materials/Lit.bmat
         IsEngineAsset: true
     Enabled: true

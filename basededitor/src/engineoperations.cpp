@@ -247,28 +247,49 @@ namespace editor
 		return true;
 	}
 
-	bool EngineOperations::EditorSetMeshMaterial(std::shared_ptr<based::graphics::Mesh> mesh,
+	bool EngineOperations::EditorSetMeshMaterial(std::shared_ptr<based::scene::Entity> entity,
 	                                             std::shared_ptr<based::graphics::Material> newMat)
 	{
-		HISTORY_PUSH(EditorSetMeshMaterial, mesh, newMat);
+		HISTORY_PUSH(EditorSetMeshMaterial, entity, newMat);
+
+		if (!entity->HasComponent<based::scene::MeshRenderer>()) return false;
+
+		auto mr = entity->GetComponent<based::scene::MeshRenderer>();
+		auto mesh = mr.mesh.lock();
+		auto material = mr.material.lock();
+
+		if (!(mesh && material)) return false;
 
 		bool isSceneDirty = Statics::IsSceneDirty();
 		HISTORY_SAVE(isSceneDirty);
 
-		auto oldMat = mesh->material;
+		auto oldMat = material;
 		HISTORY_SAVE(oldMat);
 
-		mesh->material = newMat;
+		auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
+		scene->GetRegistry().patch<based::scene::MeshRenderer>(entity->GetEntityHandle(),
+			[newMat](based::scene::MeshRenderer& m)
+			{
+				m.material = newMat;
+			});
 
 		Statics::SetSceneDirty(true);
 
 		return true;
 	}
 
-	bool EngineOperations::EditorSetMeshMaterial_Undo(std::shared_ptr<based::graphics::Mesh> mesh,
+	bool EngineOperations::EditorSetMeshMaterial_Undo(std::shared_ptr<based::scene::Entity> entity,
 		std::shared_ptr<based::graphics::Material> newMat)
 	{
 		HISTORY_POP();
+
+		if (!entity->HasComponent<based::scene::MeshRenderer>()) return false;
+
+		auto mr = entity->GetComponent<based::scene::MeshRenderer>();
+		auto mesh = mr.mesh.lock();
+		auto material = mr.material.lock();
+
+		if (!(mesh && material)) return false;
 
 		bool isSceneDirty;
 		HISTORY_LOAD(isSceneDirty);
@@ -276,7 +297,12 @@ namespace editor
 		std::shared_ptr<based::graphics::Material> oldMat;
 		HISTORY_LOAD(oldMat);
 
-		mesh->material = oldMat;
+		auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
+		scene->GetRegistry().patch<based::scene::MeshRenderer>(entity->GetEntityHandle(),
+			[oldMat](based::scene::MeshRenderer& m)
+			{
+				m.material = oldMat;
+			});
 
 		Statics::SetSceneDirty(isSceneDirty);
 

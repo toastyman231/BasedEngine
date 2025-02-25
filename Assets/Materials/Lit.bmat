@@ -1,4 +1,4 @@
-Material: Unlit
+Material: Lit
 ID: 3560342728017973358
 VertexSource: Shaders/pbr_lit.vert
 VertexIsEngineAsset: true

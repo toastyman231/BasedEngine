@@ -160,7 +160,6 @@ namespace based::scene
 
 		auto id = data["ID"] ? data["ID"].as<uint64_t>() : core::UUID();
 		auto material = std::make_shared<graphics::Material>(shader, id, materialName);
-		if (mScene) mScene->GetMaterialStorage().Load(materialName, material, true);
 
 		if (auto uniformInts = data["UniformInts"])
 		{
@@ -242,7 +241,7 @@ namespace based::scene
 			}
 		}
 
-		if (mScene) mScene->GetMaterialStorage().Load(materialName, material, true);
+		if (mScene) mScene->GetMaterialStorage().Load(materialName, material);
 		return material;
 	}
 
@@ -552,8 +551,10 @@ namespace based::scene
 		{
 			auto meshRenderer = entity->GetComponent<MeshRenderer>();
 			auto mesh = meshRenderer.mesh;
+			auto mat = meshRenderer.material;
 
-			if (auto m = mesh.lock())
+			if (auto m = mesh.lock(); 
+				auto material = mat.lock())
 			{
 				out << YAML::Key << "MeshRenderer" << YAML::BeginMap; // MeshRenderer
 
@@ -596,22 +597,22 @@ namespace based::scene
 				out << YAML::Key << "Material" << YAML::BeginMap; // Material
 
 				std::string shortPath;
-				if (!m->material->IsFileMaterial() || m->material->GetMaterialSource().empty())
+				if (!material->IsFileMaterial() || material->GetMaterialSource().empty())
 				{
 					SceneSerializer matSerializer(mScene);
 					YAML::Emitter matOut;
-					matSerializer.SerializeMaterial(matOut, m->material);
+					matSerializer.SerializeMaterial(matOut, material);
 
 					CreateDirectoryIfNotExists("Assets/GENERATED/Materials");
 
 					shortPath = std::string("Assets/GENERATED/Materials/")
-						.append(m->material->mMaterialName)
+						.append(material->mMaterialName)
 						.append(".bmat");
 					std::ofstream fout(shortPath);
 					fout << matOut.c_str();
 				}
-				else shortPath = m->material->GetMaterialSource();
-				out << YAML::Key << "ID" << YAML::Value << m->material->GetUUID();
+				else shortPath = material->GetMaterialSource();
+				out << YAML::Key << "ID" << YAML::Value << material->GetUUID();
 				auto shortenedPath = ShortenPath(shortPath);
 				out << YAML::Key << "Path" << YAML::Value << shortenedPath;
 				out << YAML::Key << "IsEngineAsset" << YAML::Value << (shortenedPath != shortPath);
@@ -897,6 +898,11 @@ namespace based::scene
 				auto id = materialId.as<uint64_t>();
 				if (mLoadedMaterials.find(id) != mLoadedMaterials.end())
 					material = mLoadedMaterials[id];
+				else if (auto m = SearchForMaterialByUUID(id))
+				{
+					mLoadedMaterials[m->GetUUID()] = m;
+					material = m;
+				}
 				else
 				{
 					auto materialPath = meshRenderer["Material"]["Path"].as<std::string>();
@@ -941,7 +947,7 @@ namespace based::scene
 					indices.resize(size);
 					ifs.read(reinterpret_cast<char*>(indices.data()), size * sizeof(unsigned int)); // Read vertices
 
-					mesh = graphics::Mesh::CreateMesh(vertices, indices, {}, 
+					mesh = graphics::Mesh::CreateMesh(vertices, indices, 
 						mScene->GetMeshStorage(), meshId, name);
 				} else
 				{
@@ -954,13 +960,11 @@ namespace based::scene
 
 				mLoadedMeshes[meshId] = mesh;
 			}
-			mesh->material = material;
 
 			std::shared_ptr<graphics::InstancedMesh> instanceMesh;
 			if (auto& instances = meshRenderer["Instances"])
 			{
 				instanceMesh = graphics::Mesh::CreateInstancedMesh(mesh, mScene->GetMeshStorage());
-				instanceMesh->material = material;
 				std::ifstream ifs(mProjectDirectory + instances["Path"].as<std::string>(), std::ios::binary);
 				auto size = instances["Size"].as<int>();
 				std::vector<Transform> transforms(size);
@@ -968,8 +972,8 @@ namespace based::scene
 				instanceMesh->AddInstances(transforms);
 			}
 
-			if (instanceMesh) deserializedEntity->AddComponent<MeshRenderer>(instanceMesh);
-			else deserializedEntity->AddComponent<MeshRenderer>(mesh);
+			if (instanceMesh) deserializedEntity->AddComponent<MeshRenderer>(instanceMesh, material);
+			else deserializedEntity->AddComponent<MeshRenderer>(mesh, material);
 		}
 
 		if (auto& modelRenderer = entity["ModelRenderer"])
@@ -1286,6 +1290,22 @@ namespace based::scene
 
 		mScene->GetEntityStorage().Load(name, deserializedEntity);
 		mLoadedEntities[deserializedEntity->GetUUID()] = deserializedEntity;
+	}
+
+	std::shared_ptr<graphics::Material> SceneSerializer::SearchForMaterialByUUID(core::UUID id)
+	{
+		if (!mScene) return nullptr;
+
+		auto materials = mScene->GetMaterialStorage().GetAll();
+		auto key = std::find_if(materials.begin(), materials.end(), 
+			[id](const std::pair<std::string, std::shared_ptr<graphics::Material>>& pair)
+			{
+				return pair.second->GetUUID() == id;
+			});
+
+		if (key == materials.end()) return nullptr;
+
+		return key->second;
 	}
 
 	void SceneSerializer::Serialize(const std::string& filepath)

@@ -61,6 +61,7 @@ namespace based::scene
 		bool CreateDirectoryIfNotExists(const std::string& filepath);
 		int CountFilesInDir(const std::string& filepath);
 		void DeserializeEntity(YAML::detail::iterator_value entity);
+		std::shared_ptr<graphics::Material> SearchForMaterialByUUID(core::UUID id);
 
 		struct TransitionStorageData
 		{

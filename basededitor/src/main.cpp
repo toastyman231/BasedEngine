@@ -55,6 +55,10 @@ public:
 		editor::Statics::InitializeEditorStatics();
 		std::string startupScenePath;
 
+		graphics::Material::LoadMaterialFromFile(
+			ASSET_PATH("Materials/Lit.bmat"), 
+			GetCurrentScene()->GetMaterialStorage());
+
 		mMenuBar = new editor::panels::MenuBar("Menu");
 		mSceneHierarchy = new editor::panels::SceneHierarchy("Hierarchy");
 

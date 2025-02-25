@@ -117,7 +117,10 @@ namespace based::core
 				case SDL_CONTROLLERDEVICEREMOVED:
 					input::Joystick::OnJoystickDisconnected(e.cdevice);
 					break;
-			case SDL_WINDOWEVENT:
+				case SDL_DROPFILE:
+					BASED_TRACE("File Dropped: {}", e.drop.file);
+					break;
+				case SDL_WINDOWEVENT:
 					switch (e.window.event)
 					{
 						case SDL_WINDOWEVENT_RESIZED:
