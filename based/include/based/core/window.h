@@ -7,6 +7,7 @@
 #include <external/glm/vec2.hpp>
 #include <external/glm/vec3.hpp>
 
+struct SDL_Cursor;
 struct SDL_Window;
 using SDL_GLContext = void*;
 namespace based::graphics
@@ -46,6 +47,8 @@ namespace based::core
 
 		void PumpEvents();
 
+		void SetCursor(const std::string& cursorName);
+
 		glm::ivec2 GetSize();
 		glm::vec2 GetFramebufferSize() const { return mFramebufferSize; }
 		std::string GetWindowTitle() const { return mWindowProperties.title; }
@@ -80,5 +83,13 @@ namespace based::core
 		glm::vec2 mFramebufferSize;
 		std::shared_ptr<graphics::VertexArray> mScreenVA;
 		std::shared_ptr<graphics::Shader> mScreenShader;
+
+		SDL_Cursor* cursor_default = nullptr;
+		SDL_Cursor* cursor_move = nullptr;
+		SDL_Cursor* cursor_pointer = nullptr;
+		SDL_Cursor* cursor_resize = nullptr;
+		SDL_Cursor* cursor_cross = nullptr;
+		SDL_Cursor* cursor_text = nullptr;
+		SDL_Cursor* cursor_unavailable = nullptr;
 	};
 }

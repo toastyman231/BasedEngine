@@ -227,6 +227,18 @@ public:
 
 		return true;
 	}
+
+	void HandleFileDrop(const std::string& path) override
+	{
+		if (mFileBrowser->IsFileViewerHovered())
+		{
+			if (mFileBrowser->HandleFileDrop(path))
+				BASED_TRACE("Accepted drop from {}", path);
+		} /*else
+		{
+			Engine::Instance().GetWindow().SetCursor("unavailable");
+		}*/
+	}
 };
 
 App* CreateApp()

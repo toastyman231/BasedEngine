@@ -35,12 +35,21 @@ namespace based::core
 	Window::Window() 
 		: mWindow(nullptr) 
 		, mShouldRenderToScreen(true)
-	{}
+	{
+	}
+
 	Window::~Window()
 	{
 		if (mWindow)
 		{
 			Shutdown();
+			SDL_FreeCursor(cursor_default);
+			SDL_FreeCursor(cursor_move);
+			SDL_FreeCursor(cursor_pointer);
+			SDL_FreeCursor(cursor_resize);
+			SDL_FreeCursor(cursor_cross);
+			SDL_FreeCursor(cursor_text);
+			SDL_FreeCursor(cursor_unavailable);
 		}
 	}
 
@@ -88,6 +97,14 @@ namespace based::core
 		InitializeScreenRender();
 		HandleResize(props.w, props.h);
 
+		cursor_default = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+		cursor_move = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL);
+		cursor_pointer = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
+		cursor_resize = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
+		cursor_cross = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
+		cursor_text = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
+		cursor_unavailable = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO);
+
 		mImguiWindow.Create(props.imguiProps);
 		return true;
 	}
@@ -117,8 +134,15 @@ namespace based::core
 				case SDL_CONTROLLERDEVICEREMOVED:
 					input::Joystick::OnJoystickDisconnected(e.cdevice);
 					break;
+				case SDL_DROPBEGIN:
+					BASED_TRACE("Drop beginning!");
+					break;
+				case SDL_DROPCOMPLETE:
+					BASED_TRACE("Drop complete!");
+					break;
 				case SDL_DROPFILE:
-					BASED_TRACE("File Dropped: {}", e.drop.file);
+					Engine::Instance().GetApp().HandleFileDrop(e.drop.file);
+					SDL_free(e.drop.file);
 					break;
 				case SDL_WINDOWEVENT:
 					switch (e.window.event)
@@ -143,6 +167,29 @@ namespace based::core
 		if (!mImguiWindow.WantCaptureKeyboard()) input::Keyboard::Update();
 		
 		input::Joystick::Update();
+	}
+
+	void Window::SetCursor(const std::string& cursorName)
+	{
+		SDL_Cursor* cursor = nullptr;
+
+		if (cursorName.empty() || cursorName == "arrow")
+			cursor = cursor_default;
+		else if (cursorName == "move")
+			cursor = cursor_move;
+		else if (cursorName == "pointer")
+			cursor = cursor_pointer;
+		else if (cursorName == "resize")
+			cursor = cursor_resize;
+		else if (cursorName == "cross")
+			cursor = cursor_cross;
+		else if (cursorName == "text")
+			cursor = cursor_text;
+		else if (cursorName == "unavailable")
+			cursor = cursor_unavailable;
+
+		if (cursor)
+			SDL_SetCursor(cursor);
 	}
 
 	glm::ivec2 Window::GetSize()

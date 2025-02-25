@@ -3,28 +3,16 @@
 
 #include <SDL2/SDL.h>
 
+#include "engine.h"
+
 namespace based::ui
 {
 	SystemInterface_SDL::SystemInterface_SDL()
 	{
-		cursor_default = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
-		cursor_move = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL);
-		cursor_pointer = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
-		cursor_resize = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
-		cursor_cross = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
-		cursor_text = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
-		cursor_unavailable = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO);
 	}
 
 	SystemInterface_SDL::~SystemInterface_SDL()
 	{
-		SDL_FreeCursor(cursor_default);
-		SDL_FreeCursor(cursor_move);
-		SDL_FreeCursor(cursor_pointer);
-		SDL_FreeCursor(cursor_resize);
-		SDL_FreeCursor(cursor_cross);
-		SDL_FreeCursor(cursor_text);
-		SDL_FreeCursor(cursor_unavailable);
 	}
 
 	void SystemInterface_SDL::SetWindow(SDL_Window* in_window)
@@ -39,27 +27,10 @@ namespace based::ui
 
 	void SystemInterface_SDL::SetMouseCursor(const Rml::String& cursor_name)
 	{
-		SDL_Cursor* cursor = nullptr;
 
-		if (cursor_name.empty() || cursor_name == "arrow")
-			cursor = cursor_default;
-		else if (cursor_name == "move")
-			cursor = cursor_move;
-		else if (cursor_name == "pointer")
-			cursor = cursor_pointer;
-		else if (cursor_name == "resize")
-			cursor = cursor_resize;
-		else if (cursor_name == "cross")
-			cursor = cursor_cross;
-		else if (cursor_name == "text")
-			cursor = cursor_text;
-		else if (cursor_name == "unavailable")
-			cursor = cursor_unavailable;
-		else if (Rml::StringUtilities::StartsWith(cursor_name, "rmlui-scroll"))
-			cursor = cursor_move;
-
-		if (cursor)
-			SDL_SetCursor(cursor);
+		if (Rml::StringUtilities::StartsWith(cursor_name, "rmlui-scroll"))
+			Engine::Instance().GetWindow().SetCursor("move");
+		else Engine::Instance().GetWindow().SetCursor(cursor_name);
 	}
 
 	void SystemInterface_SDL::SetClipboardText(const Rml::String& text_utf8)

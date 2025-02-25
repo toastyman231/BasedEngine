@@ -50,8 +50,21 @@ namespace editor::panels
 		if (ImGui::Begin("File Viewer"))
 		{
 			DrawFileViewer();
+			mIsFileViewerHovered = ImGui::IsWindowHovered();
 		}
 		ImGui::End();
+	}
+
+	bool FileBrowser::HandleFileDrop(const std::string& path)
+	{
+		if (mSelectedDirectories.empty() || mSelectedDirectories.size() != 1) return false;
+
+		auto fromPath = std::filesystem::path(path);
+		auto fileName = fromPath.filename();
+		auto toPath = std::filesystem::canonical(mSelectedDirectories[0]);
+
+		// TODO: Import objects based on file type after copying
+		return std::filesystem::copy_file(fromPath, toPath / fileName);
 	}
 
 	bool FileBrowser::IsDirectorySelected(const std::string& path)
@@ -72,6 +85,16 @@ namespace editor::panels
 		}
 
 		return true;
+	}
+
+	bool FileBrowser::IsFileOfType(const std::string& path, const std::string& type)
+	{
+		return path.find(type) != std::string::npos;
+	}
+
+	bool FileBrowser::IsFileViewerHovered()
+	{
+		return mIsFileViewerHovered;
 	}
 
 	void FileBrowser::DrawDirectoryTree(const std::string& path)
@@ -223,12 +246,17 @@ namespace editor::panels
 						mSelectedFiles = {};
 						return;
 					}
+					else if (IsFileOfType(dir.path().filename().string(), ".bscn"))
+					{
+						Statics::LoadScene(dir.path().string());
+					}
 				}
 
 				if (ImGui::IsItemHovered() && (ImGui::IsMouseClicked(0) || ImGui::IsMouseClicked(1)) &&
 					!(based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT)
 						|| based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)))
 				{
+					ImGui::SetNextWindowFocus();
 					mSelectedFiles = { dir.path().string() };
 				}
 				else if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0)

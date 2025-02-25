@@ -31,16 +31,22 @@ namespace editor::panels
 		void Render() override;
 		void Shutdown() override {}
 
+		bool HandleFileDrop(const std::string& path);
+
 		bool IsDirectorySelected(const std::string& path);
 		bool IsFileSelected(const std::string& path);
 		bool IsDirectoryLeaf(const std::string& path);
+		bool IsFileOfType(const std::string& path, const std::string& type);
+		bool IsFileViewerHovered();
 
 	private:
 		void DrawDirectoryTree(const std::string& path);
 		void DrawFileViewer();
 		uint32_t GetIconByFileType(const std::string& file);
 
-		std::vector<std::string> mExcludeDirs = { "bin", "bin-obj", "PostBuildCopy", "PostBuildCopy_windows" };
+		std::vector<std::string> mExcludeDirs = 
+			{ "bin", "bin-obj", "PostBuildCopy", "PostBuildCopy_windows",
+			".git", ".vs", "ProjectFiles" };
 
 		std::vector<std::string> mSelectedDirectories;
 		std::vector<std::string> mSelectedFiles;
@@ -55,6 +61,8 @@ namespace editor::panels
 		std::shared_ptr<based::graphics::Texture> mAudioIcon;
 		std::shared_ptr<based::graphics::Texture> mUIIcon;
 		std::shared_ptr<based::graphics::Texture> mStyleIcon;
+
+		bool mIsFileViewerHovered = false;
 
 		int mCurrentDirIndex = 0;
 		int mCurrentDirCount = 0;
