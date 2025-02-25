@@ -186,6 +186,32 @@ namespace editor
 		return true;
 	}
 
+	bool Statics::LoadSceneSafe(const std::string& path)
+	{
+		if (mEditorSceneDirty)
+		{
+			auto shouldSave = tinyfd_messageBox(
+				"Save Current Scene?",
+				"You have unsaved changes, would you like to save the current scene?",
+				"yesno",
+				"question",
+				1
+			);
+
+			if (shouldSave == 1)
+			{
+				auto saveResult = SaveScene();
+				if (!saveResult)
+				{
+					BASED_WARN("Scene did not save properly, aborting create new scene!");
+					return false;
+				}
+			}
+		}
+
+		return LoadScene(path);
+	}
+
 	bool Statics::RemoveEntityFromSelected(const std::shared_ptr<based::scene::Entity>& entity)
 	{
 		auto it = 

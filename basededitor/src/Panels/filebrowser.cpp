@@ -49,8 +49,53 @@ namespace editor::panels
 
 		if (ImGui::Begin("File Viewer"))
 		{
+			ImVec2 pos = ImGui::GetCursorScreenPos();
+
+			/*auto count = 0;
+			std::queue<std::string> dirs;
+			for (auto dir : mSelectedDirectories) dirs.push(dir);
+
+			while (!dirs.empty())
+			{
+				std::string dir = dirs.front();
+				dirs.pop();
+
+				for (auto f : std::filesystem::directory_iterator(dir))
+				{
+					if (f.is_directory())
+					{
+						dirs.push(f.path().string());
+						count++;
+					}
+					else count++;
+				}
+			}
+			float temp = (float)count / 7.f;
+			auto cols = (int)std::ceil(temp);
+			auto height = std::max((float)cols * 100.f, ImGui::GetContentRegionAvail().y);
+			BASED_TRACE("Cols: {}, Avail: {}", (float)cols * 100.f, ImGui::GetContentRegionAvail().y);*/
+
+			BASED_TRACE("Avail: {} {}, Max: {} {}", ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y,
+				ImGui::GetWindowContentRegionMax().x, ImGui::GetWindowContentRegionMax().y);
+			auto height = ImGui::GetTextLineHeightWithSpacing();
+			
+
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 0, 0, 1));
+			if (ImGui::Button("##bg", ImVec2(ImGui::GetContentRegionMax().x, 300.f + height * 3.f)))
+			{
+				BASED_TRACE("CLICK!");
+				mSelectedFiles = {};
+			}
+			ImGui::PopStyleColor();
+			ImGui::SetItemAllowOverlap();
+
+			ImGui::SetCursorScreenPos(pos);
 			DrawFileViewer();
 			mIsFileViewerHovered = ImGui::IsWindowHovered();
+
+			if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1))
+				ImGui::OpenPopup("FilesContext");
+			DrawContextMenu();
 		}
 		ImGui::End();
 	}
@@ -248,9 +293,11 @@ namespace editor::panels
 					}
 					else if (IsFileOfType(dir.path().filename().string(), ".bscn"))
 					{
-						Statics::LoadScene(dir.path().string());
+						Statics::LoadSceneSafe(dir.path().string());
 					}
 				}
+
+				if (ImGui::IsItemHovered()) mIsAnyFileHovered = true;
 
 				if (ImGui::IsItemHovered() && (ImGui::IsMouseClicked(0) || ImGui::IsMouseClicked(1)) &&
 					!(based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT)
@@ -286,6 +333,21 @@ namespace editor::panels
 			}
 		}
 		ImGui::Columns(1);
+	}
+
+	void FileBrowser::DrawContextMenu()
+	{
+		if (ImGui::BeginPopup("FilesContext"))
+		{
+			if (ImGui::Button("Show in Explorer", ImVec2(200.f, 0)))
+			{
+				for (auto& dir : mSelectedDirectories)
+					LaunchExplorer(dir);
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
+		}
 	}
 
 	uint32_t FileBrowser::GetIconByFileType(const std::string& file)

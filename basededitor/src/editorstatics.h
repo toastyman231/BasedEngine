@@ -23,6 +23,7 @@ namespace editor
 		static bool OpenScene();
 		static bool LoadScene(const std::string& path);
 		static bool SaveScene(const std::string& path = "");
+		static bool LoadSceneSafe(const std::string& path);
 
 		static std::shared_ptr<based::graphics::Camera> GetEditorCamera() { return mEditorCamera; }
 		static std::vector<std::weak_ptr<based::scene::Entity>> GetSelectedEntities() { return mSelectedEntities; }

@@ -42,7 +42,10 @@ namespace editor::panels
 	private:
 		void DrawDirectoryTree(const std::string& path);
 		void DrawFileViewer();
+		void DrawContextMenu();
 		uint32_t GetIconByFileType(const std::string& file);
+
+		void LaunchExplorer(const std::string& path);
 
 		std::vector<std::string> mExcludeDirs = 
 			{ "bin", "bin-obj", "PostBuildCopy", "PostBuildCopy_windows",
@@ -63,6 +66,7 @@ namespace editor::panels
 		std::shared_ptr<based::graphics::Texture> mStyleIcon;
 
 		bool mIsFileViewerHovered = false;
+		bool mIsAnyFileHovered = false;
 
 		int mCurrentDirIndex = 0;
 		int mCurrentDirCount = 0;
@@ -78,4 +82,11 @@ namespace editor::panels
 		int mFileMultiSelectBegin = -1;
 		int mFileMultiSelectEnd = -1;
 	};
+
+	inline void FileBrowser::LaunchExplorer(const std::string& path)
+	{
+		std::string finalCommand = "explorer ";
+		finalCommand.append(std::filesystem::canonical(path).string());
+		std::system(finalCommand.c_str());
+	}
 }
