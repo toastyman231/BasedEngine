@@ -51,42 +51,12 @@ namespace editor::panels
 		{
 			ImVec2 pos = ImGui::GetCursorScreenPos();
 
-			/*auto count = 0;
-			std::queue<std::string> dirs;
-			for (auto dir : mSelectedDirectories) dirs.push(dir);
+			auto textHeight = ImGui::GetTextLineHeightWithSpacing();
+			float numRows = based::math::Ceil((float)(mCurrentFileIndex + 1) / (float)mNumColumns);
+			float browserFullHeight = numRows * mFileSize.y + textHeight * numRows + 10.f;
 
-			while (!dirs.empty())
-			{
-				std::string dir = dirs.front();
-				dirs.pop();
-
-				for (auto f : std::filesystem::directory_iterator(dir))
-				{
-					if (f.is_directory())
-					{
-						dirs.push(f.path().string());
-						count++;
-					}
-					else count++;
-				}
-			}
-			float temp = (float)count / 7.f;
-			auto cols = (int)std::ceil(temp);
-			auto height = std::max((float)cols * 100.f, ImGui::GetContentRegionAvail().y);
-			BASED_TRACE("Cols: {}, Avail: {}", (float)cols * 100.f, ImGui::GetContentRegionAvail().y);*/
-
-			BASED_TRACE("Avail: {} {}, Max: {} {}", ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y,
-				ImGui::GetWindowContentRegionMax().x, ImGui::GetWindowContentRegionMax().y);
-			auto height = ImGui::GetTextLineHeightWithSpacing();
-			
-
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 0, 0, 1));
-			if (ImGui::Button("##bg", ImVec2(ImGui::GetContentRegionMax().x, 300.f + height * 3.f)))
-			{
-				BASED_TRACE("CLICK!");
+			if (ImGui::InvisibleButton("##bg", ImVec2(ImGui::GetContentRegionMax().x, browserFullHeight)))
 				mSelectedFiles = {};
-			}
-			ImGui::PopStyleColor();
 			ImGui::SetItemAllowOverlap();
 
 			ImGui::SetCursorScreenPos(pos);
@@ -223,9 +193,9 @@ namespace editor::panels
 
 	void FileBrowser::DrawFileViewer()
 	{
-		ImVec2 itemSize = { 100.f, 100.f };
-		int numColumns = (int)std::floor(ImGui::GetContentRegionAvail().x / itemSize.x);
-		ImGui::Columns(numColumns, 0, false);
+		ImVec2 itemSize = mFileSize;
+		mNumColumns = (int)std::floor(ImGui::GetContentRegionAvail().x / itemSize.x);
+		ImGui::Columns(mNumColumns, 0, false);
 
 		mCurrentFileIndex = 0;
 		mCurrentFileCount = 0;
@@ -244,7 +214,7 @@ namespace editor::panels
 
 			for (auto dir : directories)
 			{
-				mCurrentFileIndex++;
+				++mCurrentFileIndex;
 				ImVec2 pos = ImGui::GetCursorScreenPos();
 
 				if (!mSelectedFiles.empty())

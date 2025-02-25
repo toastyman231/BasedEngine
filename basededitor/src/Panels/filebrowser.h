@@ -68,6 +68,9 @@ namespace editor::panels
 		bool mIsFileViewerHovered = false;
 		bool mIsAnyFileHovered = false;
 
+		int mNumColumns;
+		ImVec2 mFileSize = { 100, 100 };
+
 		int mCurrentDirIndex = 0;
 		int mCurrentDirCount = 0;
 		int mDirCountMax = 0;
