@@ -131,6 +131,55 @@ namespace editor
 		return true;
 	}
 
+	bool Statics::OpenScene(const std::string& path, bool keepLoadedAssets)
+	{
+		if (mEditorSceneDirty)
+		{
+			auto shouldSave = tinyfd_messageBox(
+				"Save Current Scene?",
+				"You have unsaved changes, would you like to save the current scene?",
+				"yesno",
+				"question",
+				1
+			);
+
+			if (shouldSave == 1)
+			{
+				auto saveResult = SaveScene();
+				if (!saveResult)
+				{
+					BASED_WARN("Scene did not save properly, aborting create new scene!");
+					return false;
+				}
+			}
+		}
+
+		BASED_TRACE("Creating new scene!");
+		auto newScene = std::make_shared<based::scene::Scene>();
+		auto currentScene = based::Engine::Instance().GetApp().GetCurrentScene();
+		if (keepLoadedAssets)
+		{
+			newScene->GetMeshStorage() = currentScene->GetMeshStorage();
+			newScene->GetModelStorage() = currentScene->GetModelStorage();
+			newScene->GetMaterialStorage() = currentScene->GetMaterialStorage();
+			newScene->GetTextureStorage() = currentScene->GetTextureStorage();
+			newScene->GetAnimationStorage() = currentScene->GetAnimationStorage();
+			newScene->GetAnimatorStorage() = currentScene->GetAnimatorStorage();
+		}
+		based::Engine::Instance().GetApp().LoadScene(newScene);
+
+		auto res = LoadScene(path);
+
+		if (!res)
+		{
+			BASED_WARN("Error deserializing default scene, aborting!");
+			return false;
+		}
+
+		SetSceneDirty(false);
+		return true;
+	}
+
 	bool Statics::LoadScene(const std::string& path)
 	{
 		auto scene = based::Engine::Instance().GetApp().GetCurrentScene();

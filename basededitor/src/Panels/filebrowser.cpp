@@ -307,7 +307,7 @@ namespace editor::panels
 					}
 					else if (IsFileOfType(dir.path().filename().string(), ".bscn"))
 					{
-						Statics::LoadSceneSafe(dir.path().string());
+						Statics::OpenScene(dir.path().string());
 					}
 				}
 

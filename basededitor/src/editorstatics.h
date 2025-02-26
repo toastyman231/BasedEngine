@@ -21,6 +21,7 @@ namespace editor
 
 		static bool NewScene();
 		static bool OpenScene();
+		static bool OpenScene(const std::string& path, bool keepLoadedAssets = true);
 		static bool LoadScene(const std::string& path);
 		static bool SaveScene(const std::string& path = "");
 		static bool LoadSceneSafe(const std::string& path);
