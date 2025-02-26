@@ -22,6 +22,18 @@ namespace editor::panels
 			if (ImGui::IsMouseClicked(0))
 				mRenameIndex = -1;
 
+			ImVec2 pos = ImGui::GetCursorScreenPos();
+
+			auto textHeight = ImGui::GetTextLineHeightWithSpacing();
+			float numRows = (float)mCurrentIndex + 1.f;
+			float browserFullHeight = std::max(textHeight * numRows + 10.f, ImGui::GetContentRegionAvail().y);
+
+			if (ImGui::InvisibleButton("##nolabel",
+				ImVec2(ImGui::GetContentRegionAvailWidth(), browserFullHeight)))
+				Statics::SetSelectedEntities({});
+			ImGui::SetItemAllowOverlap();
+			ImGui::SetCursorScreenPos(pos);
+			
 			mCurrentIndex = 0;
 			mCurrentCount = 0;
 			for (auto e : view)
