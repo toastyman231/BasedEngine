@@ -128,7 +128,8 @@ namespace editor::panels
 			!(based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT)
 				|| based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)))
 		{
-			Statics::SetSelectedEntities({ entity });
+			if (!Statics::SelectedEntitiesContains(entity))
+				Statics::SetSelectedEntities({ entity });
 			mRenameIndex = -1;
 		}
 		else if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0)
@@ -210,7 +211,6 @@ namespace editor::panels
 
 	void SceneHierarchy::DrawRightClickMenu()
 	{
-		//ImGui::SetNextWindowSize(ImVec2(200.f, 500.f));
 		if (ImGui::BeginPopup("HierarchyRightClick"))
 		{
 			if (ImGui::Button("Add Entity", ImVec2(200.f, 0.f)))

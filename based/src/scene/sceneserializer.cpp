@@ -318,8 +318,9 @@ namespace based::scene
 
 			if (model == nullptr)
 			{
-				BASED_ERROR("Could not find model with ID {} when loading animation at {}!", skeletonId, filepath);
-				return nullptr;
+				model = graphics::Model::CreateModel(animSource,
+					mScene->GetModelStorage(), "TEMP");
+				mLoadedModels[skeletonId] = model;
 			}
 		}
 
@@ -930,6 +931,10 @@ namespace based::scene
 			if (mLoadedMeshes.find(meshId) != mLoadedMeshes.end())
 			{
 				mesh = mLoadedMeshes[meshId];
+			} else if (auto m = SearchForMeshByUUID(meshId))
+			{
+				mesh = m;
+				mLoadedMeshes[meshId] = mesh;
 			}
 			else
 			{
@@ -993,6 +998,11 @@ namespace based::scene
 
 						if (mLoadedMaterials.find(id) != mLoadedMaterials.end())
 							mat = mLoadedMaterials[id];
+						else if (auto findMat = SearchForMaterialByUUID(id))
+						{
+							mat = findMat;
+							mLoadedMaterials[id] = mat;
+						}
 						else
 						{
 							auto truePath = materialPath;
@@ -1027,7 +1037,12 @@ namespace based::scene
 			if (mLoadedMeshes.find(modelId) != mLoadedMeshes.end())
 			{
 				model = mLoadedModels[modelId];
-			} else
+			} else if (auto m = SearchForModelByUUID(modelId))
+			{
+				model = m;
+				mLoadedModels[modelId] = model;
+			}
+			else
 			{
 				auto path = modelRenderer["Model"]["IsEngineAsset"].as<bool>() ?
 					ASSET_PATH(modelRenderer["Model"]["Path"].as<std::string>()) :
@@ -1304,6 +1319,38 @@ namespace based::scene
 			});
 
 		if (key == materials.end()) return nullptr;
+
+		return key->second;
+	}
+
+	std::shared_ptr<graphics::Mesh> SceneSerializer::SearchForMeshByUUID(core::UUID id)
+	{
+		if (!mScene) return nullptr;
+
+		auto meshes = mScene->GetMeshStorage().GetAll();
+		auto key = std::find_if(meshes.begin(), meshes.end(),
+			[id](const std::pair<std::string, std::shared_ptr<graphics::Mesh>>& pair)
+			{
+				return pair.second->GetUUID() == id;
+			});
+
+		if (key == meshes.end()) return nullptr;
+
+		return key->second;
+	}
+
+	std::shared_ptr<graphics::Model> SceneSerializer::SearchForModelByUUID(core::UUID id)
+	{
+		if (!mScene) return nullptr;
+
+		auto models = mScene->GetModelStorage().GetAll();
+		auto key = std::find_if(models.begin(), models.end(),
+			[id](const std::pair<std::string, std::shared_ptr<graphics::Model>>& pair)
+			{
+				return pair.second->GetUUID() == id;
+			});
+
+		if (key == models.end()) return nullptr;
 
 		return key->second;
 	}

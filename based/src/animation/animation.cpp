@@ -50,6 +50,19 @@ namespace based::animation
 		return anim;
 	}
 
+	std::shared_ptr<Animation> Animation::LoadAnimationFromFileAbsolute(const std::string& filepath,
+		core::AssetLibrary<Animation>& assetLibrary, const std::string& filePrefix)
+	{
+		scene::SceneSerializer serializer(Engine::Instance().GetApp().GetCurrentScene());
+		serializer.SetProjectDirectory(filePrefix);
+		auto anim = serializer.DeserializeAnimation(filepath);
+		anim->m_IsFileAnimation = true;
+		anim->m_FileSource = filepath;
+		assetLibrary.Load(anim->GetAnimationName(), anim);
+
+		return anim;
+	}
+
 	Animation::Animation(const std::string& animationPath, const std::shared_ptr<graphics::Model>& model, 
 	                     const std::string& animationName)
 	{

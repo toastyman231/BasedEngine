@@ -22,6 +22,8 @@ namespace based::graphics
 		static std::shared_ptr<Material> LoadMaterialFromFile(const std::string& filepath,
 			core::AssetLibrary<Material>& assetLibrary, const std::string& filePrefix = "", 
 			const std::string& saveAs = "");
+		static std::shared_ptr<Material> LoadMaterialFromFileAbsolute(const std::string& filepath,
+			const std::string& filePrefix = "", const std::string& saveAs = "");
 		static std::shared_ptr<Material> LoadFileMaterialWithoutSaving(const std::string& filepath);
 
 		inline std::weak_ptr<Shader> GetShader() const { return mShader; }

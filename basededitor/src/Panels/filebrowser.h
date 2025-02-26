@@ -3,6 +3,7 @@
 
 #include "panelbase.h"
 #include "../editorstatics.h"
+#include "../Importers/importer.h"
 
 namespace editor::panels
 {
@@ -26,7 +27,7 @@ namespace editor::panels
 
 		~FileBrowser() override = default;
 
-		void Initialize() override {}
+		void Initialize() override;
 		void Update(float deltaTime) override {}
 		void Render() override;
 		void Shutdown() override {}
@@ -47,12 +48,16 @@ namespace editor::panels
 
 		void LaunchExplorer(const std::string& path);
 
+		bool InstantiateFile(const std::string& path);
+
 		std::vector<std::string> mExcludeDirs = 
 			{ "bin", "bin-obj", "PostBuildCopy", "PostBuildCopy_windows",
 			".git", ".vs", "ProjectFiles" };
 
 		std::vector<std::string> mSelectedDirectories;
 		std::vector<std::string> mSelectedFiles;
+
+		std::vector<Importer*> mImporters;
 
 		std::shared_ptr<based::graphics::Texture> mFolderIcon;
 		std::shared_ptr<based::graphics::Texture> mImageIcon;

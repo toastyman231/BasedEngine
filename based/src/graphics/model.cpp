@@ -50,7 +50,7 @@ namespace based::graphics
 	{
 		auto model = std::make_shared<Model>(path.c_str(), name);
 		model->mUUID = uuid;
-		assetLibrary.Load(name, model);
+		assetLibrary.Load(model->mModelName, model);
 		return model;
 	}
 
@@ -67,6 +67,7 @@ namespace based::graphics
 		}
 		mDirectory = path.substr(0, path.find_last_of('/'));
 		mModelSource = path;
+		mModelName = scene->mMeshes[0]->mName.C_Str();
 
 		ProcessNode(scene->mRootNode, scene);
 	}

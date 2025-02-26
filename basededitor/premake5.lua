@@ -30,7 +30,8 @@ project "BasedEditor"
             "%{externals.rmlui}",
             "%{externals.tracy}",
             "%{externals.yaml_cpp}",
-            "%{externals.jolt}"
+            "%{externals.jolt}",
+            "%{externals.assimp}",
         }
     ))
 

@@ -62,6 +62,8 @@ namespace based::scene
 		int CountFilesInDir(const std::string& filepath);
 		void DeserializeEntity(YAML::detail::iterator_value entity);
 		std::shared_ptr<graphics::Material> SearchForMaterialByUUID(core::UUID id);
+		std::shared_ptr<graphics::Mesh> SearchForMeshByUUID(core::UUID id);
+		std::shared_ptr<graphics::Model> SearchForModelByUUID(core::UUID id);
 
 		struct TransitionStorageData
 		{

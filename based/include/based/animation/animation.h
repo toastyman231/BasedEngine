@@ -30,6 +30,8 @@ namespace based::animation
 
         static std::shared_ptr<Animation> LoadAnimationFromFile(const std::string& filepath,
             core::AssetLibrary<Animation>& assetLibrary, const std::string& filePrefix = "");
+        static std::shared_ptr<Animation> LoadAnimationFromFileAbsolute(const std::string& filepath,
+            core::AssetLibrary<Animation>& assetLibrary, const std::string& filePrefix = "");
 
         Bone* FindBone(const std::string& name);
 

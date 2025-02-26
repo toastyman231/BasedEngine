@@ -64,6 +64,7 @@ public:
 		mMenuBar = new editor::panels::MenuBar("Menu");
 		mSceneHierarchy = new editor::panels::SceneHierarchy("Hierarchy");
 		mFileBrowser = new editor::panels::FileBrowser("File Browser");
+		mFileBrowser->Initialize();
 
 		if (std::filesystem::exists("Config/EditorConfig.yml"))
 		{

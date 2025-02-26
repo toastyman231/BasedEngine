@@ -4,9 +4,45 @@
 #include "based/input/keyboard.h"
 #include "external/imgui/imgui.h"
 #include "external/imgui/imgui_internal.h"
+#include "external/tfd/tinyfiledialogs.h"
 
 namespace editor::panels
 {
+	void FileBrowser::Initialize()
+	{
+		mImporters.emplace_back(new MeshImporter());
+		mImporters.emplace_back(new ModelImporter());
+		mImporters.emplace_back(new TextureImporter());
+		mImporters.emplace_back(new MaterialImporter());
+		mImporters.emplace_back(new AnimationImporter());
+
+		std::queue<std::string> dirs;
+		dirs.push(Statics::GetProjectDirectory());
+
+		while (!dirs.empty())
+		{
+			auto path = std::filesystem::canonical(dirs.front());
+			auto dir = std::filesystem::directory_entry(path);
+			BASED_TRACE("Visiting {}", path.string());
+			dirs.pop();
+
+			for (auto file : std::filesystem::directory_iterator(path))
+			{
+				if (file.is_directory())
+				{
+					if (std::find(mExcludeDirs.begin(), mExcludeDirs.end(), 
+						file.path().filename().string()) == mExcludeDirs.end())
+						dirs.push(file.path().string());
+				}
+				else
+				{
+					InstantiateFile(file.path().string());
+				}
+			}
+		}
+
+	}
+
 	void FileBrowser::Render()
 	{
 		ImGui::Begin(mPanelTitle.c_str());
@@ -78,8 +114,16 @@ namespace editor::panels
 		auto fileName = fromPath.filename();
 		auto toPath = std::filesystem::canonical(mSelectedDirectories[0]);
 
-		// TODO: Import objects based on file type after copying
-		return std::filesystem::copy_file(fromPath, toPath / fileName);
+		if (std::filesystem::copy_file(fromPath, toPath / fileName))
+		{
+			auto result = InstantiateFile(path);
+
+			if (!result) BASED_ERROR("Error importing file {}", path);
+
+			return result;
+		}
+
+		return false;
 	}
 
 	bool FileBrowser::IsDirectorySelected(const std::string& path)
@@ -274,12 +318,12 @@ namespace editor::panels
 						|| based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)))
 				{
 					ImGui::SetNextWindowFocus();
-					mSelectedFiles = { dir.path().string() };
+					if (!IsFileSelected(dir.path().string()))
+						mSelectedFiles = { dir.path().string() };
 				}
 				else if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0)
 					&& based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL))
 				{
-
 					if (!IsFileSelected(dir.path().string()))
 					{
 						mSelectedFiles.emplace_back(dir.path().string());
@@ -309,6 +353,27 @@ namespace editor::panels
 	{
 		if (ImGui::BeginPopup("FilesContext"))
 		{
+			if (ImGui::Button("Delete", ImVec2(200.f, 0)))
+			{
+				auto result = tinyfd_messageBox(
+					"Are you sure?",
+					"This will delete these items permanently.",
+					"yesno",
+					"warning",
+					0
+				);
+				if (result == 0)
+				{
+					ImGui::CloseCurrentPopup();
+					ImGui::EndPopup();
+					return;
+				}
+
+				for (auto& file : mSelectedFiles)
+					std::filesystem::remove(file);
+				ImGui::CloseCurrentPopup();
+			}
+
 			if (ImGui::Button("Show in Explorer", ImVec2(200.f, 0)))
 			{
 				for (auto& dir : mSelectedDirectories)
@@ -386,5 +451,18 @@ namespace editor::panels
 		}
 
 		return mFolderIcon->GetId();
+	}
+
+	bool FileBrowser::InstantiateFile(const std::string& path)
+	{
+		for (Importer* importer : mImporters)
+		{
+			if (!importer->CanHandleFile(path)) continue;
+
+			importer->HandleImport(path);
+			return true;
+		}
+
+		return false;
 	}
 }
