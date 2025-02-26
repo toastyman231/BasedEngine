@@ -2,6 +2,7 @@
 #include "Panels/gameview.h"
 #include "based/core/basedtime.h"
 #include "based/input/keyboard.h"
+#include "based/input/mouse.h"
 #include "based/scene/components.h"
 #include "based/scene/entity.h"
 #include "external/entt/entity/registry.hpp"
@@ -11,6 +12,9 @@ namespace editor
 	struct EditorPlayer
 	{
 		float speed = 2.5f;
+		float pitch = 0.f;
+		float yaw = 0.f;
+		float sensitivity = 100.f;
 	};
 
 	inline void EditorPlayerUpdateSystem(entt::registry& registry, panels::GameView& sceneView)
@@ -25,15 +29,35 @@ namespace editor
 
 		for (auto& ent : view)
 		{
-			auto& entPtr = registry.get<based::scene::EntityReference>(ent).entity;
-			auto& transform = registry.get<based::scene::Transform>(ent);
-			auto& cameraComp = registry.get<based::scene::CameraComponent>(ent).camera;
-			auto& player = registry.get<EditorPlayer>(ent);
+			auto& entPtr = view.get<based::scene::EntityReference>(ent).entity;
+			auto& transform = view.get<based::scene::Transform>(ent);
+			auto& cameraComp = view.get<based::scene::CameraComponent>(ent).camera;
+			auto& player = view.get<EditorPlayer>(ent);
 
 			auto entity = entPtr.lock();
 			auto camera = cameraComp.lock();
 
-			if (entity && camera)
+			if (based::input::Mouse::Button(BASED_INPUT_MOUSE_RIGHT) || 
+				based::input::Mouse::Button(BASED_INPUT_MOUSE_LEFT))
+			{
+				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+				based::input::Mouse::SetCursorMode(based::input::CursorMode::Confined);
+
+				player.pitch += static_cast<float>(based::input::Mouse::DX())
+					* player.sensitivity * based::core::Time::UnscaledDeltaTime();
+				player.yaw += static_cast<float>(based::input::Mouse::DY())
+					* player.sensitivity * based::core::Time::UnscaledDeltaTime();
+
+				player.yaw = based::math::Clamp(player.yaw, -89.f, 89.f);
+
+				if (camera)
+					entity->SetRotation({ player.yaw, player.pitch, camera->GetTransform().Rotation.z });
+			} else
+			{
+				based::input::Mouse::SetCursorMode(based::input::CursorMode::Free);
+			}
+
+			if (entity && camera && based::input::Mouse::Button(BASED_INPUT_MOUSE_RIGHT))
 			{
 				if (based::input::Keyboard::Key(BASED_INPUT_KEY_W))
 				{

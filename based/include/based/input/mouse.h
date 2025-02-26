@@ -29,6 +29,9 @@ namespace based::input
 
 		static glm::ivec2 GetMousePosition();
 
+		inline static glm::vec2 xBounds = {-999, -999};
+		inline static glm::vec2 yBounds = { -999, -999 };
+
 	private:
 		constexpr static int ButtonCount = 5; //SDL supports up to 5 mouse buttons
 

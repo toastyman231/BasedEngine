@@ -4,6 +4,8 @@
 #include "../editorstatics.h"
 #include "based/app.h"
 #include "based/engine.h"
+#include "based/input/joystick.h"
+#include "based/input/mouse.h"
 
 namespace editor::panels
 {
@@ -31,6 +33,13 @@ namespace editor::panels
 			ImGui::SetCursorPos(pos);
 			ImGui::Image((void*)static_cast<intptr_t>(mBackingBuffer->GetTextureId()),
 				size, uv0, uv1);
+			based::input::Mouse::xBounds = {
+				ImGui::GetItemRectMin().x,
+				ImGui::GetItemRectMin().x + ImGui::GetItemRectSize().x };
+			based::input::Mouse::yBounds = {
+				ImGui::GetItemRectMin().y,
+				ImGui::GetItemRectMin().y + ImGui::GetItemRectSize().y
+			};
 		}
 		mIsFocused = ImGui::IsWindowFocused();
 		ImGui::End();

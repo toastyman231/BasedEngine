@@ -47,16 +47,20 @@ namespace based::input
 		buttonsLast = buttons;
 		Uint32 state = SDL_GetMouseState(&x, &y);
 		glm::vec2 size = based::Engine::Instance().GetWindow().GetSize();
-		if (mCursorMode == CursorMode::Confined && (x <= 1 || x >= static_cast<int>(size.x) - 1))
+		auto xMin = xBounds.x != -999.f ? static_cast<int>(xBounds.x) : 1;
+		auto xMax = xBounds.y != -999.f ? static_cast<int>(xBounds.y) : static_cast<int>(size.x) - 1;
+		if (mCursorMode == CursorMode::Confined && (x <= xMin || x >= xMax))
 		{
-			int newX = x <= 1 ? static_cast<int>(size.x) - 2 : 2;
+			int newX = x <= xMin ? xMax - 1 : xMin + 1;
 			SDL_WarpMouseInWindow(based::Engine::Instance().GetWindow().GetSDLWindow(), newX, y);
 			x = newX;
 			xLast = newX;
 		}
-		if (mCursorMode == CursorMode::Confined && (y <= 1 || y >= static_cast<int>(size.y) - 1))
+		auto yMin = yBounds.x != -999.f ? static_cast<int>(yBounds.x) : 1;
+		auto yMax = yBounds.y != -999.f ? static_cast<int>(yBounds.y) : static_cast<int>(size.y) - 1;
+		if (mCursorMode == CursorMode::Confined && (y <= yMin || y >= yMax))
 		{
-			int newY = y <= 1 ? static_cast<int>(size.y) - 2 : 2;
+			int newY = y <= yMin ? yMax - 1 : yMin + 1;
 			SDL_WarpMouseInWindow(based::Engine::Instance().GetWindow().GetSDLWindow(), x, newY);
 			y = newY;
 			yLast = newY;
