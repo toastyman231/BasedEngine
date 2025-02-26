@@ -86,6 +86,18 @@ namespace based::core
 			return mAssets.find(name) != mAssets.end();
 		}
 
+		std::string GetSafeName(const std::string& name)
+		{
+			std::string finalName = name;
+			int count = 1;
+			while (Exists(finalName))
+			{
+				finalName = name + std::to_string(count);
+				count++;
+			}
+			return finalName;
+		}
+
 	private:
 		std::unordered_map<std::string, T> mAssets;
 	};

@@ -49,13 +49,11 @@ namespace editor::panels
 		void LaunchExplorer(const std::string& path);
 
 		bool InstantiateFile(const std::string& path);
+		bool CreateObject(const std::string& type);
 
 		std::vector<std::string> mExcludeDirs = 
 			{ "bin", "bin-obj", "PostBuildCopy", "PostBuildCopy_windows",
 			".git", ".vs", "ProjectFiles" };
-
-		std::vector<std::string> mSelectedDirectories;
-		std::vector<std::string> mSelectedFiles;
 
 		std::vector<Importer*> mImporters;
 
@@ -89,12 +87,18 @@ namespace editor::panels
 
 		int mFileMultiSelectBegin = -1;
 		int mFileMultiSelectEnd = -1;
+
+		int mRenameIndex = -1;
 	};
 
 	inline void FileBrowser::LaunchExplorer(const std::string& path)
 	{
+#ifdef BASED_PLATFORM_WINDOWS
 		std::string finalCommand = "explorer ";
 		finalCommand.append(std::filesystem::canonical(path).string());
 		std::system(finalCommand.c_str());
+#else
+		BASED_WARN("Could not open file in explorer - Unsupported platform!");
+#endif
 	}
 }

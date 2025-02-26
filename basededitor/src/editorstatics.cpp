@@ -313,4 +313,28 @@ namespace editor
 
 		return true;
 	}
+
+	bool Statics::SelectedFilesContains(const std::string& file)
+	{
+		return std::find(mSelectedFiles.begin(), mSelectedFiles.end(), file) != mSelectedFiles.end();
+	}
+
+	bool Statics::SelectedDirectoriesContains(const std::string& dir)
+	{
+		return std::find(mSelectedDirectories.begin(), mSelectedDirectories.end(), dir) != mSelectedDirectories.end();
+	}
+
+	void Statics::RemoveSelectedFile(const std::string& file)
+	{
+		mSelectedFiles.erase(
+			std::find(mSelectedFiles.begin(), mSelectedFiles.end(), file)
+		);
+	}
+
+	void Statics::RemoveSelectedDirectory(const std::string& dir)
+	{
+		mSelectedDirectories.erase(
+			std::find(mSelectedDirectories.begin(), mSelectedDirectories.end(), dir)
+		);
+	}
 }

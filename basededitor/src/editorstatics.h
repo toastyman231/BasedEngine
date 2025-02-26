@@ -28,6 +28,8 @@ namespace editor
 
 		static std::shared_ptr<based::graphics::Camera> GetEditorCamera() { return mEditorCamera; }
 		static std::vector<std::weak_ptr<based::scene::Entity>> GetSelectedEntities() { return mSelectedEntities; }
+		static std::vector<std::string> GetSelectedFiles() { return mSelectedFiles; }
+		static std::vector<std::string> GetSelectedDirectories() { return mSelectedDirectories; }
 		static bool IsSceneDirty() { return mEditorSceneDirty; }
 
 		static void SetSelectedEntities(const std::vector<std::weak_ptr<based::scene::Entity>>& entities) { mSelectedEntities = entities; }
@@ -36,6 +38,17 @@ namespace editor
 
 		static bool SelectedEntitiesContains(std::shared_ptr<based::scene::Entity> entity);
 		static bool SelectedEntitiesContains(std::vector<std::weak_ptr<based::scene::Entity>> entities);
+
+		static bool SelectedFilesContains(const std::string& file);
+		static bool SelectedDirectoriesContains(const std::string& dir);
+
+		static void SetSelectedFiles(const std::vector<std::string>& files) { mSelectedFiles = files; }
+		static void AddSelectedFile(const std::string& file) { mSelectedFiles.emplace_back(file); }
+		static void SetSelectedDirectories(const std::vector<std::string>& dirs) { mSelectedDirectories = dirs; }
+		static void AddSelectedDirectory(const std::string& dir) { mSelectedDirectories.emplace_back(dir); }
+
+		static void RemoveSelectedFile(const std::string& file);
+		static void RemoveSelectedDirectory(const std::string& dir);
 
 		static HistoryContext& GetHistory() { return mHistoryContext; }
 
@@ -55,6 +68,8 @@ namespace editor
 		inline static std::string mSaveLocation;
 
 		inline static std::vector<std::weak_ptr<based::scene::Entity>> mSelectedEntities;
+		inline static std::vector<std::string> mSelectedDirectories;
+		inline static std::vector<std::string> mSelectedFiles;
 
 		inline static HistoryContext mHistoryContext;
 	};

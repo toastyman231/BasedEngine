@@ -30,7 +30,12 @@ namespace editor::panels
 
 			if (ImGui::InvisibleButton("##nolabel",
 				ImVec2(ImGui::GetContentRegionAvailWidth(), browserFullHeight)))
+			{
 				Statics::SetSelectedEntities({});
+				mMultiSelectBegin = -1;
+				mMultiSelectEnd = -1;
+			}
+				
 			ImGui::SetItemAllowOverlap();
 			ImGui::SetCursorScreenPos(pos);
 			
@@ -140,6 +145,7 @@ namespace editor::panels
 			!(based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT)
 				|| based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)))
 		{
+			Statics::SetSelectedFiles({});
 			if (!Statics::SelectedEntitiesContains(entity))
 				Statics::SetSelectedEntities({ entity });
 			mRenameIndex = -1;
@@ -160,7 +166,15 @@ namespace editor::panels
 		} else if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)
 			&& based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT))
 		{
-			mMultiSelectEnd = mCurrentIndex;
+			if (mMultiSelectBegin == -1)
+			{
+				Statics::SetSelectedEntities({ entity });
+				mMultiSelectBegin = mCurrentIndex;
+			} else
+			{
+				mMultiSelectEnd = mCurrentIndex;
+			}
+			Statics::SetSelectedFiles({});
 		}
 
 		if (ImGui::BeginDragDropSource())
@@ -225,7 +239,7 @@ namespace editor::panels
 	{
 		if (ImGui::BeginPopup("HierarchyRightClick"))
 		{
-			if (ImGui::Button("Add Entity", ImVec2(200.f, 0.f)))
+			if (ImGui::MenuItem("Add Entity", nullptr))
 			{
 				auto selections = Statics::GetSelectedEntities();
 				if (!selections.empty())
