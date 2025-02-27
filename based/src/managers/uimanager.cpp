@@ -33,7 +33,7 @@ namespace based::managers
 		}
 	}
 
-	void UiManager::Update() const
+	void UiManager::Update()
 	{
 		PROFILE_FUNCTION();
 #ifdef BASED_CONFIG_DEBUG
@@ -146,15 +146,26 @@ namespace based::managers
 		mUsePathPrefix = true;
 	}
 
-	void UiManager::HotReloadDocuments() const
+	std::vector<DocumentInfo*> UiManager::GetDocuments()
 	{
-		BASED_TRACE("Hot reloading!");
+		return mDocuments;
+	}
 
+	void UiManager::HotReloadDocuments()
+	{
+		std::vector<DocumentInfo*> docsToDelete;
 		for (auto docInfo : mDocuments)
 		{
 			Rml::ElementDocument* rawPointer = docInfo->document;
 			Rml::Context* context = docInfo->context;
 			const auto& path = docInfo->path;
+
+			if (!rawPointer || !context)
+			{
+				BASED_TRACE("Bad pointer to document or context, skipping {}!", path);
+				docsToDelete.emplace_back(docInfo);
+				continue;
+			}
 
 			BASED_TRACE("Reloading {}", rawPointer->GetSourceURL());
 
@@ -176,6 +187,17 @@ namespace based::managers
 
 			rawPointer->Close();
 			docInfo->document = document;
+		}
+
+		for (auto docInfo : docsToDelete)
+		{
+			auto it = std::find(mDocuments.begin(), mDocuments.end(), docInfo);
+
+			if (it != mDocuments.end())
+			{
+				mDocuments.erase(it);
+				delete docInfo;
+			}
 		}
 	}
 }

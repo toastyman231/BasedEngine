@@ -22,7 +22,7 @@ namespace based::managers
 
 		void Initialize();
 		void ProcessEvents(SDL_Event e) const;
-		void Update() const;
+		void Update();
 		void Render() const;
 		void Shutdown();
 
@@ -32,10 +32,12 @@ namespace based::managers
 		void RemoveContext(const Rml::Context* context);
 		void SetPathPrefix(const std::string& path);
 
+		std::vector<DocumentInfo*> GetDocuments();
+
 		Rml::SystemInterface& GetSystemInterface() const { return *mSystemInterface; }
 		Rml::RenderInterface& GetRenderInterface() const { return *mRenderInterface; }
 	private:
-		void HotReloadDocuments() const;
+		void HotReloadDocuments();
 
 		Rml::SystemInterface* mSystemInterface;
 		Rml::RenderInterface* mRenderInterface;
