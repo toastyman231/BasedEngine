@@ -191,7 +191,7 @@ namespace based::ui
 
 	void RenderInterface_GL4::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry)
 	{
-		if (geometry < 0 || geometry > mCompiledVAs.size()) return;
+		if (geometry < 0 || geometry > mCompiledVAs.size() - 1) return;
 
 		mCompiledVAs.erase(mCompiledVAs.begin() + geometry);
 		mCompiledTextures.erase(mCompiledTextures.begin() + geometry);

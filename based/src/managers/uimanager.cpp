@@ -43,7 +43,7 @@ namespace based::managers
 
 		for (const auto context : mContexts)
 		{
-			context->Update();
+			if (context) context->Update();
 		}
 	}
 
@@ -53,7 +53,7 @@ namespace based::managers
 		dynamic_cast<ui::RenderInterface_GL4*>(mRenderInterface)->BeginFrame();
 		for (const auto context : mContexts)
 		{
-			context->Render();
+			if (context) context->Render();
 		}
 		dynamic_cast<ui::RenderInterface_GL4*>(mRenderInterface)->EndFrame();
 	}
@@ -79,15 +79,29 @@ namespace based::managers
 			return new DocumentInfo();
 		}
 
-		/*if (Rml::Element* title = document->GetElementById("title"))
-			title->SetInnerRML(document->GetTitle());*/
+		if (Rml::Element* title = document->GetElementById("title"))
+			title->SetInnerRML(document->GetTitle());
 
-		//document->SetId(std::to_string(context->GetNumDocuments() - 1));
 		document->Show();
 
-		mDocuments.emplace_back(new DocumentInfo{ document, documentPath, context });
+		mDocuments.emplace_back(DocumentInfo{ document, documentPath, context });
 
-		return mDocuments.back();
+		return &mDocuments.back();
+	}
+
+	bool UiManager::CloseWindow(const DocumentInfo& document)
+	{
+		document.document->Close();
+
+		auto it = std::find(mDocuments.begin(), mDocuments.end(), document);
+
+		if (it != mDocuments.end())
+		{
+			mDocuments.erase(it);
+			return true;
+		}
+
+		return false;
 	}
 
 	Rml::Context* UiManager::CreateContext(const std::string& name, glm::ivec2 size)
@@ -146,19 +160,23 @@ namespace based::managers
 		mUsePathPrefix = true;
 	}
 
-	std::vector<DocumentInfo*> UiManager::GetDocuments()
+	std::vector<DocumentInfo> UiManager::GetDocuments()
 	{
 		return mDocuments;
 	}
 
 	void UiManager::HotReloadDocuments()
 	{
-		std::vector<DocumentInfo*> docsToDelete;
-		for (auto docInfo : mDocuments)
+		std::vector<DocumentInfo> docsToDelete;
+
+		Rml::Factory::ClearStyleSheetCache();
+		Rml::Factory::ClearTemplateCache();
+
+		for (auto& docInfo : mDocuments)
 		{
-			Rml::ElementDocument* rawPointer = docInfo->document;
-			Rml::Context* context = docInfo->context;
-			const auto& path = docInfo->path;
+			Rml::ElementDocument* rawPointer = docInfo.document;
+			Rml::Context* context = docInfo.context;
+			const auto& path = docInfo.path;
 
 			if (!rawPointer || !context)
 			{
@@ -171,32 +189,31 @@ namespace based::managers
 
 			bool isShown = rawPointer->IsVisible();
 
-			Rml::ElementDocument* document = context->LoadDocument(path);
-			document->ReloadStyleSheet();
-			if (!document)
+			rawPointer = context->LoadDocument(path);
+			rawPointer->ReloadStyleSheet();
+			if (!rawPointer)
 			{
 				BASED_ERROR("Failed to hot reload document at {}", path);
 				continue;
 			}
 
-			if (Rml::Element* title = document->GetElementById("title"))
-				title->SetInnerRML(document->GetTitle());
+			if (Rml::Element* title = rawPointer->GetElementById("title"))
+				title->SetInnerRML(rawPointer->GetTitle());
 
 			if (isShown)
-				document->Show();
+				rawPointer->Show();
 
-			rawPointer->Close();
-			docInfo->document = document;
+			docInfo.document->Close();
+			docInfo.document = rawPointer;
 		}
 
-		for (auto docInfo : docsToDelete)
+		for (auto& docInfo : docsToDelete)
 		{
 			auto it = std::find(mDocuments.begin(), mDocuments.end(), docInfo);
 
 			if (it != mDocuments.end())
 			{
 				mDocuments.erase(it);
-				delete docInfo;
 			}
 		}
 	}

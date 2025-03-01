@@ -12,6 +12,11 @@ namespace based::managers
 		Rml::ElementDocument* document;
 		std::string path;
 		Rml::Context* context;
+
+		bool operator== (const DocumentInfo& other) const
+		{
+			return path == other.path;
+		}
 	};
 
 	class UiManager
@@ -27,12 +32,13 @@ namespace based::managers
 		void Shutdown();
 
 		DocumentInfo* LoadWindow(const std::string& path, Rml::Context* context);
+		bool CloseWindow(const DocumentInfo& document);
 		Rml::Context* CreateContext(const std::string& name, glm::ivec2 size);
 		Rml::Context* GetContext(const std::string& name);
 		void RemoveContext(const Rml::Context* context);
 		void SetPathPrefix(const std::string& path);
 
-		std::vector<DocumentInfo*> GetDocuments();
+		std::vector<DocumentInfo> GetDocuments();
 
 		Rml::SystemInterface& GetSystemInterface() const { return *mSystemInterface; }
 		Rml::RenderInterface& GetRenderInterface() const { return *mRenderInterface; }
@@ -43,7 +49,7 @@ namespace based::managers
 		Rml::RenderInterface* mRenderInterface;
 
 		std::vector<Rml::Context*> mContexts;
-		std::vector<DocumentInfo*> mDocuments;
+		std::vector<DocumentInfo> mDocuments;
 
 		Rml::String mPathPrefix;
 
