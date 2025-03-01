@@ -3,6 +3,7 @@
 #ifndef RMLUI_BACKENDS_RENDERER_GL3_H
 #define RMLUI_BACKENDS_RENDERER_GL3_H
 
+#include "uuid.h"
 #include "based/graphics/vertex.h"
 #include "based/graphics/shader.h"
 #include "glad/glad.h"
@@ -40,8 +41,8 @@ namespace based::ui
 		// Can be passed to RenderGeometry() to enable texture rendering without changing the bound texture.
 		static const Rml::TextureHandle TextureEnableWithoutBinding = Rml::TextureHandle(-1);
 	private:
-		std::vector<std::shared_ptr<graphics::VertexArray>> mCompiledVAs;
-		std::vector<Rml::TextureHandle> mCompiledTextures;
+		std::unordered_map<core::UUID, std::shared_ptr<graphics::VertexArray>> mCompiledVAs;
+		std::unordered_map<core::UUID, Rml::TextureHandle> mCompiledTextures;
 		std::vector<std::shared_ptr<graphics::VertexArray>> mVAs; // Cleared every frame
 		std::shared_ptr<graphics::Shader> mFragColor;
 		std::shared_ptr<graphics::Shader> mFragTexture;

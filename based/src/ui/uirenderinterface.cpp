@@ -161,10 +161,12 @@ namespace based::ui
 		va->SetElements(std::vector<uint32_t>(indices, indices + num_indices));
 		va->Upload();
 
-		mCompiledVAs.emplace_back(va);
-		mCompiledTextures.emplace_back(texture);
+		auto id = core::UUID();
 
-		return mCompiledVAs.size() - 1;
+		mCompiledVAs[id] = va;
+		mCompiledTextures[id] = texture;
+
+		return id;
 	}
 
 	void RenderInterface_GL4::RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry,
@@ -191,10 +193,21 @@ namespace based::ui
 
 	void RenderInterface_GL4::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry)
 	{
-		if (geometry < 0 || geometry > mCompiledVAs.size() - 1) return;
+		auto it = std::find_if(mCompiledVAs.begin(), mCompiledVAs.end(),
+			[geometry](auto pair)
+			{
+				return pair.first == (core::UUID)geometry;
+			});
+		if (it != mCompiledVAs.end())
+			mCompiledVAs.erase(it);
 
-		mCompiledVAs.erase(mCompiledVAs.begin() + geometry);
-		mCompiledTextures.erase(mCompiledTextures.begin() + geometry);
+		auto it2 = std::find_if(mCompiledTextures.begin(), mCompiledTextures.end(),
+			[geometry](auto pair)
+			{
+				return pair.first == (core::UUID)geometry;
+			});
+		if (it2 != mCompiledTextures.end())
+			mCompiledTextures.erase(it2);
 	}
 
 	void RenderInterface_GL4::EnableScissorRegion(bool enable)
