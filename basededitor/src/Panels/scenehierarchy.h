@@ -18,6 +18,8 @@ namespace editor::panels
 		void Render() override;
 		void Shutdown() override {}
 
+		void ProcessEvent(BasedEvent event) override;
+
 	private:
 		void DrawEntity(const std::shared_ptr<based::scene::Entity>& entity);
 		void DrawRightClickMenu();

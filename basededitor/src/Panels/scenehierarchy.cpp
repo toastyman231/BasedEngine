@@ -26,10 +26,10 @@ namespace editor::panels
 
 			auto textHeight = ImGui::GetTextLineHeightWithSpacing();
 			float numRows = (float)mCurrentIndex + 1.f;
-			float browserFullHeight = std::max(textHeight * numRows + 10.f, ImGui::GetContentRegionAvail().y);
+			float hierarchyFullHeight = std::max(textHeight * numRows + 10.f, ImGui::GetContentRegionAvail().y);
 
-			if (ImGui::InvisibleButton("##nolabel",
-				ImVec2(ImGui::GetContentRegionAvailWidth(), browserFullHeight)))
+			if (ImGui::InvisibleButton("##hierarchybg",
+				ImVec2(ImGui::GetContentRegionAvail().x, hierarchyFullHeight)))
 			{
 				Statics::SetSelectedEntities({});
 				mMultiSelectBegin = -1;
@@ -81,6 +81,26 @@ namespace editor::panels
 			DrawRightClickMenu();
 		}
 		ImGui::End();
+	}
+
+	void SceneHierarchy::ProcessEvent(BasedEvent event)
+	{
+		Panel::ProcessEvent(event);
+
+		switch (event.EventType)
+		{
+		case BasedEventType::BASED_EVENT_DUPLICATE:
+			for (auto& e : Statics::GetSelectedEntities())
+			{
+				if (auto entity = e.lock())
+				{
+					Statics::EngineOperations.EditorDuplicateEntity(entity);
+				}
+			}
+			break;
+		default:
+			break;
+		}
 	}
 
 	void SceneHierarchy::DrawEntity(const std::shared_ptr<based::scene::Entity>& entity)
@@ -150,7 +170,7 @@ namespace editor::panels
 				Statics::SetSelectedEntities({ entity });
 			mRenameIndex = -1;
 		}
-		else if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0)
+		else if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)
 			&& based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL))
 		{
 			auto entities = Statics::GetSelectedEntities();

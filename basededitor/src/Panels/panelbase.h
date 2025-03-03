@@ -1,4 +1,6 @@
 #pragma once
+#include "../basedevent.h"
+#include "external/imgui/imgui.h"
 
 namespace editor::panels
 {
@@ -15,6 +17,11 @@ namespace editor::panels
 		virtual void Update(float deltaTime) = 0;
 		virtual void Render() = 0;
 		virtual void Shutdown() = 0;
+
+		virtual void ProcessEvent(BasedEvent event)
+		{
+			//if (!ImGui::IsWindowFocused()) return;
+		}
 
 	protected:
 		std::string mPanelTitle = "Untitled Panel";

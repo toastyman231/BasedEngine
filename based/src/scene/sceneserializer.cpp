@@ -800,7 +800,7 @@ namespace based::scene
 						auto typeName = std::string(type.info().name());
 						typeName = typeName.substr(typeName.find(" ") + 1);
 						out << YAML::Key << typeName << YAML::BeginMap;
-						auto component = static_cast<ScriptComponent*>(storage.get(entity->GetEntityHandle()));
+						auto component = static_cast<ScriptComponent*>(storage.value(entity->GetEntityHandle()));
 
 						type.func("SerializeScriptComponent"_hs).invoke(*component, &out, component);
 

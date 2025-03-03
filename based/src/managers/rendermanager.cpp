@@ -264,7 +264,7 @@ namespace based::managers
 		const auto directionalLightView = registry.view<scene::DirectionalLight>();
 		if (directionalLightView.size() > 0)
 		{
-			const auto directionalLight = registry.get<scene::Transform>(directionalLightView[0]);
+			const auto directionalLight = registry.get<scene::Transform>(directionalLightView.front());
 			lightPosition = -directionalLight.Rotation;
 		}
 		const glm::mat4 lightProjection = glm::ortho(-10.f, 10.f, -10.f, 10.f, nearPlane, farPlane);

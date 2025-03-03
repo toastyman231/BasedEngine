@@ -146,6 +146,17 @@ public:
 		{
 			editor::Statics::SaveScene(editor::Statics::GetCurrentSceneSaveLocation());
 		}
+
+		if (input::Keyboard::Key(BASED_INPUT_KEY_LCTRL) 
+			&& input::Keyboard::KeyDown(BASED_INPUT_KEY_D))
+		{
+			mSceneView->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DUPLICATE });
+			mGameView->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DUPLICATE });
+			mMenuBar->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DUPLICATE });
+			mSceneHierarchy->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DUPLICATE });
+			mDetailsPanel->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DUPLICATE });
+			mFileBrowser->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DUPLICATE });
+		}
 	}
 
 	void Render() override

@@ -48,6 +48,9 @@ namespace editor
 		bool EditorSetPointLightData_Undo(std::shared_ptr<based::scene::Entity> entity,
 			based::scene::PointLight oldLightData, based::scene::PointLight newLightData);
 
+		bool EditorDuplicateEntity(std::shared_ptr<based::scene::Entity> entity);
+		bool EditorDuplicateEntity_Undo(std::shared_ptr<based::scene::Entity> entity);
+
 		template <typename Type, typename ...Args>
 		static void AddComponent(based::scene::Entity* entity, Args &&... args)
 		{

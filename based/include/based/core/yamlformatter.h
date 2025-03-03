@@ -4,7 +4,7 @@
 
 #define SERIALIZE_SIMPLE_TYPE(T)                                    \
 if (type.id() == entt::type_hash<T>()) {                            \
-	object.allow_cast<T>();                                         \
+	auto res = object.allow_cast<T>();                              \
 	out << YAML::Key << "Value" << YAML::Value << object.cast<T>(); \
 	out << YAML::Key << "Type" << YAML::Value << type.id();         \
 } else
@@ -47,7 +47,7 @@ namespace based::core::YAMLFormatter
 
 		if (type.is_enum())
 		{
-			object.allow_cast<int>();
+			auto res = object.allow_cast<int>();
 			out << YAML::Key << "Value" << YAML::Value << object.cast<int>();
 			out << YAML::Key << "Type" << YAML::Value << type.id();
 			return;

@@ -456,4 +456,53 @@ namespace editor
 
 		return true;
 	}
+
+	bool EngineOperations::EditorDuplicateEntity(std::shared_ptr<based::scene::Entity> entity)
+	{
+		HISTORY_PUSH(EditorDuplicateEntity, entity);
+
+		bool isSceneDirty = Statics::IsSceneDirty();
+		HISTORY_SAVE(isSceneDirty);
+
+		auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
+		auto& registry = scene->GetRegistry();
+
+		auto entityBacking = registry.create();
+		auto newEntity = std::make_shared<based::scene::Entity>(entityBacking, registry);
+		newEntity->SetEntityName(scene->GetEntityStorage().GetSafeName(entity->GetEntityName()));
+		for (auto [id, storage] : registry.storage())
+		{
+			if (storage.contains(entity->GetEntityHandle()))
+			{
+				storage.push(entityBacking, storage.value(entity->GetEntityHandle()));
+			}
+		}
+		newEntity->AddOrReplaceComponent<based::scene::EntityReference>(newEntity);
+		scene->GetEntityStorage().Load(newEntity->GetEntityName(), newEntity);
+
+		HISTORY_SAVE(newEntity);
+
+		Statics::SetSceneDirty(true);
+
+		return true;
+	}
+
+	bool EngineOperations::EditorDuplicateEntity_Undo(std::shared_ptr<based::scene::Entity> entity)
+	{
+		HISTORY_POP();
+
+		bool isSceneDirty;
+		HISTORY_LOAD(isSceneDirty);
+
+		std::shared_ptr<based::scene::Entity> newEntity;
+		HISTORY_LOAD(newEntity);
+
+		based::scene::Entity::DestroyEntity(newEntity);
+
+		Statics::SetSelectedEntities({});
+
+		Statics::SetSceneDirty(isSceneDirty);
+
+		return true;
+	}
 }

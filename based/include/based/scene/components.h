@@ -16,7 +16,6 @@
 #include <Jolt/Physics/Body/MotionType.h>
 #include <Jolt/Physics/EActivation.h>
 
-//#include "based/app.h"
 #include "based/math/basedmath.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 
@@ -52,16 +51,39 @@ namespace based::scene
 		std::weak_ptr<Entity> entity;
 
 		EntityReference() = default;
-		EntityReference(const EntityReference&) = default;
+		EntityReference(const EntityReference& other)
+		{
+			entity = other.entity;
+		}
+		EntityReference& operator= (const EntityReference& other)
+		{
+			if (this != &other)
+			{
+				entity = other.entity;
+			}
+			return *this;
+		}
 		EntityReference(const std::shared_ptr<Entity>& entityPtr) : entity(entityPtr) {}
 	};
 
 	struct IDComponent
 	{
-		based::core::UUID uuid;
+		core::UUID uuid;
 
 		IDComponent() = default;
-		IDComponent(const IDComponent&) = default;
+		IDComponent(core::UUID id) : uuid(id) {}
+		IDComponent& operator= (const IDComponent& other)
+		{
+			if (this != &other)
+			{
+				uuid = core::UUID(); // IDs should always be unique
+			}
+			return *this;
+		}
+		IDComponent(const IDComponent& other)
+		{
+			uuid = core::UUID();
+		}
 	};
 
 	struct Transform
@@ -75,7 +97,16 @@ namespace based::scene
 		glm::vec3 LocalScale = { 1.0f, 1.0f, 1.0f };
 
 		Transform() = default;
-		Transform(const Transform&) = default;
+		Transform(const Transform& other)
+		{
+			Position = other.Position;
+			Rotation = other.Rotation;
+			Scale = other.Scale;
+
+			LocalPosition = other.LocalPosition;
+			LocalRotation = other.LocalRotation;
+			LocalScale = other.LocalScale;
+		}
 		Transform(const glm::vec3& pos) : Position(pos) {}
 		Transform(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale, bool local = false)
 		{
@@ -90,6 +121,20 @@ namespace based::scene
 				Rotation = rot;
 				Scale = scale;
 			}
+		}
+		Transform& operator= (const Transform& other)
+		{
+			if (this != &other)
+			{
+				Position = other.Position;
+				Rotation = other.Rotation;
+				Scale = other.Scale;
+
+				LocalPosition = other.LocalPosition;
+				LocalRotation = other.LocalRotation;
+				LocalScale = other.LocalScale;
+			}
+			return *this;
 		}
 		Transform(const glm::vec3& pos, const glm::vec3& localPos, 
 			const glm::vec3& rot, const glm::vec3& localRot,
@@ -121,6 +166,18 @@ namespace based::scene
 
 		SpriteRenderer() = delete;
 		SpriteRenderer(const std::shared_ptr<graphics::Sprite>& spritePtr) : sprite(spritePtr) {}
+		SpriteRenderer(const SpriteRenderer& other)
+		{
+			sprite = other.sprite;
+		}
+		SpriteRenderer& operator= (const SpriteRenderer& other)
+		{
+			if (this != &other)
+			{
+				sprite = other.sprite;
+			}
+			return *this;
+		}
 	};
 
 	struct ModelRenderer
@@ -129,7 +186,18 @@ namespace based::scene
 
 		ModelRenderer() = default;
 		ModelRenderer(const std::shared_ptr<graphics::Model>& modelPtr) : model(modelPtr) {}
-		ModelRenderer(const ModelRenderer&) = default;
+		ModelRenderer(const ModelRenderer& other)
+		{
+			model = other.model;
+		}
+		ModelRenderer& operator= (const ModelRenderer& other)
+		{
+			if (this != &other)
+			{
+				model = other.model;
+			}
+			return *this;
+		}
 	};
 
 	struct AnimatorComponent
@@ -138,6 +206,18 @@ namespace based::scene
 
 		AnimatorComponent() = default;
 		AnimatorComponent(const std::shared_ptr<animation::Animator>& anim) : animator(anim) {}
+		AnimatorComponent(const AnimatorComponent& other)
+		{
+			animator = other.animator;
+		}
+		AnimatorComponent& operator= (const AnimatorComponent& other)
+		{
+			if (this != &other)
+			{
+				animator = other.animator;
+			}
+			return *this;
+		}
 	};
 
 	struct MeshRenderer
@@ -159,7 +239,20 @@ namespace based::scene
 			material = mat;
 		}
 
-		MeshRenderer(const MeshRenderer&) = default;
+		MeshRenderer(const MeshRenderer& other)
+		{
+			mesh = other.mesh;
+			material = other.material;
+		}
+		MeshRenderer& operator= (const MeshRenderer& other)
+		{
+			if (this != &other)
+			{
+				mesh = other.mesh;
+				material = other.material;
+			}
+			return *this;
+		}
 	};
 
 	struct PointLight {
@@ -175,6 +268,28 @@ namespace based::scene
 		PointLight() = default;
 		PointLight(float c, float l, float q, glm::vec3 col) : constant(c), linear(l), quadratic(q), intensity(0.5f), color(col) {}
 		PointLight(float c, float l, float q, float i, glm::vec3 col) : constant(c), linear(l), quadratic(q), intensity(i), color(col) {}
+		PointLight(const PointLight& other)
+		{
+			position = other.position;
+			constant = other.constant;
+			linear = other.linear;
+			quadratic = other.quadratic;
+			intensity = other.intensity;
+			color = other.color;
+		}
+		PointLight& operator= (const PointLight& other)
+		{
+			if (this != &other)
+			{
+				position = other.position;
+				constant = other.constant;
+				linear = other.linear;
+				quadratic = other.quadratic;
+				intensity = other.intensity;
+				color = other.color;
+			}
+			return *this;
+		}
 	};
 
 	struct DirectionalLight
@@ -186,6 +301,22 @@ namespace based::scene
 		DirectionalLight(glm::vec3 dir, glm::vec3 col, float i) : direction(dir), color(col), intensity(i) {}
 		DirectionalLight(glm::vec3 dir, glm::vec3 col) : direction(dir), color(col) {}
 		DirectionalLight(glm::vec3 col) : direction(glm::vec3(60.f, 60.f, 0.f)), color(col) {}
+		DirectionalLight(const DirectionalLight& other)
+		{
+			direction = other.direction;
+			color = other.color;
+			intensity = other.intensity;
+		}
+		DirectionalLight& operator= (const DirectionalLight& other)
+		{
+			if (this != &other)
+			{
+				direction = other.direction;
+				color = other.color;
+				intensity = other.intensity;
+			}
+			return *this;
+		}
 	};
 
 	struct CameraComponent
@@ -193,6 +324,18 @@ namespace based::scene
 		std::weak_ptr<graphics::Camera> camera;
 
 		CameraComponent(const std::shared_ptr<graphics::Camera>& cam) : camera(cam) {}
+		CameraComponent(const CameraComponent& other)
+		{
+			camera = other.camera;
+		}
+		CameraComponent& operator= (const CameraComponent& other)
+		{
+			if (this != &other)
+			{
+				camera = other.camera;
+			}
+			return *this;
+		}
 	};
 
 	// Kind of only exists to signal to the serializer which components
@@ -200,6 +343,8 @@ namespace based::scene
 	struct ScriptComponent
 	{
 		ScriptComponent() = default;
+		ScriptComponent(const ScriptComponent& other) = default;
+		ScriptComponent& operator= (const ScriptComponent& other) = default;
 		virtual ~ScriptComponent() = default;
 
 		bool Enabled = true;
@@ -230,6 +375,25 @@ namespace based::scene
 			halfExtent = hExtent;
 			shape = new JPH::BoxShape(convert(hExtent));
 		}
+
+		BoxShapeComponent(const BoxShapeComponent& other)
+		{
+			shape = other.shape;
+			center = other.center;
+			rotation = other.rotation;
+			halfExtent = other.halfExtent;
+		}
+		BoxShapeComponent operator= (const BoxShapeComponent& other)
+		{
+			if (this != &other)
+			{
+				shape = other.shape;
+				center = other.center;
+				rotation = other.rotation;
+				halfExtent = other.halfExtent;
+			}
+			return *this;
+		}
 	};
 
 	struct CapsuleShapeComponent: public PhysicsShapeComponent
@@ -243,6 +407,27 @@ namespace based::scene
 			Radius = radius;
 			shape = new JPH::CapsuleShape(halfHeight, radius);
 		}
+
+		CapsuleShapeComponent(const CapsuleShapeComponent& other)
+		{
+			shape = other.shape;
+			center = other.center;
+			rotation = other.rotation;
+			HalfHeight = other.HalfHeight;
+			Radius = other.Radius;
+		}
+		CapsuleShapeComponent& operator= (const CapsuleShapeComponent& other)
+		{
+			if (this != &other)
+			{
+				shape = other.shape;
+				center = other.center;
+				rotation = other.rotation;
+				HalfHeight = other.HalfHeight;
+				Radius = other.Radius;
+			}
+			return *this;
+		}
 	};
 
 	struct RigidbodyComponent
@@ -255,6 +440,19 @@ namespace based::scene
 			rigidbodyID = Engine::Instance().GetPhysicsManager().AddBody(
 				shape.shape, shape.center, shape.rotation * based::math::Deg2Rad, type, layer, activation
 			);
+		}
+
+		RigidbodyComponent(const RigidbodyComponent& other)
+		{
+			rigidbodyID = other.rigidbodyID;
+		}
+		RigidbodyComponent& operator= (const RigidbodyComponent& other)
+		{
+			if (this != &other)
+			{
+				rigidbodyID = other.rigidbodyID;
+			}
+			return *this;
 		}
 
 		void RegisterBody(const entt::entity entity)
@@ -305,6 +503,29 @@ namespace based::scene
 				JPH::Quat::sEulerAngles(convert(transform.Rotation)), 0,
 				&Engine::Instance().GetPhysicsManager().GetPhysicsSystem());
 		}
+
+		CharacterController(const CharacterController& other)
+		{
+			Character = other.Character;
+			Settings = other.Settings;
+			Speed = other.Speed;
+			JumpForce = other.JumpForce;
+			AllowAirControl = other.AllowAirControl;
+			ControlEnabled = other.ControlEnabled;
+		}
+		CharacterController& operator= (const CharacterController& other)
+		{
+			if (this != &other)
+			{
+				Character = other.Character;
+				Settings = other.Settings;
+				Speed = other.Speed;
+				JumpForce = other.JumpForce;
+				AllowAirControl = other.AllowAirControl;
+				ControlEnabled = other.ControlEnabled;
+			}
+			return *this;
+		}
 	};
 
 	struct TextRenderer
@@ -313,10 +534,15 @@ namespace based::scene
 
 		TextRenderer() = default;
 		TextRenderer(ui::TextEntity* textPtr) : text(textPtr) {}
+		TextRenderer(const TextRenderer& other)
+		{
+			text = other.text;
+		}
 	};
 
 	struct Enabled
 	{
 		Enabled() = default;
+		Enabled(const Enabled& other) = default;
 	};
 }
