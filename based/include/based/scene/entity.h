@@ -14,6 +14,7 @@ namespace based::scene
 		Entity();
 		Entity(entt::registry& registry);
 		Entity(entt::entity handle, entt::registry& registry);
+		Entity& operator= (const Entity& other);
 		virtual ~Entity();
 
 		static std::shared_ptr<Entity> CreateEntity(const std::string& name);
@@ -92,6 +93,8 @@ namespace based::scene
 				func(ent);
 			}
 		}
+
+		entt::registry& GetRegistry() { return mRegistry; }
 
 		void SetActive(bool active);
 

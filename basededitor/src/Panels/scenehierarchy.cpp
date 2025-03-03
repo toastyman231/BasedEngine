@@ -98,6 +98,15 @@ namespace editor::panels
 				}
 			}
 			break;
+		case BasedEventType::BASED_EVENT_DELETE:
+			for (auto& e : Statics::GetSelectedEntities())
+			{
+				if (auto entity = e.lock())
+				{
+					Statics::EngineOperations.EditorDeleteEntity(entity);
+				}
+			}
+			break;
 		default:
 			break;
 		}

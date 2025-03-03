@@ -156,6 +156,16 @@ public:
 			mDetailsPanel->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DUPLICATE });
 			mFileBrowser->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DUPLICATE });
 		}
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_DELETE))
+		{
+			mSceneView->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DELETE });
+			mGameView->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DELETE });
+			mMenuBar->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DELETE });
+			mSceneHierarchy->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DELETE });
+			mDetailsPanel->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DELETE });
+			mFileBrowser->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DELETE });
+		}
 	}
 
 	void Render() override

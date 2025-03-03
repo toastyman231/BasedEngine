@@ -61,6 +61,9 @@ namespace editor
 		bool EditorSetCameraData_Undo(std::shared_ptr<based::scene::Entity> entity,
 			based::graphics::CameraData oldData, based::graphics::CameraData newData);
 
+		bool EditorDeleteEntity(std::shared_ptr<based::scene::Entity> entity);
+		bool EditorDeleteEntity_Undo(std::shared_ptr<based::scene::Entity> entity);
+
 		template <typename Type, typename ...Args>
 		static void AddComponent(based::scene::Entity* entity, Args &&... args)
 		{

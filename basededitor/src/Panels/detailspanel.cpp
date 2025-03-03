@@ -14,7 +14,7 @@ namespace editor::panels
 
 		if (ImGui::Begin(mPanelTitle.c_str()))
 		{
-			auto selections = editor::Statics::GetSelectedEntities();
+			auto selections = Statics::GetSelectedEntities();
 
 			if (selections.empty()) { ImGui::End(); return; }
 

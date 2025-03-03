@@ -20,6 +20,18 @@ namespace based::scene
 	{
 	}
 
+	Entity& Entity::operator=(const Entity& other)
+	{
+		if (this != &other)
+		{
+			mRegistry = std::move(other.mRegistry);
+			mEntity = other.mEntity;
+			mEntityName = other.mEntityName;
+			mIsEnabled = other.mIsEnabled;
+		}
+		return *this;
+	}
+
 	Entity::~Entity()
 	{
 		BASED_TRACE("Destroying entity {}", GetEntityName());
