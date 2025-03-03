@@ -26,7 +26,6 @@ namespace based::graphics
 		, mNear(other.mNear)
 		, mFar(other.mFar)
 		, mFOV(other.mFOV)
-		, main(other.main)
 	{
 		RecalculateProjectionMatrix();
 	}
@@ -40,7 +39,7 @@ namespace based::graphics
 			mNear = other.mNear;
 			mFar = other.mFar;
 			mFOV = other.mFOV;
-			main = other.main;
+			main = false;
 			RecalculateProjectionMatrix();
 		}
 		return *this;

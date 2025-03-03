@@ -522,7 +522,24 @@ namespace editor
 		{
 			if (storage.contains(entity->GetEntityHandle()))
 			{
-				storage.push(entityBacking, storage.value(entity->GetEntityHandle()));
+				if (storage.type().name().find("based::scene::CameraComponent") != std::string_view::npos)
+				{
+					// Need to copy the camera manually because the normal copy constructor
+					// would cause this camera component to point to the exact same camera.
+					// But the camera copy constructor needs to work that way or the editor
+					// and game cameras become the same camera at some point during startup.
+					auto& comp = registry.emplace<based::scene::CameraComponent>(entityBacking);
+					auto& otherComp = entity->GetComponent<based::scene::CameraComponent>();
+					auto newCam = comp.camera.lock();
+					if (auto oldCam = otherComp.camera.lock())
+					{
+						newCam->SetProjection(oldCam->GetProjectionType());
+						newCam->SetFOV(oldCam->GetFOV());
+						newCam->SetNear(oldCam->GetNear());
+						newCam->SetFar(oldCam->GetFar());
+						newCam->SetHeight(oldCam->GetHeight());
+					}
+				} else storage.push(entityBacking, storage.value(entity->GetEntityHandle()));
 			}
 		}
 		newEntity->AddOrReplaceComponent<based::scene::EntityReference>(newEntity);
