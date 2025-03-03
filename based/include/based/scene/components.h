@@ -326,6 +326,7 @@ namespace based::scene
 	{
 		std::weak_ptr<graphics::Camera> camera;
 
+		CameraComponent();
 		CameraComponent(const std::shared_ptr<graphics::Camera>& cam) : camera(cam) {}
 		CameraComponent(const CameraComponent& other)
 		{

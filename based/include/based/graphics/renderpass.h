@@ -35,6 +35,7 @@ namespace based::graphics
 		std::shared_ptr<Framebuffer> mPassBuffer;
 		std::shared_ptr<Material> mOverrideMaterial;
 		std::shared_ptr<Camera> mPassCamera;
+		bool mDidBypassCamera = false;
 
 		static std::shared_ptr<Framebuffer> mLastFrameBuffer;
 	};

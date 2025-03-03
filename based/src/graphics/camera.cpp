@@ -25,9 +25,25 @@ namespace based::graphics
 		, mHeight(other.mHeight)
 		, mNear(other.mNear)
 		, mFar(other.mFar)
-		, mFOV(60.f)
+		, mFOV(other.mFOV)
+		, main(other.main)
 	{
 		RecalculateProjectionMatrix();
+	}
+
+	Camera& Camera::operator=(const Camera& other)
+	{
+		if (this != &other)
+		{
+			mAspectRatio = other.mAspectRatio;
+			mHeight = other.mHeight;
+			mNear = other.mNear;
+			mFar = other.mFar;
+			mFOV = other.mFOV;
+			main = other.main;
+			RecalculateProjectionMatrix();
+		}
+		return *this;
 	}
 
 	void Camera::SetAspectRatio(float aspectRatio)
@@ -178,6 +194,19 @@ namespace based::graphics
 	const glm::vec3 Camera::ScreenToWorldPoint(glm::vec2 point) const
 	{
 		return ScreenToWorldPoint(point.x, point.y);
+	}
+
+	std::string Camera::GetProjectionString(Projection projection)
+	{
+		switch(projection)
+		{
+		case ORTHOGRAPHIC:
+			return "Orthographic";
+		case PERSPECTIVE:
+			return "Perspective";
+		}
+
+		return "PROJECTION ERROR";
 	}
 
 	void Camera::RecalculateProjectionMatrix()

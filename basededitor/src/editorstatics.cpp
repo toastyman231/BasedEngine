@@ -9,6 +9,14 @@
 #include "Player/editorplayer.h"
 #include "external/entt/core/hashed_string.hpp"
 
+#define REFLECT_COMPONENT(ComponentType)                                            \
+{                                                                                   \
+	entt::meta<ComponentType>()                                                     \
+	.type(entt::type_hash<ComponentType>())                                         \
+	.func<&EngineOperations::AddComponent<ComponentType>>("AddComponent"_hs)        \
+	.func<&EngineOperations::RemoveComponent<ComponentType>>("RemoveComponent"_hs); \
+}
+
 namespace editor
 {
 	void Statics::InitializeEditorStatics()
@@ -27,18 +35,10 @@ namespace editor
 		History::SetContext(&mHistoryContext);
 
 		using namespace entt::literals;
-		entt::meta<based::scene::MeshRenderer>()
-			.type(entt::type_hash<based::scene::MeshRenderer>())
-			.func<&EngineOperations::AddComponent<based::scene::MeshRenderer>>("AddComponent"_hs)
-			.func<&EngineOperations::RemoveComponent<based::scene::MeshRenderer>>("RemoveComponent"_hs);
-		entt::meta<based::scene::PointLight>()
-			.type(entt::type_hash<based::scene::PointLight>())
-			.func<&EngineOperations::AddComponent<based::scene::PointLight>>("AddComponent"_hs)
-			.func<&EngineOperations::RemoveComponent<based::scene::PointLight>>("RemoveComponent"_hs);
-		entt::meta<based::scene::DirectionalLight>()
-			.type(entt::type_hash<based::scene::DirectionalLight>())
-			.func<&EngineOperations::AddComponent<based::scene::DirectionalLight>>("AddComponent"_hs)
-			.func<&EngineOperations::RemoveComponent<based::scene::DirectionalLight>>("RemoveComponent"_hs);
+		REFLECT_COMPONENT(based::scene::MeshRenderer)
+		REFLECT_COMPONENT(based::scene::PointLight)
+		REFLECT_COMPONENT(based::scene::DirectionalLight)
+		REFLECT_COMPONENT(based::scene::CameraComponent)
 	}
 
 	bool Statics::NewScene()

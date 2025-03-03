@@ -87,6 +87,10 @@ namespace editor::panels
 				ImGui::Unindent();
 			}
 
+			DrawCameraComponent(entity);
+
+			ImGui::Spacing();
+
 			DrawMeshRendererComponent(entity);
 
 			ImGui::Spacing();
@@ -108,7 +112,7 @@ namespace editor::panels
 			{
 				ImGui::Text("Add Component");
 				static std::vector<std::string> componentTypes = 
-					{ "Mesh Renderer", "Point Light", "Directional Light" };
+					{ "Mesh Renderer", "Point Light", "Directional Light", "Camera Component" };
 
 				if (ImGui::BeginListBox("##nolabel", ImVec2(200,0)))
 				{
@@ -146,6 +150,17 @@ namespace editor::panels
 								if (!meta_type)
 								{
 									BASED_ERROR("Directional Light has not been reflected!");
+								}
+								else
+								{
+									Statics::EngineOperations.EditorAddComponent(meta_type, entity);
+								}
+							} else if (type == "Camera Component")
+							{
+								auto meta_type = entt::resolve(entt::type_hash<scene::CameraComponent>());
+								if (!meta_type)
+								{
+									BASED_ERROR("Camera Component has not been reflected!");
 								}
 								else
 								{
@@ -255,7 +270,6 @@ namespace editor::panels
 
 			static auto madeAnyChange = false;
 			static auto lightSaved = false;
-			auto anyItemEdited = false;
 
 			if (!lightSaved || entity->HasComponent<LightChangedDueToUndo>())
 			{
@@ -288,7 +302,7 @@ namespace editor::panels
 					pl.color = light.color;
 				});
 
-			if (madeAnyChange && (ImGui::IsMouseReleased(0) || anyItemEdited))
+			if (madeAnyChange && ImGui::IsMouseReleased(0))
 			{
 				Statics::EngineOperations.EditorSetPointLightData(entity, savedLightData, light);
 				madeAnyChange = false;
@@ -325,7 +339,6 @@ namespace editor::panels
 
 			static auto madeAnyChange = false;
 			static auto lightSaved = false;
-			auto anyItemEdited = false;
 
 			if (!lightSaved || entity->HasComponent<DLightChangedDueToUndo>())
 			{
@@ -349,11 +362,146 @@ namespace editor::panels
 					pl.color = light.color;
 				});
 
-			if (madeAnyChange && (ImGui::IsMouseReleased(0) || anyItemEdited))
+			if (madeAnyChange && ImGui::IsMouseReleased(0))
 			{
 				Statics::EngineOperations.EditorSetDirectionalLightData(entity, savedLightData, light);
 				madeAnyChange = false;
 				lightSaved = false;
+			}
+
+			ImGui::Unindent();
+		}
+	}
+
+	void DetailsPanel::DrawCameraComponent(std::shared_ptr<based::scene::Entity> entity)
+	{
+		using namespace based;
+
+		auto hasCamera = entity->HasComponent<scene::CameraComponent>();
+		if (ImGui::CollapsingHeader("Camera", &hasCamera, ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Indent(); ImGui::Spacing();
+			auto cameraComp = entity->GetComponent<scene::CameraComponent>();
+			if (!hasCamera)
+			{
+				auto meta_type = entt::resolve(entt::type_hash<scene::CameraComponent>());
+				if (!meta_type)
+				{
+					BASED_ERROR("Camera Component has not been reflected!");
+				}
+				else
+				{
+					Statics::EngineOperations.EditorRemoveComponent(meta_type, entity);
+					return;
+				}
+			}
+
+			static auto madeAnyChange = false;
+			static auto cameraSaved = false;
+
+			if (auto camera = cameraComp.camera.lock())
+			{
+				static std::vector<std::string> projectionOptions = { "Orthographic", "Perspective" };
+				auto currentProjectionString = camera->GetProjectionString(camera->GetProjectionType());
+				auto currentProjection = camera->GetProjectionType();
+
+				static auto oldCameraData = graphics::CameraData{
+					camera->GetProjectionType(), camera->GetFOV(),
+					camera->GetNear(), camera->GetFar(), camera->GetHeight(),
+					camera->main
+				};
+
+				if (!cameraSaved || entity->HasComponent<CamChangedDueToUndo>())
+				{
+					cameraSaved = true;
+					oldCameraData = graphics::CameraData{
+						camera->GetProjectionType(), camera->GetFOV(),
+						camera->GetNear(), camera->GetFar(), camera->GetHeight(),
+						camera->main
+					};
+					entity->RemoveComponent<CamChangedDueToUndo>();
+				}
+
+				bool isMain = camera->main;
+				ImGui::Text("Main Camera"); ImGui::SameLine();
+				if (ImGui::Checkbox("##maincam", &isMain))
+				{
+					madeAnyChange = true;
+				}
+
+				ImGui::Text("Projection"); ImGui::SameLine();
+				if (ImGui::BeginCombo("##proj", currentProjectionString.c_str()))
+				{
+					for (size_t n = 0; n < projectionOptions.size(); n++)
+					{
+						auto item = projectionOptions[n];
+						const bool selected = currentProjectionString.c_str() == item;
+						if (ImGui::Selectable(item.c_str(), selected))
+						{
+							if (item == camera->GetProjectionString(graphics::ORTHOGRAPHIC).c_str())
+							{
+								currentProjection = graphics::ORTHOGRAPHIC;
+							}
+							else currentProjection = graphics::PERSPECTIVE;
+							madeAnyChange = true;
+						}
+					}
+
+					ImGui::EndCombo();
+				}
+
+				auto currentFOV = camera->GetFOV();
+
+				ImGui::Text("FOV"); ImGui::SameLine();
+				if (ImGui::DragFloat("##fov", &currentFOV, 0.01f))
+				{
+					madeAnyChange = true;
+				}
+
+				auto currentNearPlane = camera->GetNear();
+
+				ImGui::Text("Near"); ImGui::SameLine();
+				if (ImGui::DragFloat("##near", &currentNearPlane, 0.01f))
+				{
+					madeAnyChange = true;
+				}
+
+				auto currentFarPlane = camera->GetFar();
+
+				ImGui::Text("Far"); ImGui::SameLine();
+				if (ImGui::DragFloat("##far", &currentFarPlane, 0.01f))
+				{
+					madeAnyChange = true;
+				}
+
+				auto currentHeight = camera->GetHeight();
+				if (currentProjection == graphics::ORTHOGRAPHIC)
+				{
+					ImGui::Text("Height"); ImGui::SameLine();
+					if (ImGui::DragFloat("##height", &currentHeight, 0.01f))
+					{
+						madeAnyChange = true;
+					}
+				}
+
+				camera->SetProjection(currentProjection);
+				camera->SetFOV(currentFOV);
+				camera->SetNear(currentNearPlane);
+				camera->SetFar(currentFarPlane);
+				camera->SetHeight(currentHeight);
+
+				if (madeAnyChange && ImGui::IsMouseReleased(0))
+				{
+					auto newCameraData = graphics::CameraData{
+						camera->GetProjectionType(), camera->GetFOV(),
+						camera->GetNear(), camera->GetFar(), camera->GetHeight(),
+						isMain
+					};
+
+					Statics::EngineOperations.EditorSetCameraData(entity, oldCameraData, newCameraData);
+					madeAnyChange = false;
+					cameraSaved = false;
+				}
 			}
 
 			ImGui::Unindent();

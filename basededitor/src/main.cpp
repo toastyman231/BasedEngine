@@ -88,7 +88,6 @@ public:
 			BASED_WARN("Provided scene is invalid, falling back on default!");
 			editor::Statics::LoadScene(ASSET_PATH("Scenes/Default3D.bscn"));
 		}
-		GetCurrentScene()->SetActiveCamera(editor::Statics::GetEditorCamera());
 
 		auto editorSceneBuffer = std::make_shared<graphics::Framebuffer>(1280, 720);
 		editorSceneBuffer->SetClearColor(glm::vec4(GetWindowProperties().clearColor, 1.0));
@@ -99,7 +98,7 @@ public:
 
 		auto editorMainPass = new graphics::CustomRenderPass(
 			"MainRenderPass", Engine::Instance().GetWindow().GetFramebuffer(), 
-			nullptr, gameCamera);
+			nullptr);
 		editorMainPass->SetOutputName("SceneColor");
 		Engine::Instance().GetRenderManager().InjectPass(editorMainPass,
 			(int)graphics::PassInjectionPoint::BeforeMainColor);

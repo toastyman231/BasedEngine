@@ -17,4 +17,11 @@ namespace based::scene
 			Engine::Instance().GetApp().GetCurrentScene()->GetMaterialStorage());
 		}
 	}
+
+	CameraComponent::CameraComponent()
+	{
+		auto cam = std::make_shared<graphics::Camera>();
+		Engine::Instance().GetApp().GetCurrentScene()->GetCameraStorage().Load("Camera", cam);
+		camera = cam;
+	}
 }

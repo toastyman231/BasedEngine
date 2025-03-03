@@ -65,7 +65,10 @@ namespace based::graphics
 		rm.Submit(BASED_SUBMIT_RC(PushFramebuffer, mPassBuffer, mPassName));
 
 		if (!mPassCamera)
+		{
 			mPassCamera = Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera();
+			mDidBypassCamera = true;
+		}
 		rm.Submit(BASED_SUBMIT_RC(PushCamera, mPassCamera));
 	}
 
@@ -90,6 +93,12 @@ namespace based::graphics
 		if (mOutputName != CRP_NO_OUTPUT)
 		{
 			graphics::DefaultLibraries::GetRenderPassOutputs().Load(mOutputName, mPassBuffer->GetTextureId(), true);
+		}
+
+		if (mDidBypassCamera)
+		{
+			mPassCamera = nullptr;
+			mDidBypassCamera = false;
 		}
 
 		mLastFrameBuffer = mPassBuffer;

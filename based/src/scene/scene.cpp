@@ -209,7 +209,9 @@ namespace based::scene
 	{
 		if (mActiveCamera) mActiveCamera->main = false;
 		mActiveCamera = std::move(cam);
-		mActiveCamera->main = true;
+
+		if (mActiveCamera)
+			mActiveCamera->main = true;
 	}
 
 	bool Scene::LoadScene(const std::string& path)

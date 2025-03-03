@@ -56,6 +56,11 @@ namespace editor
 		bool EditorDuplicateEntity(std::shared_ptr<based::scene::Entity> entity);
 		bool EditorDuplicateEntity_Undo(std::shared_ptr<based::scene::Entity> entity);
 
+		bool EditorSetCameraData(std::shared_ptr<based::scene::Entity> entity,
+			based::graphics::CameraData oldData, based::graphics::CameraData newData);
+		bool EditorSetCameraData_Undo(std::shared_ptr<based::scene::Entity> entity,
+			based::graphics::CameraData oldData, based::graphics::CameraData newData);
+
 		template <typename Type, typename ...Args>
 		static void AddComponent(based::scene::Entity* entity, Args &&... args)
 		{

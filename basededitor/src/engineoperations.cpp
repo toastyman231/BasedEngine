@@ -553,4 +553,83 @@ namespace editor
 
 		return true;
 	}
+
+	bool EngineOperations::EditorSetCameraData(std::shared_ptr<based::scene::Entity> entity,
+		based::graphics::CameraData oldData, based::graphics::CameraData newData)
+	{
+		HISTORY_PUSH(EditorSetCameraData, entity, oldData, newData);
+
+		bool isSceneDirty = Statics::IsSceneDirty();
+		HISTORY_SAVE(isSceneDirty);
+
+		using namespace based;
+
+		auto cam = entity->GetComponent<scene::CameraComponent>();
+		auto scene = Engine::Instance().GetApp().GetCurrentScene();
+
+		auto previousMainCam = scene->GetActiveCamera();
+		HISTORY_SAVE(previousMainCam);
+
+		if (auto camera = cam.camera.lock())
+		{
+			camera->SetProjection(newData.projection);
+			camera->SetFOV(newData.fov);
+			camera->SetNear(newData.nearPlane);
+			camera->SetFar(newData.farPlane);
+			camera->SetHeight(newData.height);
+
+			if (newData.main && previousMainCam != camera)
+			{
+				scene->SetActiveCamera(camera);
+			} else if (!newData.main && previousMainCam == camera)
+			{
+				scene->SetActiveCamera(nullptr);
+			}
+		}
+
+		Statics::SetSceneDirty(true);
+
+		return true;
+	}
+
+	bool EngineOperations::EditorSetCameraData_Undo(std::shared_ptr<based::scene::Entity> entity,
+		based::graphics::CameraData oldData, based::graphics::CameraData newData)
+	{
+		HISTORY_POP();
+
+		bool isSceneDirty;
+		HISTORY_LOAD(isSceneDirty);
+
+		using namespace based;
+
+		std::shared_ptr<graphics::Camera> previousMainCam;
+		HISTORY_LOAD(previousMainCam);
+
+		auto cam = entity->GetComponent<scene::CameraComponent>();
+		auto scene = Engine::Instance().GetApp().GetCurrentScene();
+
+		if (auto camera = cam.camera.lock())
+		{
+			camera->SetProjection(oldData.projection);
+			camera->SetFOV(oldData.fov);
+			camera->SetNear(oldData.nearPlane);
+			camera->SetFar(oldData.farPlane);
+			camera->SetHeight(oldData.height);
+
+			if (oldData.main && previousMainCam != scene->GetActiveCamera())
+			{
+				scene->SetActiveCamera(previousMainCam);
+			}
+			else if (!oldData.main && camera == scene->GetActiveCamera())
+			{
+				scene->SetActiveCamera(nullptr);
+			}
+		}
+
+		entity->AddComponent<CamChangedDueToUndo>();
+
+		Statics::SetSceneDirty(isSceneDirty);
+
+		return true;
+	}
 }

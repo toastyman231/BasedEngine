@@ -10,11 +10,23 @@ namespace based::graphics
 		PERSPECTIVE
 	};
 
+	// Editor use only!
+	struct CameraData
+	{
+		Projection projection;
+		float fov;
+		float nearPlane;
+		float farPlane;
+		float height;
+		bool main;
+	};
+
 	class Camera
 	{
 	public:
 		Camera();
 		Camera(const Camera& other);
+		Camera& operator= (const Camera& other);
 
 		Projection projection = ORTHOGRAPHIC;
 		bool main = false;
@@ -50,6 +62,8 @@ namespace based::graphics
 		const glm::vec3 ScreenToWorldPoint(glm::vec2 point) const;
 
 		Projection GetProjectionType() const { return projection; }
+
+		static std::string GetProjectionString(Projection projection);
 	private:
 		float mAspectRatio;
 		float mHeight, mNear, mFar;
