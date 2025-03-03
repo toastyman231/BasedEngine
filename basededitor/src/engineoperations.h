@@ -48,6 +48,11 @@ namespace editor
 		bool EditorSetPointLightData_Undo(std::shared_ptr<based::scene::Entity> entity,
 			based::scene::PointLight oldLightData, based::scene::PointLight newLightData);
 
+		bool EditorSetDirectionalLightData(std::shared_ptr<based::scene::Entity> entity,
+			based::scene::DirectionalLight oldLightData, based::scene::DirectionalLight newLightData);
+		bool EditorSetDirectionalLightData_Undo(std::shared_ptr<based::scene::Entity> entity,
+			based::scene::DirectionalLight oldLightData, based::scene::DirectionalLight newLightData);
+
 		bool EditorDuplicateEntity(std::shared_ptr<based::scene::Entity> entity);
 		bool EditorDuplicateEntity_Undo(std::shared_ptr<based::scene::Entity> entity);
 

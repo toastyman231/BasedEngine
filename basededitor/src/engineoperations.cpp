@@ -457,6 +457,54 @@ namespace editor
 		return true;
 	}
 
+	bool EngineOperations::EditorSetDirectionalLightData(std::shared_ptr<based::scene::Entity> entity,
+		based::scene::DirectionalLight oldLightData, based::scene::DirectionalLight newLightData)
+	{
+		HISTORY_PUSH(EditorSetDirectionalLightData, entity, oldLightData, newLightData);
+
+		bool isSceneDirty = Statics::IsSceneDirty();
+		HISTORY_SAVE(isSceneDirty);
+
+		using namespace based;
+
+		auto& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+		registry.patch<scene::DirectionalLight>(entity->GetEntityHandle(),
+			[newLightData](scene::DirectionalLight& pl)
+			{
+				pl.intensity = newLightData.intensity;
+				pl.color = newLightData.color;
+			});
+
+		Statics::SetSceneDirty(true);
+
+		return true;
+	}
+
+	bool EngineOperations::EditorSetDirectionalLightData_Undo(std::shared_ptr<based::scene::Entity> entity,
+		based::scene::DirectionalLight oldLightData, based::scene::DirectionalLight newLightData)
+	{
+		HISTORY_POP();
+
+		bool isSceneDirty;
+		HISTORY_LOAD(isSceneDirty);
+
+		using namespace based;
+
+		auto& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+		registry.patch<scene::DirectionalLight>(entity->GetEntityHandle(),
+			[oldLightData](scene::DirectionalLight& pl)
+			{
+				pl.intensity = oldLightData.intensity;
+				pl.color = oldLightData.color;
+			});
+
+		entity->AddComponent<DLightChangedDueToUndo>();
+
+		Statics::SetSceneDirty(isSceneDirty);
+
+		return true;
+	}
+
 	bool EngineOperations::EditorDuplicateEntity(std::shared_ptr<based::scene::Entity> entity)
 	{
 		HISTORY_PUSH(EditorDuplicateEntity, entity);

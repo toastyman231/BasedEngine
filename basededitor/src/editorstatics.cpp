@@ -35,6 +35,10 @@ namespace editor
 			.type(entt::type_hash<based::scene::PointLight>())
 			.func<&EngineOperations::AddComponent<based::scene::PointLight>>("AddComponent"_hs)
 			.func<&EngineOperations::RemoveComponent<based::scene::PointLight>>("RemoveComponent"_hs);
+		entt::meta<based::scene::DirectionalLight>()
+			.type(entt::type_hash<based::scene::DirectionalLight>())
+			.func<&EngineOperations::AddComponent<based::scene::DirectionalLight>>("AddComponent"_hs)
+			.func<&EngineOperations::RemoveComponent<based::scene::DirectionalLight>>("RemoveComponent"_hs);
 	}
 
 	bool Statics::NewScene()

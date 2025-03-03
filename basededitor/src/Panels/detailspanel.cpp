@@ -91,6 +91,10 @@ namespace editor::panels
 
 			ImGui::Spacing();
 
+			DrawDirectionalLightComponent(entity);
+
+			ImGui::Spacing();
+
 			DrawPointLightComponent(entity);
 
 			auto isPopupOpen = ImGui::IsPopupOpen("ComponentPicker");
@@ -103,7 +107,8 @@ namespace editor::panels
 			if (ImGui::BeginPopup("ComponentPicker"))
 			{
 				ImGui::Text("Add Component");
-				static std::vector<std::string> componentTypes = { "MeshRenderer", "PointLight" };
+				static std::vector<std::string> componentTypes = 
+					{ "Mesh Renderer", "Point Light", "Directional Light" };
 
 				if (ImGui::BeginListBox("##nolabel", ImVec2(200,0)))
 				{
@@ -111,7 +116,7 @@ namespace editor::panels
 					{
 						if (ImGui::Selectable(type.c_str()))
 						{
-							if (type == "MeshRenderer")
+							if (type == "Mesh Renderer")
 							{
 								auto meta_type = entt::resolve(entt::type_hash<scene::MeshRenderer>());
 								if (!meta_type)
@@ -123,12 +128,24 @@ namespace editor::panels
 									Statics::EngineOperations.EditorAddComponent(meta_type, entity);
 								}
 							}
-							else if (type == "PointLight")
+							else if (type == "Point Light")
 							{
 								auto meta_type = entt::resolve(entt::type_hash<scene::PointLight>());
 								if (!meta_type)
 								{
 									BASED_ERROR("Mesh Renderer has not been reflected!");
+								}
+								else
+								{
+									Statics::EngineOperations.EditorAddComponent(meta_type, entity);
+								}
+							}
+							else if (type == "Directional Light")
+							{
+								auto meta_type = entt::resolve(entt::type_hash<scene::DirectionalLight>());
+								if (!meta_type)
+								{
+									BASED_ERROR("Directional Light has not been reflected!");
 								}
 								else
 								{
@@ -274,6 +291,67 @@ namespace editor::panels
 			if (madeAnyChange && (ImGui::IsMouseReleased(0) || anyItemEdited))
 			{
 				Statics::EngineOperations.EditorSetPointLightData(entity, savedLightData, light);
+				madeAnyChange = false;
+				lightSaved = false;
+			}
+
+			ImGui::Unindent();
+		}
+	}
+
+	void DetailsPanel::DrawDirectionalLightComponent(std::shared_ptr<based::scene::Entity> entity)
+	{
+		using namespace based;
+
+		auto hasDirLight = entity->HasComponent<scene::DirectionalLight>();
+		if (ImGui::CollapsingHeader("Directional Light", &hasDirLight, ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Indent(); ImGui::Spacing();
+			auto light = entity->GetComponent<scene::DirectionalLight>();
+			static auto savedLightData = light;
+			if (!hasDirLight)
+			{
+				auto meta_type = entt::resolve(entt::type_hash<scene::DirectionalLight>());
+				if (!meta_type)
+				{
+					BASED_ERROR("Directional Light has not been reflected!");
+				}
+				else
+				{
+					Statics::EngineOperations.EditorRemoveComponent(meta_type, entity);
+					return;
+				}
+			}
+
+			static auto madeAnyChange = false;
+			static auto lightSaved = false;
+			auto anyItemEdited = false;
+
+			if (!lightSaved || entity->HasComponent<DLightChangedDueToUndo>())
+			{
+				lightSaved = true;
+				savedLightData = light;
+				entity->RemoveComponent<DLightChangedDueToUndo>();
+			}
+
+			ImGui::Text("Color"); ImGui::SameLine();
+			if (ImGui::ColorEdit3("##color", glm::value_ptr(light.color)))
+				madeAnyChange = true;
+
+			ImGui::Text("Intensity"); ImGui::SameLine();
+			if (ImGui::DragFloat("##intensity", &light.intensity, 0.01f)) madeAnyChange = true;
+
+			auto& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+			registry.patch<scene::DirectionalLight>(entity->GetEntityHandle(),
+				[light](scene::DirectionalLight& pl)
+				{
+					pl.intensity = light.intensity;
+					pl.color = light.color;
+				});
+
+			if (madeAnyChange && (ImGui::IsMouseReleased(0) || anyItemEdited))
+			{
+				Statics::EngineOperations.EditorSetDirectionalLightData(entity, savedLightData, light);
 				madeAnyChange = false;
 				lightSaved = false;
 			}

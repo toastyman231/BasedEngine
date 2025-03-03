@@ -20,5 +20,6 @@ namespace editor::panels
 	private:
 		void DrawMeshRendererComponent(std::shared_ptr<based::scene::Entity> entity);
 		void DrawPointLightComponent(std::shared_ptr<based::scene::Entity> entity);
+		void DrawDirectionalLightComponent(std::shared_ptr<based::scene::Entity> entity);
 	};
 }
