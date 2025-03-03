@@ -80,12 +80,15 @@ namespace editor::panels
 			}
 			DrawRightClickMenu();
 		}
+		mIsFocused = ImGui::IsWindowFocused();
 		ImGui::End();
 	}
 
 	void SceneHierarchy::ProcessEvent(BasedEvent event)
 	{
 		Panel::ProcessEvent(event);
+
+		if (!mIsFocused) return;
 
 		switch (event.EventType)
 		{

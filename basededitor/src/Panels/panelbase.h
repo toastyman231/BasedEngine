@@ -18,10 +18,7 @@ namespace editor::panels
 		virtual void Render() = 0;
 		virtual void Shutdown() = 0;
 
-		virtual void ProcessEvent(BasedEvent event)
-		{
-			//if (!ImGui::IsWindowFocused()) return;
-		}
+		virtual void ProcessEvent(BasedEvent event) {}
 
 	protected:
 		std::string mPanelTitle = "Untitled Panel";
