@@ -37,6 +37,8 @@ namespace editor
 			auto entity = entPtr.lock();
 			auto camera = cameraComp.lock();
 
+			BASED_TRACE("Entity player exists!");
+
 			if (based::input::Mouse::Button(BASED_INPUT_MOUSE_RIGHT) || 
 				based::input::Mouse::Button(BASED_INPUT_MOUSE_LEFT))
 			{

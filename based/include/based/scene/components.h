@@ -66,6 +66,8 @@ namespace based::scene
 		EntityReference(const std::shared_ptr<Entity>& entityPtr) : entity(entityPtr) {}
 	};
 
+	struct DontDestroyOnLoad {};
+
 	struct IDComponent
 	{
 		core::UUID uuid;

@@ -30,6 +30,24 @@ namespace based::scene
 		{
 			mSceneName = name;
 		}
+		Scene(const std::string& name, entt::registry& registry)
+			: Scene(name)
+		{
+			for (auto [id, storage] : registry.storage())
+			{
+				if (storage.type().name().find("DontDestroyOnLoad") != std::string_view::npos)
+				{
+					for (auto [newId, newStorage] : mRegistry.storage())
+					{
+						if (newStorage.type().name().find("DontDestroyOnLoad") != std::string_view::npos)
+						{
+							// TODO: Load scenes properly
+							//newStorage.push(storage, );
+						}
+					}
+				}
+			}
+		}
 		~Scene() = default;
 
 		void InitializeScene() const;

@@ -97,16 +97,16 @@ public:
 		Engine::Instance().GetRenderManager().RemovePass(2);
 
 		auto editorMainPass = new graphics::CustomRenderPass(
-			"MainRenderPass", Engine::Instance().GetWindow().GetFramebuffer(), 
+			"MainColorPass", Engine::Instance().GetWindow().GetFramebuffer(), 
 			nullptr);
-		editorMainPass->SetOutputName("SceneColor");
+		editorMainPass->AddOutputName("SceneColor");
 		Engine::Instance().GetRenderManager().InjectPass(editorMainPass,
 			(int)graphics::PassInjectionPoint::BeforeMainColor);
 
 		auto editorRenderPass = new graphics::CustomRenderPass(
 			"EditorRenderPass", editorSceneBuffer, nullptr, 
 			editor::Statics::GetEditorCamera());
-		editorRenderPass->SetOutputName("EditorColor");
+		editorRenderPass->AddOutputName("EditorColor");
 		Engine::Instance().GetRenderManager().InjectPass(editorRenderPass, 
 			(int)graphics::PassInjectionPoint::BeforeMainColor);
 

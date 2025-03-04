@@ -17,7 +17,7 @@ namespace based::graphics
 		~Framebuffer();
 
 		inline uint32_t GetFbo() const { return mFbo; }
-		inline uint32_t GetTextureId() const { return mTextureIDs[1]; }
+		inline uint32_t GetTextureId() const { return mTextureIDs[0]; }
 		inline uint32_t GetTexture(int index)
 		{
 			BASED_ASSERT(index >= 0 && index < mTextureIDs.size(), "Invalid texture index passed to framebuffer!");
