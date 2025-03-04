@@ -258,14 +258,15 @@ namespace based
                     auto shadowDepthPass = new graphics::CustomRenderPass(
                         "ShadowDepthPass", mWindow.GetShadowBuffer(),
                         graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"));
-                    shadowDepthPass->SetOutputName("ShadowMap");
+                    shadowDepthPass->AddOutputName("ShadowMap");
                     mRenderManager.InjectPass(shadowDepthPass);
                     auto mainRenderPass = new graphics::CustomRenderPass(
                         "MainColorPass", mWindow.GetFramebuffer());
-                    mainRenderPass->SetOutputName("SceneColor");
+                    mainRenderPass->AddOutputName("SceneColor");
+                    mainRenderPass->AddOutputName("SceneDepth");
                     mRenderManager.InjectPass(mainRenderPass);
                     auto uiRenderPass = new graphics::UIRenderPass("UserInterfacePass", mWindow.GetFramebuffer());
-                    uiRenderPass->SetOutputName("SceneColor");
+                    uiRenderPass->AddOutputName("SceneColor");
                     mRenderManager.InjectPass(uiRenderPass);
 
                     // Initialize UI after input and rendering is initialized

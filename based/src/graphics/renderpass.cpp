@@ -53,16 +53,16 @@ namespace based::graphics
 		return mPassName;
 	}
 
-	void CustomRenderPass::SetOutputName(const std::string& name)
+	void CustomRenderPass::AddOutputName(const std::string& name)
 	{
-		mOutputName = name;
+		mOutputNames.emplace_back(name);
 	}
 
 	void CustomRenderPass::BeginRender()
 	{
 		auto& rm = Engine::Instance().GetRenderManager();
 
-		rm.Submit(BASED_SUBMIT_RC(PushFramebuffer, mPassBuffer, mPassName));
+		rm.Submit(BASED_SUBMIT_RC(PushFramebuffer, mPassBuffer, mPassName, mShouldClear));
 
 		if (!mPassCamera)
 		{
@@ -90,10 +90,16 @@ namespace based::graphics
 		rm.Submit(BASED_SUBMIT_RC(PopFramebuffer));
 		rm.Flush();
 
-		if (mOutputName != CRP_NO_OUTPUT)
+		int index = 0;
+		for (auto& name : mOutputNames)
 		{
-			graphics::DefaultLibraries::GetRenderPassOutputs().Load(mOutputName, mPassBuffer->GetTextureId(), true);
+			if (name != CRP_NO_OUTPUT)
+			{
+				DefaultLibraries::GetRenderPassOutputs().Load(name, mPassBuffer->GetTexture(index), true);
+			}
+			index++;
 		}
+		
 
 		if (mDidBypassCamera)
 		{
@@ -131,9 +137,14 @@ namespace based::graphics
 		rm.Submit(BASED_SUBMIT_RC(PopFramebuffer));
 		rm.Flush();
 
-		if (mOutputName != CRP_NO_OUTPUT)
+		int index = 0;
+		for (auto& name : mOutputNames)
 		{
-			graphics::DefaultLibraries::GetRenderPassOutputs().Load(mOutputName, mLastFrameBuffer->GetTextureId(), true);
+			if (name != CRP_NO_OUTPUT)
+			{
+				DefaultLibraries::GetRenderPassOutputs().Load(name, mPassBuffer->GetTexture(index), true);
+			}
+			index++;
 		}
 
 		mLastFrameBuffer = mPassBuffer;
@@ -142,7 +153,7 @@ namespace based::graphics
 	PostProcessPass::PostProcessPass(const std::string& name, const std::string& output, std::shared_ptr<Material> material)
 		: CustomRenderPass(name, std::move(material))
 	{
-		mOutputName = output;
+		AddOutputName(output);
 
 		mVA = std::make_shared<VertexArray>();
 
@@ -161,7 +172,7 @@ namespace based::graphics
 	                                 std::shared_ptr<Framebuffer> buffer)
 		: CustomRenderPass(name, std::move(buffer), std::move(material))
 	{
-		mOutputName = output;
+		AddOutputName(output);
 
 		mVA = std::make_shared<VertexArray>();
 

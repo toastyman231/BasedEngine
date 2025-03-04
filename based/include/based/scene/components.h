@@ -224,6 +224,7 @@ namespace based::scene
 	{
 		std::weak_ptr<graphics::Mesh> mesh;
 		std::weak_ptr<graphics::Material> material;
+		std::vector<std::string> excludedPasses;
 
 		MeshRenderer();
 
@@ -243,6 +244,7 @@ namespace based::scene
 		{
 			mesh = other.mesh;
 			material = other.material;
+			excludedPasses = other.excludedPasses;
 		}
 		MeshRenderer& operator= (const MeshRenderer& other)
 		{
@@ -250,6 +252,7 @@ namespace based::scene
 			{
 				mesh = other.mesh;
 				material = other.material;
+				excludedPasses = other.excludedPasses;
 			}
 			return *this;
 		}

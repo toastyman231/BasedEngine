@@ -23,15 +23,17 @@ namespace based::graphics
 
 		std::shared_ptr<Material> GetOverrideMaterial();
 		const std::string& GetPassName();
-		void SetOutputName(const std::string& name);
+		void AddOutputName(const std::string& name);
 
 		virtual void BeginRender();
 		virtual void Render();
 		virtual void EndRender();
 
+		bool mShouldClear = true;
+
 	protected:
 		std::string mPassName;
-		std::string mOutputName = CRP_NO_OUTPUT;
+		std::vector<std::string> mOutputNames;
 		std::shared_ptr<Framebuffer> mPassBuffer;
 		std::shared_ptr<Material> mOverrideMaterial;
 		std::shared_ptr<Camera> mPassCamera;

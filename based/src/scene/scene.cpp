@@ -110,6 +110,12 @@ namespace based::scene
 			scene::MeshRenderer renderer = mRegistry.get<MeshRenderer>(entity);
 			scene::EntityReference ent = mRegistry.get<EntityReference>(entity);
 
+			if (std::find(renderer.excludedPasses.begin(), renderer.excludedPasses.end(), 
+				Engine::Instance().GetRenderManager().GetCurrentPassName()) != renderer.excludedPasses.end())
+			{
+				continue;
+			}
+
 			auto m = renderer.mesh.lock();
 			auto material = renderer.material.lock();
 

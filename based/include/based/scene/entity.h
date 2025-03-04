@@ -71,7 +71,7 @@ namespace based::scene
 		}
 
 		template<typename Type>
-		inline Type GetComponent()
+		inline Type& GetComponent()
 		{
 			return mRegistry.get<Type>(mEntity);
 		}

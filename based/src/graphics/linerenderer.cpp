@@ -30,7 +30,7 @@ namespace based::graphics
 		mLines.emplace_back(va, mat, width, duration, color);
 	}
 
-	// SHOULD ONLY BE CALLED ONCE PER FRAMED BY ENGINE
+	// SHOULD ONLY BE CALLED ONCE PER FRAME BY ENGINE
 	void DebugLineRenderer::DrawLines()
 	{
 		std::vector<size_t> linesToRemove;
