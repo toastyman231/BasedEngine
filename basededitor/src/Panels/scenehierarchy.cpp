@@ -28,7 +28,9 @@ namespace editor::panels
 			float numRows = (float)mCurrentIndex + 1.f;
 			float hierarchyFullHeight = std::max(textHeight * numRows + 10.f, ImGui::GetContentRegionAvail().y);
 
-			if (ImGui::InvisibleButton("##hierarchybg",
+			if (!based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL) &&
+				!based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT) &&
+				ImGui::InvisibleButton("##hierarchybg",
 				ImVec2(ImGui::GetContentRegionAvail().x, hierarchyFullHeight)))
 			{
 				Statics::SetSelectedEntities({});
@@ -38,7 +40,7 @@ namespace editor::panels
 				
 			ImGui::SetItemAllowOverlap();
 			ImGui::SetCursorScreenPos(pos);
-			
+
 			mCurrentIndex = 0;
 			mCurrentCount = 0;
 			for (auto e : view)
@@ -177,8 +179,7 @@ namespace editor::panels
 				|| based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)))
 		{
 			Statics::SetSelectedFiles({});
-			if (!Statics::SelectedEntitiesContains(entity))
-				Statics::SetSelectedEntities({ entity });
+			Statics::SetSelectedEntities({ entity });
 			mRenameIndex = -1;
 		}
 		else if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)
@@ -186,6 +187,7 @@ namespace editor::panels
 		{
 			auto entities = Statics::GetSelectedEntities();
 			entities.emplace_back(entity);
+			Statics::SetSelectedFiles({});
 			if (!Statics::SelectedEntitiesContains(entity))
 			{
 				Statics::SetSelectedEntities(entities);
