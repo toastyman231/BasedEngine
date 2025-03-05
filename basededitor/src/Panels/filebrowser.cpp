@@ -90,6 +90,7 @@ namespace editor::panels
 			auto textHeight = ImGui::GetTextLineHeightWithSpacing();
 			float numRows = based::math::Ceil((float)(mCurrentFileIndex + 1) / (float)mNumColumns);
 			float browserFullHeight = numRows * mFileSize.y + textHeight * numRows + 10.f;
+			browserFullHeight = std::max(browserFullHeight, ImGui::GetContentRegionAvail().y);
 
 			if (ImGui::InvisibleButton("##bg", ImVec2(ImGui::GetContentRegionMax().x, browserFullHeight)))
 			{
@@ -423,6 +424,7 @@ namespace editor::panels
 							mRenamePath = "";
 						}
 					}
+					ImGui::SetItemDefaultFocus();
 				} else
 				{
 					ImGuiSelectableFlags flags = ImGuiSelectableFlags_AllowDoubleClick;
