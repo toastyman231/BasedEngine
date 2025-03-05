@@ -1,5 +1,6 @@
 #pragma once
 #include "panelbase.h"
+#include "../external/imguizmo/ImGuizmo.h"
 
 namespace based::graphics
 {
@@ -31,9 +32,26 @@ namespace editor::panels
 		void Shutdown() override {}
 		void Render() override;
 
-	private:
+	protected:
 		std::shared_ptr<based::graphics::Camera> mViewCamera;
 		std::shared_ptr<based::graphics::Framebuffer> mBackingBuffer;
 		std::string mOutputBufferId = "SceneColor";
+	};
+
+	class EditorView : public GameView
+	{
+	public:
+		EditorView(const std::shared_ptr<based::graphics::Camera>& camera, const std::string& title,
+			const std::shared_ptr<based::graphics::Framebuffer>& buffer)
+			: GameView(camera, title, buffer)
+		{
+		}
+
+		void Render() override;
+		void ProcessEvent(BasedEvent event) override;
+
+	private:
+		ImGuizmo::OPERATION mOperation = ImGuizmo::OPERATION::TRANSLATE;
+		ImGuizmo::MODE mMode = ImGuizmo::MODE::WORLD;
 	};
 }

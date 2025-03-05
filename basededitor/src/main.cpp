@@ -111,7 +111,7 @@ public:
 		Engine::Instance().GetRenderManager().InjectPass(editorRenderPass, 
 			(int)graphics::PassInjectionPoint::BeforeMainColor);
 
-		mSceneView = new editor::panels::GameView(
+		mSceneView = new editor::panels::EditorView(
 			editor::Statics::GetEditorCamera(), "Scene View", editorSceneBuffer);
 		mGameView = new editor::panels::GameView(
 			gameCamera, "Game View", Engine::Instance().GetWindow().GetFramebuffer());
@@ -166,6 +166,36 @@ public:
 			mSceneHierarchy->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DELETE });
 			mDetailsPanel->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DELETE });
 			mFileBrowser->ProcessEvent({ editor::BasedEventType::BASED_EVENT_DELETE });
+		}
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_W))
+		{
+			mSceneView->ProcessEvent({ editor::BasedEventType::BASED_EVENT_TRANSLATE });
+			mGameView->ProcessEvent({ editor::BasedEventType::BASED_EVENT_TRANSLATE });
+			mMenuBar->ProcessEvent({ editor::BasedEventType::BASED_EVENT_TRANSLATE });
+			mSceneHierarchy->ProcessEvent({ editor::BasedEventType::BASED_EVENT_TRANSLATE });
+			mDetailsPanel->ProcessEvent({ editor::BasedEventType::BASED_EVENT_TRANSLATE });
+			mFileBrowser->ProcessEvent({ editor::BasedEventType::BASED_EVENT_TRANSLATE });
+		}
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_E))
+		{
+			mSceneView->ProcessEvent({ editor::BasedEventType::BASED_EVENT_ROTATE });
+			mGameView->ProcessEvent({ editor::BasedEventType::BASED_EVENT_ROTATE });
+			mMenuBar->ProcessEvent({ editor::BasedEventType::BASED_EVENT_ROTATE });
+			mSceneHierarchy->ProcessEvent({ editor::BasedEventType::BASED_EVENT_ROTATE });
+			mDetailsPanel->ProcessEvent({ editor::BasedEventType::BASED_EVENT_ROTATE });
+			mFileBrowser->ProcessEvent({ editor::BasedEventType::BASED_EVENT_ROTATE });
+		}
+
+		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_R))
+		{
+			mSceneView->ProcessEvent({ editor::BasedEventType::BASED_EVENT_SCALE });
+			mGameView->ProcessEvent({ editor::BasedEventType::BASED_EVENT_SCALE });
+			mMenuBar->ProcessEvent({ editor::BasedEventType::BASED_EVENT_SCALE });
+			mSceneHierarchy->ProcessEvent({ editor::BasedEventType::BASED_EVENT_SCALE });
+			mDetailsPanel->ProcessEvent({ editor::BasedEventType::BASED_EVENT_SCALE });
+			mFileBrowser->ProcessEvent({ editor::BasedEventType::BASED_EVENT_SCALE });
 		}
 	}
 
