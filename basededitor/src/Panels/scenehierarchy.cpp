@@ -155,6 +155,7 @@ namespace editor::panels
 		{
 			std::string buffer = entity->GetEntityName();
 			ImGuiInputTextFlags textFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll;
+			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 			if (ImGui::InputText("", &buffer, textFlags))
 			{
 				if (!buffer.empty())

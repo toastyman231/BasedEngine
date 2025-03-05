@@ -659,26 +659,7 @@ namespace editor
 		bool isSceneDirty = Statics::IsSceneDirty();
 		HISTORY_SAVE(isSceneDirty);
 
-		auto scene = Engine::Instance().GetApp().GetCurrentScene();
-		auto& registry = scene->GetRegistry();
-
-		if (!Statics::GetHistory().IsRedoing())
-		{
-			auto backingEntityCopy = registry.create();
-
-			for (auto [id, storage] : registry.storage())
-			{
-				if (storage.contains(entity->GetEntityHandle()))
-				{
-					storage.push(backingEntityCopy, storage.value(entity->GetEntityHandle()));
-				}
-			}
-			registry.remove<scene::EntityReference>(backingEntityCopy);
-
-			HISTORY_SAVE(backingEntityCopy);
-		}
-
-		scene::Entity::DestroyEntity(entity);
+		entity->RemoveComponent<scene::EntityReference>();
 
 		Statics::SetSceneDirty(true);
 		Statics::SetSelectedEntities({});
@@ -693,34 +674,9 @@ namespace editor
 		bool isSceneDirty;
 		HISTORY_LOAD(isSceneDirty);
 
-		entt::entity backingEntityCopy;
-		HISTORY_LOAD(backingEntityCopy);
-
 		using namespace based;
 
-		auto scene = Engine::Instance().GetApp().GetCurrentScene();
-		auto& registry = scene->GetRegistry();
-
-		auto oldID = registry.get<scene::IDComponent>(backingEntityCopy).uuid;
-
-		// TODO: Deleting and then undoing causes a crash when using details panel
-		auto entityBacking = registry.create(entity->GetEntityHandle());
-		auto newEntity = std::make_shared<scene::Entity>(entityBacking, entity->GetRegistry());
-		newEntity->SetEntityName(entity->GetEntityName());
-		for (auto [id, storage] : registry.storage())
-		{
-			if (storage.contains(backingEntityCopy))
-			{
-				storage.push(entityBacking, storage.value(backingEntityCopy));
-			}
-		}
-		newEntity->AddOrReplaceComponent<scene::EntityReference>(newEntity);
-		newEntity->AddOrReplaceComponent<scene::IDComponent>(oldID);
-		newEntity->SetParent(entity->Parent.lock());
-		newEntity->SetActive(entity->IsActive());
-		scene->GetEntityStorage().Load(newEntity->GetEntityName(), newEntity, true);
-
-		registry.destroy(backingEntityCopy);
+		entity->AddComponent<scene::EntityReference>(entity);
 
 		Statics::SetSceneDirty(isSceneDirty);
 

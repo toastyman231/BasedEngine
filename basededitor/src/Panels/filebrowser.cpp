@@ -424,7 +424,7 @@ namespace editor::panels
 							mRenamePath = "";
 						}
 					}
-					ImGui::SetItemDefaultFocus();
+					ImGui::SetKeyboardFocusHere(-1);
 				} else
 				{
 					ImGuiSelectableFlags flags = ImGuiSelectableFlags_AllowDoubleClick;
@@ -436,14 +436,16 @@ namespace editor::panels
 					ImGui::Selectable(dir.path().filename().string().c_str(), 
 						selected, flags, ImVec2(itemSize.x, 0));
 					ImGui::PopStyleVar();
+				}
 
-					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-					{
-						mRenamePath = dir.path();
-					} else if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0))
-					{
-						mRenamePath = "";
-					}
+				// TODO: Figure out how to cancel renames properly
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+				{
+					mRenamePath = dir.path();
+				}
+				else if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0))
+				{
+					mRenamePath = "";
 				}
 
 				ImGui::NextColumn();
