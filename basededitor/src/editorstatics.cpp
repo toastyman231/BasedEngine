@@ -34,7 +34,7 @@ namespace editor
 		mEditorPlayer->AddComponent<based::scene::CameraComponent>(mEditorCamera);
 		mEditorPlayer->AddComponent<EditorPlayer>();
 		mEditorPlayer->AddComponent<based::scene::DontDestroyOnLoad>();
-		based::Engine::Instance().GetApp().GetCurrentScene()->GetEntityStorage().Load("EditorPlayer", mEditorPlayer);
+		//based::Engine::Instance().GetApp().GetCurrentScene()->GetEntityStorage().Load("EditorPlayer", mEditorPlayer);
 
 		History::SetContext(&mHistoryContext);
 
@@ -84,28 +84,34 @@ namespace editor
 		return true;
 	}
 
-	bool Statics::OpenScene(bool keepLoadedAssets)
+	bool Statics::OpenScene(const std::string& path, bool keepLoadedAssets)
 	{
-		static char const* patterns = { "*.bscn" };
-		const char* fileLocation = tinyfd_openFileDialog(
-			"Select Scene",
-			nullptr,
-			1,
-			&patterns,
-			NULL,
-			0
-		);
-
-		if (!fileLocation)
+		auto openPath = path;
+		if (openPath.empty())
 		{
-			BASED_WARN("Invalid scene chosen, aborting!");
-			return false;
+			static char const* patterns = { "*.bscn" };
+			const char* fileLocation = tinyfd_openFileDialog(
+				"Select Scene",
+				nullptr,
+				1,
+				&patterns,
+				NULL,
+				0
+			);
+
+			if (!fileLocation)
+			{
+				BASED_WARN("Invalid scene chosen, aborting!");
+				return false;
+			}
+
+			openPath = fileLocation;
 		}
 
-		return OpenScene(fileLocation, keepLoadedAssets);
+		return LoadScene(openPath, keepLoadedAssets);
 	}
 
-	bool Statics::OpenScene(const std::string& path, bool keepLoadedAssets)
+	bool Statics::LoadScene(const std::string& path, bool keepLoadedAssets)
 	{
 		if (mEditorSceneDirty)
 		{
@@ -128,46 +134,10 @@ namespace editor
 			}
 		}
 
-		BASED_TRACE("Creating new scene!");
-		auto currentScene = based::Engine::Instance().GetApp().GetCurrentScene();
-		auto newScene = std::make_shared<based::scene::Scene>("TEMP", currentScene->GetRegistry());
-		if (keepLoadedAssets)
-		{
-			newScene->GetMeshStorage() = currentScene->GetMeshStorage();
-			newScene->GetModelStorage() = currentScene->GetModelStorage();
-			newScene->GetMaterialStorage() = currentScene->GetMaterialStorage();
-			newScene->GetTextureStorage() = currentScene->GetTextureStorage();
-			newScene->GetAnimationStorage() = currentScene->GetAnimationStorage();
-			newScene->GetAnimatorStorage() = currentScene->GetAnimatorStorage();
-
-			for (auto& [id, e] : currentScene->GetEntityStorage().GetAll())
-			{
-				if (e->HasComponent<based::scene::DontDestroyOnLoad>())
-				{
-					newScene->GetEntityStorage().Load(id, e);
-				}
-			}
-		}
-		based::Engine::Instance().GetApp().LoadScene(newScene);
-
-		auto res = LoadScene(path);
-
-		if (!res)
-		{
-			BASED_WARN("Error deserializing default scene, aborting!");
-			return false;
-		}
-
-		SetSceneDirty(false);
-		return true;
-	}
-
-	bool Statics::LoadScene(const std::string& path)
-	{
-		auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
-		auto serializer = based::scene::SceneSerializer(scene);
-		serializer.SetProjectDirectory(mProjectDirectory);
-		auto res = serializer.Deserialize(path);
+		auto prefix = mProjectDirectory;
+		if (!EndsWith(mProjectDirectory, "/") && !EndsWith(mProjectDirectory, "\\"))
+			prefix.append("/");
+		auto res = based::scene::Scene::LoadScene(path, prefix, keepLoadedAssets);
 
 		if (!res)
 		{
@@ -175,6 +145,7 @@ namespace editor
 			return false;
 		}
 
+		auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
 		based::Engine::Instance().GetWindow().SetWindowTitle("Based Editor - " + scene->GetSceneName());
 
 		SetSceneDirty(false);
@@ -215,32 +186,6 @@ namespace editor
 		SetSceneDirty(false);
 		mSaveLocation = std::string(saveLocation);
 		return true;
-	}
-
-	bool Statics::LoadSceneSafe(const std::string& path)
-	{
-		if (mEditorSceneDirty)
-		{
-			auto shouldSave = tinyfd_messageBox(
-				"Save Current Scene?",
-				"You have unsaved changes, would you like to save the current scene?",
-				"yesno",
-				"question",
-				1
-			);
-
-			if (shouldSave == 1)
-			{
-				auto saveResult = SaveScene();
-				if (!saveResult)
-				{
-					BASED_WARN("Scene did not save properly, aborting create new scene!");
-					return false;
-				}
-			}
-		}
-
-		return LoadScene(path);
 	}
 
 	bool Statics::RemoveEntityFromSelected(const std::shared_ptr<based::scene::Entity>& entity)
@@ -320,16 +265,9 @@ namespace editor
 		);
 	}
 
-	int Statics::InputTextResizeCallback(ImGuiInputTextCallbackData* data)
+	bool Statics::EndsWith(const std::string& value, const std::string& ending)
 	{
-		if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
-		{
-			std::string* myString = (std::string*)data->UserData;
-
-			if (!myString) return -1;
-
-			*myString = std::string(data->Buf);
-		}
-		return 0;
+		if (ending.size() > value.size()) return false;
+		return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 	}
 }

@@ -20,11 +20,9 @@ namespace editor
 		static void InitializeEditorStatics();
 
 		static bool NewScene();
-		static bool OpenScene(bool keepLoadedAssets = true);
-		static bool OpenScene(const std::string& path, bool keepLoadedAssets = true);
-		static bool LoadScene(const std::string& path);
+		static bool OpenScene(const std::string& path = "", bool keepLoadedAssets = true);
+		static bool LoadScene(const std::string& path, bool keepLoadedAssets = true);
 		static bool SaveScene(const std::string& path = "", bool forceSave = false);
-		static bool LoadSceneSafe(const std::string& path);
 
 		static std::shared_ptr<based::graphics::Camera> GetEditorCamera() { return mEditorCamera; }
 		static std::vector<std::weak_ptr<based::scene::Entity>> GetSelectedEntities() { return mSelectedEntities; }
@@ -56,7 +54,7 @@ namespace editor
 
 		static std::string GetProjectDirectory() { return mProjectDirectory; }
 
-		static int InputTextResizeCallback(ImGuiInputTextCallbackData* data);
+		static bool EndsWith(const std::string& value, const std::string& ending);
 
 		inline static EngineOperations EngineOperations;
 	private:
