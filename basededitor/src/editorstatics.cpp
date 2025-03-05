@@ -23,6 +23,8 @@ namespace editor
 	{
 		if (auto dir = based::Engine::Instance().GetArg(1); dir != "")
 			mProjectDirectory = dir;
+		else
+			mProjectDirectory = std::filesystem::canonical("../Sandbox").string();
 
 		mEditorCamera = std::make_shared<based::graphics::Camera>();
 		mEditorCamera->SetProjection(based::graphics::Projection::PERSPECTIVE);
@@ -294,24 +296,24 @@ namespace editor
 		return true;
 	}
 
-	bool Statics::SelectedFilesContains(const std::string& file)
+	bool Statics::SelectedFilesContains(const std::filesystem::path& file)
 	{
 		return std::find(mSelectedFiles.begin(), mSelectedFiles.end(), file) != mSelectedFiles.end();
 	}
 
-	bool Statics::SelectedDirectoriesContains(const std::string& dir)
+	bool Statics::SelectedDirectoriesContains(const std::filesystem::path& dir)
 	{
 		return std::find(mSelectedDirectories.begin(), mSelectedDirectories.end(), dir) != mSelectedDirectories.end();
 	}
 
-	void Statics::RemoveSelectedFile(const std::string& file)
+	void Statics::RemoveSelectedFile(const std::filesystem::path& file)
 	{
 		mSelectedFiles.erase(
 			std::find(mSelectedFiles.begin(), mSelectedFiles.end(), file)
 		);
 	}
 
-	void Statics::RemoveSelectedDirectory(const std::string& dir)
+	void Statics::RemoveSelectedDirectory(const std::filesystem::path& dir)
 	{
 		mSelectedDirectories.erase(
 			std::find(mSelectedDirectories.begin(), mSelectedDirectories.end(), dir)

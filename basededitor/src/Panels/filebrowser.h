@@ -34,10 +34,10 @@ namespace editor::panels
 
 		bool HandleFileDrop(const std::string& path);
 
-		bool IsDirectorySelected(const std::string& path);
-		bool IsFileSelected(const std::string& path);
-		bool IsDirectoryLeaf(const std::string& path);
-		bool IsFileOfType(const std::string& path, const std::string& type);
+		bool IsDirectorySelected(const std::filesystem::path& path);
+		bool IsFileSelected(const std::filesystem::path& path);
+		bool IsDirectoryLeaf(const std::filesystem::path& path);
+		bool IsFileOfType(const std::filesystem::path& path, const std::string& type);
 		bool IsFileViewerHovered();
 
 	private:
@@ -88,7 +88,8 @@ namespace editor::panels
 		int mFileMultiSelectBegin = -1;
 		int mFileMultiSelectEnd = -1;
 
-		int mRenameIndex = -1;
+		std::filesystem::path mRenamePath;
+		std::filesystem::path mScrollTarget;
 	};
 
 	inline void FileBrowser::LaunchExplorer(const std::string& path)

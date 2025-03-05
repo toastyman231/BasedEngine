@@ -96,6 +96,7 @@ namespace editor::panels
 				Statics::SetSelectedFiles({});
 				mFileMultiSelectBegin = -1;
 				mFileMultiSelectEnd = -1;
+				mRenamePath = "";
 			}
 				
 			ImGui::SetItemAllowOverlap();
@@ -131,17 +132,17 @@ namespace editor::panels
 		return false;
 	}
 
-	bool FileBrowser::IsDirectorySelected(const std::string& path)
+	bool FileBrowser::IsDirectorySelected(const std::filesystem::path& path)
 	{
 		return Statics::SelectedDirectoriesContains(path);
 	}
 
-	bool FileBrowser::IsFileSelected(const std::string& path)
+	bool FileBrowser::IsFileSelected(const std::filesystem::path& path)
 	{
 		return Statics::SelectedFilesContains(path);
 	}
 
-	bool FileBrowser::IsDirectoryLeaf(const std::string& path)
+	bool FileBrowser::IsDirectoryLeaf(const std::filesystem::path& path)
 	{
 		for (auto dir : std::filesystem::directory_iterator(path))
 		{
@@ -151,9 +152,9 @@ namespace editor::panels
 		return true;
 	}
 
-	bool FileBrowser::IsFileOfType(const std::string& path, const std::string& type)
+	bool FileBrowser::IsFileOfType(const std::filesystem::path& path, const std::string& type)
 	{
-		return path.find(type) != std::string::npos;
+		return path.string().find(type) != std::string::npos;
 	}
 
 	bool FileBrowser::IsFileViewerHovered()
@@ -170,9 +171,9 @@ namespace editor::panels
 			if (std::find(mExcludeDirs.begin(), mExcludeDirs.end(), dirName) == mExcludeDirs.end())
 			{
 				ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_OpenOnArrow;
-				if (dir.is_directory() && IsDirectoryLeaf(dir.path().string())) 
+				if (dir.is_directory() && IsDirectoryLeaf(dir.path())) 
 					flags |= ImGuiTreeNodeFlags_Leaf;
-				if (IsDirectorySelected(dir.path().string())) 
+				if (IsDirectorySelected(dir.path())) 
 					flags |= ImGuiTreeNodeFlags_Selected;
 
 				if (!dir.is_directory()) continue;
@@ -181,7 +182,7 @@ namespace editor::panels
 
 				if (!Statics::GetSelectedDirectories().empty())
 				{
-					if (Statics::GetSelectedDirectories().back() == dir.path().string())
+					if (Statics::GetSelectedDirectories().back() == dir.path())
 						mDirMultiSelectBegin = mCurrentDirIndex;
 				}
 
@@ -192,8 +193,8 @@ namespace editor::panels
 				if (mDirMultiSelectEnd != -1 && mCurrentDirIndex >= min
 					&& mCurrentDirIndex <= max)
 				{
-					if (!IsDirectorySelected(dir.path().string()))
-						Statics::AddSelectedDirectory(dir.path().string());
+					if (!IsDirectorySelected(dir.path()))
+						Statics::AddSelectedDirectory(dir.path());
 					mCurrentDirCount++;
 
 					if (mCurrentDirCount >= mDirCountMax + 1)
@@ -209,19 +210,19 @@ namespace editor::panels
 					!(based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT)
 						|| based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)))
 				{
-					Statics::SetSelectedDirectories({ dir.path().string() });
+					Statics::SetSelectedDirectories({ dir.path() });
 				}
 				else if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0)
 					&& based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL))
 				{
 
-					if (!IsDirectorySelected(dir.path().string()))
+					if (!IsDirectorySelected(dir.path()))
 					{
-						Statics::AddSelectedDirectory(dir.path().string());
+						Statics::AddSelectedDirectory(dir.path());
 					}
 					else
 					{
-						Statics::RemoveSelectedDirectory(dir.path().string());
+						Statics::RemoveSelectedDirectory(dir.path());
 					}
 				}
 				else if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)
@@ -229,7 +230,7 @@ namespace editor::panels
 				{
 					if (mDirMultiSelectBegin == -1)
 					{
-						Statics::SetSelectedDirectories({ dir.path().string() });
+						Statics::SetSelectedDirectories({ dir.path() });
 						mDirMultiSelectBegin = mCurrentDirIndex;
 					} else
 					{
@@ -297,7 +298,7 @@ namespace editor::panels
 
 				bool selected = IsFileSelected(dir.path().string());
 				ImGui::Selectable(
-					"",
+					"##fileicon",
 					&selected, ImGuiSelectableFlags_AllowDoubleClick,
 					itemSize);
 				ImGui::SetItemAllowOverlap();
@@ -306,12 +307,18 @@ namespace editor::panels
 				ImGui::Image(
 					(void*)static_cast<intptr_t>(GetIconByFileType(dir.path().filename().string())),
 					itemSize, { 0, 1 }, { 1, 0 });
+				if (mScrollTarget == dir.path().string())
+				{
+					ImGui::ScrollToBringRectIntoView(ImGui::GetCurrentWindow(), 
+						ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax()));
+					mScrollTarget = "";
+				}
 
 				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 				{
 					if (dir.is_directory())
 					{
-						Statics::SetSelectedDirectories({ dir.path().string() });
+						Statics::SetSelectedDirectories({ dir.path() });
 						Statics::SetSelectedFiles({});
 						return;
 					}
@@ -331,21 +338,21 @@ namespace editor::panels
 						|| based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)))
 				{
 					ImGui::SetNextWindowFocus();
-					if (!IsFileSelected(dir.path().string()) || Statics::GetSelectedFiles().size() > 1)
-						Statics::SetSelectedFiles({ dir.path().string() });
+					if (!IsFileSelected(dir.path()) || Statics::GetSelectedFiles().size() > 1)
+						Statics::SetSelectedFiles({ dir.path() });
 					Statics::SetSelectedEntities({});
-					mRenameIndex = -1;
+					mRenamePath = "";
 				}
 				else if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0)
 					&& based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL))
 				{
-					if (!IsFileSelected(dir.path().string()))
+					if (!IsFileSelected(dir.path()))
 					{
-						Statics::AddSelectedFile(dir.path().string());
+						Statics::AddSelectedFile(dir.path());
 					}
 					else
 					{
-						Statics::RemoveSelectedFile(dir.path().string());
+						Statics::RemoveSelectedFile(dir.path());
 					}
 				}
 				else if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)
@@ -353,7 +360,7 @@ namespace editor::panels
 				{
 					if (mFileMultiSelectBegin == -1)
 					{
-						Statics::SetSelectedFiles({ dir.path().string() });
+						Statics::SetSelectedFiles({ dir.path() });
 						mFileMultiSelectBegin = mCurrentFileIndex;
 					} else
 					{
@@ -363,7 +370,7 @@ namespace editor::panels
 					Statics::SetSelectedEntities({});
 				}
 
-				if (mRenameIndex == mCurrentFileIndex)
+				if (mRenamePath == dir.path())
 				{
 					std::string temp = dir.path().filename().string();
 					char* buffer = (char*)temp.c_str();
@@ -374,15 +381,14 @@ namespace editor::panels
 						if (!name.empty())
 						{
 							std::filesystem::rename(dir.path(), path / name);
-							mRenameIndex = -1;
+							mRenamePath = "";
 						}
 					}
-					ImGui::SetKeyboardFocusHere(-1);
 				} else
 				{
 					ImGuiSelectableFlags flags = ImGuiSelectableFlags_AllowDoubleClick;
 					bool selected = false;
-					if (Statics::SelectedFilesContains(dir.path().string()))
+					if (Statics::SelectedFilesContains(dir.path()))
 						selected = true;
 
 					ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
@@ -392,8 +398,10 @@ namespace editor::panels
 
 					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 					{
-						// TODO: Make this work without crashing
-						//mRenameIndex = mCurrentFileIndex;
+						mRenamePath = dir.path();
+					} else if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0))
+					{
+						mRenamePath = "";
 					}
 				}
 
@@ -409,6 +417,10 @@ namespace editor::panels
 		{
 			if (ImGui::BeginMenu("Create"))
 			{
+				if (ImGui::MenuItem("Folder", nullptr))
+				{
+					CreateObject("Folder");
+				}
 				if (ImGui::MenuItem("Material", nullptr))
 				{
 					CreateObject("Material");
@@ -442,7 +454,7 @@ namespace editor::panels
 			if (ImGui::MenuItem("Show in Explorer", nullptr))
 			{
 				for (auto& dir : Statics::GetSelectedDirectories())
-					LaunchExplorer(dir);
+					LaunchExplorer(dir.string());
 				ImGui::CloseCurrentPopup();
 			}
 
@@ -536,6 +548,8 @@ namespace editor::panels
 		if (Statics::GetSelectedDirectories().empty()) return false;
 
 		auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
+		auto path = std::filesystem::canonical(Statics::GetSelectedDirectories()[0]);
+		bool res;
 
 		if (type == "Material")
 		{
@@ -554,20 +568,36 @@ namespace editor::panels
 				std::string("__MATERIAL_UUID__").length(),
 				std::to_string(id));
 
-			std::ofstream ofs(Statics::GetSelectedDirectories()[0] + "/" + materialName + ".bmat");
+			std::ofstream ofs(Statics::GetSelectedDirectories()[0].string() + "/" + materialName + ".bmat");
 			ofs << output;
 			ofs.close();
 
-			auto path = std::filesystem::canonical(Statics::GetSelectedDirectories()[0] + "/" + materialName + ".bmat");
+			path = std::filesystem::canonical(Statics::GetSelectedDirectories()[0].string() 
+				+ "/" + materialName + ".bmat");
 
 			auto newMaterial = 
 				based::graphics::Material::LoadMaterialWithUUID(
-					path.string(), id, Statics::GetSelectedDirectories()[0] + "/", true);
+					path.string(), id, Statics::GetSelectedDirectories()[0].string() + "/", true);
 
-			if (newMaterial) return true;
-			else std::filesystem::remove(path);
+			if (newMaterial) res = true;
+			else
+			{
+				std::filesystem::remove(path);
+				res = false;
+			}
+		} else if (type == "Folder")
+		{
+			res = std::filesystem::create_directory(path / "New Folder");
+
+			path = std::filesystem::canonical(path / "New Folder");
 		}
 
-		return false;
+		if (res)
+		{
+			mRenamePath = path;
+			mScrollTarget = path;
+		}
+
+		return res;
 	}
 }
