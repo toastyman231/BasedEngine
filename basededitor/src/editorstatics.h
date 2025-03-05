@@ -56,6 +56,8 @@ namespace editor
 
 		static std::string GetProjectDirectory() { return mProjectDirectory; }
 
+		static int InputTextResizeCallback(ImGuiInputTextCallbackData* data);
+
 		inline static EngineOperations EngineOperations;
 	private:
 		inline static std::shared_ptr<based::graphics::Camera> mEditorCamera;

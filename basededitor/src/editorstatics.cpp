@@ -319,4 +319,17 @@ namespace editor
 			std::find(mSelectedDirectories.begin(), mSelectedDirectories.end(), dir)
 		);
 	}
+
+	int Statics::InputTextResizeCallback(ImGuiInputTextCallbackData* data)
+	{
+		if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+		{
+			std::string* myString = (std::string*)data->UserData;
+
+			if (!myString) return -1;
+
+			*myString = std::string(data->Buf);
+		}
+		return 0;
+	}
 }

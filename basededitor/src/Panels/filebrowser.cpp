@@ -162,6 +162,41 @@ namespace editor::panels
 		return mIsFileViewerHovered;
 	}
 
+	bool FileBrowser::DoesProjectContainFile(const std::string& filename, std::filesystem::path& outPath)
+	{
+		std::queue<std::filesystem::path> dirs;
+		dirs.emplace(std::filesystem::canonical(Statics::GetProjectDirectory()));
+		while (!dirs.empty())
+		{
+			auto dir = dirs.front();
+			dirs.pop();
+
+			if (dir.filename().string().find(filename) != std::string::npos)
+			{
+				outPath = dir;
+				return true;
+			}
+
+			for (const auto& child : std::filesystem::directory_iterator(dir))
+			{
+				if (child.is_directory() && std::find(mExcludeDirs.begin(), mExcludeDirs.end(), 
+					child.path().filename().string()) == mExcludeDirs.end())
+				{
+					dirs.emplace(child.path());
+					continue;
+				}
+
+				if (child.path().filename().string().find(filename) != std::string::npos)
+				{
+					outPath = child.path();
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	void FileBrowser::DrawDirectoryTree(const std::string& path)
 	{
 		for (auto dir :
@@ -372,15 +407,19 @@ namespace editor::panels
 
 				if (mRenamePath == dir.path())
 				{
-					std::string temp = dir.path().filename().string();
-					char* buffer = (char*)temp.c_str();
-					ImGuiInputTextFlags textFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll;
-					if (ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), textFlags))
+					std::string buffer = dir.path().filename().string();
+					ImGuiInputTextFlags textFlags =
+						ImGuiInputTextFlags_EnterReturnsTrue |
+						ImGuiInputTextFlags_AutoSelectAll;
+					ImGui::SetNextItemWidth(itemSize.x);
+					if (ImGui::InputText("", &buffer, textFlags))
 					{
-						auto name = std::string(buffer);
-						if (!name.empty())
+						if (!buffer.empty())
 						{
-							std::filesystem::rename(dir.path(), path / name);
+							auto fileType = dir.path().extension();
+							auto newPath = fileType == "" ? path / buffer
+								: path / (buffer + fileType.string());
+							std::filesystem::rename(dir.path(), newPath);
 							mRenamePath = "";
 						}
 					}
@@ -419,14 +458,21 @@ namespace editor::panels
 			{
 				if (ImGui::MenuItem("Folder", nullptr))
 				{
-					CreateObject("Folder");
+					CreateObject(BasedFileType::Folder);
 				}
 				if (ImGui::MenuItem("Material", nullptr))
 				{
-					CreateObject("Material");
+					CreateObject(BasedFileType::Material);
 				}
-				ImGui::MenuItem("UI Layout", nullptr);
-				ImGui::MenuItem("UI Style", nullptr);
+				if (ImGui::BeginMenu("UI"))
+				{
+					if (ImGui::MenuItem("UI Layout", nullptr))
+					{
+						CreateObject(BasedFileType::UIDoc);
+					}
+					ImGui::MenuItem("UI Style", nullptr);
+					ImGui::EndMenu();
+				}
 				ImGui::EndMenu();
 			}
 
@@ -543,7 +589,7 @@ namespace editor::panels
 		return false;
 	}
 
-	bool FileBrowser::CreateObject(const std::string& type)
+	bool FileBrowser::CreateObject(const editor::BasedFileType& type)
 	{
 		if (Statics::GetSelectedDirectories().empty()) return false;
 
@@ -551,8 +597,16 @@ namespace editor::panels
 		auto path = std::filesystem::canonical(Statics::GetSelectedDirectories()[0]);
 		bool res;
 
-		if (type == "Material")
+		// ALWAYS REASSIGN path FOR FILE SELECTION
+		switch (type)
 		{
+		case BasedFileType::Folder:
+			res = std::filesystem::create_directory(path / "New Folder");
+
+			path = std::filesystem::canonical(path / "New Folder");
+			break;
+		case BasedFileType::Material:
+			{
 			std::ifstream ifs("Assets/Templates/MaterialTemplate.txt");
 			std::stringstream strStream;
 			strStream << ifs.rdbuf();
@@ -561,7 +615,7 @@ namespace editor::panels
 			based::core::UUID id;
 
 			std::string output = strStream.str();
-			output.replace(output.find("__MATERIAL_NAME__"), 
+			output.replace(output.find("__MATERIAL_NAME__"),
 				std::string("__MATERIAL_NAME__").length(),
 				materialName);
 			output.replace(output.find("__MATERIAL_UUID__"),
@@ -572,10 +626,10 @@ namespace editor::panels
 			ofs << output;
 			ofs.close();
 
-			path = std::filesystem::canonical(Statics::GetSelectedDirectories()[0].string() 
+			path = std::filesystem::canonical(Statics::GetSelectedDirectories()[0].string()
 				+ "/" + materialName + ".bmat");
 
-			auto newMaterial = 
+			auto newMaterial =
 				based::graphics::Material::LoadMaterialWithUUID(
 					path.string(), id, Statics::GetSelectedDirectories()[0].string() + "/", true);
 
@@ -585,11 +639,104 @@ namespace editor::panels
 				std::filesystem::remove(path);
 				res = false;
 			}
-		} else if (type == "Folder")
-		{
-			res = std::filesystem::create_directory(path / "New Folder");
+			break;
+			}
+		case BasedFileType::UIDoc:
+			{
+			std::ifstream ifs("Assets/Templates/UIDocTemplate.txt");
+			std::stringstream strStream;
+			strStream << ifs.rdbuf();
+			std::string output = strStream.str();
 
-			path = std::filesystem::canonical(path / "New Folder");
+			std::filesystem::path rmlPath; // IGNORED
+			if (!DoesProjectContainFile("rml.rcss", rmlPath))
+			{
+				auto selection = tinyfd_messageBox(
+					"Import Default RML Styles?",
+					"Would you like to import the default RCSS style sheet?",
+					"yesno",
+					"question",
+					0
+				);
+				if (selection == 1)
+				{
+					std::ifstream ifs("Assets/Templates/rml.txt");
+					std::stringstream strStream;
+					strStream << ifs.rdbuf();
+					std::string output = strStream.str();
+					std::ofstream ofs(Statics::GetSelectedDirectories()[0].string() + "/rml.rcss");
+					ofs << output;
+					ofs.close();
+				}
+			}
+
+			std::string baseFileName = "New UI Doc";
+			std::string fileName = baseFileName;
+			int index = 1;
+			while (std::filesystem::exists(path / (fileName + ".rml")))
+			{
+				fileName = baseFileName + std::to_string(index);
+				index++;
+			}
+
+			std::ofstream ofs(Statics::GetSelectedDirectories()[0].string() + "/" + fileName + ".rml");
+			ofs << output;
+			ofs.close();
+
+			path = std::filesystem::canonical(Statics::GetSelectedDirectories()[0] / (fileName + ".rml"));
+
+			res = true;
+			break;
+			}
+		case BasedFileType::UIStyle:
+			{
+			std::ifstream ifs("Assets/Templates/UIStyleTemplate.txt");
+			std::stringstream strStream;
+			strStream << ifs.rdbuf();
+			std::string output = strStream.str();
+
+			std::filesystem::path rmlPath; // IGNORED
+			if (!DoesProjectContainFile("rml.rcss", rmlPath))
+			{
+				auto selection = tinyfd_messageBox(
+					"Import Default RML Styles?",
+					"Would you like to import the default RCSS style sheet?",
+					"yesno",
+					"question",
+					0
+				);
+				if (selection == 1)
+				{
+					std::ifstream ifs("Assets/Templates/rml.txt");
+					std::stringstream strStream;
+					strStream << ifs.rdbuf();
+					std::string output = strStream.str();
+					std::ofstream ofs(Statics::GetSelectedDirectories()[0].string() + "/rml.rcss");
+					ofs << output;
+					ofs.close();
+				}
+			}
+
+			std::string baseFileName = "New UI Style";
+			std::string fileName = baseFileName;
+			int index = 1;
+			while (std::filesystem::exists(path / (fileName + ".rcss")))
+			{
+				fileName = baseFileName + std::to_string(index);
+				index++;
+			}
+
+			std::ofstream ofs(Statics::GetSelectedDirectories()[0].string() + "/" + fileName + ".rcss");
+			ofs << output;
+			ofs.close();
+
+			path = std::filesystem::canonical(Statics::GetSelectedDirectories()[0] / (fileName + ".rcss"));
+
+			res = true;
+			break;
+			}
+		default:
+			BASED_WARN("Unhandled file type was passed to CreateObject! (filebrowser.cpp)");
 		}
 
 		if (res)

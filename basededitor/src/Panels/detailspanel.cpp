@@ -29,12 +29,10 @@ namespace editor::panels
 			if (isActive != previouslyActive) Statics::EngineOperations.EditorSetEntityActive(entity, isActive);
 
 			std::string name = entity->GetEntityName();
-			char* buffer = (char*)name.c_str();
 
 			ImGui::SameLine();
-			if (ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer)))
+			if (ImGui::InputText("", &name))
 			{
-				auto name = std::string(buffer);
 				if (!name.empty()) Statics::EngineOperations.EditorSetEntityName(entity, name);
 			}
 

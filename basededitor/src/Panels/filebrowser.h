@@ -4,6 +4,7 @@
 #include "panelbase.h"
 #include "../editorstatics.h"
 #include "../Importers/importer.h"
+#include "../basedfiletypes.h"
 
 namespace editor::panels
 {
@@ -39,6 +40,7 @@ namespace editor::panels
 		bool IsDirectoryLeaf(const std::filesystem::path& path);
 		bool IsFileOfType(const std::filesystem::path& path, const std::string& type);
 		bool IsFileViewerHovered();
+		bool DoesProjectContainFile(const std::string& filename, std::filesystem::path& outPath);
 
 	private:
 		void DrawDirectoryTree(const std::string& path);
@@ -49,7 +51,7 @@ namespace editor::panels
 		void LaunchExplorer(const std::string& path);
 
 		bool InstantiateFile(const std::string& path);
-		bool CreateObject(const std::string& type);
+		bool CreateObject(const editor::BasedFileType& type);
 
 		std::vector<std::string> mExcludeDirs = 
 			{ "bin", "bin-obj", "PostBuildCopy", "PostBuildCopy_windows",

@@ -153,15 +153,13 @@ namespace editor::panels
 
 		if (mRenameIndex == mCurrentIndex)
 		{
-			std::string temp = entity->GetEntityName();
-			char* buffer = (char*)temp.c_str();
+			std::string buffer = entity->GetEntityName();
 			ImGuiInputTextFlags textFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll;
-			if (ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), textFlags))
+			if (ImGui::InputText("", &buffer, textFlags))
 			{
-				auto name = std::string(buffer);
-				if (!name.empty())
+				if (!buffer.empty())
 				{
-					Statics::EngineOperations.EditorSetEntityName(entity, name);
+					Statics::EngineOperations.EditorSetEntityName(entity, buffer);
 					mRenameIndex = -1;
 				}
 			}
