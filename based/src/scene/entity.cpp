@@ -66,7 +66,8 @@ namespace based::scene
 		auto scene = Engine::Instance().GetApp().GetCurrentScene();
 		scene->GetEntityStorage().Delete(ent->GetEntityName());
 
-		ent->mRegistry.destroy(ent->mEntity);
+		if (ent->mRegistry.valid(ent->mEntity)) 
+			ent->mRegistry.destroy(ent->mEntity);
 		ent.reset();
 	}
 
