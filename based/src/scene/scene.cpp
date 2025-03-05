@@ -247,45 +247,6 @@ namespace based::scene
 			}
 		}
 
-		/*auto dontDestroyEntities = currentScene->mRegistry.view<DontDestroyOnLoad>();
-		std::vector<entt::entity> cachedEntities;
-		for (auto& e : dontDestroyEntities)
-		{
-			auto createdEntity = scene->mRegistry.create(e);
-			std::vector container = { createdEntity };
-			for (auto [id, storage] : currentScene->mRegistry.storage())
-			{
-				if (storage.contains(e) && storage.type().name().find("EntityReference") == std::string_view::npos)
-				{
-					auto otherStorage = scene->mRegistry.storage(id);
-					if (otherStorage && otherStorage->contains(createdEntity))
-						continue;
-					if (auto component = storage.value(e))
-					{
-						scene->mRegistry.insert(container.begin(), container.end(), component);
-					}
-				} else if (storage.type().name().find("EntityReference") != std::string_view::npos)
-				{
-					cachedEntities.emplace_back(createdEntity);
-				}
-			}
-		}*/
-
-		/*for (auto& [id, e] : currentScene->GetEntityStorage().GetAll())
-		{
-			if (e->HasComponent<DontDestroyOnLoad>())
-			{
-				if (auto it = 
-					std::find(cachedEntities.begin(), cachedEntities.end(), e->GetEntityHandle());
-					it != cachedEntities.end())
-				{
-					auto ent = cachedEntities[std::distance(cachedEntities.begin(), it)];
-					scene->mRegistry.emplace<EntityReference>(ent, e);
-				}
-				scene->GetEntityStorage().Load(id, e);
-			}
-		}*/
-
 		if (!keepLoadedAssets)
 		{
 			currentScene->GetMeshStorage().Clear();
@@ -294,15 +255,7 @@ namespace based::scene
 			currentScene->GetTextureStorage().Clear();
 			currentScene->GetAnimationStorage().Clear();
 			currentScene->GetAnimatorStorage().Clear();
-			/*scene->GetMeshStorage() = currentScene->GetMeshStorage();
-			scene->GetModelStorage() = currentScene->GetModelStorage();
-			scene->GetMaterialStorage() = currentScene->GetMaterialStorage();
-			scene->GetTextureStorage() = currentScene->GetTextureStorage();
-			scene->GetAnimationStorage() = currentScene->GetAnimationStorage();
-			scene->GetAnimatorStorage() = currentScene->GetAnimatorStorage();*/
 		}
-
-		//Engine::Instance().GetApp().LoadScene(scene);
 
 		auto serializer = SceneSerializer(currentScene);
 		serializer.SetProjectDirectory(prefix);

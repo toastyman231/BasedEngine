@@ -2,6 +2,7 @@
 #include "gameview.h"
 
 #include "../editorstatics.h"
+#include "../external/imguizmo/ImGuizmo.h"
 #include "based/app.h"
 #include "based/engine.h"
 #include "based/input/joystick.h"
@@ -40,6 +41,31 @@ namespace editor::panels
 				ImGui::GetItemRectMin().y,
 				ImGui::GetItemRectMin().y + ImGui::GetItemRectSize().y
 			};
+			ImGuizmo::SetRect(ImGui::GetItemRectMin().x, ImGui::GetItemRectMin().y, 
+				ImGui::GetItemRectSize().x, ImGui::GetItemRectSize().y);
+
+			if (!Statics::GetSelectedEntities().empty())
+			{
+				if (auto entity = Statics::GetSelectedEntities()[0].lock())
+				{
+					auto viewMat = mViewCamera->GetViewMatrix();
+					auto projMat = mViewCamera->GetProjectionMatrix();
+					auto modelMat = entity->GetTransform().GetMatrix();
+					ImGuizmo::Manipulate(
+						glm::value_ptr(viewMat),
+						glm::value_ptr(projMat),
+						ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::MODE::WORLD,
+						glm::value_ptr(modelMat));
+					if (ImGuizmo::IsUsing())
+					{
+						float trans[3], rot[3], scale[3];
+						ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(modelMat), trans, rot, scale);
+						entity->SetTransform({ trans[0], trans[1], trans[2] },
+							{ rot[0], rot[1], rot[2] },
+							{ scale[0], scale[1], scale[2] });
+					}
+				}
+			}
 		}
 		mIsFocused = ImGui::IsWindowFocused();
 		ImGui::End();

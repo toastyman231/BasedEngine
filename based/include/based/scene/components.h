@@ -149,6 +149,28 @@ namespace based::scene
 			Rotation = rot;
 			Scale = scale;
 		}
+
+		glm::mat4 GetMatrix()
+		{
+			auto model = glm::mat4(1.f);
+			model = glm::translate(model, Position - LocalPosition);
+
+			// Rotations are passed as degrees and converted to radians here automatically
+			model = glm::rotate(model, glm::radians(-(Rotation.y - LocalRotation.y)), glm::vec3(0.f, 1.f, 0.f));
+			model = glm::rotate(model, glm::radians(-(Rotation.x - LocalRotation.x)), glm::vec3(1.f, 0.f, 0.f));
+			model = glm::rotate(model, glm::radians(-(Rotation.z - LocalRotation.z)), glm::vec3(0.f, 0.f, 1.f));
+
+			model = glm::translate(model, LocalPosition);
+
+			// Rotations are passed as degrees and converted to radians here automatically
+			model = glm::rotate(model, glm::radians(LocalRotation.y), glm::vec3(0.f, 1.f, 0.f));
+			model = glm::rotate(model, glm::radians(LocalRotation.x), glm::vec3(1.f, 0.f, 0.f));
+			model = glm::rotate(model, glm::radians(LocalRotation.z), glm::vec3(0.f, 0.f, 1.f));
+
+			model = glm::scale(model, Scale);
+
+			return model;
+		}
 	};
 
 	struct Velocity

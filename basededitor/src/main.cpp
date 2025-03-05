@@ -14,6 +14,7 @@
 #include "based/input/mouse.h"
 #include "based/scene/entity.h"
 #include "external/imgui/imgui_internal.h"
+#include "external/imguizmo/ImGuizmo.h"
 #include "external/tfd/tinyfiledialogs.h"
 #include "Panels/detailspanel.h"
 #include "Panels/filebrowser.h"
@@ -111,9 +112,9 @@ public:
 			(int)graphics::PassInjectionPoint::BeforeMainColor);
 
 		mSceneView = new editor::panels::GameView(
-			gameCamera, "Scene View", editorSceneBuffer);
+			editor::Statics::GetEditorCamera(), "Scene View", editorSceneBuffer);
 		mGameView = new editor::panels::GameView(
-			editor::Statics::GetEditorCamera(), "Game View", Engine::Instance().GetWindow().GetFramebuffer());
+			gameCamera, "Game View", Engine::Instance().GetWindow().GetFramebuffer());
 		mDetailsPanel = new editor::panels::DetailsPanel("Details");
 	}
 
@@ -175,6 +176,8 @@ public:
 
 	void ImguiRender() override
 	{
+		ImGuizmo::BeginFrame();
+
 		ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar;
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->Pos);
