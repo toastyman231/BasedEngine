@@ -89,6 +89,17 @@ namespace editor::panels
 			{
 				mOperation = ImGuizmo::OPERATION::TRANSLATE;
 			}
+			ImGui::SameLine();
+			if (ImGui::Button("##mode", ImVec2(50, 50)))
+			{
+				if (mMode == ImGuizmo::WORLD)
+				{
+					mMode = ImGuizmo::LOCAL;
+				} else
+				{
+					mMode = ImGuizmo::WORLD;
+				}
+			}
 			if (ImGui::Button("##rot", ImVec2(50, 50)))
 			{
 				mOperation = ImGuizmo::OPERATION::ROTATE;
@@ -107,28 +118,54 @@ namespace editor::panels
 					auto projMat = mViewCamera->GetProjectionMatrix();
 					auto modelMat = entity->GetTransform().GetMatrix();
 					auto deltaMat = glm::mat4(1.f);
+					auto mode = mMode;
+					if (!entity->Parent.expired())
+					{
+						if (mode == ImGuizmo::WORLD)
+							mode = ImGuizmo::LOCAL;
+						else mode = ImGuizmo::WORLD;
+					}
 					ImGuizmo::Manipulate(
 						glm::value_ptr(viewMat),
 						glm::value_ptr(projMat),
-						mOperation, mMode,
+						mOperation, mode,
 						glm::value_ptr(modelMat), glm::value_ptr(deltaMat));
-					//ImGuizmo::SetGizmoSizeClipSpace(1.5);
+					ImGuizmo::SetGizmoSizeClipSpace(0.25f);
 					if (ImGuizmo::IsUsing())
 					{
 						float trans[3], rot[3], scale[3];
+						float dTrans[3], dRot[3], dScale[3];
 						ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(modelMat), 
 							trans, rot, scale);
-						entity->SetPosition({ trans[0], trans[1], trans[2] });
-						entity->SetScale({ scale[0], scale[1], scale[2] });
 						ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(deltaMat),
-							trans, rot, scale);
-						auto temp = entity->GetTransform().Rotation;
-						entity->SetRotation({ temp.x - rot[0], temp.y - rot[1], temp.z - rot[2] });
+							dTrans, dRot, dScale);
+						auto transform = entity->GetTransform();
+						if (entity->Parent.expired())
+						{
+							entity->SetPosition({ trans[0], trans[1], trans[2] });
+							entity->SetRotation({ transform.Rotation.x - dRot[0],
+								transform.Rotation.y - dRot[1], transform.Rotation.z - dRot[2] });
+							entity->SetScale({ scale[0], scale[1], scale[2] });
+						} else
+						{
+							entity->SetLocalPosition({
+								transform.LocalPosition.x + dTrans[0],
+								transform.LocalPosition.y + dTrans[1],
+								transform.LocalPosition.z + dTrans[2] });
+							entity->SetLocalRotation({
+								transform.LocalRotation.x + dRot[0],
+								transform.LocalRotation.y + dRot[1],
+								transform.LocalRotation.z + dRot[2] });
+							entity->SetLocalScale({ 
+								scale[0],
+								scale[1],
+								scale[2] });
+						}
 					}
 				}
 			}
 		}
-		mIsFocused = ImGui::IsWindowFocused();
+		mIsFocused = ImGui::IsWindowFocused() && !ImGuizmo::IsUsing();
 		ImGui::End();
 
 	}
