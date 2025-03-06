@@ -131,6 +131,7 @@ namespace editor::panels
 					auto projMat = mViewCamera->GetProjectionMatrix();
 					auto modelMat = entity->GetTransform().GetGlobalMatrix();
 					auto deltaMat = glm::mat4(0.f);
+					ImGuizmo::SetDrawlist();
 					ImGuizmo::Manipulate(
 						glm::value_ptr(viewMat),
 						glm::value_ptr(projMat),
