@@ -494,7 +494,7 @@ public:
 		GetCurrentScene()->GetEntityStorage().Get("Crate")->SetActive(true);
 		cameraEntity = GetCurrentScene()->GetEntityStorage().Get("Camera");
 		crateEntity = GetCurrentScene()->GetEntityStorage().Get("Crate");
-		crateEntity->SetPosition(crateEntity->GetTransform().Position + glm::vec3(0, 30.f, 0));
+		crateEntity->SetPosition(crateEntity->GetTransform().Position() + glm::vec3(0, 30.f, 0));
 		crateEntity->SetRotation(glm::vec3(45.f, 0.f, 0.f));
 #endif
 
@@ -538,25 +538,25 @@ public:
 		{
 			const auto& transform = cameraEntity->GetTransform();
 			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
-			cameraEntity->SetPosition(transform.Position + speed * core::Time::UnscaledDeltaTime() * camera->GetForward());
+			cameraEntity->SetPosition(transform.Position() + speed * core::Time::UnscaledDeltaTime() * camera->GetForward());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_S))
 		{
 			const auto& transform = cameraEntity->GetTransform();
 			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
-			cameraEntity->SetPosition(transform.Position - speed * core::Time::UnscaledDeltaTime() * camera->GetForward());
+			cameraEntity->SetPosition(transform.Position() - speed * core::Time::UnscaledDeltaTime() * camera->GetForward());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_A))
 		{
 			const auto& transform = cameraEntity->GetTransform();
 			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
-			cameraEntity->SetPosition(transform.Position - speed * core::Time::UnscaledDeltaTime() * camera->GetRight());
+			cameraEntity->SetPosition(transform.Position() - speed * core::Time::UnscaledDeltaTime() * camera->GetRight());
 		}
 		if (input::Keyboard::Key(BASED_INPUT_KEY_D))
 		{
 			const auto& transform = cameraEntity->GetTransform();
 			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
-			cameraEntity->SetPosition(transform.Position + speed * core::Time::UnscaledDeltaTime() * camera->GetRight());
+			cameraEntity->SetPosition(transform.Position() + speed * core::Time::UnscaledDeltaTime() * camera->GetRight());
 		}
 
 		// Enable/disable mouse control
@@ -574,14 +574,14 @@ public:
 			yaw = based::math::Clamp(yaw, -89.f, 89.f);
 
 			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
-			cameraEntity->SetRotation(glm::vec3(yaw, pitch, camera->GetTransform().Rotation.z));
+			cameraEntity->SetRotation(glm::vec3(yaw, pitch, camera->GetTransform().Rotation().z));
 		}
 
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
 		{
 			animator->GetStateMachine()->SetBool("punch", true);
 			JPH::RRayCast ray{
-				convert(cameraEntity->GetTransform().Position),
+				convert(cameraEntity->GetTransform().Position()),
 				convert(glm::normalize(GetCurrentScene()->GetActiveCamera()->GetForward())) * 1000.f
 			};
 
@@ -822,7 +822,7 @@ public:
 					scene::Transform trans = registry.get<scene::Transform>(light);
 
 					glm::vec3 col = lightComponent.color;
-					glm::vec3 position = trans.Position;
+					glm::vec3 position = trans.Position();
 					ImGui::PushID(i);
 					ImGui::Text("Light %d", i);
 					ImGui::DragFloat3("Light Color", glm::value_ptr(col), 0.01f);
@@ -842,7 +842,7 @@ public:
 					scene::Transform trans = registry.get<scene::Transform>(light);
 
 					glm::vec3 col = lightComponent.color;
-					glm::vec3 direction = trans.Rotation;
+					glm::vec3 direction = trans.Rotation();
 					ImGui::PushID(i);
 					ImGui::Text("Light %d", i);
 					ImGui::DragFloat3("Light Color", glm::value_ptr(col), 0.01f);
@@ -872,7 +872,7 @@ public:
 
 					if (auto e = ent.lock())
 					{
-						glm::vec3 position = trans.Position;
+						/*glm::vec3 position = trans.Position;
 						glm::vec3 rotation = trans.Rotation;
 						glm::vec3 scale = trans.Scale;
 						glm::vec3 localPos = trans.LocalPosition;
@@ -896,7 +896,7 @@ public:
 						e->SetTransform(position, rotation, scale);
 						if (!e->Parent.expired()) e->SetLocalTransform(localPos, localRot, localScale);
 						e->SetActive(enabled);
-						i++;
+						i++;*/
 					}
 				}
 			}

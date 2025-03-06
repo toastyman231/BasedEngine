@@ -203,45 +203,22 @@ namespace based::graphics
 
 	void Mesh::Draw(scene::Transform transform, std::shared_ptr<Material> material)
 	{
-		const glm::vec3 pos = transform.Position;
-		const glm::vec3 rot = transform.Rotation;
-		const glm::vec3 scale = transform.Scale;
-		const glm::vec3 localPos = transform.LocalPosition;
-		const glm::vec3 localRot = transform.LocalRotation;
-
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera,
 			Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()));
-		// Translations are applied in the opposite order they are defined here
-		// So - scale, rotate by local rotation, translate by local position, rotate by global rotation,
-		// translate by global translation
 
-		auto model = glm::mat4(1.f);
-		model = glm::translate(model, pos - localPos);
-
-		// Rotations are passed as degrees and converted to radians here automatically
-		model = glm::rotate(model, glm::radians(-(rot.y - localRot.y)), glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, glm::radians(-(rot.x - localRot.x)), glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, glm::radians(-(rot.z - localRot.z)), glm::vec3(0.f, 0.f, 1.f));
-
-		model = glm::translate(model, localPos);
-
-		// Rotations are passed as degrees and converted to radians here automatically
-		model = glm::rotate(model, glm::radians(localRot.y), glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, glm::radians(localRot.x), glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, glm::radians(localRot.z), glm::vec3(0.f, 0.f, 1.f));
-
-		model = glm::scale(model, scale);
-		Shader::UpdateShaderPointLighting(material->GetShader(), pos);
+		Shader::UpdateShaderPointLighting(material->GetShader(), transform.Position());
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());
+
 		if (auto overrideMat = Engine::Instance().GetRenderManager().GetCurrentPassOverrideMaterial())
 		{
 			if (material->GetUniformValue<int>("castShadows", 1) != 0)
 				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA,
-					overrideMat, model));
+					overrideMat, transform.GetGlobalMatrix()));
 		}
 		else
 		{
-			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model));
+			Engine::Instance().GetRenderManager().Submit(
+				BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, transform.GetGlobalMatrix()));
 		}
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 	}
@@ -375,48 +352,24 @@ namespace based::graphics
 		PROFILE_FUNCTION();
 		if (mIsDirty) RegenVertexArray();
 
-		const glm::vec3 pos = transform.Position;
-		const glm::vec3 rot = transform.Rotation;
-		const glm::vec3 scale = transform.Scale;
-		const glm::vec3 localPos = transform.LocalPosition;
-		const glm::vec3 localRot = transform.LocalRotation;
-		const glm::vec3 localScale = transform.LocalScale;
-
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera,
 			Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()));
-		// Translations are applied in the opposite order they are defined here
-		// So - scale, rotate by local rotation, translate by local position, rotate by global rotation,
-		// translate by global translation
 
-		auto model = glm::mat4(1.f);
-		model = glm::translate(model, pos - localPos);
-
-		// Rotations are passed as degrees and converted to radians here automatically
-		model = glm::rotate(model, glm::radians(-(rot.y - localRot.y)), glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, glm::radians(-(rot.x - localRot.x)), glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, glm::radians(-(rot.z - localRot.z)), glm::vec3(0.f, 0.f, 1.f));
-
-		model = glm::translate(model, localPos);
-
-		// Rotations are passed as degrees and converted to radians here automatically
-		model = glm::rotate(model, glm::radians(localRot.y), glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, glm::radians(localRot.x), glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, glm::radians(localRot.z), glm::vec3(0.f, 0.f, 1.f));
-
-		model = glm::scale(model, scale * localScale);
-		Shader::UpdateShaderPointLighting(material->GetShader(), pos);
+		Shader::UpdateShaderPointLighting(material->GetShader(), transform.Position());
 		Shader::UpdateShaderDirectionalLighting(material->GetShader());
+
 		if (auto overrideMat = Engine::Instance().GetRenderManager().GetCurrentPassOverrideMaterial())
 		{
 
 			if (material->GetUniformValue<int>("castShadows", 1) != 0)
 				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA,
-					overrideMat, model, GL_LEQUAL, true, mInstanceCount));
+					overrideMat, transform.GetGlobalMatrix(), GL_LEQUAL, true, mInstanceCount));
 		}
 		else
 		{
 			Engine::Instance().GetRenderManager().Submit(
-				BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, model, GL_LEQUAL, true, mInstanceCount));
+				BASED_SUBMIT_RC(
+					RenderVertexArrayMaterial, mVA, material, transform.GetGlobalMatrix(), GL_LEQUAL, true, mInstanceCount));
 		}
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 	}
@@ -432,13 +385,7 @@ namespace based::graphics
 		{
 			auto transform = mInstanceTransforms[i];
 
-			auto model = glm::mat4(1.f);
-			model = glm::translate(model, transform.Position);
-			// Rotations are passed as degrees and converted to radians here automatically
-			model = glm::rotate(model, glm::radians(transform.Rotation.z), glm::vec3(0.f, 0.f, 1.f));
-			model = glm::rotate(model, glm::radians(transform.Rotation.x), glm::vec3(1.f, 0.f, 0.f));
-			model = glm::rotate(model, glm::radians(transform.Rotation.y), glm::vec3(0.f, 1.f, 0.f));
-			model = glm::scale(model, transform.Scale);
+			auto model = transform.GetGlobalMatrix();
 
 			for (int j = 0; j < 4; j++)
 			{

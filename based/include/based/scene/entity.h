@@ -98,7 +98,7 @@ namespace based::scene
 
 		void SetActive(bool active);
 
-		scene::Transform GetTransform();
+		scene::Transform& GetTransform();
 		std::string& GetEntityName() { return mEntityName; }
 		void SetEntityName(const std::string& name) { mEntityName = name; }
 		virtual void SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
@@ -135,11 +135,17 @@ namespace based::scene
 
 			Parent = parentEntity;
 			parentEntity->Children.emplace_back(shared_from_this());
+			mRegistry.patch<Transform>(mEntity,
+				[parentEntity](Transform& tr)
+				{
+					tr.Parent = &parentEntity->GetComponent<Transform>();
+				});
 			if (keepRelativeTransform)
 			{
-				SetLocalPosition(GetTransform().Position - parentEntity->GetTransform().Position);
-				SetLocalRotation(GetTransform().Rotation - parentEntity->GetTransform().Rotation);
-				SetLocalScale(GetTransform().Scale / parentEntity->GetTransform().Scale);
+				// TODO: Figure this out
+				/*SetLocalPosition(GetTransform().Position() - parentEntity->GetTransform().Position());
+				SetLocalRotation(GetTransform().Rotation() - parentEntity->GetTransform().Rotation());
+				SetLocalScale(GetTransform().Scale() / parentEntity->GetTransform().Scale());*/
 			} else
 			{
 				SetLocalTransform({ 0, 0, 0 }, { 0, 0, 0 }, { 1, 1, 1 });
@@ -156,6 +162,7 @@ namespace based::scene
 
 			if (it != Children.end())
 			{
+				childEntity->GetComponent<Transform>().Parent = nullptr;
 				Children.erase(it);
 				return true;
 			}

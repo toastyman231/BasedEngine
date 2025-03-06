@@ -17,6 +17,7 @@
 #include <Jolt/Physics/EActivation.h>
 
 #include "based/math/basedmath.h"
+#include "external/glm/gtx/orthonormalize.hpp"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 
 namespace JPH
@@ -90,87 +91,218 @@ namespace based::scene
 
 	struct Transform
 	{
-		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
-
-		glm::vec3 LocalPosition = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 LocalRotation = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 LocalScale = { 1.0f, 1.0f, 1.0f };
+		Transform* Parent = nullptr;
 
 		Transform() = default;
+		Transform(const glm::vec3& pos) : mPosition(pos) {}
+		Transform(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale)
+		{
+			mPosition = pos;
+			mRotation = rot;
+			mScale = scale;
+		}
+
 		Transform(const Transform& other)
 		{
-			Position = other.Position;
-			Rotation = other.Rotation;
-			Scale = other.Scale;
-
-			LocalPosition = other.LocalPosition;
-			LocalRotation = other.LocalRotation;
-			LocalScale = other.LocalScale;
-		}
-		Transform(const glm::vec3& pos) : Position(pos) {}
-		Transform(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale, bool local = false)
-		{
-			if (local)
-			{
-				LocalPosition = pos;
-				LocalRotation = rot;
-				LocalScale = scale;
-			} else
-			{
-				Position = pos;
-				Rotation = rot;
-				Scale = scale;
-			}
+			mPosition = other.mPosition;
+			mRotation = other.mRotation;
+			mScale = other.mScale;
+			Parent = other.Parent;
 		}
 		Transform& operator= (const Transform& other)
 		{
 			if (this != &other)
 			{
-				Position = other.Position;
-				Rotation = other.Rotation;
-				Scale = other.Scale;
-
-				LocalPosition = other.LocalPosition;
-				LocalRotation = other.LocalRotation;
-				LocalScale = other.LocalScale;
+				mPosition = other.mPosition;
+				mRotation = other.mRotation;
+				mScale = other.mScale;
+				Parent = other.Parent;
 			}
 			return *this;
 		}
-		Transform(const glm::vec3& pos, const glm::vec3& localPos, 
-			const glm::vec3& rot, const glm::vec3& localRot,
-			const glm::vec3& scale, const glm::vec3& localScale)
+
+		glm::vec3 Position() const
 		{
-			LocalPosition = localPos;
-			LocalRotation = localRot;
-			LocalScale = localScale;
-			Position = pos;
-			Rotation = rot;
-			Scale = scale;
+			if (!Parent)
+			{
+				return LocalPosition();
+			}
+			return glm::vec3(GetGlobalMatrix()[3]);
+		}
+		glm::vec3 LocalPosition() const
+		{
+			return mPosition;
 		}
 
-		glm::mat4 GetMatrix()
+		glm::quat Quat() const
 		{
-			auto model = glm::mat4(1.f);
-			model = glm::translate(model, Position - LocalPosition);
+			if (!Parent)
+			{
+				return LocalQuat();
+			}
+			return Parent->Quat() * LocalQuat();
+		}
+		glm::quat LocalQuat() const
+		{ 
+			return glm::quat(glm::radians(mRotation));
+		}
 
-			// Rotations are passed as degrees and converted to radians here automatically
-			model = glm::rotate(model, glm::radians(-(Rotation.y - LocalRotation.y)), glm::vec3(0.f, 1.f, 0.f));
-			model = glm::rotate(model, glm::radians(-(Rotation.x - LocalRotation.x)), glm::vec3(1.f, 0.f, 0.f));
-			model = glm::rotate(model, glm::radians(-(Rotation.z - LocalRotation.z)), glm::vec3(0.f, 0.f, 1.f));
+		glm::vec3 Rotation() const
+		{
+			if (!Parent)
+			{
+				return LocalRotation();
+			}
+			return glm::degrees(glm::eulerAngles(Quat()));
+		}
+		glm::vec3 LocalRotation() const
+		{
+			return mRotation;
+		}
 
-			model = glm::translate(model, LocalPosition);
+		glm::vec3 Scale() const
+		{
+			if (!Parent)
+			{
+				return LocalScale();
+			}
+			return Parent->Scale() * LocalScale();
+		}
+		glm::vec3 LocalScale() const
+		{
+			return mScale;
+		}
 
-			// Rotations are passed as degrees and converted to radians here automatically
-			model = glm::rotate(model, glm::radians(LocalRotation.y), glm::vec3(0.f, 1.f, 0.f));
-			model = glm::rotate(model, glm::radians(LocalRotation.x), glm::vec3(1.f, 0.f, 0.f));
-			model = glm::rotate(model, glm::radians(LocalRotation.z), glm::vec3(0.f, 0.f, 1.f));
+		glm::mat4 GetGlobalMatrix() const
+		{
+			if (!Parent)
+			{
+				return GetLocalMatrix();
+			}
+			return Parent->GetGlobalMatrix() * GetLocalMatrix();
+		}
 
-			model = glm::scale(model, Scale);
-
+		glm::mat4 GetLocalMatrix() const
+		{
+			glm::mat4 model = glm::mat4(1.f);
+			model = glm::translate(model, mPosition);
+			model = glm::rotate(model, glm::radians(mRotation.y), glm::vec3(0.f, 1.f, 0.f));
+			model = glm::rotate(model, glm::radians(mRotation.x), glm::vec3(1.f, 0.f, 0.f));
+			model = glm::rotate(model, glm::radians(mRotation.z), glm::vec3(0.f, 0.f, 1.f));
+			model = glm::scale(model, mScale);
 			return model;
 		}
+
+		void SetLocalTransform(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale)
+		{
+			mPosition = pos;
+			mRotation = rot;
+			mScale = scale;
+		}
+
+		void SetGlobalTransform(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale)
+		{
+			if (!Parent)
+			{
+				SetLocalTransform(pos, rot, scale);
+				return;
+			}
+
+			// Convert global position into local space
+			glm::mat4 parentTransform = Parent->GetGlobalMatrix();
+			glm::mat4 parentInverse = glm::inverse(parentTransform);
+			glm::vec4 localPos4 = parentInverse * glm::vec4(pos, 1.0f);
+			mPosition = glm::vec3(localPos4); // Extract local position
+
+			// Convert global rotation into local rotation
+			/*glm::quat globalQuat = glm::quat(glm::radians(rot));
+			glm::quat parentGlobalQuat = Parent->Quat();
+			mRotation = glm::degrees(glm::eulerAngles(glm::inverse(parentGlobalQuat) * globalQuat));*/
+			// Convert global rotation into local rotation
+			glm::quat globalQuat = glm::quat(glm::radians(rot));
+			glm::quat parentGlobalQuat = Parent->Quat();
+			glm::quat localQuat = glm::inverse(parentGlobalQuat) * globalQuat;  // this gives the relative rotation
+			mRotation = glm::degrees(glm::eulerAngles(localQuat));
+
+			// Scale is hierarchical (divisible)
+			mScale = scale / Parent->Scale();
+		}
+
+		void SetGlobalTransformFromMatrix(const glm::mat4& matrix)
+		{
+			// Extract position (translation)
+			glm::vec3 position = glm::vec3(matrix[3]);
+
+			// Extract scale: Length of basis vectors
+			glm::vec3 scale;
+			scale.x = glm::length(glm::vec3(matrix[0]));
+			scale.y = glm::length(glm::vec3(matrix[1]));
+			scale.z = glm::length(glm::vec3(matrix[2]));
+
+			// Prevent zero scale (to avoid division by zero)
+			if (glm::any(glm::lessThan(scale, glm::vec3(0.0001f))))
+			{
+				scale = glm::vec3(1.0f);
+			}
+
+			// Construct a normalized rotation matrix
+			glm::mat3 rotationMatrix;
+			rotationMatrix[0] = glm::normalize(glm::vec3(matrix[0]) / scale.x);
+			rotationMatrix[1] = glm::normalize(glm::vec3(matrix[1]) / scale.y);
+			rotationMatrix[2] = glm::normalize(glm::vec3(matrix[2]) / scale.z);
+
+			// Ensure the rotation matrix is orthonormal (fixes floating point drift)
+			rotationMatrix = glm::orthonormalize(rotationMatrix);
+
+			// Convert the normalized rotation matrix to a quaternion
+			glm::quat rotation = glm::quat_cast(rotationMatrix);
+
+			// Convert quaternion to Euler angles *only if needed*
+			glm::vec3 eulerRotation = glm::degrees(glm::eulerAngles(rotation));
+
+			SetGlobalTransform(position, eulerRotation, scale);
+		}
+
+		void SetLocalTransformFromMatrix(const glm::mat4& matrix)
+		{
+			// Extract position (translation)
+			glm::vec3 position = glm::vec3(matrix[3]);
+
+			// Extract scale: Length of basis vectors
+			glm::vec3 scale;
+			scale.x = glm::length(glm::vec3(matrix[0]));
+			scale.y = glm::length(glm::vec3(matrix[1]));
+			scale.z = glm::length(glm::vec3(matrix[2]));
+
+			// Prevent zero scale (to avoid division by zero)
+			if (glm::any(glm::lessThan(scale, glm::vec3(0.0001f))))
+			{
+				scale = glm::vec3(1.0f);
+			}
+
+			// Construct a normalized rotation matrix
+			glm::mat3 rotationMatrix;
+			rotationMatrix[0] = glm::normalize(glm::vec3(matrix[0]) / scale.x);
+			rotationMatrix[1] = glm::normalize(glm::vec3(matrix[1]) / scale.y);
+			rotationMatrix[2] = glm::normalize(glm::vec3(matrix[2]) / scale.z);
+
+			// Ensure the rotation matrix is orthonormal (fixes floating point drift)
+			rotationMatrix = glm::orthonormalize(rotationMatrix);
+
+			// Convert the normalized rotation matrix to a quaternion
+			glm::quat rotation = glm::quat_cast(rotationMatrix);
+
+			// Convert quaternion to Euler angles *only if needed*
+			glm::vec3 eulerRotation = glm::degrees(glm::eulerAngles(rotation));
+
+			SetLocalTransform(position, eulerRotation, scale);
+		}
+
+
+	private:
+		glm::vec3 mPosition = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 mRotation = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 mScale = { 1.0f, 1.0f, 1.0f };
 	};
 
 	struct Velocity
@@ -509,8 +641,8 @@ namespace based::scene
 		CharacterController(JPH::CharacterVirtualSettings settings, Transform transform)
 		{
 			Settings = settings;
-			Character = new JPH::CharacterVirtual(&settings, convert(transform.Position),
-				JPH::Quat::sEulerAngles(convert(transform.Rotation)), 0,
+			Character = new JPH::CharacterVirtual(&settings, convert(transform.Position()),
+				JPH::Quat::sEulerAngles(convert(transform.Rotation())), 0,
 				&Engine::Instance().GetPhysicsManager().GetPhysicsSystem());
 		}
 
@@ -530,8 +662,8 @@ namespace based::scene
 			settings.mInnerBodyLayer = physics::Layers::MOVING;
 
 			Settings = settings;
-			Character = new JPH::CharacterVirtual(&settings, convert(transform.Position),
-				JPH::Quat::sEulerAngles(convert(transform.Rotation)), 0,
+			Character = new JPH::CharacterVirtual(&settings, convert(transform.Position()),
+				JPH::Quat::sEulerAngles(convert(transform.Rotation())), 0,
 				&Engine::Instance().GetPhysicsManager().GetPhysicsSystem());
 		}
 

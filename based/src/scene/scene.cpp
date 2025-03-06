@@ -149,7 +149,7 @@ namespace based::scene
 			auto trans = mRegistry.get<Transform>(camera);
 			if (auto cam = camPtr.camera.lock())
 			{
-				cam->SetTransform(trans.Position, trans.Rotation, trans.Scale);
+				cam->SetTransform(trans.Position(), trans.Rotation(), trans.Scale());
 			}
 		}
 
@@ -174,7 +174,7 @@ namespace based::scene
 			mRegistry.patch<PointLight>(entity, 
 				[this, trans](auto& l)
 				{
-					l.position = trans.Position;
+					l.position = trans.Position();
 				});
 		}
 
@@ -187,7 +187,7 @@ namespace based::scene
 			mRegistry.patch<DirectionalLight>(entity,
 				[this, trans](auto& l)
 				{
-					l.direction = trans.Rotation;
+					l.direction = trans.Rotation();
 				});
 		}
 

@@ -121,38 +121,14 @@ namespace based::ui
 			textEntity->RegenerateRenderSpace();
 
 		const scene::Transform transform = textEntity->GetComponent<scene::Transform>();
-		const glm::vec3 pos = transform.Position;
-		const glm::vec3 rot = transform.Rotation;
-		const glm::vec3 scale = transform.Scale;
-		const glm::vec3 localPos = transform.LocalPosition;
-		const glm::vec3 localRot = transform.LocalRotation;
 
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera,
 			Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()));
-		// Translations are applied in the opposite order they are defined here
-		// So - scale, rotate by local rotation, translate by local position, rotate by global rotation,
-		// translate by global translation
 
-		auto model = glm::mat4(1.f);
-		model = glm::translate(model, pos - localPos);
-
-		// Rotations are passed as degrees and converted to radians here automatically
-		model = glm::rotate(model, glm::radians(-(rot.y - localRot.y)), glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, glm::radians(-(rot.x - localRot.x)), glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, glm::radians(-(rot.z - localRot.z)), glm::vec3(0.f, 0.f, 1.f));
-
-		model = glm::translate(model, localPos);
-
-		// Rotations are passed as degrees and converted to radians here automatically
-		model = glm::rotate(model, glm::radians(localRot.y), glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, glm::radians(localRot.x), glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, glm::radians(localRot.z), glm::vec3(0.f, 0.f, 1.f));
-
-		model = glm::scale(model, scale);
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayMaterial,
 			textEntity->mVA,
 			textEntity->mMaterial,
-			model,
+			transform.GetGlobalMatrix(),
 			textEntity->mIgnoreDepth ? GL_ALWAYS : GL_LEQUAL));
 
 		if (textEntity->mShouldRegenerate) textEntity->RegenerateTexture();

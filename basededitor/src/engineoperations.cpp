@@ -373,9 +373,9 @@ namespace editor
 		HISTORY_SAVE(isSceneDirty);
 
 		if (!local)
-			entity->SetTransform(transform.Position, transform.Rotation, transform.Scale);
+			entity->SetTransform(transform.Position(), transform.Rotation(), transform.Scale());
 		else
-			entity->SetLocalTransform(transform.Position, transform.Rotation, transform.Scale);
+			entity->SetLocalTransform(transform.Position(), transform.Rotation(), transform.Scale());
 
 		Statics::SetSceneDirty(true);
 
@@ -392,9 +392,9 @@ namespace editor
 		HISTORY_LOAD(isSceneDirty);
 
 		if (!local)
-			entity->SetTransform(savedTransform.Position, savedTransform.Rotation, savedTransform.Scale);
+			entity->SetTransform(savedTransform.Position(), savedTransform.Rotation(), savedTransform.Scale());
 		else
-			entity->SetLocalTransform(savedTransform.LocalPosition, savedTransform.LocalRotation, savedTransform.LocalScale);
+			entity->SetLocalTransform(savedTransform.LocalPosition(), savedTransform.LocalRotation(), savedTransform.LocalScale());
 
 		entity->AddComponent<MovedDueToUndo>();
 

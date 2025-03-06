@@ -52,7 +52,7 @@ namespace based::managers
 				auto id = rigidbody.rigidbodyID;
 				entity->SetTransform(convert(bodyInterface.GetPosition(id)),
 					convert(bodyInterface.GetRotation(id).GetEulerAngles()) * math::Rad2Deg,
-					entity->GetTransform().Scale);
+					entity->GetTransform().Scale());
 			}
 		}
 

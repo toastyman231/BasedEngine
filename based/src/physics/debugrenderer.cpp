@@ -132,7 +132,7 @@ namespace based::physics
 		ECastShadow inCastShadow, EDrawMode inDrawMode)
 	{
 		auto& rm = Engine::Instance().GetRenderManager();
-		auto cameraPos = convert(Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetTransform().Position);
+		auto cameraPos = convert(Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()->GetTransform().Position());
 		LOD lod = inGeometry->GetLOD(cameraPos, inWorldSpaceBounds, inLODScaleSq);
 
 		if (inDrawMode == EDrawMode::Wireframe)

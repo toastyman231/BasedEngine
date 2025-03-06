@@ -427,7 +427,7 @@ namespace based::graphics::rendercommands
 		{
 			globals.proj = cam->GetProjectionMatrix();
 			globals.view = cam->GetViewMatrix();
-			globals.eyePos = glm::vec4(cam->GetTransform().Position, 1.f);
+			globals.eyePos = glm::vec4(cam->GetTransform().Position(), 1.f);
 			globals.eyeForward = glm::vec4(cam->GetForward(), 1.f);
 		}
 

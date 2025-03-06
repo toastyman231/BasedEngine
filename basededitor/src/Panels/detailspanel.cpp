@@ -41,9 +41,9 @@ namespace editor::panels
 			bool isChild = !entity->Parent.expired();
 			auto transform = entity->GetTransform();
 			static auto savedTransform = transform;
-			auto pos = isChild ? transform.LocalPosition : transform.Position;
-			auto rot = isChild ? transform.LocalRotation : transform.Rotation;
-			auto scale = isChild ? transform.LocalScale : transform.Scale;
+			auto pos = isChild ? transform.LocalPosition() : transform.Position();
+			auto rot = isChild ? transform.LocalRotation() : transform.Rotation();
+			auto scale = isChild ? transform.LocalScale() : transform.Scale();
 
 			if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 			{

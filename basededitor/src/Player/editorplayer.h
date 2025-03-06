@@ -51,7 +51,7 @@ namespace editor
 				player.yaw = based::math::Clamp(player.yaw, -89.f, 89.f);
 
 				if (camera)
-					entity->SetRotation({ player.yaw, player.pitch, camera->GetTransform().Rotation.z });
+					entity->SetRotation({ player.yaw, player.pitch, camera->GetTransform().Rotation().z});
 			} else
 			{
 				based::input::Mouse::SetCursorMode(based::input::CursorMode::Free);
@@ -61,25 +61,25 @@ namespace editor
 			{
 				if (based::input::Keyboard::Key(BASED_INPUT_KEY_W))
 				{
-					entity->SetPosition(transform.Position + 
+					entity->SetPosition(transform.Position() +
 						player.speed * based::core::Time::UnscaledDeltaTime() * camera->GetForward());
 				}
 
 				if (based::input::Keyboard::Key(BASED_INPUT_KEY_S))
 				{
-					entity->SetPosition(transform.Position -
+					entity->SetPosition(transform.Position() -
 						player.speed * based::core::Time::UnscaledDeltaTime() * camera->GetForward());
 				}
 
 				if (based::input::Keyboard::Key(BASED_INPUT_KEY_D))
 				{
-					entity->SetPosition(transform.Position +
+					entity->SetPosition(transform.Position() +
 						player.speed * based::core::Time::UnscaledDeltaTime() * camera->GetRight());
 				}
 
 				if (based::input::Keyboard::Key(BASED_INPUT_KEY_A))
 				{
-					entity->SetPosition(transform.Position -
+					entity->SetPosition(transform.Position() -
 						player.speed * based::core::Time::UnscaledDeltaTime() * camera->GetRight());
 				}
 			}

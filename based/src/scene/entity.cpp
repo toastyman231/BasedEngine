@@ -79,9 +79,9 @@ namespace based::scene
 		else { RemoveComponent<scene::Enabled>(); OnDisable(); }
 	}
 
-	scene::Transform Entity::GetTransform()
+	Transform& Entity::GetTransform()
 	{
-		return GetComponent<scene::Transform>();
+		return GetComponent<Transform>();
 	}
 
 	void Entity::SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
@@ -94,55 +94,23 @@ namespace based::scene
 
 	void Entity::SetPosition(glm::vec3 pos)
 	{
-		Transform transform = GetComponent<scene::Transform>();
-		AddOrReplaceComponent<scene::Transform>(pos, transform.LocalPosition,
-			transform.Rotation, transform.LocalRotation,
-			transform.Scale, transform.LocalScale);
+		Transform& transform = GetComponent<scene::Transform>();
 
-		for (auto const& child : Children)
-		{
-			if (auto ch = child.lock())
-			{
-				glm::vec3 newAbsolutePosition = pos + ch->GetComponent<scene::Transform>().LocalPosition;
-				ch->SetPosition(newAbsolutePosition);
-			}
-		}
+		transform.SetGlobalTransform(pos, transform.Rotation(), transform.Scale());
 	}
 
 	void Entity::SetRotation(glm::vec3 rot)
 	{
-		Transform transform = GetComponent<scene::Transform>();
+		Transform& transform = GetComponent<scene::Transform>();
 
-		AddOrReplaceComponent<scene::Transform>(transform.Position, transform.LocalPosition,
-			rot, transform.LocalRotation,
-			transform.Scale, transform.LocalScale);
-
-		for (auto const& child : Children)
-		{
-			if (auto ch = child.lock())
-			{
-				glm::vec3 newAbsoluteRotation = rot + ch->GetComponent<scene::Transform>().LocalRotation;
-				ch->SetRotation(newAbsoluteRotation);
-			}
-		}
+		transform.SetGlobalTransform(transform.Position(), rot, transform.Scale());
 	}
 
 	void Entity::SetScale(glm::vec3 scale)
 	{
-		Transform transform = GetComponent<scene::Transform>();
+		Transform& transform = GetComponent<scene::Transform>();
 
-		AddOrReplaceComponent<scene::Transform>(transform.Position, transform.LocalPosition,
-			transform.Rotation, transform.LocalRotation,
-			scale, transform.LocalScale);
-
-		for (auto const& child : Children)
-		{
-			if (auto ch = child.lock())
-			{
-				glm::vec3 newAbsoluteScale = scale * ch->GetComponent<scene::Transform>().LocalScale;
-				ch->SetScale(newAbsoluteScale);
-			}
-		}
+		transform.SetGlobalTransform(transform.Position(), transform.Rotation(), scale);
 	}
 
 	void Entity::SetLocalTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
@@ -155,87 +123,22 @@ namespace based::scene
 
 	void Entity::SetLocalPosition(glm::vec3 pos)
 	{
-		Transform transform = GetComponent<scene::Transform>();
-		glm::vec3 newPosition;
+		Transform& transform = GetComponent<Transform>();
 
-		if (auto parent = Parent.lock())
-		{
-			newPosition = parent->GetComponent<scene::Transform>().Position + pos;
-		} else
-		{
-			newPosition = pos;
-			pos = glm::vec3(0.f);
-		}
-
-		AddOrReplaceComponent<scene::Transform>(newPosition, pos,
-			transform.Rotation, transform.LocalRotation,
-			transform.Scale, transform.LocalScale);
-
-		for (auto const& child : Children)
-		{
-			if (auto ch = child.lock())
-			{
-				glm::vec3 newAbsolutePosition = newPosition + ch->GetComponent<scene::Transform>().LocalPosition;
-				ch->SetPosition(newAbsolutePosition);
-			}
-		}
+		transform.SetLocalTransform(pos, transform.LocalRotation(), transform.LocalScale());
 	}
 
 	void Entity::SetLocalRotation(glm::vec3 rot)
 	{
-		Transform transform = GetComponent<scene::Transform>();
-		glm::vec3 newRotation;
+		Transform& transform = GetComponent<Transform>();
 
-		if (auto parent = Parent.lock())
-		{
-			newRotation = parent->GetComponent<scene::Transform>().Rotation + rot;
-		} else
-		{
-			newRotation = rot;
-			rot = glm::vec3(0.f);
-		}
-
-		AddOrReplaceComponent<scene::Transform>(transform.Position, transform.LocalPosition,
-			newRotation, rot,
-			transform.Scale, transform.LocalScale);
-
-		for (auto const& child : Children)
-		{
-			if (auto ch = child.lock())
-			{
-				glm::vec3 newAbsoluteRotation = newRotation + ch->GetComponent<scene::Transform>().LocalRotation;
-				ch->SetRotation(newAbsoluteRotation);
-			}
-		}
+		transform.SetLocalTransform(transform.LocalPosition(), rot, transform.LocalScale());
 	}
 
 	void Entity::SetLocalScale(glm::vec3 scale)
 	{
-		Transform transform = GetComponent<scene::Transform>();
+		Transform& transform = GetComponent<Transform>();
 
-		glm::vec3 newScale;
-
-		if (auto parent = Parent.lock())
-		{
-			newScale = parent->GetComponent<scene::Transform>().Scale * scale;
-		}
-		else
-		{
-			newScale = scale;
-			scale = glm::vec3(1.f);
-		}
-
-		AddOrReplaceComponent<scene::Transform>(transform.Position, transform.LocalPosition,
-			transform.Rotation, transform.LocalRotation,
-			newScale, scale);
-
-		for (auto const& child : Children)
-		{
-			if (auto ch = child.lock())
-			{
-				glm::vec3 newAbsoluteScale = newScale * ch->GetComponent<scene::Transform>().LocalScale;
-				ch->SetScale(newAbsoluteScale);
-			}
-		}
+		transform.SetLocalTransform(transform.LocalPosition(), transform.LocalRotation(), scale);
 	}
 }

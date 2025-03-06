@@ -114,23 +114,19 @@ namespace editor::panels
 			{
 				if (auto entity = Statics::GetSelectedEntities()[0].lock())
 				{
+					const bool isChild = !entity->Parent.expired();
+
 					auto viewMat = mViewCamera->GetViewMatrix();
 					auto projMat = mViewCamera->GetProjectionMatrix();
-					auto modelMat = entity->GetTransform().GetMatrix();
-					auto deltaMat = glm::mat4(1.f);
-					auto mode = mMode;
-					if (!entity->Parent.expired())
-					{
-						if (mode == ImGuizmo::WORLD)
-							mode = ImGuizmo::LOCAL;
-						else mode = ImGuizmo::WORLD;
-					}
+					auto modelMat = entity->GetTransform().GetGlobalMatrix();
+					auto deltaMat = glm::mat4(0.f);
 					ImGuizmo::Manipulate(
 						glm::value_ptr(viewMat),
 						glm::value_ptr(projMat),
-						mOperation, mode,
+						mOperation, mMode,
 						glm::value_ptr(modelMat), glm::value_ptr(deltaMat));
 					ImGuizmo::SetGizmoSizeClipSpace(0.25f);
+
 					if (ImGuizmo::IsUsing())
 					{
 						float trans[3], rot[3], scale[3];
@@ -139,28 +135,10 @@ namespace editor::panels
 							trans, rot, scale);
 						ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(deltaMat),
 							dTrans, dRot, dScale);
-						auto transform = entity->GetTransform();
-						if (entity->Parent.expired())
-						{
-							entity->SetPosition({ trans[0], trans[1], trans[2] });
-							entity->SetRotation({ transform.Rotation.x - dRot[0],
-								transform.Rotation.y - dRot[1], transform.Rotation.z - dRot[2] });
-							entity->SetScale({ scale[0], scale[1], scale[2] });
-						} else
-						{
-							entity->SetLocalPosition({
-								transform.LocalPosition.x + dTrans[0],
-								transform.LocalPosition.y + dTrans[1],
-								transform.LocalPosition.z + dTrans[2] });
-							entity->SetLocalRotation({
-								transform.LocalRotation.x + dRot[0],
-								transform.LocalRotation.y + dRot[1],
-								transform.LocalRotation.z + dRot[2] });
-							entity->SetLocalScale({ 
-								scale[0],
-								scale[1],
-								scale[2] });
-						}
+						auto& transform = entity->GetTransform();
+
+						transform.SetGlobalTransformFromMatrix(modelMat);
+						ImGuizmo::DrawCubes(glm::value_ptr(viewMat), glm::value_ptr(projMat), glm::value_ptr(modelMat), 1);
 					}
 				}
 			}

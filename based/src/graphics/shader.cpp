@@ -342,7 +342,7 @@ namespace based::graphics
 			{
 				scene::Transform trans = registry.get<scene::Transform>(entity);
 				scene::PointLight light = registry.get<scene::PointLight>(entity);
-				light.position = trans.Position;
+				light.position = trans.Position();
 				pointLights.emplace_back(light);
 			}
 
@@ -380,7 +380,7 @@ namespace based::graphics
 			{
 				scene::Transform trans = registry.get<scene::Transform>(entity);
 				scene::DirectionalLight light = registry.get<scene::DirectionalLight>(entity);
-				light.direction = trans.Rotation;
+				light.direction = trans.Rotation();
 
 				shdr->SetUniformFloat3("directionalLight.direction", light.direction);
 				shdr->SetUniformFloat3("directionalLight.color", light.color);
