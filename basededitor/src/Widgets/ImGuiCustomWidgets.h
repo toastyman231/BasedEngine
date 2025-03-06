@@ -1,4 +1,5 @@
 #pragma once
+#include "external/imgui/imgui.h"
 
 namespace based::graphics
 {
@@ -12,6 +13,8 @@ namespace ImGui
 
 	template <typename Type>
 	std::shared_ptr<Type> ObjectPicker(const std::string& label, std::shared_ptr<Type> current) = delete;
+
+	bool ToggleButton(uint32_t textureId, ImVec2 size, bool isSelected);
 
 	// Explicit specialization declarations
 	template <>

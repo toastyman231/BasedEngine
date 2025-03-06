@@ -113,6 +113,7 @@ public:
 
 		mSceneView = new editor::panels::EditorView(
 			editor::Statics::GetEditorCamera(), "Scene View", editorSceneBuffer);
+		mSceneView->Initialize();
 		mGameView = new editor::panels::GameView(
 			gameCamera, "Game View", Engine::Instance().GetWindow().GetFramebuffer());
 		mDetailsPanel = new editor::panels::DetailsPanel("Details");

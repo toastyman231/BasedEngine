@@ -130,4 +130,26 @@ namespace ImGui
 
         return returnPointer;
     }
+
+    bool ToggleButton(uint32_t textureId, ImVec2 size, bool isSelected)
+    {
+        bool wasPressed = false;
+        if (isSelected)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3 / 7.0f, 1, 1));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3 / 7.0f, 1, 1));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(3 / 7.0f, 0.5f, 0.5f));
+        }
+        if (ImGui::ImageButton((void*)static_cast<intptr_t>(textureId),
+            size))
+        {
+            isSelected = !isSelected;
+            wasPressed = true;
+        }
+        if (isSelected && !wasPressed)
+        {
+            ImGui::PopStyleColor(3);
+        }
+        return wasPressed;
+    }
 }

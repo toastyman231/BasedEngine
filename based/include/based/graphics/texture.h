@@ -3,8 +3,8 @@
 #include <string>
 #include <memory>
 
-#include "assetlibrary.h"
-#include "uuid.h"
+#include "based/core/assetlibrary.h"
+#include "based/core/uuid.h"
 
 #define DEFAULT_TEX_LIB based::graphics::DefaultLibraries::GetTextureLibrary()
 

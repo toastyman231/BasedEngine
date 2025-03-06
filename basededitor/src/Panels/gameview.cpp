@@ -3,6 +3,7 @@
 
 #include "../editorstatics.h"
 #include "../external/imguizmo/ImGuizmo.h"
+#include "../Widgets/ImGuiCustomWidgets.h"
 #include "based/app.h"
 #include "based/engine.h"
 #include "based/input/joystick.h"
@@ -82,15 +83,22 @@ namespace editor::panels
 			ImGuizmo::SetRect(ImGui::GetItemRectMin().x, ImGui::GetItemRectMin().y,
 				ImGui::GetItemRectSize().x, ImGui::GetItemRectSize().y);
 
+			ImVec2 buttonSize(25, 25);
+
 			ImGui::SetCursorPos(pos);
 			ImGui::Spacing();
 			ImGui::Indent(5);
-			if (ImGui::Button("##trans", ImVec2(50, 50)))
+			if (ImGui::ToggleButton(mTranslateIcon->GetId(), buttonSize,
+				mOperation == ImGuizmo::TRANSLATE))
 			{
 				mOperation = ImGuizmo::OPERATION::TRANSLATE;
 			}
 			ImGui::SameLine();
-			if (ImGui::Button("##mode", ImVec2(50, 50)))
+			if (ImGui::ImageButton(
+				mMode == ImGuizmo::WORLD ?
+				(void*)static_cast<intptr_t>(mGlobalIcon->GetId())
+				: (void*)static_cast<intptr_t>(mLocalIcon->GetId()),
+				buttonSize))
 			{
 				if (mMode == ImGuizmo::WORLD)
 				{
@@ -100,11 +108,13 @@ namespace editor::panels
 					mMode = ImGuizmo::WORLD;
 				}
 			}
-			if (ImGui::Button("##rot", ImVec2(50, 50)))
+			if (ImGui::ToggleButton(mRotateIcon->GetId(), buttonSize,
+				mOperation == ImGuizmo::ROTATE))
 			{
 				mOperation = ImGuizmo::OPERATION::ROTATE;
 			}
-			if (ImGui::Button("##scale", ImVec2(50, 50)))
+			if (ImGui::ToggleButton(mScaleIcon->GetId(), buttonSize,
+				mOperation == ImGuizmo::SCALE))
 			{
 				mOperation = ImGuizmo::OPERATION::SCALE;
 			}
@@ -115,6 +125,7 @@ namespace editor::panels
 				if (auto entity = Statics::GetSelectedEntities()[0].lock())
 				{
 					const bool isChild = !entity->Parent.expired();
+					// TODO: Fix rotations
 
 					auto viewMat = mViewCamera->GetViewMatrix();
 					auto projMat = mViewCamera->GetProjectionMatrix();
@@ -138,7 +149,6 @@ namespace editor::panels
 						auto& transform = entity->GetTransform();
 
 						transform.SetGlobalTransformFromMatrix(modelMat);
-						ImGuizmo::DrawCubes(glm::value_ptr(viewMat), glm::value_ptr(projMat), glm::value_ptr(modelMat), 1);
 					}
 				}
 			}
@@ -152,17 +162,21 @@ namespace editor::panels
 	{
 		GameView::ProcessEvent(event);
 
-		if (event.EventType == BasedEventType::BASED_EVENT_TRANSLATE)
+		if (!(based::input::Mouse::Button(BASED_INPUT_MOUSE_RIGHT) ||
+			based::input::Mouse::Button(BASED_INPUT_MOUSE_LEFT)))
 		{
-			mOperation = ImGuizmo::TRANSLATE;
-		}
-		if (event.EventType == BasedEventType::BASED_EVENT_ROTATE)
-		{
-			mOperation = ImGuizmo::ROTATE;
-		}
-		if (event.EventType == BasedEventType::BASED_EVENT_SCALE)
-		{
-			mOperation = ImGuizmo::SCALE;
+			if (event.EventType == BasedEventType::BASED_EVENT_TRANSLATE)
+			{
+				mOperation = ImGuizmo::TRANSLATE;
+			}
+			if (event.EventType == BasedEventType::BASED_EVENT_ROTATE)
+			{
+				mOperation = ImGuizmo::ROTATE;
+			}
+			if (event.EventType == BasedEventType::BASED_EVENT_SCALE)
+			{
+				mOperation = ImGuizmo::SCALE;
+			}
 		}
 	}
 }
