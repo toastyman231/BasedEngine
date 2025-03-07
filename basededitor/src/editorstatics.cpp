@@ -68,11 +68,7 @@ namespace editor
 			}
 		}
 
-		BASED_TRACE("Creating new scene!");
-		auto newScene = std::make_shared<based::scene::Scene>();
-		based::Engine::Instance().GetApp().LoadScene(newScene);
-		
-		auto res = LoadScene(ASSET_PATH("Scenes/Default3D.bscn"));
+		auto res = LoadScene(ASSET_PATH("Scenes/Default3D.bscn"), true, true);
 
 		if (!res)
 		{
@@ -111,7 +107,7 @@ namespace editor
 		return LoadScene(openPath, keepLoadedAssets);
 	}
 
-	bool Statics::LoadScene(const std::string& path, bool keepLoadedAssets)
+	bool Statics::LoadScene(const std::string& path, bool keepLoadedAssets, bool absolutePath)
 	{
 		if (mEditorSceneDirty)
 		{
@@ -134,10 +130,18 @@ namespace editor
 			}
 		}
 
-		auto prefix = mProjectDirectory;
-		if (!EndsWith(mProjectDirectory, "/") && !EndsWith(mProjectDirectory, "\\"))
-			prefix.append("/");
-		auto res = based::scene::Scene::LoadScene(path, prefix, keepLoadedAssets);
+		std::string prefix = "";
+		std::string filepath = path;
+		if (!absolutePath)
+		{
+			prefix = mProjectDirectory;
+			if (!EndsWith(mProjectDirectory, "/") && !EndsWith(mProjectDirectory, "\\"))
+				prefix.append("/");
+			BASED_TRACE("Deserializing {}", prefix + filepath);
+			filepath = path.substr(path.find("Assets"));
+		}
+
+		auto res = based::scene::Scene::LoadScene(filepath, prefix, keepLoadedAssets);
 
 		if (!res)
 		{

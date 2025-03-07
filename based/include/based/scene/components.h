@@ -186,9 +186,9 @@ namespace based::scene
 		{
 			glm::mat4 model = glm::mat4(1.f);
 			model = glm::translate(model, mPosition);
-			model = glm::rotate(model, glm::radians(mRotation.y), glm::vec3(0.f, 1.f, 0.f));
-			model = glm::rotate(model, glm::radians(mRotation.x), glm::vec3(1.f, 0.f, 0.f));
 			model = glm::rotate(model, glm::radians(mRotation.z), glm::vec3(0.f, 0.f, 1.f));
+			model = glm::rotate(model, glm::radians(mRotation.x), glm::vec3(1.f, 0.f, 0.f));
+			model = glm::rotate(model, glm::radians(mRotation.y), glm::vec3(0.f, 1.f, 0.f));
 			model = glm::scale(model, mScale);
 			return model;
 		}
@@ -215,14 +215,14 @@ namespace based::scene
 			mPosition = glm::vec3(localPos4); // Extract local position
 
 			// Convert global rotation into local rotation
-			/*glm::quat globalQuat = glm::quat(glm::radians(rot));
-			glm::quat parentGlobalQuat = Parent->Quat();
-			mRotation = glm::degrees(glm::eulerAngles(glm::inverse(parentGlobalQuat) * globalQuat));*/
-			// Convert global rotation into local rotation
 			glm::quat globalQuat = glm::quat(glm::radians(rot));
 			glm::quat parentGlobalQuat = Parent->Quat();
+			mRotation = glm::degrees(glm::eulerAngles(glm::inverse(parentGlobalQuat) * globalQuat));
+			// Convert global rotation into local rotation
+			/*glm::quat globalQuat = glm::quat(glm::radians(rot));
+			glm::quat parentGlobalQuat = Parent->Quat();
 			glm::quat localQuat = glm::inverse(parentGlobalQuat) * globalQuat;  // this gives the relative rotation
-			mRotation = glm::degrees(glm::eulerAngles(localQuat));
+			mRotation = glm::degrees(glm::eulerAngles(localQuat));*/
 
 			// Scale is hierarchical (divisible)
 			mScale = scale / Parent->Scale();

@@ -135,21 +135,27 @@ namespace based::scene
 
 			Parent = parentEntity;
 			parentEntity->Children.emplace_back(shared_from_this());
+			if (keepRelativeTransform)
+			{
+				mRegistry.patch<Transform>(mEntity,
+					[parentEntity](Transform& tr)
+					{
+						tr.SetLocalTransform(
+							tr.Position() - parentEntity->GetTransform().Position(),
+							tr.Rotation() - parentEntity->GetTransform().Rotation(),
+							tr.Scale() / parentEntity->GetTransform().Scale()
+						);
+					});
+			} else
+			{
+				SetLocalTransform({ 0, 0, 0 }, { 0, 0, 0 }, { 1, 1, 1 });
+			}
+
 			mRegistry.patch<Transform>(mEntity,
 				[parentEntity](Transform& tr)
 				{
 					tr.Parent = &parentEntity->GetComponent<Transform>();
 				});
-			if (keepRelativeTransform)
-			{
-				// TODO: Figure this out
-				/*SetLocalPosition(GetTransform().Position() - parentEntity->GetTransform().Position());
-				SetLocalRotation(GetTransform().Rotation() - parentEntity->GetTransform().Rotation());
-				SetLocalScale(GetTransform().Scale() / parentEntity->GetTransform().Scale());*/
-			} else
-			{
-				SetLocalTransform({ 0, 0, 0 }, { 0, 0, 0 }, { 1, 1, 1 });
-			}
 		}
 
 		bool RemoveChild(const std::shared_ptr<Entity>& childEntity)

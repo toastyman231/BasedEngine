@@ -149,7 +149,8 @@ namespace based::scene
 			auto trans = mRegistry.get<Transform>(camera);
 			if (auto cam = camPtr.camera.lock())
 			{
-				cam->SetTransform(trans.Position(), trans.Rotation(), trans.Scale());
+				cam->GetTransform().Parent = trans.Parent;
+				cam->SetTransform(trans.Position(), trans.LocalRotation(), trans.Scale());
 			}
 		}
 

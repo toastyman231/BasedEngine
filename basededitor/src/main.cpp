@@ -67,14 +67,15 @@ public:
 		mFileBrowser = new editor::panels::FileBrowser("File Browser");
 		mFileBrowser->Initialize();
 
-		if (std::filesystem::exists("Config/EditorConfig.yml"))
+		if (std::filesystem::exists(editor::Statics::GetProjectDirectory() + "/Config/EditorConfig.yml"))
 		{
-			std::ifstream ifs("Config/EditorConfig.yml");
+			std::ifstream ifs(editor::Statics::GetProjectDirectory() + "/Config/EditorConfig.yml");
 			std::stringstream stream;
 			stream << ifs.rdbuf();
 
 			YAML::Node data = YAML::Load(stream.str());
 			if (data["StartupScene"]) startupScenePath = data["StartupScene"].as<std::string>();
+			BASED_TRACE("Loaded data as {}", startupScenePath);
 		} else
 		{
 			BASED_WARN("No config file for editor!");
@@ -87,7 +88,7 @@ public:
 		else
 		{
 			BASED_WARN("Provided scene is invalid, falling back on default!");
-			editor::Statics::LoadScene(ASSET_PATH("Scenes/Default3D.bscn"));
+			editor::Statics::LoadScene(ASSET_PATH("Scenes/Default3D.bscn"), true, true);
 		}
 
 		auto editorSceneBuffer = std::make_shared<graphics::Framebuffer>(1280, 720);

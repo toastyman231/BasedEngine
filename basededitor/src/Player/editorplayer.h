@@ -11,7 +11,7 @@ namespace editor
 {
 	struct EditorPlayer
 	{
-		float speed = 2.5f;
+		float speed = 6.f;
 		float pitch = 0.f;
 		float yaw = 0.f;
 		float sensitivity = 100.f;

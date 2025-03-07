@@ -37,7 +37,7 @@ namespace based::graphics
 		inline float GetFar() const { return mFar; }
 		inline float GetFOV() const { return mFOV; }
 		inline void SetViewMatrix(const glm::mat4& matrix) { mViewMatrix = matrix; }
-		inline scene::Transform GetTransform() const { return mTransform; }
+		inline scene::Transform& GetTransform() { return mTransform; }
 
 		void SetAspectRatio(float aspectRatio);
 		void SetHeight(float height);

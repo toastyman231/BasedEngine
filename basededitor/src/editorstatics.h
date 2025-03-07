@@ -21,7 +21,7 @@ namespace editor
 
 		static bool NewScene();
 		static bool OpenScene(const std::string& path = "", bool keepLoadedAssets = true);
-		static bool LoadScene(const std::string& path, bool keepLoadedAssets = true);
+		static bool LoadScene(const std::string& path, bool keepLoadedAssets = true, bool absolutePath = false);
 		static bool SaveScene(const std::string& path = "", bool forceSave = false);
 
 		static std::shared_ptr<based::graphics::Camera> GetEditorCamera() { return mEditorCamera; }
@@ -52,6 +52,7 @@ namespace editor
 
 		static std::string GetCurrentSceneSaveLocation() { return mSaveLocation; }
 
+		static void SetProjectDirectory(const std::string& dir) { mProjectDirectory = dir; }
 		static std::string GetProjectDirectory() { return mProjectDirectory; }
 
 		static bool EndsWith(const std::string& value, const std::string& ending);

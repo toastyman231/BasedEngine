@@ -914,7 +914,7 @@ namespace based::scene
 					else truePath = mProjectDirectory + materialPath;
 					material = DeserializeMaterial(truePath);
 					BASED_ASSERT(material != nullptr, "Material is null!");
-					material->SetMaterialSource(truePath);
+					material->SetMaterialSource(materialPath);
 					mLoadedMaterials[material->GetUUID()] = material;
 				}
 			}
@@ -1012,7 +1012,7 @@ namespace based::scene
 							else truePath = mProjectDirectory + materialPath;
 							mat = DeserializeMaterial(truePath);
 							BASED_ASSERT(mat != nullptr, "Material is null!");
-							mat->SetMaterialSource(truePath);
+							mat->SetMaterialSource(materialPath);
 							mLoadedMaterials[mat->GetUUID()] = mat;
 						}
 					}
@@ -1142,8 +1142,6 @@ namespace based::scene
 								anim = DeserializeAnimation(mProjectDirectory + path);
 								anim->SetFileAnimation(path);
 								mScene->GetAnimationStorage().Load(anim->GetAnimationName(), anim);
-								/*animation::Animation::LoadAnimationFromFile(mProjectDirectory + path,
-									mScene->GetAnimationStorage());*/
 								BASED_ASSERT(anim, "Loaded animation is not valid!");
 								mLoadedAnimations[animId] = anim;
 							}
@@ -1366,7 +1364,9 @@ namespace based::scene
 		for (auto ent: mScene->GetRegistry().view<EntityReference>())
 		{
 			auto entity = mScene->GetRegistry().get<EntityReference>(ent).entity;
-			if (auto myEntity = entity.lock()) SerializeEntity(out, myEntity);
+			if (auto myEntity = entity.lock();
+				myEntity && myEntity->GetEntityName() != "EditorPlayer") 
+				SerializeEntity(out, myEntity);
 		}
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
@@ -1386,13 +1386,17 @@ namespace based::scene
 
 	bool SceneSerializer::Deserialize(const std::string& filepath)
 	{
-		std::ifstream stream(filepath);
+		std::ifstream stream(mProjectDirectory + filepath);
 		std::stringstream strStream;
 		strStream << stream.rdbuf();
+		stream.close();
 
 		YAML::Node data = YAML::Load(strStream.str());
 		if (!data["Scene"])
+		{
+			BASED_ERROR("Error deserializing path {}", mProjectDirectory + filepath);
 			return false;
+		}
 
 		std::string sceneName = data["Scene"].as<std::string>();
 		BASED_TRACE("Deserializing scene {}", sceneName);

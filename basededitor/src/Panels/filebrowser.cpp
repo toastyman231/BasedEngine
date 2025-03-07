@@ -360,7 +360,7 @@ namespace editor::panels
 					}
 					else if (IsFileOfType(dir.path().filename().string(), ".bscn"))
 					{
-						Statics::OpenScene(dir.path().string());
+						Statics::LoadScene(dir.path().string(), true);
 					} else
 					{
 						LaunchExplorer(dir.path().string());
