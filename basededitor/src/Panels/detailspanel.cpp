@@ -74,10 +74,10 @@ namespace editor::panels
 
 				if (madeAnyChange && (ImGui::IsMouseReleased(0) || anyItemEdited))
 				{
-					Statics::EngineOperations.EditorSetEntityTransform(entity, 
+					/*Statics::EngineOperations.EditorSetEntityTransform(entity, 
 						{ pos, rot , scale },
 						savedTransform,
-						isChild);
+						isChild);*/
 					locationSaved = false;
 					madeAnyChange = false;
 				}

@@ -50,8 +50,9 @@ namespace editor
 
 				player.yaw = based::math::Clamp(player.yaw, -89.f, 89.f);
 
-				if (camera)
-					entity->SetRotation({ player.yaw, player.pitch, camera->GetTransform().Rotation().z});
+				transform.SetLocalTransform(transform.Position(),
+					{ player.yaw, player.pitch, transform.Rotation().z },
+					transform.Scale());
 			} else
 			{
 				based::input::Mouse::SetCursorMode(based::input::CursorMode::Free);

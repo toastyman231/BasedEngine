@@ -370,16 +370,16 @@ namespace based::graphics
 	{
 		if (auto shdr = shader.lock())
 		{
-			const entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
-			const auto lightsView = registry.view<scene::Enabled, scene::Transform, scene::DirectionalLight>();
+			entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
+			auto lightsView = registry.view<scene::Enabled, scene::Transform, scene::DirectionalLight>();
 
 			// Return if there are no directional lights
 			if (lightsView.begin() == lightsView.end()) return;
 
-			for (const auto entity : lightsView)
+			for (auto entity : lightsView)
 			{
-				scene::Transform trans = registry.get<scene::Transform>(entity);
-				scene::DirectionalLight light = registry.get<scene::DirectionalLight>(entity);
+				scene::Transform& trans = registry.get<scene::Transform>(entity);
+				scene::DirectionalLight& light = registry.get<scene::DirectionalLight>(entity);
 				light.direction = trans.Rotation();
 
 				shdr->SetUniformFloat3("directionalLight.direction", light.direction);

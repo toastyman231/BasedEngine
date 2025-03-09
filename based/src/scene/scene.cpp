@@ -146,11 +146,11 @@ namespace based::scene
 		for (const auto& camera : cameraView)
 		{
 			auto camPtr = mRegistry.get<CameraComponent>(camera);
-			auto trans = mRegistry.get<Transform>(camera);
+			auto& trans = mRegistry.get<Transform>(camera);
 			if (auto cam = camPtr.camera.lock())
 			{
 				cam->GetTransform().Parent = trans.Parent;
-				cam->SetTransform(trans.Position(), trans.LocalRotation(), trans.Scale());
+				cam->SetTransform(trans.Position(), trans.Rotation(), trans.Scale());
 			}
 		}
 

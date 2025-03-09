@@ -261,10 +261,10 @@ namespace based::managers
 		constexpr float farPlane = 100.f;
 		glm::vec3 lightPosition = glm::vec3(-2.f, 4.f, -1.f);
 		entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
-		const auto directionalLightView = registry.view<scene::DirectionalLight>();
+		auto directionalLightView = registry.view<scene::DirectionalLight>();
 		if (directionalLightView.size() > 0)
 		{
-			const auto directionalLight = registry.get<scene::Transform>(directionalLightView.front());
+			auto& directionalLight = registry.get<scene::Transform>(directionalLightView.front());
 			lightPosition = -directionalLight.Rotation();
 		}
 		const glm::mat4 lightProjection = glm::ortho(-10.f, 10.f, -10.f, 10.f, nearPlane, farPlane);
