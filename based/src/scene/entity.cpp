@@ -87,9 +87,9 @@ namespace based::scene
 	void Entity::SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
 	{
 		PROFILE_FUNCTION();
-		SetPosition(pos);
-		SetRotation(rot);
-		SetScale(scale);
+		
+		Transform& transform = GetComponent<scene::Transform>();
+		transform.SetGlobalTransform(pos, rot, scale);
 	}
 
 	void Entity::SetPosition(glm::vec3 pos)
@@ -116,9 +116,9 @@ namespace based::scene
 	void Entity::SetLocalTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
 	{
 		PROFILE_FUNCTION();
-		SetLocalPosition(pos);
-		SetLocalRotation(rot);
-		SetLocalScale(scale);
+		
+		Transform& transform = GetComponent<scene::Transform>();
+		transform.SetLocalTransform(pos, rot, scale);
 	}
 
 	void Entity::SetLocalPosition(glm::vec3 pos)

@@ -147,7 +147,7 @@ namespace based::scene
 		}
 		glm::quat LocalQuat() const
 		{ 
-			return glm::quat(glm::quat_cast(mMatrix));
+			return glm::quat_cast(glm::extractMatrixRotation(mMatrix));
 		}
 
 		glm::vec3 Rotation() const
@@ -177,6 +177,7 @@ namespace based::scene
 		}
 		glm::vec3 LocalScale() const
 		{
+			// TODO: Fix 0 and negative scales
 			glm::vec3 scale;
 			scale.x = glm::length(glm::vec3(mMatrix[0]));
 			scale.y = glm::length(glm::vec3(mMatrix[1]));
@@ -242,7 +243,7 @@ namespace based::scene
 
 			auto parentMatrix = Parent->GetGlobalMatrix();
 
-			if (glm::determinant(parentMatrix) != 0)
+			if (glm::determinant(parentMatrix) != 0.f)
 				mMatrix = glm::inverse(parentMatrix) * matrix;
 			else BASED_WARN("Non invertible matrix!");
 		}

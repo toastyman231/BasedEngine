@@ -23,4 +23,6 @@ namespace editor::panels
 		void DrawDirectionalLightComponent(std::shared_ptr<based::scene::Entity> entity);
 		void DrawCameraComponent(std::shared_ptr<based::scene::Entity> entity);
 	};
+
+	void OnTransformChanged(float newPos[3], float oldPos[3]);
 }

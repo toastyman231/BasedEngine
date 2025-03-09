@@ -3,8 +3,10 @@
 
 #include "../EditorComponents.h"
 #include "../editorstatics.h"
+#include "../external/imguizmo/ImGuizmo.h"
 #include "../Widgets/ImGuiCustomWidgets.h"
 #include "based/graphics/mesh.h"
+#include "based/input/keyboard.h"
 
 namespace editor::panels
 {
@@ -39,47 +41,79 @@ namespace editor::panels
 			ImGui::Spacing();
 
 			bool isChild = !entity->Parent.expired();
-			auto transform = entity->GetTransform();
-			static auto savedTransform = transform;
+			auto& transform = entity->GetTransform();
 			auto pos = isChild ? transform.LocalPosition() : transform.Position();
 			auto rot = isChild ? transform.LocalRotation() : transform.Rotation();
 			auto scale = isChild ? transform.LocalScale() : transform.Scale();
+			static glm::vec3 savedPos = pos;
+			static glm::vec3 savedRot = rot;
+			static glm::vec3 savedScale = scale;
 
+			ImVec2 guiPos = ImGui::GetCursorScreenPos();
 			if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 			{
-				static auto madeAnyChange = false;
-				static auto locationSaved = false;
-				auto anyItemEdited = false;
-				ImGui::Indent(); ImGui::Spacing();
-				ImGui::Text("Position"); ImGui::SameLine();
-				if (ImGui::DragFloat3("##Position", glm::value_ptr(pos), 0.01f)) madeAnyChange = true;
-				if (ImGui::IsItemDeactivatedAfterEdit()) anyItemEdited = true;
-				ImGui::Text("Rotation"); ImGui::SameLine();
-				if (ImGui::DragFloat3("##Rotation", glm::value_ptr(rot), 0.01f)) madeAnyChange = true;
-				if (ImGui::IsItemDeactivatedAfterEdit()) anyItemEdited = true;
-				ImGui::Text("Scale"); ImGui::SameLine(0, 29);
-				if (ImGui::DragFloat3("##Scale", glm::value_ptr(scale), 0.01f)) madeAnyChange = true;
-				if (ImGui::IsItemDeactivatedAfterEdit()) anyItemEdited = true;
-
-				if (!locationSaved || entity->HasComponent<MovedDueToUndo>())
+				ImGui::SetItemAllowOverlap();
+				ImGui::SetCursorScreenPos(ImVec2(guiPos.x + (ImGui::GetItemRectSize().x - 50), guiPos.y));
+				if (ImGui::Button("Reset", ImVec2(50, ImGui::GetItemRectSize().y)))
 				{
-					locationSaved = true;
-					savedTransform = transform;
-					entity->RemoveComponent<MovedDueToUndo>();
+					scene::Transform oldTrans;
+					if (isChild)
+						oldTrans.SetLocalTransform(savedPos, savedRot, savedScale);
+					else oldTrans.SetGlobalTransform(savedPos, savedRot, savedScale);
+
+					Statics::EngineOperations.EditorSetEntityTransform(entity,
+						{
+							{ 0, 0, 0 },
+							{ 0, 0, 0 },
+							{ 1, 1, 1 } },
+						oldTrans,
+						isChild);
+					pos = glm::vec3(0.f);
+					rot = glm::vec3(0.f);
+					scale = glm::vec3(1.f);
+				}
+
+				if (based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL) &&
+					(input::Keyboard::KeyDown(BASED_INPUT_KEY_Z)
+						|| input::Keyboard::KeyDown(BASED_INPUT_KEY_Y)))
+				{
+					savedPos = pos;
+					savedRot = rot;
+					savedScale = scale;
+				}
+
+				ImGui::Indent(); ImGui::Spacing();
+				if (ImGui::TransformEditor( 
+					glm::value_ptr(pos), 
+					glm::value_ptr(savedPos),
+					glm::value_ptr(rot),
+					glm::value_ptr(savedRot),
+					glm::value_ptr(scale),
+					glm::value_ptr(savedScale),
+					0.01f))
+				{
+					scene::Transform oldTrans;
+					if (isChild) 
+						oldTrans.SetLocalTransform(savedPos, savedRot, savedScale);
+					else oldTrans.SetGlobalTransform(savedPos, savedRot, savedScale);
+					Statics::EngineOperations.EditorSetEntityTransform(entity,
+						entity->GetTransform(), oldTrans, false);
+					savedPos = pos;
+					savedRot = rot;
+					savedScale = scale;
 				}
 
 				if (isChild)
-					entity->SetLocalTransform(pos, rot, scale);
-				else entity->SetTransform(pos, rot, scale);
-
-				if (madeAnyChange && (ImGui::IsMouseReleased(0) || anyItemEdited))
 				{
-					/*Statics::EngineOperations.EditorSetEntityTransform(entity, 
-						{ pos, rot , scale },
-						savedTransform,
-						isChild);*/
-					locationSaved = false;
-					madeAnyChange = false;
+					auto tr = entity->GetTransform();
+					if (pos != tr.LocalPosition() || rot != tr.LocalRotation() || scale != tr.LocalScale())
+						entity->SetLocalTransform(pos, rot, scale);
+				}
+				else
+				{
+					auto tr = entity->GetTransform();
+					if (pos != tr.Position() || rot != tr.Rotation() || scale != tr.Scale())
+						entity->SetTransform(pos, rot, scale);
 				}
 
 				ImGui::Unindent();

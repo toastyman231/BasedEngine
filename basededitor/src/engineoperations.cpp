@@ -375,7 +375,7 @@ namespace editor
 		if (!local)
 			entity->SetTransform(transform.Position(), transform.Rotation(), transform.Scale());
 		else
-			entity->SetLocalTransform(transform.Position(), transform.Rotation(), transform.Scale());
+			entity->SetLocalTransform(transform.LocalPosition(), transform.LocalRotation(), transform.LocalRotation());
 
 		Statics::SetSceneDirty(true);
 
@@ -394,9 +394,12 @@ namespace editor
 		if (!local)
 			entity->SetTransform(savedTransform.Position(), savedTransform.Rotation(), savedTransform.Scale());
 		else
-			entity->SetLocalTransform(savedTransform.LocalPosition(), savedTransform.LocalRotation(), savedTransform.LocalScale());
+			entity->SetLocalTransform(savedTransform.LocalPosition(), savedTransform.LocalRotation(), savedTransform.LocalRotation());
 
-		entity->AddComponent<MovedDueToUndo>();
+		/*if (!local)
+			entity->SetTransform(savedTransform.Position(), savedTransform.Rotation(), savedTransform.Scale());
+		else
+			entity->SetLocalTransform(savedTransform.LocalPosition(), savedTransform.LocalRotation(), savedTransform.LocalScale());*/
 
 		Statics::SetSceneDirty(isSceneDirty);
 

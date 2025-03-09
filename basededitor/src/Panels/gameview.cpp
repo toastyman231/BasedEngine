@@ -1,6 +1,7 @@
 #include "based/pch.h"
 #include "gameview.h"
 
+#include "../EditorComponents.h"
 #include "../editorstatics.h"
 #include "../external/imguizmo/ImGuizmo.h"
 #include "../Widgets/ImGuiCustomWidgets.h"
@@ -125,7 +126,9 @@ namespace editor::panels
 				if (auto entity = Statics::GetSelectedEntities()[0].lock())
 				{
 					const bool isChild = !entity->Parent.expired();
-					// TODO: Fix rotations
+					static bool wasUsingLastFrame = false;
+
+					static auto savedTransform = entity->GetTransform();
 
 					auto viewMat = mViewCamera->GetViewMatrix();
 					auto projMat = mViewCamera->GetProjectionMatrix();
@@ -139,6 +142,13 @@ namespace editor::panels
 						glm::value_ptr(modelMat), glm::value_ptr(deltaMat));
 					ImGuizmo::SetGizmoSizeClipSpace(0.25f);
 
+					if (entity->HasComponent<MovedDueToUndo>())
+					{
+						BASED_TRACE("Moved due to undo!");
+						savedTransform = entity->GetTransform();
+						entity->RemoveComponent<MovedDueToUndo>();
+					}
+
 					if (ImGuizmo::IsUsing())
 					{
 						float trans[3], rot[3], scale[3];
@@ -150,6 +160,18 @@ namespace editor::panels
 						auto& transform = entity->GetTransform();
 
 						transform.SetGlobalTransformFromMatrix(modelMat);
+						wasUsingLastFrame = true;
+					} else if (wasUsingLastFrame)
+					{
+						BASED_TRACE("Locking entity transform!");
+						Statics::EngineOperations.EditorSetEntityTransform(
+							entity,
+							entity->GetTransform(),
+							savedTransform,
+							isChild
+						);
+						savedTransform = entity->GetTransform();
+						wasUsingLastFrame = false;
 					}
 				}
 			}

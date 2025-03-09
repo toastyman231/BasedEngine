@@ -152,4 +152,66 @@ namespace ImGui
         }
         return wasPressed;
     }
+
+    bool TransformEditor(
+        float pos[3],
+        float oldPos[3],
+        float rot[3],
+        float oldRot[3],
+        float scale[3],
+        float oldScale[3],
+        float speed)
+    {
+        static bool isDragging = false;
+        static float savedPos[3] = {pos[0], pos[1], pos[2]};
+        static float savedRot[3] = { rot[0], rot[1], rot[2] };
+        static float savedScale[3] = { scale[0], scale[1], scale[2] };
+
+        ImGui::Text("Position"); ImGui::SameLine();
+        if (ImGui::DragFloat3("##pos", pos, speed))
+        {
+	        if (!isDragging)
+	        {
+                isDragging = true;
+                savedPos[0] = pos[0];
+                savedPos[1] = pos[1];
+                savedPos[2] = pos[2];
+	        }
+
+        }
+        ImGui::Text("Rotation"); ImGui::SameLine();
+        if (ImGui::DragFloat3("##rot", rot, speed))
+        {
+            if (!isDragging)
+            {
+                isDragging = true;
+                savedRot[0] = rot[0];
+                savedRot[1] = rot[1];
+                savedRot[2] = rot[2];
+            }
+        }
+        ImGui::Text("Scale"); ImGui::SameLine();
+        if (ImGui::DragFloat3("##scale", scale, speed))
+        {
+            if (!isDragging)
+            {
+                isDragging = true;
+                savedScale[0] = scale[0];
+                savedScale[1] = scale[1];
+                savedScale[2] = scale[2];
+            }
+        }
+
+        oldPos = savedPos;
+        oldRot = savedRot;
+        oldScale = savedScale;
+
+        if (isDragging && ImGui::IsMouseReleased(0))
+        {
+            isDragging = false;
+            return true;
+        }
+
+        return false;
+    }
 }
