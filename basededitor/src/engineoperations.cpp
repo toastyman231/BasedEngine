@@ -556,6 +556,7 @@ namespace editor
 					else storage.push(entityBacking, storage.value(entity->GetEntityHandle()));
 				}
 			}
+			newEntity->SetParent(entity->Parent.lock());
 			newEntity->AddOrReplaceComponent<based::scene::EntityReference>(newEntity);
 			scene->GetEntityStorage().Load(newEntity->GetEntityName(), newEntity);
 			HISTORY_SAVE(newEntity);
@@ -563,6 +564,7 @@ namespace editor
 		{
 			HISTORY_LOAD(newEntity);
 			newEntity->AddComponent<based::scene::EntityReference>(newEntity);
+			newEntity->SetParent(entity->Parent.lock());
 		}
 
 		Statics::SetSceneDirty(true);
@@ -581,6 +583,7 @@ namespace editor
 		HISTORY_LOAD(newEntity);
 
 		newEntity->RemoveComponent<based::scene::EntityReference>();
+		newEntity->SetParent(nullptr);
 		//based::scene::Entity::DestroyEntity(newEntity);
 
 		Statics::SetSelectedEntities({});
@@ -679,6 +682,11 @@ namespace editor
 		HISTORY_SAVE(isSceneDirty);
 
 		entity->RemoveComponent<scene::EntityReference>();
+		for (auto& c : entity->Children)
+		{
+			if (auto child = c.lock())
+				child->RemoveComponent<scene::EntityReference>();
+		}
 
 		Statics::SetSceneDirty(true);
 		Statics::SetSelectedEntities({});
@@ -696,6 +704,11 @@ namespace editor
 		using namespace based;
 
 		entity->AddComponent<scene::EntityReference>(entity);
+		for (auto& c : entity->Children)
+		{
+			if (auto child = c.lock())
+				child->AddComponent<scene::EntityReference>(child);
+		}
 
 		Statics::SetSceneDirty(isSceneDirty);
 
