@@ -15,7 +15,7 @@ namespace based::graphics
 		}
 	}
 
-	void Model::Draw(scene::Transform transform) const
+	void Model::Draw(scene::Transform& transform) const
 	{
 		for (unsigned int i = 0; i < meshes.size(); i++)
 		{

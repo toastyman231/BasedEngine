@@ -96,30 +96,40 @@ namespace based::scene
 
 		Transform()
 		{
-			mMatrix = glm::mat4(1.f);
+			mCachedMatrix = glm::mat4(1.f);
 		}
 		Transform(const glm::vec3& pos)
 		{
-			mMatrix = glm::mat4(1.f);
-			SetGlobalTransform(pos, { 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f });
+			mCachedMatrix = glm::mat4(1.f);
+			SetPosition(pos);
 		}
 		Transform(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale)
 		{
-			mMatrix = glm::mat4(1.f);
-			SetGlobalTransform(pos, rot, scale);
+			mCachedMatrix = glm::mat4(1.f);
+			SetLocalTransform(pos, rot, scale);
 		}
 
 		Transform(const Transform& other)
 		{
 			Parent = other.Parent;
-			SetLocalTransformFromMatrix(other.GetLocalMatrix());
+			mLocalPosition = other.mLocalPosition;
+			mLocalRotation = other.mLocalRotation;
+			mLocalScale = other.mLocalScale;
+			mCachedEuler = other.mCachedEuler;
+			mUseCachedEuler = other.mUseCachedEuler;
+			mCachedMatrix = other.mCachedMatrix;
 		}
 		Transform& operator= (const Transform& other)
 		{
 			if (this != &other)
 			{
 				Parent = other.Parent;
-				SetLocalTransformFromMatrix(other.GetLocalMatrix());
+				mLocalPosition = other.mLocalPosition;
+				mLocalRotation = other.mLocalRotation;
+				mLocalScale = other.mLocalScale;
+				mCachedEuler = other.mCachedEuler;
+				mUseCachedEuler = other.mUseCachedEuler;
+				mCachedMatrix = other.mCachedMatrix;
 			}
 			return *this;
 		}
@@ -130,41 +140,41 @@ namespace based::scene
 			{
 				return LocalPosition();
 			}
-			return glm::vec3(GetGlobalMatrix()[3]);
+			return glm::vec3(Parent->GetGlobalMatrix() * glm::vec4(mLocalPosition, 1.f));
 		}
 		glm::vec3 LocalPosition() const
 		{
-			return glm::vec3(mMatrix[3]);
+			return mLocalPosition;
 		}
 
-		glm::quat Quat() const
-		{
-			if (!Parent)
-			{
-				return LocalQuat();
-			}
-			return Parent->Quat() * LocalQuat();
-		}
-		glm::quat LocalQuat() const
-		{ 
-			return glm::quat_cast(glm::extractMatrixRotation(mMatrix));
-		}
-
-		glm::vec3 Rotation() const
+		glm::quat Rotation() const
 		{
 			if (!Parent)
 			{
 				return LocalRotation();
 			}
-			return Parent->Rotation() + LocalRotation();
+			return Parent->Rotation() * LocalRotation();
 		}
-		glm::vec3 LocalRotation() const
+		glm::quat LocalRotation() const
+		{ 
+			return mLocalRotation;
+		}
+
+		glm::vec3 EulerAngles() const
 		{
-			float x;
-			float y;
-			float z;
-			glm::extractEulerAngleZXY(mMatrix, z, x, y);
-			return glm::degrees(glm::vec3{ x, y, z });
+			if (!Parent)
+			{
+				return LocalEulerAngles();
+			}
+
+			if (mUseCachedEuler) return Parent->EulerAngles() + LocalEulerAngles();
+
+			return glm::degrees(glm::eulerAngles((glm::normalize(Rotation()))));
+		}
+		glm::vec3 LocalEulerAngles() const
+		{
+			if (mUseCachedEuler) return mCachedEuler;
+			return glm::degrees(glm::eulerAngles(glm::normalize(mLocalRotation)));
 		}
 
 		glm::vec3 Scale() const
@@ -177,60 +187,136 @@ namespace based::scene
 		}
 		glm::vec3 LocalScale() const
 		{
-			// TODO: Fix 0 and negative scales
-			glm::vec3 scale;
-			scale.x = glm::length(glm::vec3(mMatrix[0]));
-			scale.y = glm::length(glm::vec3(mMatrix[1]));
-			scale.z = glm::length(glm::vec3(mMatrix[2]));
-			return scale;
+			return mLocalScale;
 		}
 
-		glm::mat4 GetGlobalMatrix() const
+		glm::mat4 GetGlobalMatrix()
 		{
-			if (!Parent)
+			if (Parent)
 			{
-				return GetLocalMatrix();
+				return Parent->GetGlobalMatrix() * GetLocalMatrix();
 			}
-			BASED_ASSERT(Parent != this, "Recursive transform parent!");
-			return Parent->GetGlobalMatrix() * GetLocalMatrix();
+			else return GetLocalMatrix();
 		}
 
-		glm::mat4 GetLocalMatrix() const
+		glm::mat4 GetLocalMatrix()
 		{
-			return mMatrix;
+			return mCachedMatrix;
+		}
+
+		glm::vec3 InverseTransformPoint(const glm::vec3& point) const
+		{
+			glm::vec3 localPosition;
+			if (Parent)
+				localPosition = Parent->InverseTransformPoint(point);
+			else
+				localPosition = point;
+
+			localPosition -= mLocalPosition;
+			glm::vec3 newPosition = glm::inverse(mLocalRotation) * localPosition;
+			return newPosition;
+		}
+
+		void SetPosition(const glm::vec3& position)
+		{
+			if (Parent)
+			{
+				BASED_TRACE("Parent at {} {} {}", Parent->Position().x, Parent->Position().y, Parent->Position().z);
+				SetLocalPosition(Parent->InverseTransformPoint(position));
+				BASED_TRACE("New local pos {} {} {}", mLocalPosition.x, mLocalPosition.y, mLocalPosition.z);
+			}
+			else SetLocalPosition(position);
+		}
+		void SetLocalPosition(const glm::vec3& position)
+		{
+			mLocalPosition = position;
+			UpdateCachedMatrix();
+		}
+
+		void SetEulerAngles(const glm::vec3& eulerAngles)
+		{
+			if (Parent)
+			{
+				SetLocalEulerAngles(Parent->EulerAngles() - eulerAngles);
+			}
+			else SetLocalEulerAngles(eulerAngles);
+		}
+		void SetLocalEulerAngles(const glm::vec3& eulerAngles)
+		{
+			mCachedEuler = eulerAngles;
+			mUseCachedEuler = true;
+			mLocalRotation = EulerToQuaternion(eulerAngles);
+			UpdateCachedMatrix();
+		}
+
+		void SetRotation(const glm::quat& q)
+		{
+			if (Parent)
+			{
+				SetLocalRotation(glm::inverse(Parent->Rotation()) * q);
+			}
+			else SetLocalRotation(q);
+		}
+		void SetLocalRotation(const glm::quat& q)
+		{
+			mLocalRotation = glm::normalize(q);
+			mUseCachedEuler = false;
+			UpdateCachedMatrix();
+		}
+
+		void SetScale(const glm::vec3& scale)
+		{
+			if (Parent)
+			{
+				glm::vec3 parentScale = Parent->Scale();
+				if (parentScale.x == 0.f) parentScale.x = 0.0001f;
+				if (parentScale.y == 0.f) parentScale.y = 0.0001f;
+				if (parentScale.z == 0.f) parentScale.z = 0.0001f;
+
+				SetLocalScale(scale / parentScale);
+			}
+			else SetLocalScale(scale);
+		}
+		void SetLocalScale(const glm::vec3& scale)
+		{
+			mLocalScale = scale;
+			UpdateCachedMatrix();
 		}
 
 		void SetLocalTransform(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale)
 		{
-			glm::mat4 model = glm::mat4(1.f);
-			model = glm::translate(model, pos);
-			model = glm::rotate(model, glm::radians(rot.z), glm::vec3(0.f, 0.f, 1.f));
-			model = glm::rotate(model, glm::radians(rot.x), glm::vec3(1.f, 0.f, 0.f));
-			model = glm::rotate(model, glm::radians(rot.y), glm::vec3(0.f, 1.f, 0.f));
-			model = glm::scale(model, scale);
-			mMatrix = model;
+			SetLocalPosition(pos);
+
+			SetLocalEulerAngles(rot);
+
+			SetLocalScale(scale);
+		}
+
+		void SetLocalTransform(const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
+		{
+			SetLocalPosition(pos);
+
+			SetLocalRotation(rot);
+
+			SetLocalScale(scale);
 		}
 
 		void SetGlobalTransform(const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale)
 		{
-			if (!Parent)
-			{
-				SetLocalTransform(pos, rot, scale);
-				return;
-			}
+			SetPosition(pos);
 
-			glm::mat4 model = glm::mat4(1.f);
-			model = glm::translate(model, pos);
-			model = glm::rotate(model, glm::radians(rot.z), glm::vec3(0.f, 0.f, 1.f));
-			model = glm::rotate(model, glm::radians(rot.x), glm::vec3(1.f, 0.f, 0.f));
-			model = glm::rotate(model, glm::radians(rot.y), glm::vec3(0.f, 1.f, 0.f));
-			model = glm::scale(model, scale);
+			SetEulerAngles(rot);
 
-			auto parentMatrix = Parent->GetGlobalMatrix();
+			SetScale(scale);
+		}
 
-			if (glm::determinant(parentMatrix) != 0.f)
-				mMatrix = glm::inverse(parentMatrix) * model;
-			else BASED_WARN("Non invertible matrix!");
+		void SetGlobalTransform(const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
+		{
+			SetPosition(pos);
+
+			SetRotation(rot);
+
+			SetScale(scale);
 		}
 
 		void SetGlobalTransformFromMatrix(const glm::mat4& matrix)
@@ -243,18 +329,88 @@ namespace based::scene
 
 			auto parentMatrix = Parent->GetGlobalMatrix();
 
-			if (glm::determinant(parentMatrix) != 0.f)
-				mMatrix = glm::inverse(parentMatrix) * matrix;
-			else BASED_WARN("Non invertible matrix!");
+			mCachedMatrix = glm::inverse(parentMatrix) * matrix;
+			mUseCachedEuler = false;
+
+			mLocalPosition = glm::vec3(mCachedMatrix[3]);
+
+			glm::vec3 scale;
+			scale.x = glm::length(glm::vec3(mCachedMatrix[0]));
+			scale.y = glm::length(glm::vec3(mCachedMatrix[1]));
+			scale.z = glm::length(glm::vec3(mCachedMatrix[2]));
+
+			mLocalScale = scale;
+
+			glm::mat3 rotationMatrix;
+			rotationMatrix[0] = glm::normalize(glm::vec3(mCachedMatrix[0]) / scale.x);
+			rotationMatrix[1] = glm::normalize(glm::vec3(mCachedMatrix[1]) / scale.y);
+			rotationMatrix[2] = glm::normalize(glm::vec3(mCachedMatrix[2]) / scale.z);
+
+			rotationMatrix = glm::orthonormalize(rotationMatrix);
+
+			mLocalRotation = glm::quat_cast(rotationMatrix);
 		}
 
 		void SetLocalTransformFromMatrix(const glm::mat4& matrix)
 		{
-			mMatrix = matrix;
+			mCachedMatrix = matrix;
+			mUseCachedEuler = false;
+
+			mLocalPosition = glm::vec3(mCachedMatrix[3]);
+
+			glm::vec3 scale;
+			scale.x = glm::length(glm::vec3(mCachedMatrix[0]));
+			scale.y = glm::length(glm::vec3(mCachedMatrix[1]));
+			scale.z = glm::length(glm::vec3(mCachedMatrix[2]));
+
+			mLocalScale = scale;
+
+			glm::mat3 rotationMatrix;
+			rotationMatrix[0] = glm::normalize(glm::vec3(mCachedMatrix[0]) / scale.x);
+			rotationMatrix[1] = glm::normalize(glm::vec3(mCachedMatrix[1]) / scale.y);
+			rotationMatrix[2] = glm::normalize(glm::vec3(mCachedMatrix[2]) / scale.z);
+
+			rotationMatrix = glm::orthonormalize(rotationMatrix);
+
+			mLocalRotation = glm::quat_cast(rotationMatrix);
+		}
+
+		static glm::quat EulerToQuaternion(const glm::vec3& eulerAngles)
+		{
+			glm::quat yawQuat = glm::angleAxis(glm::radians(eulerAngles.y), glm::vec3(0, 1, 0)); // Rotate around Y
+			glm::quat pitchQuat = glm::angleAxis(glm::radians(eulerAngles.x), glm::vec3(1, 0, 0)); // Rotate around X
+			glm::quat rollQuat = glm::angleAxis(glm::radians(eulerAngles.z), glm::vec3(0, 0, 1)); // Rotate around Z
+
+			return yawQuat * pitchQuat * rollQuat; // Apply rotations in correct order
 		}
 
 	private:
-		glm::mat4 mMatrix;
+		void UpdateCachedMatrix()
+		{
+			if (mUseCachedEuler)
+			{
+				glm::mat4 rotation =
+					glm::rotate(glm::mat4(1.f), glm::radians(mCachedEuler.y), glm::vec3(0.f, 1.f, 0.f)) *
+					glm::rotate(glm::mat4(1.f), glm::radians(mCachedEuler.x), glm::vec3(1.f, 0.f, 0.f)) *
+					glm::rotate(glm::mat4(1.f), glm::radians(mCachedEuler.z), glm::vec3(0.f, 0.f, 1.f));
+
+				mCachedMatrix = glm::translate(glm::mat4(1.f), mLocalPosition)
+					* rotation * glm::scale(glm::mat4(1.f), mLocalScale);
+			}
+			else
+			{
+				mCachedMatrix = glm::translate(glm::mat4(1.f), mLocalPosition)
+					* glm::mat4_cast(mLocalRotation) * glm::scale(glm::mat4(1.f), mLocalScale);
+			}
+		}
+
+		glm::vec3 mLocalPosition = glm::vec3(0.f, 0.f, 0.f);
+		glm::quat mLocalRotation = glm::quat(1.f, 0.f, 0.f, 0.f);
+		glm::vec3 mCachedEuler = glm::vec3(0.f);
+		glm::vec3 mLocalScale = glm::vec3(1.f, 1.f, 1.f);
+		bool mUseCachedEuler = false;
+
+		glm::mat4 mCachedMatrix;
 	};
 
 	struct Velocity
@@ -590,11 +746,11 @@ namespace based::scene
 		bool AllowAirControl = false;
 		bool ControlEnabled = true;
 
-		CharacterController(JPH::CharacterVirtualSettings settings, Transform transform)
+		CharacterController(JPH::CharacterVirtualSettings settings, const Transform& transform)
 		{
 			Settings = settings;
 			Character = new JPH::CharacterVirtual(&settings, convert(transform.Position()),
-				JPH::Quat::sEulerAngles(convert(transform.Rotation())), 0,
+				JPH::Quat::sEulerAngles(convert(transform.EulerAngles())), 0,
 				&Engine::Instance().GetPhysicsManager().GetPhysicsSystem());
 		}
 
@@ -615,7 +771,7 @@ namespace based::scene
 
 			Settings = settings;
 			Character = new JPH::CharacterVirtual(&settings, convert(transform.Position()),
-				JPH::Quat::sEulerAngles(convert(transform.Rotation())), 0,
+				JPH::Quat::sEulerAngles(convert(transform.EulerAngles())), 0,
 				&Engine::Instance().GetPhysicsManager().GetPhysicsSystem());
 		}
 

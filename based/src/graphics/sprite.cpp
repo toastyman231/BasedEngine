@@ -127,7 +127,7 @@ namespace based::graphics
 			return;
 		}
 
-		auto transform = ent->GetTransform();
+		auto& transform = ent->GetTransform();
 
 		const std::shared_ptr<VertexArray> va = GetVA();
 		const std::shared_ptr<Material> mat = GetMaterial();

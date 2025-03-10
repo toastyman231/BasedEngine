@@ -6,6 +6,7 @@
 #include "based/engine.h"
 #include "based/graphics/material.h"
 #include "based/graphics/mesh.h"
+#include "based/input/mouse.h"
 #include "external/imgui/imgui.h"
 
 namespace ImGui
@@ -189,6 +190,8 @@ namespace ImGui
                 savedRot[1] = rot[1];
                 savedRot[2] = rot[2];
             }
+
+            //based::input::Mouse::SetCursorMode(input::CursorMode::Confined);
         }
         ImGui::Text("Scale"); ImGui::SameLine();
         if (ImGui::DragFloat3("##scale", scale, speed))
@@ -209,6 +212,7 @@ namespace ImGui
         if (isDragging && ImGui::IsMouseReleased(0))
         {
             isDragging = false;
+            //based::input::Mouse::SetCursorMode(input::CursorMode::Free);
             return true;
         }
 

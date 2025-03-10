@@ -43,16 +43,29 @@ namespace editor
 				ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 				based::input::Mouse::SetCursorMode(based::input::CursorMode::Confined);
 
-				player.pitch += static_cast<float>(based::input::Mouse::DX())
+				player.pitch += static_cast<float>(based::input::Mouse::DY())
 					* player.sensitivity * based::core::Time::UnscaledDeltaTime();
-				player.yaw += static_cast<float>(based::input::Mouse::DY())
+				player.yaw += static_cast<float>(based::input::Mouse::DX())
 					* player.sensitivity * based::core::Time::UnscaledDeltaTime();
 
-				player.yaw = based::math::Clamp(player.yaw, -89.f, 89.f);
+				player.pitch = based::math::Clamp(player.pitch, -89.f, 89.f);
 
-				transform.SetLocalTransform(transform.Position(),
-					{ player.yaw, player.pitch, transform.Rotation().z },
-					transform.Scale());
+				//BASED_TRACE("Pitch {} Yaw {}", player.pitch, player.yaw);
+
+				/*glm::quat yawQuat = glm::angleAxis(glm::radians(player.yaw), glm::vec3(0, 1, 0)); // Rotate around Y
+				glm::quat pitchQuat = glm::angleAxis(glm::radians(player.pitch), glm::vec3(1, 0, 0)); // Rotate around X
+				glm::quat rollQuat = glm::angleAxis(glm::radians(0.f), glm::vec3(0, 0, 1)); // Rotate around Z
+
+				glm::quat finalQuat = yawQuat * pitchQuat * rollQuat; // Apply rotations in correct order*/
+
+				//transform.SetRotation(finalQuat);
+
+				transform.SetEulerAngles({ player.pitch, player.yaw, 0.f });
+				/*transform.SetGlobalTransform(
+					transform.Position(),
+					{ player.pitch, player.yaw, 0.f },
+					transform.Scale());*/
+				//BASED_TRACE("Rotation: {} {} {}", transform.Rotation().x, transform.Rotation().y, transform.Rotation().z);
 			} else
 			{
 				based::input::Mouse::SetCursorMode(based::input::CursorMode::Free);

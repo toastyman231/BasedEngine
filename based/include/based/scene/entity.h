@@ -122,16 +122,28 @@ namespace based::scene
 		void SetParent(const std::shared_ptr<Entity>& parentEntity, bool keepRelativeTransform = true)
 		{
 			auto parent = Parent.lock();
+
+			if (parentEntity == nullptr)
+			{
+				if (parent)
+				{
+					auto transform = GetTransform();
+					Parent = std::weak_ptr<Entity>();
+					GetTransform().Parent = nullptr;
+					GetTransform().SetGlobalTransform(transform.Position(), transform.Rotation(), transform.Scale());
+				}
+				else Parent = std::weak_ptr<Entity>();
+			}
+
 			if (parent && parent != parentEntity)
 			{
 				parent->RemoveChild(shared_from_this());
 			}
-			if (parentEntity == nullptr)
-			{
-				Parent = std::weak_ptr<Entity>();
+
+			if (parentEntity == nullptr || 
+				parentEntity == parent || 
+				parentEntity->GetEntityHandle() == mEntity) 
 				return;
-			}
-			if (parentEntity == parent || parentEntity->GetEntityHandle() == mEntity) return;
 
 			Parent = parentEntity;
 			parentEntity->Children.emplace_back(shared_from_this());
@@ -142,7 +154,7 @@ namespace based::scene
 					{
 						tr.SetLocalTransform(
 							tr.Position() - parentEntity->GetTransform().Position(),
-							tr.Rotation() - parentEntity->GetTransform().Rotation(),
+							tr.EulerAngles() - parentEntity->GetTransform().EulerAngles(),
 							tr.Scale() / parentEntity->GetTransform().Scale()
 						);
 					});

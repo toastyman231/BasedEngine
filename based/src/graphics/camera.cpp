@@ -140,7 +140,7 @@ namespace based::graphics
 	void Camera::SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
 	{
 		PROFILE_FUNCTION();
-		mTransform.SetGlobalTransform(pos, rot, scale);
+		mTransform.SetLocalTransform(pos, rot, scale);
 
 		glm::mat4 view = glm::mat4(1.f);
 		view = glm::rotate(view, glm::radians(rot.z), glm::vec3(0, 0, 1));
@@ -155,9 +155,25 @@ namespace based::graphics
 		SetViewMatrix(view);
 	}
 
+	void Camera::SetTransform(glm::vec3 pos, glm::quat rot, glm::vec3 scale)
+	{
+		PROFILE_FUNCTION();
+		mTransform.SetLocalTransform(pos, rot, scale);
+
+		glm::mat4 view = glm::mat4(1.f);
+		view = glm::translate(view, mTransform.Position()) * glm::mat4_cast(-mTransform.Rotation());
+		view = glm::inverse(view);
+
+		mForward = glm::normalize(glm::vec3(view[0][2], view[1][2], view[2][2]));
+		mRight = glm::normalize(glm::cross(glm::vec3(0.f, 1.f, 0.f), mForward));
+		mUp = glm::cross(mForward, mRight);
+
+		SetViewMatrix(view);
+	}
+
 	void Camera::SetPosition(glm::vec3 pos)
 	{
-		SetTransform(pos, mTransform.Rotation(), mTransform.Scale());
+		SetTransform(pos, mTransform.EulerAngles(), mTransform.Scale());
 	}
 
 	void Camera::SetRotation(glm::vec3 rot)
@@ -167,7 +183,7 @@ namespace based::graphics
 
 	void Camera::SetScale(glm::vec3 scale)
 	{
-		SetTransform(mTransform.Position(), mTransform.Rotation(), scale);
+		SetTransform(mTransform.Position(), mTransform.EulerAngles(), scale);
 	}
 
 	const glm::vec3 Camera::ScreenToWorldPoint(float x, float y) const

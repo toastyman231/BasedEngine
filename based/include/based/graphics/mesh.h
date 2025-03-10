@@ -96,7 +96,7 @@ namespace based::graphics
             BASED_TRACE("Destroying mesh {}", mMeshSource);
         }
         virtual void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material);
-        virtual void Draw(scene::Transform transform, std::shared_ptr<Material> material);
+        virtual void Draw(scene::Transform& transform, std::shared_ptr<Material> material);
 
         bool IsFileMesh() const { return !mMeshSource.empty(); }
         std::string GetMeshSource() const { return mMeshSource; }
@@ -128,14 +128,14 @@ namespace based::graphics
         ~InstancedMesh() override = default;
 
         void SetInstanceTransform(int index, const scene::Transform& transform);
-        int AddInstance(scene::Transform transform, bool markDirty = true);
+        int AddInstance(const scene::Transform& transform, bool markDirty = true);
         void AddInstances(const std::vector<scene::Transform>& transforms);
         bool RemoveInstance(int index, bool markDirty = true);
         bool RemoveInstances(std::vector<int> indices);
         void ClearInstances();
         std::vector<scene::Transform> GetInstanceTransforms() const { return mInstanceTransforms; }
         void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::shared_ptr<Material> material) override;
-        void Draw(scene::Transform, std::shared_ptr<Material> material) override;
+        void Draw(scene::Transform&, std::shared_ptr<Material> material) override;
 
         int GetInstanceCount() const { return mInstanceCount; }
     private:

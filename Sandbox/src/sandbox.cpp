@@ -501,7 +501,7 @@ public:
 		crateEntity->AddComponent<scene::BoxShapeComponent>(
 			crateEntity->GetTransform().Scale,
 			crateEntity->GetTransform().Position,
-			crateEntity->GetTransform().Rotation);
+			crateEntity->GetTransform().EulerAngles);
 		auto boxComp = crateEntity->GetComponent<scene::BoxShapeComponent>();
 		crateEntity->AddComponent<scene::RigidbodyComponent>(boxComp, JPH::EMotionType::Dynamic, physics::Layers::MOVING);
 
@@ -513,7 +513,7 @@ public:
 		floorEntity->AddComponent<scene::BoxShapeComponent>(
 			floorEntity->GetTransform().Scale,
 			floorEntity->GetTransform().Position,
-			floorEntity->GetTransform().Rotation);
+			floorEntity->GetTransform().EulerAngles);
 		boxComp = floorEntity->GetComponent<scene::BoxShapeComponent>();
 		floorEntity->AddComponent<scene::RigidbodyComponent>(boxComp, JPH::EMotionType::Static, physics::Layers::STATIC);
 		Engine::Instance().GetPhysicsManager().SetRenderDebug(true);
@@ -574,7 +574,7 @@ public:
 			yaw = based::math::Clamp(yaw, -89.f, 89.f);
 
 			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
-			cameraEntity->SetRotation(glm::vec3(yaw, pitch, camera->GetTransform().Rotation().z));
+			cameraEntity->SetRotation(glm::vec3(yaw, pitch, camera->GetTransform().EulerAngles().z));
 		}
 
 		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
@@ -842,7 +842,7 @@ public:
 					scene::Transform trans = registry.get<scene::Transform>(light);
 
 					glm::vec3 col = lightComponent.color;
-					glm::vec3 direction = trans.Rotation();
+					glm::vec3 direction = trans.EulerAngles();
 					ImGui::PushID(i);
 					ImGui::Text("Light %d", i);
 					ImGui::DragFloat3("Light Color", glm::value_ptr(col), 0.01f);

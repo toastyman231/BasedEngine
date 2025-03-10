@@ -120,7 +120,7 @@ namespace based::ui
 		if (textEntity->mShouldRegenSpace || textEntity->mRenderSpace == RenderSpace::World) 
 			textEntity->RegenerateRenderSpace();
 
-		const scene::Transform transform = textEntity->GetComponent<scene::Transform>();
+		scene::Transform& transform = textEntity->GetComponent<scene::Transform>();
 
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera,
 			Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()));

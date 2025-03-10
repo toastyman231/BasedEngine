@@ -96,21 +96,21 @@ namespace based::scene
 	{
 		Transform& transform = GetComponent<scene::Transform>();
 
-		transform.SetGlobalTransform(pos, transform.Rotation(), transform.Scale());
+		transform.SetPosition(pos);
 	}
 
 	void Entity::SetRotation(glm::vec3 rot)
 	{
 		Transform& transform = GetComponent<scene::Transform>();
 
-		transform.SetGlobalTransform(transform.Position(), rot, transform.Scale());
+		transform.SetEulerAngles(rot);
 	}
 
 	void Entity::SetScale(glm::vec3 scale)
 	{
 		Transform& transform = GetComponent<scene::Transform>();
 
-		transform.SetGlobalTransform(transform.Position(), transform.Rotation(), scale);
+		transform.SetScale(scale);
 	}
 
 	void Entity::SetLocalTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
@@ -125,7 +125,7 @@ namespace based::scene
 	{
 		Transform& transform = GetComponent<Transform>();
 
-		transform.SetLocalTransform(pos, transform.LocalRotation(), transform.LocalScale());
+		transform.SetLocalTransform(pos, transform.LocalEulerAngles(), transform.LocalScale());
 	}
 
 	void Entity::SetLocalRotation(glm::vec3 rot)
@@ -139,6 +139,6 @@ namespace based::scene
 	{
 		Transform& transform = GetComponent<Transform>();
 
-		transform.SetLocalTransform(transform.LocalPosition(), transform.LocalRotation(), scale);
+		transform.SetLocalTransform(transform.LocalPosition(), transform.LocalEulerAngles(), scale);
 	}
 }

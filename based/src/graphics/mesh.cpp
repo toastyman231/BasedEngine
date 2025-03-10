@@ -201,7 +201,7 @@ namespace based::graphics
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 	}
 
-	void Mesh::Draw(scene::Transform transform, std::shared_ptr<Material> material)
+	void Mesh::Draw(scene::Transform& transform, std::shared_ptr<Material> material)
 	{
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PushCamera,
 			Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera()));
@@ -275,9 +275,11 @@ namespace based::graphics
 		mInstanceTransforms[index] = transform;
 	}
 
-	int InstancedMesh::AddInstance(scene::Transform transform, bool markDirty)
+	int InstancedMesh::AddInstance(const scene::Transform& transform, bool markDirty)
 	{
-		mInstanceTransforms.emplace_back(transform);
+		scene::Transform copyTransform;
+		copyTransform = transform;
+		mInstanceTransforms.push_back(copyTransform);
 		mInstanceCount++;
 		if (markDirty) mIsDirty = true;
 		return static_cast<int>(mInstanceTransforms.size());
@@ -347,7 +349,7 @@ namespace based::graphics
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
 	}
 
-	void InstancedMesh::Draw(scene::Transform transform, std::shared_ptr<Material> material)
+	void InstancedMesh::Draw(scene::Transform& transform, std::shared_ptr<Material> material)
 	{
 		PROFILE_FUNCTION();
 		if (mIsDirty) RegenVertexArray();
@@ -383,7 +385,7 @@ namespace based::graphics
 
 		for (int i = 0; i < mInstanceCount; i++)
 		{
-			auto transform = mInstanceTransforms[i];
+			auto& transform = mInstanceTransforms[i];
 
 			auto model = transform.GetGlobalMatrix();
 

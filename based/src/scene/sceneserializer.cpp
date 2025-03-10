@@ -511,13 +511,10 @@ namespace based::scene
 			out << YAML::Key << "Transform"; // Transform
 			out << YAML::BeginMap;
 
-			auto trans = entity->GetComponent<Transform>();
+			auto& trans = entity->GetComponent<Transform>();
 			out << YAML::Key << "Position" << YAML::Value << trans.Position();
-			out << YAML::Key << "Rotation" << YAML::Value << trans.Rotation();
+			out << YAML::Key << "Rotation" << YAML::Value << trans.EulerAngles();
 			out << YAML::Key << "Scale" << YAML::Value << trans.Scale();
-			/*out << YAML::Key << "LocalPosition" << YAML::Value << trans.LocalPosition;
-			out << YAML::Key << "LocalRotation" << YAML::Value << trans.LocalRotation;
-			out << YAML::Key << "LocalScale" << YAML::Value << trans.LocalScale;*/
 
 			out << YAML::EndMap; // Transform
 		}

@@ -49,6 +49,7 @@ namespace based::graphics
 		void SetViewMatrix(const glm::vec3& pos, float rot);
 		void SetViewMatrix(const glm::vec3& pos, const glm::vec3& front, const glm::vec3& up);
 		void SetTransform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
+		void SetTransform(glm::vec3 pos, glm::quat rot, glm::vec3 scale);
 		void SetPosition(glm::vec3 pos);
 		void SetRotation(glm::vec3 rot);
 		void SetScale(glm::vec3 scale);

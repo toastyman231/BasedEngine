@@ -55,6 +55,10 @@ namespace editor::panels
 			if (ImGui::IsWindowHovered())
 			{
 				ImGui::CaptureMouseFromApp(false);
+				if (ImGui::IsMouseDown(1)) // Allow right mouse button to grab focus
+				{
+					ImGui::SetWindowFocus();
+				}
 			}
 
 			auto& window = based::Engine::Instance().GetWindow();
@@ -138,7 +142,7 @@ namespace editor::panels
 					ImGuizmo::Manipulate(
 						glm::value_ptr(viewMat),
 						glm::value_ptr(projMat),
-						mOperation, mMode,
+						mOperation, mOperation == ImGuizmo::SCALE ? ImGuizmo::LOCAL : mMode,
 						glm::value_ptr(modelMat), glm::value_ptr(deltaMat));
 					ImGuizmo::SetGizmoSizeClipSpace(0.25f);
 
@@ -158,12 +162,12 @@ namespace editor::panels
 						ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(deltaMat),
 							dTrans, dRot, dScale);
 						auto& transform = entity->GetTransform();
-
+						
 						transform.SetGlobalTransformFromMatrix(modelMat);
 						wasUsingLastFrame = true;
 					} else if (wasUsingLastFrame)
 					{
-						BASED_TRACE("Locking entity transform!");
+						/*BASED_TRACE("Locking entity transform!");
 						Statics::EngineOperations.EditorSetEntityTransform(
 							entity,
 							entity->GetTransform(),
@@ -171,7 +175,7 @@ namespace editor::panels
 							isChild
 						);
 						savedTransform = entity->GetTransform();
-						wasUsingLastFrame = false;
+						wasUsingLastFrame = false;*/
 					}
 				}
 			}

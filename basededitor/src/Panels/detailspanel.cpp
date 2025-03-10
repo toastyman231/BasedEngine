@@ -43,7 +43,8 @@ namespace editor::panels
 			bool isChild = !entity->Parent.expired();
 			auto& transform = entity->GetTransform();
 			auto pos = isChild ? transform.LocalPosition() : transform.Position();
-			auto rot = isChild ? transform.LocalRotation() : transform.Rotation();
+			// TODO: Get rid of all this static stuff, doesn't really work when iterating objects
+			glm::vec3 rot = isChild ? transform.LocalEulerAngles() : transform.EulerAngles();
 			auto scale = isChild ? transform.LocalScale() : transform.Scale();
 			static glm::vec3 savedPos = pos;
 			static glm::vec3 savedRot = rot;
@@ -92,7 +93,7 @@ namespace editor::panels
 					glm::value_ptr(savedScale),
 					0.01f))
 				{
-					scene::Transform oldTrans;
+					/*scene::Transform oldTrans;
 					if (isChild) 
 						oldTrans.SetLocalTransform(savedPos, savedRot, savedScale);
 					else oldTrans.SetGlobalTransform(savedPos, savedRot, savedScale);
@@ -100,19 +101,19 @@ namespace editor::panels
 						entity->GetTransform(), oldTrans, false);
 					savedPos = pos;
 					savedRot = rot;
-					savedScale = scale;
+					savedScale = scale;*/
 				}
 
 				if (isChild)
 				{
 					auto tr = entity->GetTransform();
-					if (pos != tr.LocalPosition() || rot != tr.LocalRotation() || scale != tr.LocalScale())
+					if (pos != tr.LocalPosition() || rot != tr.LocalEulerAngles() || scale != tr.LocalScale())
 						entity->SetLocalTransform(pos, rot, scale);
 				}
 				else
 				{
 					auto tr = entity->GetTransform();
-					if (pos != tr.Position() || rot != tr.Rotation() || scale != tr.Scale())
+					if (pos != tr.Position() || rot != tr.EulerAngles() || scale != tr.Scale())
 						entity->SetTransform(pos, rot, scale);
 				}
 

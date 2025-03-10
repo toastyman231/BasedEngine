@@ -82,13 +82,13 @@ namespace based::scene
 			sprite->Draw();
 		}
 
-		const auto modelView = mRegistry.view<Enabled, Transform, ModelRenderer, EntityReference>();
+		auto modelView = mRegistry.view<Enabled, Transform, ModelRenderer, EntityReference>();
 
-		for (const auto entity : modelView)
+		for (auto entity : modelView)
 		{
 			scene::ModelRenderer renderer = mRegistry.get<ModelRenderer>(entity);
 			scene::EntityReference ent = mRegistry.get<EntityReference>(entity);
-			scene::Transform trans = ent.entity.lock()->GetTransform();//mRegistry.get<Transform>(entity);
+			scene::Transform& trans = ent.entity.lock()->GetTransform();
 
 			auto m = renderer.model.lock();
 			auto e = ent.entity.lock();
@@ -102,13 +102,16 @@ namespace based::scene
 			}
 		}
 
-		const auto meshView = mRegistry.view<Enabled, Transform, MeshRenderer, EntityReference>();
+		auto meshView = mRegistry.view<Enabled, Transform, MeshRenderer, EntityReference>();
 
-		for (const auto entity : meshView)
+		for (auto entity : meshView)
 		{
-			scene::Transform trans = mRegistry.get<Transform>(entity);
+			//mRegistry.get<Transform>(entity);
 			scene::MeshRenderer renderer = mRegistry.get<MeshRenderer>(entity);
 			scene::EntityReference ent = mRegistry.get<EntityReference>(entity);
+			if (ent.entity.expired()) continue;
+
+			scene::Transform& trans = ent.entity.lock()->GetTransform();
 
 			if (std::find(renderer.excludedPasses.begin(), renderer.excludedPasses.end(), 
 				Engine::Instance().GetRenderManager().GetCurrentPassName()) != renderer.excludedPasses.end())
@@ -150,7 +153,7 @@ namespace based::scene
 			if (auto cam = camPtr.camera.lock())
 			{
 				cam->GetTransform().Parent = trans.Parent;
-				cam->SetTransform(trans.Position(), trans.Rotation(), trans.Scale());
+				cam->SetTransform(trans.LocalPosition(), trans.LocalEulerAngles(), trans.LocalScale());
 			}
 		}
 
@@ -188,7 +191,7 @@ namespace based::scene
 			mRegistry.patch<DirectionalLight>(entity,
 				[this, trans](auto& l)
 				{
-					l.direction = trans.Rotation();
+					l.direction = trans.EulerAngles();
 				});
 		}
 

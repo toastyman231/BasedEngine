@@ -373,9 +373,9 @@ namespace editor
 		HISTORY_SAVE(isSceneDirty);
 
 		if (!local)
-			entity->SetTransform(transform.Position(), transform.Rotation(), transform.Scale());
+			entity->SetTransform(transform.Position(), transform.EulerAngles(), transform.Scale());
 		else
-			entity->SetLocalTransform(transform.LocalPosition(), transform.LocalRotation(), transform.LocalRotation());
+			entity->SetLocalTransform(transform.LocalPosition(), transform.LocalEulerAngles(), transform.LocalEulerAngles());
 
 		Statics::SetSceneDirty(true);
 
@@ -392,9 +392,9 @@ namespace editor
 		HISTORY_LOAD(isSceneDirty);
 
 		if (!local)
-			entity->SetTransform(savedTransform.Position(), savedTransform.Rotation(), savedTransform.Scale());
+			entity->SetTransform(savedTransform.Position(), savedTransform.EulerAngles(), savedTransform.Scale());
 		else
-			entity->SetLocalTransform(savedTransform.LocalPosition(), savedTransform.LocalRotation(), savedTransform.LocalRotation());
+			entity->SetLocalTransform(savedTransform.LocalPosition(), savedTransform.LocalEulerAngles(), savedTransform.LocalEulerAngles());
 
 		/*if (!local)
 			entity->SetTransform(savedTransform.Position(), savedTransform.Rotation(), savedTransform.Scale());

@@ -129,6 +129,13 @@ public:
 	{
 		App::Update(deltaTime);
 
+		/*auto cube = GetCurrentScene()->GetEntityStorage().Get("Cube");
+		cube->SetRotation({
+			cube->GetTransform().EulerAngles().x,
+			cube->GetTransform().EulerAngles().y + core::Time::UnscaledDeltaTime() * 45.f,
+			cube->GetTransform().EulerAngles().z
+			});*/
+
 		editor::EditorPlayerUpdateSystem(GetCurrentScene()->GetRegistry(), *mSceneView);
 
 		if (input::Keyboard::Key(BASED_INPUT_KEY_LCTRL) 

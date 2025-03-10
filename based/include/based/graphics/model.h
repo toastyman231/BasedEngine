@@ -44,7 +44,7 @@ namespace based::graphics
         }
         ~Model() { BASED_TRACE("Destroying model {}!", mModelName); }
         void Draw(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) const;
-        void Draw(scene::Transform transform) const;
+        void Draw(scene::Transform& transform) const;
         void SetMaterial(const std::shared_ptr<Material>& mat, int index = 0);
         void SetMaterials(const std::vector<std::shared_ptr<Material>>& materials);
 
