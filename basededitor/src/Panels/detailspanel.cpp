@@ -1,6 +1,8 @@
 #include "based/pch.h"
 #include "detailspanel.h"
 
+#include <cinttypes>
+
 #include "../EditorComponents.h"
 #include "../editorstatics.h"
 #include "../external/imguizmo/ImGuizmo.h"
@@ -37,6 +39,8 @@ namespace editor::panels
 			{
 				if (!name.empty()) Statics::EngineOperations.EditorSetEntityName(entity, name);
 			}
+
+			ImGui::Text("UUID: %" PRIu64, entity->GetUUID());
 
 			ImGui::Spacing();
 

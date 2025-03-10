@@ -20,7 +20,7 @@ namespace editor::panels
 			auto view = registry.view<based::scene::EntityReference>();
 
 			if (ImGui::IsMouseClicked(0))
-				mRenameIndex = -1;
+				mRenameIndex = 0;
 
 			ImVec2 pos = ImGui::GetCursorScreenPos();
 
@@ -150,10 +150,7 @@ namespace editor::panels
 		if (entity->Children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
 		if (Statics::SelectedEntitiesContains(entity)) flags |= ImGuiTreeNodeFlags_Selected;
 
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-			mRenameIndex = mCurrentIndex - 1;
-
-		if (mRenameIndex == mCurrentIndex)
+		if (mRenameIndex == entity->GetUUID())
 		{
 			std::string buffer = entity->GetEntityName();
 			ImGuiInputTextFlags textFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll;
@@ -163,7 +160,7 @@ namespace editor::panels
 				if (!buffer.empty())
 				{
 					Statics::EngineOperations.EditorSetEntityName(entity, buffer);
-					mRenameIndex = -1;
+					mRenameIndex = 0;
 				}
 			}
 			ImGui::SetKeyboardFocusHere(-1);
@@ -174,13 +171,16 @@ namespace editor::panels
 		auto isOpen = ImGui::TreeNodeEx(entity->GetEntityName().c_str(), flags);
 		if (!entity->IsActive()) ImGui::PopStyleColor();
 
+		static based::core::UUID lastClickedEntity = 0;
+
 		if (ImGui::IsItemHovered() && (ImGui::IsMouseClicked(0) || ImGui::IsMouseClicked(1)) &&
 			!(based::input::Keyboard::Key(BASED_INPUT_KEY_LSHIFT)
 				|| based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL)))
 		{
 			Statics::SetSelectedFiles({});
 			Statics::SetSelectedEntities({ entity });
-			mRenameIndex = -1;
+			mRenameIndex = 0;
+			lastClickedEntity = entity->GetUUID();
 		}
 		else if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)
 			&& based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL))
@@ -210,6 +210,9 @@ namespace editor::panels
 			Statics::SetSelectedFiles({});
 		}
 
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && lastClickedEntity == entity->GetUUID())
+			mRenameIndex = entity->GetUUID();
+
 		if (ImGui::BeginDragDropSource())
 		{
 			ImGui::TextUnformatted(entity->GetEntityName().c_str());
@@ -235,13 +238,11 @@ namespace editor::panels
 
 						if (ent->Parent.lock() == entity)
 						{
-							BASED_TRACE("Setting parent of {} to null", ent->GetEntityName());
 							Statics::EngineOperations.EditorSetEntityParent(nullptr, ent);
 							mReparentCooldown = true;
 							continue;
 						}
 
-						BASED_TRACE("Setting parent of {}", ent->GetEntityName());
 						Statics::EngineOperations.EditorSetEntityParent(entity, ent);
 						mReparentCooldown = true;
 					}
@@ -292,7 +293,8 @@ namespace editor::panels
 				{
 					std::string name;
 					Statics::EngineOperations.EditorCreateEntity(&name);
-					mRenameIndex = 1;
+					mRenameIndex =
+						based::Engine::Instance().GetApp().GetCurrentScene()->GetEntityStorage().Get(name)->GetUUID();
 				}
 				ImGui::CloseCurrentPopup();
 			}
