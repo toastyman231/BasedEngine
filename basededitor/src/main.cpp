@@ -67,6 +67,7 @@ public:
 		mFileBrowser = new editor::panels::FileBrowser("File Browser");
 		mFileBrowser->Initialize();
 
+		BASED_TRACE(editor::Statics::GetProjectDirectory() + "/Config/EditorConfig.yml");
 		if (std::filesystem::exists(editor::Statics::GetProjectDirectory() + "/Config/EditorConfig.yml"))
 		{
 			std::ifstream ifs(editor::Statics::GetProjectDirectory() + "/Config/EditorConfig.yml");
@@ -75,6 +76,13 @@ public:
 
 			YAML::Node data = YAML::Load(stream.str());
 			if (data["StartupScene"]) startupScenePath = data["StartupScene"].as<std::string>();
+			if (auto snapNode = data["PositionSnap"])
+				editor::Statics::GetEditorSettings().mPositionSnap = snapNode.as<glm::vec3>();
+			if (auto snapNode = data["RotationSnap"])
+				editor::Statics::GetEditorSettings().mRotationSnap = snapNode.as<glm::vec3>();
+			if (auto snapNode = data["ScaleSnap"])
+				editor::Statics::GetEditorSettings().mScaleSnap = snapNode.as<glm::vec3>();
+
 			BASED_TRACE("Loaded data as {}", startupScenePath);
 		} else
 		{
@@ -128,13 +136,6 @@ public:
 	void Update(float deltaTime) override
 	{
 		App::Update(deltaTime);
-
-		/*auto cube = GetCurrentScene()->GetEntityStorage().Get("Cube");
-		cube->SetRotation({
-			cube->GetTransform().EulerAngles().x,
-			cube->GetTransform().EulerAngles().y + core::Time::UnscaledDeltaTime() * 45.f,
-			cube->GetTransform().EulerAngles().z
-			});*/
 
 		editor::EditorPlayerUpdateSystem(GetCurrentScene()->GetRegistry(), *mSceneView);
 

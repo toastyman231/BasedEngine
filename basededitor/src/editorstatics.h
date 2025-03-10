@@ -14,6 +14,13 @@ namespace based::graphics
 
 namespace editor
 {
+	struct EditorSettings
+	{
+		glm::vec3 mPositionSnap = glm::vec3(1.f);
+		glm::vec3 mRotationSnap = glm::vec3(15.f);
+		glm::vec3 mScaleSnap = glm::vec3(1.f);
+	};
+
 	class Statics
 	{
 	public:
@@ -59,6 +66,8 @@ namespace editor
 
 		static std::unordered_map<based::core::UUID, based::scene::Transform>& GetSavedTransforms() { return mSavedTransforms; }
 
+		static EditorSettings& GetEditorSettings() { return mEditorSettings; }
+
 		inline static EngineOperations EngineOperations;
 	private:
 		inline static std::shared_ptr<based::graphics::Camera> mEditorCamera;
@@ -77,5 +86,7 @@ namespace editor
 		inline static HistoryContext mHistoryContext;
 
 		inline static std::unordered_map<based::core::UUID, based::scene::Transform> mSavedTransforms;
+
+		inline static EditorSettings mEditorSettings;
 	};
 }

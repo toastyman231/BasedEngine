@@ -58,6 +58,8 @@ namespace editor::panels
 		void Initialize() override;
 
 	private:
+		glm::vec3 GetSnap();
+
 		ImGuizmo::OPERATION mOperation = ImGuizmo::OPERATION::TRANSLATE;
 		ImGuizmo::MODE mMode = ImGuizmo::MODE::WORLD;
 

@@ -128,6 +128,10 @@ namespace editor::panels
 			}
 			ImGui::Unindent();
 
+			ImGui::SetCursorPos(ImVec2(pos.x + (size.x - buttonSize.x) - 15.f, pos.y + 5.f));
+			static bool t = false;
+			ImGui::ToggleButton(mScaleIcon->GetId(), buttonSize, t);
+
 			if (!Statics::GetSelectedEntities().empty())
 			{
 				if (auto entity = Statics::GetSelectedEntities()[0].lock())
@@ -149,12 +153,14 @@ namespace editor::panels
 					auto projMat = mViewCamera->GetProjectionMatrix();
 					auto modelMat = entity->GetTransform().GetGlobalMatrix();
 					auto deltaMat = glm::mat4(0.f);
+					auto snap = GetSnap();
 					ImGuizmo::SetDrawlist();
 					ImGuizmo::Manipulate(
 						glm::value_ptr(viewMat),
 						glm::value_ptr(projMat),
 						mOperation, mOperation == ImGuizmo::SCALE ? ImGuizmo::LOCAL : mMode,
-						glm::value_ptr(modelMat), glm::value_ptr(deltaMat));
+						glm::value_ptr(modelMat), glm::value_ptr(deltaMat),
+						input::Keyboard::Key(BASED_INPUT_KEY_LCTRL) ? glm::value_ptr(snap) : nullptr);
 					ImGuizmo::SetGizmoSizeClipSpace(0.25f);
 
 					if (based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL) &&
@@ -180,8 +186,8 @@ namespace editor::panels
 						wasUsingLastFrame = true;
 					} else if (wasUsingLastFrame)
 					{
-						// TODO: This is kinda buggy sometimes
-						Statics::EngineOperations.EditorSetEntityTransform(
+						// TODO: This overwrites the matrix
+						/*Statics::EngineOperations.EditorSetEntityTransform(
 							entity,
 							entity->GetTransform(),
 							savedTransform,
@@ -190,7 +196,7 @@ namespace editor::panels
 						auto& trans = entity->GetTransform();
 						Statics::GetSavedTransforms()[entity->GetUUID()] =
 							scene::Transform(trans.Position(), trans.EulerAngles(), trans.Scale());
-						wasUsingLastFrame = false;
+						wasUsingLastFrame = false;*/
 					}
 				}
 			}
@@ -219,6 +225,21 @@ namespace editor::panels
 			{
 				mOperation = ImGuizmo::SCALE;
 			}
+		}
+	}
+
+	glm::vec3 EditorView::GetSnap()
+	{
+		switch (mOperation)
+		{
+		case ImGuizmo::TRANSLATE:
+			return Statics::GetEditorSettings().mPositionSnap;
+		case ImGuizmo::ROTATE:
+			return Statics::GetEditorSettings().mRotationSnap;
+		case ImGuizmo::SCALE:
+			return Statics::GetEditorSettings().mScaleSnap;
+		default:
+			return glm::vec3(1.f);
 		}
 	}
 }

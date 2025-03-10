@@ -34,7 +34,6 @@ namespace editor
 		mEditorPlayer->AddComponent<based::scene::CameraComponent>(mEditorCamera);
 		mEditorPlayer->AddComponent<EditorPlayer>();
 		mEditorPlayer->AddComponent<based::scene::DontDestroyOnLoad>();
-		//based::Engine::Instance().GetApp().GetCurrentScene()->GetEntityStorage().Load("EditorPlayer", mEditorPlayer);
 
 		History::SetContext(&mHistoryContext);
 
