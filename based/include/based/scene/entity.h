@@ -127,6 +127,7 @@ namespace based::scene
 			{
 				if (parent)
 				{
+					// INTENTIONAL COPY - caching global position
 					auto transform = GetTransform();
 					Parent = std::weak_ptr<Entity>();
 					GetTransform().Parent = nullptr;

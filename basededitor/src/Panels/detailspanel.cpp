@@ -42,13 +42,18 @@ namespace editor::panels
 
 			bool isChild = !entity->Parent.expired();
 			auto& transform = entity->GetTransform();
+
 			auto pos = isChild ? transform.LocalPosition() : transform.Position();
-			// TODO: Get rid of all this static stuff, doesn't really work when iterating objects
-			glm::vec3 rot = isChild ? transform.LocalEulerAngles() : transform.EulerAngles();
+			auto rot = isChild ? transform.LocalEulerAngles() : transform.EulerAngles();
 			auto scale = isChild ? transform.LocalScale() : transform.Scale();
-			static glm::vec3 savedPos = pos;
-			static glm::vec3 savedRot = rot;
-			static glm::vec3 savedScale = scale;
+
+			scene::Transform savedTransform;
+			if (mSavedTransforms.find(entity->GetUUID()) == mSavedTransforms.end())
+			{
+				savedTransform = mSavedTransforms[entity->GetUUID()] = scene::Transform(pos, rot, scale);
+			}
+			else
+				savedTransform = mSavedTransforms[entity->GetUUID()];
 
 			ImVec2 guiPos = ImGui::GetCursorScreenPos();
 			if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
@@ -57,31 +62,27 @@ namespace editor::panels
 				ImGui::SetCursorScreenPos(ImVec2(guiPos.x + (ImGui::GetItemRectSize().x - 50), guiPos.y));
 				if (ImGui::Button("Reset", ImVec2(50, ImGui::GetItemRectSize().y)))
 				{
-					scene::Transform oldTrans;
-					if (isChild)
-						oldTrans.SetLocalTransform(savedPos, savedRot, savedScale);
-					else oldTrans.SetGlobalTransform(savedPos, savedRot, savedScale);
-
 					Statics::EngineOperations.EditorSetEntityTransform(entity,
 						{
 							{ 0, 0, 0 },
 							{ 0, 0, 0 },
 							{ 1, 1, 1 } },
-						oldTrans,
+						savedTransform,
 						isChild);
-					pos = glm::vec3(0.f);
-					rot = glm::vec3(0.f);
-					scale = glm::vec3(1.f);
+					mSavedTransforms[entity->GetUUID()] =
+						scene::Transform(glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f));
 				}
 
 				if (based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL) &&
 					(input::Keyboard::KeyDown(BASED_INPUT_KEY_Z)
 						|| input::Keyboard::KeyDown(BASED_INPUT_KEY_Y)))
 				{
-					savedPos = pos;
-					savedRot = rot;
-					savedScale = scale;
+					mSavedTransforms[entity->GetUUID()] = scene::Transform(pos, rot, scale);
 				}
+
+				auto savedPos = savedTransform.Position();
+				auto savedRot = savedTransform.EulerAngles();
+				auto savedScale = savedTransform.Scale();
 
 				ImGui::Indent(); ImGui::Spacing();
 				if (ImGui::TransformEditor( 
@@ -93,13 +94,12 @@ namespace editor::panels
 					glm::value_ptr(savedScale),
 					0.01f))
 				{
-					/*scene::Transform oldTrans;
-					if (isChild) 
-						oldTrans.SetLocalTransform(savedPos, savedRot, savedScale);
-					else oldTrans.SetGlobalTransform(savedPos, savedRot, savedScale);
+					//scene::Transform oldTrans(savedPos, savedRot, savedScale);
 					Statics::EngineOperations.EditorSetEntityTransform(entity,
-						entity->GetTransform(), oldTrans, false);
-					savedPos = pos;
+						entity->GetTransform(), 
+						savedTransform, isChild);
+					mSavedTransforms[entity->GetUUID()] = scene::Transform(pos, rot, scale);
+					/*savedPos = pos;
 					savedRot = rot;
 					savedScale = scale;*/
 				}

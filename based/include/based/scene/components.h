@@ -221,9 +221,7 @@ namespace based::scene
 		{
 			if (Parent)
 			{
-				BASED_TRACE("Parent at {} {} {}", Parent->Position().x, Parent->Position().y, Parent->Position().z);
 				SetLocalPosition(Parent->InverseTransformPoint(position));
-				BASED_TRACE("New local pos {} {} {}", mLocalPosition.x, mLocalPosition.y, mLocalPosition.z);
 			}
 			else SetLocalPosition(position);
 		}

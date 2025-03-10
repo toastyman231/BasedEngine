@@ -79,12 +79,20 @@ namespace editor
 			name = nameBase.append(std::to_string(++iterations));
 		}
 
-		HISTORY_SAVE(name);
-		auto entity = based::scene::Entity::CreateEntity(name);
-		scene->GetEntityStorage().Load(name, entity);
-		Statics::SetSceneDirty(true);
+		if (Statics::GetHistory().IsRedoing())
+		{
+			HISTORY_LOAD(name);
+			auto e = scene->GetEntityStorage().Get(name);
+			e->AddComponent<based::scene::EntityReference>(e);
+		} else
+		{
+			HISTORY_SAVE(name);
+			auto entity = based::scene::Entity::CreateEntity(name);
+			scene->GetEntityStorage().Load(name, entity);
+			*outName = name;
+		}
 
-		*outName = name;
+		Statics::SetSceneDirty(true);
 
 		return true;
 	}
@@ -102,7 +110,8 @@ namespace editor
 		auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
 		auto entity = scene->GetEntityStorage().Get(name);
 
-		based::scene::Entity::DestroyEntity(entity);
+		//based::scene::Entity::DestroyEntity(entity);
+		entity->RemoveComponent<based::scene::EntityReference>();
 
 		Statics::SetSceneDirty(isSceneDirty);
 
@@ -375,7 +384,8 @@ namespace editor
 		if (!local)
 			entity->SetTransform(transform.Position(), transform.EulerAngles(), transform.Scale());
 		else
-			entity->SetLocalTransform(transform.LocalPosition(), transform.LocalEulerAngles(), transform.LocalEulerAngles());
+			entity->SetLocalTransform(transform.LocalPosition(),
+				transform.LocalEulerAngles(), transform.LocalScale());
 
 		Statics::SetSceneDirty(true);
 
@@ -394,12 +404,8 @@ namespace editor
 		if (!local)
 			entity->SetTransform(savedTransform.Position(), savedTransform.EulerAngles(), savedTransform.Scale());
 		else
-			entity->SetLocalTransform(savedTransform.LocalPosition(), savedTransform.LocalEulerAngles(), savedTransform.LocalEulerAngles());
-
-		/*if (!local)
-			entity->SetTransform(savedTransform.Position(), savedTransform.Rotation(), savedTransform.Scale());
-		else
-			entity->SetLocalTransform(savedTransform.LocalPosition(), savedTransform.LocalRotation(), savedTransform.LocalScale());*/
+			entity->SetLocalTransform(savedTransform.LocalPosition(),
+				savedTransform.LocalEulerAngles(), savedTransform.LocalScale());
 
 		Statics::SetSceneDirty(isSceneDirty);
 
@@ -518,37 +524,46 @@ namespace editor
 		auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
 		auto& registry = scene->GetRegistry();
 
-		auto entityBacking = registry.create();
-		auto newEntity = std::make_shared<based::scene::Entity>(entityBacking, registry);
-		newEntity->SetEntityName(scene->GetEntityStorage().GetSafeName(entity->GetEntityName()));
-		for (auto [id, storage] : registry.storage())
-		{
-			if (storage.contains(entity->GetEntityHandle()))
-			{
-				if (storage.type().name().find("based::scene::CameraComponent") != std::string_view::npos)
-				{
-					// Need to copy the camera manually because the normal copy constructor
-					// would cause this camera component to point to the exact same camera.
-					// But the camera copy constructor needs to work that way or the editor
-					// and game cameras become the same camera at some point during startup.
-					auto& comp = registry.emplace<based::scene::CameraComponent>(entityBacking);
-					auto& otherComp = entity->GetComponent<based::scene::CameraComponent>();
-					auto newCam = comp.camera.lock();
-					if (auto oldCam = otherComp.camera.lock())
-					{
-						newCam->SetProjection(oldCam->GetProjectionType());
-						newCam->SetFOV(oldCam->GetFOV());
-						newCam->SetNear(oldCam->GetNear());
-						newCam->SetFar(oldCam->GetFar());
-						newCam->SetHeight(oldCam->GetHeight());
-					}
-				} else storage.push(entityBacking, storage.value(entity->GetEntityHandle()));
-			}
-		}
-		newEntity->AddOrReplaceComponent<based::scene::EntityReference>(newEntity);
-		scene->GetEntityStorage().Load(newEntity->GetEntityName(), newEntity);
+		std::shared_ptr<based::scene::Entity> newEntity;
 
-		HISTORY_SAVE(newEntity);
+		if (!Statics::GetHistory().IsRedoing())
+		{
+			auto entityBacking = registry.create();
+			newEntity = std::make_shared<based::scene::Entity>(entityBacking, registry);
+			newEntity->SetEntityName(scene->GetEntityStorage().GetSafeName(entity->GetEntityName()));
+			for (auto [id, storage] : registry.storage())
+			{
+				if (storage.contains(entity->GetEntityHandle()))
+				{
+					if (storage.type().name().find("based::scene::CameraComponent") != std::string_view::npos)
+					{
+						// Need to copy the camera manually because the normal copy constructor
+						// would cause this camera component to point to the exact same camera.
+						// But the camera copy constructor needs to work that way or the editor
+						// and game cameras become the same camera at some point during startup.
+						auto& comp = registry.emplace<based::scene::CameraComponent>(entityBacking);
+						auto& otherComp = entity->GetComponent<based::scene::CameraComponent>();
+						auto newCam = comp.camera.lock();
+						if (auto oldCam = otherComp.camera.lock())
+						{
+							newCam->SetProjection(oldCam->GetProjectionType());
+							newCam->SetFOV(oldCam->GetFOV());
+							newCam->SetNear(oldCam->GetNear());
+							newCam->SetFar(oldCam->GetFar());
+							newCam->SetHeight(oldCam->GetHeight());
+						}
+					}
+					else storage.push(entityBacking, storage.value(entity->GetEntityHandle()));
+				}
+			}
+			newEntity->AddOrReplaceComponent<based::scene::EntityReference>(newEntity);
+			scene->GetEntityStorage().Load(newEntity->GetEntityName(), newEntity);
+			HISTORY_SAVE(newEntity);
+		} else
+		{
+			HISTORY_LOAD(newEntity);
+			newEntity->AddComponent<based::scene::EntityReference>(newEntity);
+		}
 
 		Statics::SetSceneDirty(true);
 
@@ -565,7 +580,8 @@ namespace editor
 		std::shared_ptr<based::scene::Entity> newEntity;
 		HISTORY_LOAD(newEntity);
 
-		based::scene::Entity::DestroyEntity(newEntity);
+		newEntity->RemoveComponent<based::scene::EntityReference>();
+		//based::scene::Entity::DestroyEntity(newEntity);
 
 		Statics::SetSelectedEntities({});
 

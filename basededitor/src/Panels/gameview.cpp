@@ -167,7 +167,7 @@ namespace editor::panels
 						wasUsingLastFrame = true;
 					} else if (wasUsingLastFrame)
 					{
-						/*BASED_TRACE("Locking entity transform!");
+						BASED_TRACE("Locking entity transform!");
 						Statics::EngineOperations.EditorSetEntityTransform(
 							entity,
 							entity->GetTransform(),
@@ -175,7 +175,7 @@ namespace editor::panels
 							isChild
 						);
 						savedTransform = entity->GetTransform();
-						wasUsingLastFrame = false;*/
+						wasUsingLastFrame = false;
 					}
 				}
 			}

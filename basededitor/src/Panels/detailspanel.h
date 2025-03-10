@@ -1,5 +1,6 @@
 #pragma once
 #include "panelbase.h"
+#include "based/scene/components.h"
 #include "based/scene/scene.h"
 
 namespace editor::panels
@@ -22,7 +23,7 @@ namespace editor::panels
 		void DrawPointLightComponent(std::shared_ptr<based::scene::Entity> entity);
 		void DrawDirectionalLightComponent(std::shared_ptr<based::scene::Entity> entity);
 		void DrawCameraComponent(std::shared_ptr<based::scene::Entity> entity);
-	};
 
-	void OnTransformChanged(float newPos[3], float oldPos[3]);
+		std::unordered_map<based::core::UUID, based::scene::Transform> mSavedTransforms;
+	};
 }
