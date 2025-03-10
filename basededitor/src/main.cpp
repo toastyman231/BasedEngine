@@ -67,7 +67,6 @@ public:
 		mFileBrowser = new editor::panels::FileBrowser("File Browser");
 		mFileBrowser->Initialize();
 
-		BASED_TRACE(editor::Statics::GetProjectDirectory() + "/Config/EditorConfig.yml");
 		if (std::filesystem::exists(editor::Statics::GetProjectDirectory() + "/Config/EditorConfig.yml"))
 		{
 			std::ifstream ifs(editor::Statics::GetProjectDirectory() + "/Config/EditorConfig.yml");
