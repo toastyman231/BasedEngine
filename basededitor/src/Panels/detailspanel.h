@@ -23,7 +23,5 @@ namespace editor::panels
 		void DrawPointLightComponent(std::shared_ptr<based::scene::Entity> entity);
 		void DrawDirectionalLightComponent(std::shared_ptr<based::scene::Entity> entity);
 		void DrawCameraComponent(std::shared_ptr<based::scene::Entity> entity);
-
-		std::unordered_map<based::core::UUID, based::scene::Transform> mSavedTransforms;
 	};
 }

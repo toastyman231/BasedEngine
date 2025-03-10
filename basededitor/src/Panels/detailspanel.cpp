@@ -48,12 +48,12 @@ namespace editor::panels
 			auto scale = isChild ? transform.LocalScale() : transform.Scale();
 
 			scene::Transform savedTransform;
-			if (mSavedTransforms.find(entity->GetUUID()) == mSavedTransforms.end())
+			if (Statics::GetSavedTransforms().find(entity->GetUUID()) == Statics::GetSavedTransforms().end())
 			{
-				savedTransform = mSavedTransforms[entity->GetUUID()] = scene::Transform(pos, rot, scale);
+				savedTransform = Statics::GetSavedTransforms()[entity->GetUUID()] = scene::Transform(pos, rot, scale);
 			}
 			else
-				savedTransform = mSavedTransforms[entity->GetUUID()];
+				savedTransform = Statics::GetSavedTransforms()[entity->GetUUID()];
 
 			ImVec2 guiPos = ImGui::GetCursorScreenPos();
 			if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
@@ -69,15 +69,18 @@ namespace editor::panels
 							{ 1, 1, 1 } },
 						savedTransform,
 						isChild);
-					mSavedTransforms[entity->GetUUID()] =
+					savedTransform = Statics::GetSavedTransforms()[entity->GetUUID()] =
 						scene::Transform(glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f));
+					ImGui::PopID();
+					ImGui::End();
+					return;
 				}
 
 				if (based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL) &&
 					(input::Keyboard::KeyDown(BASED_INPUT_KEY_Z)
 						|| input::Keyboard::KeyDown(BASED_INPUT_KEY_Y)))
 				{
-					mSavedTransforms[entity->GetUUID()] = scene::Transform(pos, rot, scale);
+					savedTransform = Statics::GetSavedTransforms()[entity->GetUUID()] = scene::Transform(pos, rot, scale);
 				}
 
 				auto savedPos = savedTransform.Position();
@@ -94,26 +97,20 @@ namespace editor::panels
 					glm::value_ptr(savedScale),
 					0.01f))
 				{
-					//scene::Transform oldTrans(savedPos, savedRot, savedScale);
 					Statics::EngineOperations.EditorSetEntityTransform(entity,
 						entity->GetTransform(), 
 						savedTransform, isChild);
-					mSavedTransforms[entity->GetUUID()] = scene::Transform(pos, rot, scale);
-					/*savedPos = pos;
-					savedRot = rot;
-					savedScale = scale;*/
+					Statics::GetSavedTransforms()[entity->GetUUID()] = scene::Transform(pos, rot, scale);
 				}
 
 				if (isChild)
 				{
-					auto tr = entity->GetTransform();
-					if (pos != tr.LocalPosition() || rot != tr.LocalEulerAngles() || scale != tr.LocalScale())
+					if (pos != transform.LocalPosition() || rot != transform.LocalEulerAngles() || scale != transform.LocalScale())
 						entity->SetLocalTransform(pos, rot, scale);
 				}
 				else
 				{
-					auto tr = entity->GetTransform();
-					if (pos != tr.Position() || rot != tr.EulerAngles() || scale != tr.Scale())
+					if (pos != transform.Position() || rot != transform.EulerAngles() || scale != transform.Scale())
 						entity->SetTransform(pos, rot, scale);
 				}
 

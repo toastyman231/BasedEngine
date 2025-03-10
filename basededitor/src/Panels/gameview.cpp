@@ -8,6 +8,7 @@
 #include "based/app.h"
 #include "based/engine.h"
 #include "based/input/joystick.h"
+#include "based/input/keyboard.h"
 #include "based/input/mouse.h"
 
 namespace editor::panels
@@ -50,6 +51,8 @@ namespace editor::panels
 
 	void EditorView::Render()
 	{
+		using namespace based;
+
 		if (ImGui::Begin(mPanelTitle.c_str()))
 		{
 			if (ImGui::IsWindowHovered())
@@ -132,7 +135,15 @@ namespace editor::panels
 					const bool isChild = !entity->Parent.expired();
 					static bool wasUsingLastFrame = false;
 
-					static auto savedTransform = entity->GetTransform();
+					scene::Transform savedTransform;
+					if (Statics::GetSavedTransforms().find(entity->GetUUID()) == Statics::GetSavedTransforms().end())
+					{
+						auto& trans = entity->GetTransform();
+						savedTransform = Statics::GetSavedTransforms()[entity->GetUUID()] = 
+							scene::Transform(trans.Position(), trans.EulerAngles(), trans.Scale());
+					}
+					else
+						savedTransform = Statics::GetSavedTransforms()[entity->GetUUID()];
 
 					auto viewMat = mViewCamera->GetViewMatrix();
 					auto projMat = mViewCamera->GetProjectionMatrix();
@@ -146,11 +157,13 @@ namespace editor::panels
 						glm::value_ptr(modelMat), glm::value_ptr(deltaMat));
 					ImGuizmo::SetGizmoSizeClipSpace(0.25f);
 
-					if (entity->HasComponent<MovedDueToUndo>())
+					if (based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL) &&
+						(input::Keyboard::KeyDown(BASED_INPUT_KEY_Z)
+							|| input::Keyboard::KeyDown(BASED_INPUT_KEY_Y)))
 					{
-						BASED_TRACE("Moved due to undo!");
-						savedTransform = entity->GetTransform();
-						entity->RemoveComponent<MovedDueToUndo>();
+						auto& trans = entity->GetTransform();
+						Statics::GetSavedTransforms()[entity->GetUUID()] = 
+							scene::Transform(trans.Position(), trans.EulerAngles(), trans.Scale());
 					}
 
 					if (ImGuizmo::IsUsing())
@@ -167,14 +180,16 @@ namespace editor::panels
 						wasUsingLastFrame = true;
 					} else if (wasUsingLastFrame)
 					{
-						BASED_TRACE("Locking entity transform!");
+						// TODO: This is kinda buggy sometimes
 						Statics::EngineOperations.EditorSetEntityTransform(
 							entity,
 							entity->GetTransform(),
 							savedTransform,
 							isChild
 						);
-						savedTransform = entity->GetTransform();
+						auto& trans = entity->GetTransform();
+						Statics::GetSavedTransforms()[entity->GetUUID()] =
+							scene::Transform(trans.Position(), trans.EulerAngles(), trans.Scale());
 						wasUsingLastFrame = false;
 					}
 				}

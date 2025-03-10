@@ -57,6 +57,8 @@ namespace editor
 
 		static bool EndsWith(const std::string& value, const std::string& ending);
 
+		static std::unordered_map<based::core::UUID, based::scene::Transform>& GetSavedTransforms() { return mSavedTransforms; }
+
 		inline static EngineOperations EngineOperations;
 	private:
 		inline static std::shared_ptr<based::graphics::Camera> mEditorCamera;
@@ -73,5 +75,7 @@ namespace editor
 		inline static std::vector<std::filesystem::path> mSelectedFiles;
 
 		inline static HistoryContext mHistoryContext;
+
+		inline static std::unordered_map<based::core::UUID, based::scene::Transform> mSavedTransforms;
 	};
 }
