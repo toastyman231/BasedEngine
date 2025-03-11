@@ -125,20 +125,20 @@ namespace based::scene
 	{
 		Transform& transform = GetComponent<Transform>();
 
-		transform.SetLocalTransform(pos, transform.LocalEulerAngles(), transform.LocalScale());
+		transform.SetLocalPosition(pos);
 	}
 
 	void Entity::SetLocalRotation(glm::vec3 rot)
 	{
 		Transform& transform = GetComponent<Transform>();
 
-		transform.SetLocalTransform(transform.LocalPosition(), rot, transform.LocalScale());
+		transform.SetLocalEulerAngles(rot);
 	}
 
 	void Entity::SetLocalScale(glm::vec3 scale)
 	{
 		Transform& transform = GetComponent<Transform>();
 
-		transform.SetLocalTransform(transform.LocalPosition(), transform.LocalEulerAngles(), scale);
+		transform.SetLocalScale(scale);
 	}
 }

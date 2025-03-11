@@ -143,10 +143,10 @@ namespace based::graphics
 		mTransform.SetLocalTransform(pos, rot, scale);
 
 		glm::mat4 view = glm::mat4(1.f);
-		view = glm::rotate(view, glm::radians(rot.z), glm::vec3(0, 0, 1));
-		view = glm::rotate(view, glm::radians(rot.x), glm::vec3(1, 0, 0));
-		view = glm::rotate(view, glm::radians(rot.y), glm::vec3(0, 1, 0));
-		view = glm::translate(view, -pos);
+		view = glm::rotate(view, glm::radians(mTransform.EulerAngles().z), glm::vec3(0, 0, 1));
+		view = glm::rotate(view, glm::radians(mTransform.EulerAngles().x), glm::vec3(1, 0, 0));
+		view = glm::rotate(view, glm::radians(mTransform.EulerAngles().y), glm::vec3(0, 1, 0));
+		view = glm::translate(view, -mTransform.Position());
 
 		mForward = glm::normalize(glm::vec3(view[0][2], view[1][2], view[2][2]));
 		mRight = glm::normalize(glm::cross(glm::vec3(0.f, 1.f, 0.f), mForward));

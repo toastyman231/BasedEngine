@@ -38,7 +38,7 @@ namespace based::managers
 		void RemoveContext(const Rml::Context* context);
 		void SetPathPrefix(const std::string& path);
 
-		std::vector<DocumentInfo> GetDocuments();
+		std::deque<DocumentInfo> GetDocuments();
 
 		Rml::SystemInterface& GetSystemInterface() const { return *mSystemInterface; }
 		Rml::RenderInterface& GetRenderInterface() const { return *mRenderInterface; }
@@ -49,7 +49,7 @@ namespace based::managers
 		Rml::RenderInterface* mRenderInterface;
 
 		std::vector<Rml::Context*> mContexts;
-		std::vector<DocumentInfo> mDocuments;
+		std::deque<DocumentInfo> mDocuments;
 
 		Rml::String mPathPrefix;
 

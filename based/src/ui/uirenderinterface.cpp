@@ -132,6 +132,8 @@ namespace based::ui
 			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayUserInterface,
 				mVAs.back(), mFragColor, 0, mTransform, glm::vec2{translation.x, translation.y}));
 		}
+
+		Engine::Instance().GetRenderManager().Flush();
 	}
 
 	Rml::CompiledGeometryHandle RenderInterface_GL4::CompileGeometry(Rml::Vertex* vertices, int num_vertices,
@@ -188,6 +190,8 @@ namespace based::ui
 				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayUserInterface,
 					va, mFragColor, 0, mTransform, glm::vec2{ translation.x, translation.y }));
 			}
+
+			Engine::Instance().GetRenderManager().Flush();
 		}
 	}
 
@@ -221,15 +225,23 @@ namespace based::ui
 		{
 			// Disable old
 			if (scissoring_state == ScissoringState::Scissor)
-				glDisable(GL_SCISSOR_TEST);
+			{
+				glDisable(GL_SCISSOR_TEST); BASED_CHECK_GL_ERROR;
+			}
 			else if (scissoring_state == ScissoringState::Stencil)
-				glStencilFunc(GL_ALWAYS, 1, GLuint(-1));
+			{
+				glStencilFunc(GL_ALWAYS, 1, 0xFF); BASED_CHECK_GL_ERROR;
+			}
 
 			// Enable new
 			if (new_state == ScissoringState::Scissor)
-				glEnable(GL_SCISSOR_TEST);
+			{
+				glEnable(GL_SCISSOR_TEST); BASED_CHECK_GL_ERROR;
+			}
 			else if (new_state == ScissoringState::Stencil)
-				glStencilFunc(GL_EQUAL, 1, GLuint(-1));
+			{
+				glStencilFunc(GL_EQUAL, 1, 0xFF); BASED_CHECK_GL_ERROR;
+			}
 
 			scissoring_state = new_state;
 		}
@@ -252,20 +264,20 @@ namespace based::ui
 
 			int indices[6] = { 0, 2, 1, 0, 3, 2 };
 
-			glClear(GL_STENCIL_BUFFER_BIT);
-			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-			glStencilFunc(GL_ALWAYS, 1, GLuint(-1));
-			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+			glClear(GL_STENCIL_BUFFER_BIT); BASED_CHECK_GL_ERROR;
+			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); BASED_CHECK_GL_ERROR;
+			glStencilFunc(GL_ALWAYS, 1, 0xFF); BASED_CHECK_GL_ERROR;
+			glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE); BASED_CHECK_GL_ERROR;
 
 			RenderGeometry(vertices, 4, indices, 6, 0, Rml::Vector2f(0, 0));
 
-			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-			glStencilFunc(GL_EQUAL, 1, GLuint(-1));
-			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); BASED_CHECK_GL_ERROR;
+			glStencilFunc(GL_EQUAL, 1, 0xFF); BASED_CHECK_GL_ERROR;
+			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); BASED_CHECK_GL_ERROR;
 		}
 		else
 		{
-			glScissor(x, Engine::Instance().GetWindow().GetSize().y - (y + height), width, height);
+			glScissor(x, Engine::Instance().GetWindow().GetSize().y - (y + height), width, height); BASED_CHECK_GL_ERROR;
 		}
 	}
 
@@ -302,6 +314,13 @@ namespace based::ui
 		size_t buffer_size = file_interface->Tell(file_handle);
 		file_interface->Seek(file_handle, 0, SEEK_SET);
 
+		auto texture = std::make_shared<graphics::Texture>(source);
+		if (texture->GetId() != 0)
+		{
+			texture_handle = (Rml::TextureHandle)texture->GetId();
+			return true;
+		}
+
 		if (buffer_size <= sizeof(TGAHeader))
 		{
 			//Rml::Log::Message(Rml::Log::LT_ERROR, "Texture file size is smaller than TGAHeader, file is not a valid TGA image.");
@@ -320,22 +339,6 @@ namespace based::ui
 
 		int color_mode = header.bitsPerPixel / 8;
 		int image_size = header.width * header.height * 4; // We always make 32bit textures
-
-		if (header.dataType != 2)
-		{
-			delete[] buffer;
-			// Try to load the texture using my texture API
-			auto texture = std::make_shared<graphics::Texture>(source);
-			texture_handle = (Rml::TextureHandle)texture->GetId();
-			if (texture_handle == 0)
-			{
-				//Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to generate texture.");
-				BASED_ERROR("Failed to generate texture.");
-				return false;
-			}
-
-			return true;
-		}
 
 		// Ensure we have at least 3 colors
 		if (color_mode < 3)

@@ -160,7 +160,7 @@ namespace based::managers
 		mUsePathPrefix = true;
 	}
 
-	std::vector<DocumentInfo> UiManager::GetDocuments()
+	std::deque<DocumentInfo> UiManager::GetDocuments()
 	{
 		return mDocuments;
 	}
@@ -199,6 +199,13 @@ namespace based::managers
 
 			if (Rml::Element* title = rawPointer->GetElementById("title"))
 				title->SetInnerRML(rawPointer->GetTitle());
+
+			Rml::ElementList elements;
+			rawPointer->GetElementsByClassName(elements, "BASED_REFRESH");
+			for (auto element : elements)
+			{
+				element->SetInnerRML(docInfo.document->GetElementById(element->GetId())->GetInnerRML());
+			}
 
 			if (isShown)
 				rawPointer->Show();
