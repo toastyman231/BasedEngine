@@ -66,7 +66,7 @@ namespace based::managers
 		delete mSystemInterface;
 	}
 
-	DocumentInfo* UiManager::LoadWindow(const std::string& path, Rml::Context* context)
+	DocumentInfo* UiManager::LoadWindow(const std::string& path, Rml::Context* context, std::string id)
 	{
 		PROFILE_FUNCTION();
 		Rml::String documentPath = path + Rml::String(".rml");
@@ -82,6 +82,7 @@ namespace based::managers
 		if (Rml::Element* title = document->GetElementById("title"))
 			title->SetInnerRML(document->GetTitle());
 
+		if (!id.empty()) document->SetId(id);
 		document->Show();
 
 		mDocuments.emplace_back(DocumentInfo{ document, documentPath, context });
@@ -199,6 +200,8 @@ namespace based::managers
 
 			if (Rml::Element* title = rawPointer->GetElementById("title"))
 				title->SetInnerRML(rawPointer->GetTitle());
+
+			rawPointer->SetId(docInfo.document->GetId());
 
 			Rml::ElementList elements;
 			rawPointer->GetElementsByClassName(elements, "BASED_REFRESH");

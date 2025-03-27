@@ -31,7 +31,7 @@ namespace based::managers
 		void Render() const;
 		void Shutdown();
 
-		DocumentInfo* LoadWindow(const std::string& path, Rml::Context* context);
+		DocumentInfo* LoadWindow(const std::string& path, Rml::Context* context, std::string id = "");
 		bool CloseWindow(const DocumentInfo& document);
 		Rml::Context* CreateContext(const std::string& name, glm::ivec2 size);
 		Rml::Context* GetContext(const std::string& name);
