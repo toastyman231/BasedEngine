@@ -45,6 +45,11 @@ namespace based::math
 		return (value <= min) ? min : (value >= max) ? max : value;
 	}
 
+	static float Clamp(int value, int min, int max)
+	{
+		return (value <= min) ? min : (value >= max) ? max : value;
+	}
+
 	static float Clamp01(float value)
 	{
 		return Clamp(value, 0, 1);
