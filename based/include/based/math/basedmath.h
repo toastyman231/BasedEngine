@@ -45,20 +45,20 @@ namespace based::math
 		return (value <= min) ? min : (value >= max) ? max : value;
 	}
 
-	static float Clamp(int value, int min, int max)
+	static int Clamp(int value, int min, int max)
 	{
 		return (value <= min) ? min : (value >= max) ? max : value;
 	}
 
 	static float Clamp01(float value)
 	{
-		return Clamp(value, 0, 1);
+		return Clamp(value, 0.f, 1.f);
 	}
 
 	template <typename T>
 	T PercentOf(T x, uint32_t percentage)
 	{
-		percentage = static_cast<uint32_t>(Clamp(static_cast<float>(percentage), 0, 100));
+		percentage = Clamp(percentage, 0, 100);
 		return static_cast<T>((x * static_cast<float>(percentage)) / 100);
 	}
 

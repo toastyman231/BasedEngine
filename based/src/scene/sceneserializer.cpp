@@ -237,7 +237,7 @@ namespace based::scene
 				tex->SetName(texture.first.as<std::string>());
 				mLoadedTextures[id] = tex;
 				if (mScene) mScene->GetTextureStorage().Load(tex->GetName(), tex);
-				material->AddTexture(tex, texture.first.as<std::string>());
+				material->AddTexture(tex, texture.second["Location"].as<std::string>());
 			}
 		}
 

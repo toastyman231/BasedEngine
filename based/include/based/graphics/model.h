@@ -59,6 +59,8 @@ namespace based::graphics
         inline std::shared_ptr<Material> GetMaterial(int index = 0) const { return mMaterials[index]; }
         inline std::vector<std::shared_ptr<Material>> GetMaterials() const { return mMaterials; }
 
+        inline int GetNumMeshes() const { return (int)meshes.size(); }
+
         inline bool IsFileModel() const { return !mModelSource.empty(); }
         inline std::string GetModelSource() const { return mModelSource; }
         inline std::string GetModelName() const { return mModelName; }
