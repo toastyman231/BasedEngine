@@ -4,6 +4,7 @@
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
+#include "external/stb/stb_image.h"
 
 namespace based::graphics
 {
@@ -58,7 +59,7 @@ namespace based::graphics
 	{
 		PROFILE_FUNCTION();
 		Assimp::Importer import;
-		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
@@ -108,10 +109,13 @@ namespace based::graphics
 			vector.z = mesh->mVertices[i].z;
 			vertex.Position = vector;
 
-			vector.x = mesh->mNormals[i].x;
-			vector.y = mesh->mNormals[i].y;
-			vector.z = mesh->mNormals[i].z;
-			vertex.Normal = vector;
+			if (mesh->mNormals)
+			{
+				vector.x = mesh->mNormals[i].x;
+				vector.y = mesh->mNormals[i].y;
+				vector.z = mesh->mNormals[i].z;
+				vertex.Normal = vector;
+			}
 
 			if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
 			{
@@ -148,7 +152,7 @@ namespace based::graphics
 		{
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-			std::shared_ptr<Material> meshMaterial = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+			std::shared_ptr<Material> meshMaterial = LoadMaterial(material, scene);
 
 			mMaterials.insert(mMaterials.end(), meshMaterial);
 		}
@@ -158,52 +162,85 @@ namespace based::graphics
 		meshes.emplace_back(std::make_shared<Mesh>(vertices, indices));
 	}
 
-	std::shared_ptr<Material> Model::LoadMaterialTextures(aiMaterial* mat, int type, std::string typeName)
+	std::shared_ptr<Material> Model::LoadMaterial(aiMaterial* mat, const aiScene* scene)
 	{
 		PROFILE_FUNCTION();
-		std::shared_ptr<Material> material = std::make_shared<Material>(DefaultLibraries::GetShaderLibrary().Get("Model"));
 
-		if (mat->GetTextureCount(static_cast<aiTextureType>(type)) <= 0)
+		aiString name;
+		mat->Get(AI_MATKEY_NAME, name);
+		auto _name = std::string(name.C_Str());
+
+		std::shared_ptr<Material> material = graphics::Material::LoadMaterialFromFile(ASSET_PATH("Materials/Lit.bmat"),
+			Engine::Instance().GetApp().GetCurrentScene()->GetMaterialStorage(), "", _name);
+
+		material->mMaterialName = _name;
+
+		aiColor4D color(0.f, 0.f, 0.f, 1.f);
+		mat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+		material->SetUniformValue("material.albedo.color",
+			glm::vec4(color.r, color.g, color.b, color.a));
+
+		mat->Get(AI_MATKEY_ROUGHNESS_FACTOR, color);
+		material->SetUniformValue("material.roughness.color",
+			glm::vec4(color.r, color.g, color.b, color.a));
+		BASED_TRACE("Roughness: {} {} {} {}", color.r, color.g, color.b, color.a);
+
+		mat->Get(AI_MATKEY_METALLIC_FACTOR, color);
+		material->SetUniformValue("material.metallic.color",
+			glm::vec4(color.r, color.g, color.b, color.a));
+
+		ai_real x;
+		mat->Get(AI_MATKEY_SPECULAR_FACTOR, x);
+		BASED_TRACE("Specular: {}", x);
+		//material->SetUniformValue("Specular", x);
+
+		mat->Get(AI_MATKEY_ANISOTROPY_FACTOR, x);
+		BASED_TRACE("Anisotropy: {}", x);
+		//material->SetUniformValue("Anisotropic", x);
+
+		mat->Get(AI_MATKEY_SHEEN_COLOR_FACTOR, x);
+		BASED_TRACE("Sheen: {}", x);
+		//material->SetUniformValue("Sheen", x);
+
+		mat->Get(AI_MATKEY_SHEEN_ROUGHNESS_FACTOR, x);
+		BASED_TRACE("Sheen Tint (Roughness): {}", x);
+		//material->SetUniformValue("SheenTint", x);
+
+		mat->Get(AI_MATKEY_CLEARCOAT_FACTOR, x);
+		BASED_TRACE("ClearCoat: {}", x);
+		//material->SetUniformValue("ClearCoat", x);
+
+		auto albedoType = aiTextureType_BASE_COLOR;
+		if (mat->GetTextureCount(aiTextureType_BASE_COLOR) <= 0)
 		{
-			SetMaterialAttribute(mat, material, "$clr.diffuse", "diffuseMat", -1, aiTextureType_UNKNOWN);
-			SetMaterialAttribute(mat, material, "$clr.ambient", "ambientMat", -1, aiTextureType_UNKNOWN);
-			SetMaterialAttribute(mat, material, "$clr.specular", "specularMat", -1, aiTextureType_UNKNOWN);
-			SetMaterialAttribute(mat, material, "$mat.shininess", "shininessMat", -1, aiTextureType_UNKNOWN);
-			SetMaterialAttribute(mat, material, "$clr.emissive", "emissiveMat", -1, aiTextureType_UNKNOWN);
-		} else
-		{
-			SetMaterialAttribute(mat, material, "$clr.diffuse", "diffuseMat", 0, aiTextureType_DIFFUSE);
-			SetMaterialAttribute(mat, material, "$clr.ambient", "ambientMat", 1, aiTextureType_AMBIENT);
-			SetMaterialAttribute(mat, material, "$clr.specular", "specularMat", 2, aiTextureType_SPECULAR);
-			SetMaterialAttribute(mat, material, "none", "normalMat", 3, aiTextureType_NORMALS);
-			SetMaterialAttribute(mat, material, "$mat.shininess", "shininessMat", 4, aiTextureType_SHININESS);
-			SetMaterialAttribute(mat, material, "$clr.emissive", "emissiveMat", 5, aiTextureType_EMISSIVE);
+			albedoType = aiTextureType_DIFFUSE;
 		}
+		auto normalType = aiTextureType_NORMAL_CAMERA;
+		if (mat->GetTextureCount(aiTextureType_NORMAL_CAMERA) <= 0)
+		{
+			normalType = aiTextureType_NORMALS;
+		}
+		auto roughnessType = aiTextureType_DIFFUSE_ROUGHNESS;
+		if (mat->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS) <= 0)
+		{
+			roughnessType = aiTextureType_SHININESS;
+		}
+
+		LoadMaterialTexture(mat, scene, material, "albedo", 0, albedoType);
+		LoadMaterialTexture(mat, scene, material, "normal", 1, normalType);
+		LoadMaterialTexture(mat, scene, material, "metallic", 2, aiTextureType_METALNESS);
+		LoadMaterialTexture(mat, scene, material, "roughness", 3, roughnessType);
+		LoadMaterialTexture(mat, scene, material, "ambientOcclusion", 4, aiTextureType_AMBIENT_OCCLUSION);
 
 		return material;
 	}
 
-	void Model::SetMaterialAttribute(aiMaterial* mat, std::shared_ptr<Material> material, const char* key,
-		const std::string& attributeName, int sampler, int type)
+	void Model::LoadMaterialTexture(aiMaterial* mat, const aiScene* scene,
+	                                std::shared_ptr<Material> material, const std::string& attributeName, int sampler, int type)
 	{
 		aiTextureType textureType = static_cast<aiTextureType>(type);
 
-		if (key != "none")
-		{
-			aiColor4D color(0.f, 0.f, 0.f, 1.f);
-			if (attributeName == "shininessMat")
-			{
-				ai_real shininess;
-				mat->Get(AI_MATKEY_SHININESS, shininess);
-				material->SetUniformValue("material." + attributeName + ".color", glm::vec4(shininess, 0.f, 0.f, 0.f));
-			}
-			else
-			{
-				aiGetMaterialColor(mat, key, 0, 0, &color);
-				material->SetUniformValue("material." + attributeName + ".color", 
-					glm::vec4(color.r, color.g, color.b, color.a));
-			}
-		}
+		if (mat->GetTextureCount(textureType) <= 0) return;
 
 		material->SetUniformValue("material." + attributeName + ".useSampler", (sampler != -1) ? 1 : 0);
 		if (sampler != -1) 
@@ -216,9 +253,31 @@ namespace based::graphics
 				bool result = stat(str.C_Str(), &sb) == 0;
 				if (!result)
 				{
-					str = mDirectory + std::string("/") + str.C_Str();
+					if (str.data[0] == '*')
+					{
+						auto texInfo = scene->GetEmbeddedTexture(str.C_Str());
+						if (texInfo->achFormatHint == "rgba8888" || texInfo->achFormatHint == "argb8888")
+						{
+							material->AddTexture(std::make_shared<Texture>(texInfo->mWidth, texInfo->mHeight, 3,
+								(unsigned char*)texInfo->pcData));
+						} else
+						{
+							int w;
+							int h;
+							int numChannels;
+							unsigned char* data = stbi_load_from_memory((unsigned char*)texInfo->pcData, 
+								texInfo->mWidth,
+								&w, &h, &numChannels, 3);
+							material->AddTexture(std::make_shared<Texture>(w, h, numChannels, data));
+						}
+						material->SetUniformValue("material." + attributeName + ".tex", sampler);
+						return;
+					} else
+					{
+						str = mDirectory + std::string("/") + str.C_Str();
+					}
 				}
-				BASED_TRACE("Texture location: {}", str.C_Str());
+				BASED_TRACE("{} texture location: {}", attributeName, str.C_Str());
 
 				material->AddTexture(std::make_shared<Texture>(str.C_Str(), true));
 			}

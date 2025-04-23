@@ -134,14 +134,9 @@ namespace based::graphics::rendercommands
 						BASED_CHECK_GL_ERROR;
 						texture->Bind();
 					}
-					
+
 					if (Engine::Instance().GetRenderManager().GetCurrentPassName() != "ShadowDepthPass")
 					{
-						/*shader->SetUniformInt("shadowMap", index + 1);
-						glActiveTexture(GL_TEXTURE0 + index + 1); BASED_CHECK_GL_ERROR;
-						glBindTexture(GL_TEXTURE_2D,
-							graphics::DefaultLibraries::GetRenderPassOutputs().Get("ShadowMap"));
-						BASED_CHECK_GL_ERROR;*/
 						for (const auto& output :
 							DefaultLibraries::GetRenderPassOutputs().GetAll())
 						{
@@ -188,12 +183,11 @@ namespace based::graphics::rendercommands
 						}
 					}
 
-					index = 0;
-					for (const auto& texture : mat->GetTextures())
+					while (index >= 0)
 					{
-						glActiveTexture(GL_TEXTURE0 + index); BASED_CHECK_GL_ERROR;
-						index++;
-						texture->Unbind();
+						glActiveTexture(GL_TEXTURE0 + index);
+						glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
+						index--;
 					}
 					glActiveTexture(GL_TEXTURE0); BASED_CHECK_GL_ERROR;
 					shader->Unbind();

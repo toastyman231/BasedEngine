@@ -40,11 +40,11 @@ void main() {
         vec3 lightPos = light.position;
         vec3 lightColor = vec3(light.color);
 
-        vec3 L = normalize(lightPos);
+        vec3 L = normalize(lightPos - fragPos);
 
         BRDFResults reflection = DisneyBRDF(albedo, L, V, N, X, Y);
 
-        Lo += (lightColor * (reflection.diffuse + reflection.specular + reflection.clearcoat)) * DotClamped(N, L) * (1.0 - shadow);
+        Lo += (lightColor * (reflection.diffuse + reflection.specular + reflection.clearcoat)) * DotClamped(N, L) * (1.0 - shadow) * light.intensity;
     }
 
     vec3 Do = vec3(0.0);

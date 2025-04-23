@@ -81,6 +81,24 @@ namespace based::graphics
 		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
 	}
 
+	Texture::Texture(uint32_t width, uint32_t height, int numChannels, unsigned char* data)
+		: mFilter(TextureFilter::Nearest),
+		mWidth(width),
+		mHeight(height),
+		mNumChannels(numChannels),
+		mPixels(data),
+		mUUID(core::UUID())
+	{
+		glGenTextures(1, &mId); BASED_CHECK_GL_ERROR;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); BASED_CHECK_GL_ERROR;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); BASED_CHECK_GL_ERROR;
+		SetTextureFilter(mFilter);
+		glBindTexture(GL_TEXTURE_2D, mId); BASED_CHECK_GL_ERROR;
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, mWidth, mHeight, 0, GL_RGBA,
+			GL_FLOAT, mPixels); BASED_CHECK_GL_ERROR;
+		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
+	}
+
 	Texture::~Texture()
 	{
 		if (mStbiTex)

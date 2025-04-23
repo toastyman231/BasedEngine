@@ -33,6 +33,7 @@ namespace based::graphics
 		Texture(const Texture& other) = default;
 		Texture(unsigned int id, uint32_t width, uint32_t height);
 		Texture(uint32_t width, uint32_t height);
+		Texture(uint32_t width, uint32_t height, int numChannels, unsigned char* data);
 		Texture() = default;
 		~Texture();
 
