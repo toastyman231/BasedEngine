@@ -10,6 +10,7 @@ struct Material {
     MaterialProperty metallic;
     MaterialProperty roughness;
     MaterialProperty ambientOcclusion;
+    MaterialProperty emission;
 };
 
 uniform Material material;
@@ -74,6 +75,10 @@ float GetMaterialRoughness(vec2 uv) {
 
 float GetMaterialAmbientOcclusion(vec2 uv) {
     return GetMaterialColor(material.ambientOcclusion, uv).r;
+}
+
+vec4 GetMaterialEmission(vec2 uv) {
+    return GetMaterialColor(material.emission, uv);
 }
 
 float CalculateShadows(vec4 fragPosLightSpace) {

@@ -77,14 +77,18 @@ namespace based::graphics
         std::map<std::string, BoneInfo> m_BoneInfoMap;
         int m_BoneCounter = 0;
 
+        inline static std::vector<glm::mat4> mDefaultBones;
+
         void LoadModel(std::string path);
         void ProcessNode(aiNode* node, const aiScene* scene);
         void ProcessMesh(aiMesh* mesh, const aiScene* scene);
         std::shared_ptr<Material> LoadMaterial(aiMaterial* mat, const aiScene* scene);
-        void LoadMaterialTexture(aiMaterial* mat, const aiScene* scene,
-                                 std::shared_ptr<Material> material, const std::string& attributeName, int sampler, int type);
+        bool LoadMaterialTexture(aiMaterial* mat, const aiScene* scene,
+                                 std::shared_ptr<Material> material, const std::string& attributeName, int sampler,
+                                 int type);
         void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
         void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
         void SetVertexBoneDataToDefault(Vertex& vertex);
+        void ReadNodeHierarchy(const aiNode* node, glm::mat4& parentTransform);
     };
 }

@@ -59,7 +59,19 @@ namespace based::graphics
 	{
 		PROFILE_FUNCTION();
 		Assimp::Importer import;
-		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals);
+		const aiScene* scene = import.ReadFile(path, 
+			aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_PopulateArmatureData
+			| aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes);
+
+		if (mDefaultBones.empty())
+		{
+			mDefaultBones.reserve(100);
+
+			for (int i = 0; i < 100; i++)
+			{
+				mDefaultBones.emplace_back(glm::mat4(1.f));
+			}
+		}
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
@@ -70,12 +82,41 @@ namespace based::graphics
 		mModelSource = path;
 		mModelName = scene->mMeshes[0]->mName.C_Str();
 
+		/*if (scene->HasLights())
+		{
+			for (int i = 0; i < scene->mNumLights; i++)
+			{
+				auto sceneLight = scene->mLights[i];
+
+				auto lightName = std::string("Light ").append(std::to_string(i));
+				auto light = scene::Entity::CreateEntity(lightName);
+				light->SetPosition(glm::vec3(sceneLight->mPosition.x, sceneLight->mPosition.y + 0.5f, sceneLight->mPosition.z));
+				light->AddComponent<scene::PointLight>(
+					sceneLight->mAttenuationConstant,
+					sceneLight->mAttenuationLinear,
+					sceneLight->mAttenuationQuadratic,
+					1.f,
+					glm::vec3(sceneLight->mColorDiffuse.r, sceneLight->mColorDiffuse.g, sceneLight->mColorDiffuse.b));
+				light->AddComponent<scene::MeshRenderer>(
+					graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/cube.obj"),
+						Engine::Instance().GetApp().GetCurrentScene()->GetMeshStorage()),
+					graphics::Material::LoadMaterialFromFile(ASSET_PATH("Materials/Unlit.bmat"),
+						Engine::Instance().GetApp().GetCurrentScene()->GetMaterialStorage()));
+				light->SetScale(glm::vec3(0.3f));
+
+				BASED_TRACE("Created light {}", lightName);
+
+				Engine::Instance().GetApp().GetCurrentScene()->GetEntityStorage().Load(lightName, light);
+			}
+		}*/
+
 		ProcessNode(scene->mRootNode, scene);
 	}
 
 	void Model::ProcessNode(aiNode* node, const aiScene* scene)
 	{
 		PROFILE_FUNCTION();
+		BASED_TRACE("Node: {}", node->mName.C_Str());
 		// process all the node's meshes (if any)
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
@@ -87,6 +128,15 @@ namespace based::graphics
 		{
 			ProcessNode(node->mChildren[i], scene);
 		}
+	}
+
+	glm::mat4 AssimpMatrixToGLM(const aiMatrix4x4& mat) {
+		return glm::mat4(
+			mat.a1, mat.b1, mat.c1, mat.d1,
+			mat.a2, mat.b2, mat.c2, mat.d2,
+			mat.a3, mat.b3, mat.c3, mat.d3,
+			mat.a4, mat.b4, mat.c4, mat.d4
+		);
 	}
 
 	void Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
@@ -160,6 +210,18 @@ namespace based::graphics
 		ExtractBoneWeightForVertices(vertices, mesh, scene);
 
 		meshes.emplace_back(std::make_shared<Mesh>(vertices, indices));
+
+		if (mesh->HasBones())
+		{
+			ReadNodeHierarchy(scene->mRootNode, glm::mat4(1.f));
+
+			for (int i = 0; i < mDefaultBones.size(); i++)
+			{
+				mMaterials.back()->SetUniformValue("finalBonesMatrices[" + std::to_string(i) + "]", 
+					mDefaultBones[i]);
+				mDefaultBones[i] = glm::mat4(1.f);
+			}
+		}
 	}
 
 	std::shared_ptr<Material> Model::LoadMaterial(aiMaterial* mat, const aiScene* scene)
@@ -170,8 +232,17 @@ namespace based::graphics
 		mat->Get(AI_MATKEY_NAME, name);
 		auto _name = std::string(name.C_Str());
 
+		auto& matStorage = Engine::Instance().GetApp().GetCurrentScene()->GetMaterialStorage();
+
+		if (matStorage.Exists(_name))
+		{
+			BASED_WARN("Loading existing material {}!", _name);
+			return matStorage.Get(_name);
+		}
+
 		std::shared_ptr<Material> material = graphics::Material::LoadMaterialFromFile(ASSET_PATH("Materials/Lit.bmat"),
-			Engine::Instance().GetApp().GetCurrentScene()->GetMaterialStorage(), "", _name);
+			matStorage, "", _name);
+		BASED_WARN("Creating new material {}!", _name);
 
 		material->mMaterialName = _name;
 
@@ -189,7 +260,11 @@ namespace based::graphics
 		material->SetUniformValue("material.metallic.color",
 			glm::vec4(color.r, color.g, color.b, color.a));
 
-		ai_real x;
+		mat->Get(AI_MATKEY_COLOR_EMISSIVE, color);
+		material->SetUniformValue("material.emission.color",
+			glm::vec4(color.r, color.g, color.b, color.a));
+
+		/*ai_real x;
 		mat->Get(AI_MATKEY_SPECULAR_FACTOR, x);
 		BASED_TRACE("Specular: {}", x);
 		//material->SetUniformValue("Specular", x);
@@ -208,7 +283,7 @@ namespace based::graphics
 
 		mat->Get(AI_MATKEY_CLEARCOAT_FACTOR, x);
 		BASED_TRACE("ClearCoat: {}", x);
-		//material->SetUniformValue("ClearCoat", x);
+		//material->SetUniformValue("ClearCoat", x);*/
 
 		auto albedoType = aiTextureType_BASE_COLOR;
 		if (mat->GetTextureCount(aiTextureType_BASE_COLOR) <= 0)
@@ -225,68 +300,82 @@ namespace based::graphics
 		{
 			roughnessType = aiTextureType_SHININESS;
 		}
+		auto emissionType = aiTextureType_EMISSION_COLOR;
+		if (mat->GetTextureCount(aiTextureType_EMISSION_COLOR) <= 0)
+		{
+			emissionType = aiTextureType_EMISSIVE;
+		}
 
-		LoadMaterialTexture(mat, scene, material, "albedo", 0, albedoType);
-		LoadMaterialTexture(mat, scene, material, "normal", 1, normalType);
-		LoadMaterialTexture(mat, scene, material, "metallic", 2, aiTextureType_METALNESS);
-		LoadMaterialTexture(mat, scene, material, "roughness", 3, roughnessType);
-		LoadMaterialTexture(mat, scene, material, "ambientOcclusion", 4, aiTextureType_AMBIENT_OCCLUSION);
+		int samplerIndex = 0;
+		if (LoadMaterialTexture(mat, scene, material, "albedo", samplerIndex, albedoType)) samplerIndex++;
+		if (LoadMaterialTexture(mat, scene, material, "normal", samplerIndex, normalType)) samplerIndex++;
+		if (LoadMaterialTexture(mat, scene, material, "metallic", samplerIndex, aiTextureType_METALNESS)) samplerIndex++;
+		if (LoadMaterialTexture(mat, scene, material, "roughness", samplerIndex, roughnessType)) samplerIndex++;
+		if (LoadMaterialTexture(mat, scene, material, "ambientOcclusion", samplerIndex, 
+			aiTextureType_AMBIENT_OCCLUSION)) samplerIndex++;
+		if (LoadMaterialTexture(mat, scene, material, "emission", samplerIndex, emissionType)) samplerIndex++;
 
 		return material;
 	}
 
-	void Model::LoadMaterialTexture(aiMaterial* mat, const aiScene* scene,
-	                                std::shared_ptr<Material> material, const std::string& attributeName, int sampler, int type)
+	bool Model::LoadMaterialTexture(aiMaterial* mat, const aiScene* scene,
+	                                std::shared_ptr<Material> material, const std::string& attributeName, int sampler,
+	                                int type)
 	{
 		aiTextureType textureType = static_cast<aiTextureType>(type);
 
-		if (mat->GetTextureCount(textureType) <= 0) return;
+		if (mat->GetTextureCount(textureType) <= 0 || sampler < 0) return false;
 
 		material->SetUniformValue("material." + attributeName + ".useSampler", (sampler != -1) ? 1 : 0);
-		if (sampler != -1) 
+		
+		for (unsigned int i = 0; i < mat->GetTextureCount(textureType); i++)
 		{
-			for (unsigned int i = 0; i < mat->GetTextureCount(textureType); i++)
+			// TODO: Don't generate a new texture if it's already been generated
+			aiString str;
+			mat->GetTexture(textureType, i, &str);
+			struct stat sb;
+			bool result = stat(str.C_Str(), &sb) == 0;
+			if (!result)
 			{
-				aiString str;
-				mat->GetTexture(textureType, i, &str);
-				struct stat sb;
-				bool result = stat(str.C_Str(), &sb) == 0;
-				if (!result)
+				if (str.data[0] == '*')
 				{
-					if (str.data[0] == '*')
+					auto texInfo = scene->GetEmbeddedTexture(str.C_Str());
+					if (texInfo->achFormatHint == "rgba8888" || texInfo->achFormatHint == "argb8888")
 					{
-						auto texInfo = scene->GetEmbeddedTexture(str.C_Str());
-						if (texInfo->achFormatHint == "rgba8888" || texInfo->achFormatHint == "argb8888")
-						{
-							material->AddTexture(std::make_shared<Texture>(texInfo->mWidth, texInfo->mHeight, 3,
-								(unsigned char*)texInfo->pcData));
-						} else
-						{
-							int w;
-							int h;
-							int numChannels;
-							unsigned char* data = stbi_load_from_memory((unsigned char*)texInfo->pcData, 
-								texInfo->mWidth,
-								&w, &h, &numChannels, 3);
-							material->AddTexture(std::make_shared<Texture>(w, h, numChannels, data));
-						}
-						material->SetUniformValue("material." + attributeName + ".tex", sampler);
-						return;
-					} else
-					{
-						str = mDirectory + std::string("/") + str.C_Str();
+						material->AddTexture(std::make_shared<Texture>(texInfo->mWidth, texInfo->mHeight, 3,
+							(unsigned char*)texInfo->pcData));
 					}
+					else
+					{
+						// TODO: Make this actually work
+						int w;
+						int h;
+						int numChannels;
+						unsigned char* data = stbi_load_from_memory((unsigned char*)texInfo->pcData,
+							texInfo->mWidth,
+							&w, &h, &numChannels, 3);
+						material->AddTexture(std::make_shared<Texture>(w, h, numChannels, data));
+					}
+					material->SetUniformValue("material." + attributeName + ".tex", sampler);
+					return true;
 				}
-				BASED_TRACE("{} texture location: {}", attributeName, str.C_Str());
-
-				material->AddTexture(std::make_shared<Texture>(str.C_Str(), true));
+				else
+				{
+					str = mDirectory + std::string("/") + str.C_Str();
+				}
 			}
-			material->SetUniformValue("material." + attributeName + ".tex", sampler);
+			BASED_TRACE("{} texture location: {}", attributeName, str.C_Str());
+
+			material->AddTexture(std::make_shared<Texture>(str.C_Str(), true));
 		}
+		material->SetUniformValue("material." + attributeName + ".tex", sampler);
+		return true;
 	}
 
 	void Model::ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene)
 	{
+		aiMatrix4x4 parentTransform;
+
 		for (int boneIndex = 0; boneIndex < (int) (mesh->mNumBones); ++boneIndex)
 		{
 			int boneID = -1;
@@ -316,6 +405,12 @@ namespace based::graphics
 				assert(vertexId <= vertices.size());
 				SetVertexBoneData(vertices[vertexId], boneID, weight);
 			}
+
+			/*auto bone = mesh->mBones[boneIndex];
+			auto nodeTransform = bone->mOffsetMatrix;
+			mDefaultBones[boneID] = AssimpMatrixToGLM(parentTransform * nodeTransform * bone->mNode->mTransformation);*/
+
+			//parentTransform = nodeTransform;
 		}
 	}
 
@@ -338,6 +433,27 @@ namespace based::graphics
 		{
 			vertex.m_BoneIDs[i] = -1;
 			vertex.m_Weights[i] = 0.0f;
+		}
+	}
+
+	void Model::ReadNodeHierarchy(const aiNode* node, glm::mat4& parentTransform)
+	{
+		aiString nodeName = node->mName;
+
+		aiMatrix4x4 nodeTransform = node->mTransformation;
+
+		glm::mat4 globalTransform = parentTransform * AssimpMatrixToGLM(nodeTransform);
+
+		if (m_BoneInfoMap.find(std::string(nodeName.C_Str())) != m_BoneInfoMap.end())
+		{
+			int boneID = m_BoneInfoMap[std::string(nodeName.C_Str())].id;
+			mDefaultBones[boneID] = globalTransform *
+				m_BoneInfoMap[std::string(nodeName.C_Str())].offset;
+		}
+
+		for (int i = 0; i < node->mNumChildren; i++)
+		{
+			ReadNodeHierarchy(node->mChildren[i], globalTransform);
 		}
 	}
 }

@@ -74,7 +74,7 @@ void main() {
     color = pow(color, vec3(1.0/2.2));
 
     if (renderMode == 0) {
-        outColor = vec4(color, 1.0);
+        outColor = vec4(color + GetMaterialEmission(uvs).xyz, 1.0);
     } else if (renderMode == 1) {
         outColor = vec4(albedo, 1.0);
     } else {
