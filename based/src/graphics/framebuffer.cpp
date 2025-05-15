@@ -43,17 +43,6 @@ namespace based::graphics
 
 		// Create depth/stencil texture
 		AddTexture(GL_DEPTH_STENCIL_ATTACHMENT, GL_UNSIGNED_INT_24_8, GL_TEXTURE_2D, GL_DEPTH_STENCIL);
-		/*uint32_t textureId;
-		glGenTextures(1, &textureId); BASED_CHECK_GL_ERROR;
-		glBindTexture(GL_TEXTURE_2D, textureId); BASED_CHECK_GL_ERROR;
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, mSize.x, mSize.y, 0,
-			GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr); BASED_CHECK_GL_ERROR;
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
-		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, textureId, 0); BASED_CHECK_GL_ERROR;
-
-		mTextureIDs.emplace_back(textureId);*/
 
 		// Check for completeness
 		int32_t completeStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER); BASED_CHECK_GL_ERROR;

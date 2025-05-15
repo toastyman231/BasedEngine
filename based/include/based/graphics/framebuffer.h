@@ -28,6 +28,7 @@ namespace based::graphics
 		inline const glm::vec4& GetClearColor() { return mClearColor; }
 
 		Framebuffer& AddTexture(int attachment, int type, int target, int format, TextureFilter filter = TextureFilter::Linear);
+		Framebuffer& AddTextureMultisample(int attachment, int target, int format, int samples, TextureFilter filter = TextureFilter::Linear);
 		Framebuffer& AddTexture(uint32_t id, int attachment, int target);
 	private:
 		uint32_t mFbo;

@@ -63,7 +63,7 @@ namespace based::graphics
 
 		friend class managers::ResourceManager;
 	private:
-		TextureFilter mFilter;
+		TextureFilter mFilter = TextureFilter::Linear;
 
 		std::string mPath = "";
 		std::string mName = "New Texture";

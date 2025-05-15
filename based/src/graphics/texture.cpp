@@ -133,7 +133,6 @@ namespace based::graphics
 		mFilter = filter;
 
 		glBindTexture(GL_TEXTURE_2D, mId); BASED_CHECK_GL_ERROR;
-		glGenerateMipmap(GL_TEXTURE_2D); BASED_CHECK_GL_ERROR;
 		switch (mFilter)
 		{
 		case TextureFilter::Linear:
@@ -198,6 +197,7 @@ namespace based::graphics
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, dataFormat, mWidth, mHeight, 
 				0, dataFormat, GL_UNSIGNED_BYTE, mPixels); BASED_CHECK_GL_ERROR;
+			glGenerateMipmap(GL_TEXTURE_2D); BASED_CHECK_GL_ERROR;
 			SetTextureFilter(mFilter);
 			//BASED_TRACE("Loaded {}-channel texture: {}", mNumChannels, mPath.c_str());
 		}
@@ -216,6 +216,7 @@ namespace based::graphics
 
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight, 
 				0, GL_RGB, GL_FLOAT, pixels); BASED_CHECK_GL_ERROR;
+			glGenerateMipmap(GL_TEXTURE_2D); BASED_CHECK_GL_ERROR;
 			SetTextureFilter(TextureFilter::Nearest);
 			//BASED_WARN("Unable to load texture: {} - defaulting to checkerboard", mPath.c_str());
 		}

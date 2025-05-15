@@ -57,6 +57,7 @@ namespace based::core
 	{
 		PROFILE_FUNCTION();
 		mWindowProperties = props;
+
 		mWindow = SDL_CreateWindow(props.title.c_str(), props.x, props.y, props.w, props.h, props.flags);
 		if (!mWindow)
 		{

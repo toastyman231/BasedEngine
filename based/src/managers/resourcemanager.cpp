@@ -25,7 +25,7 @@ namespace based::managers
 		tex->mWidth = tex->mHeight = 4;
 		tex->mNumChannels = 3;
 		tex->mPath = path;
-		tex->SetName(tex->mPath);
+		tex->SetName(std::filesystem::path(path).filename().string());
 		mTextureStorage.Load(tex->GetName(), tex);
 		Engine::Instance().GetJobManager().Execute([tex, path, overrideFlip]
 			{

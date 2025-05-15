@@ -2,6 +2,7 @@
 
 #include <external/entt/entt.hpp>
 #include "based/core/assetlibrary.h"
+#include "based/engine.h"
 
 namespace based::animation
 {
@@ -38,18 +39,19 @@ namespace based::scene
 		void UpdateScene(float deltaTime);
 		void ShutdownScene() const;
 
-		inline entt::registry& GetRegistry() { return mRegistry; }
-		inline std::shared_ptr<graphics::Camera> GetActiveCamera() const { return mActiveCamera; }
-		inline std::string GetSceneName() const { return mSceneName; }
+		entt::registry& GetRegistry() { return mRegistry; }
+		std::shared_ptr<graphics::Camera> GetActiveCamera() const { return mActiveCamera; }
+		std::string GetSceneName() const { return mSceneName; }
 
-		inline core::AssetLibrary<graphics::Texture>& GetTextureStorage() { return mTextureStorage; }
-		inline core::AssetLibrary<graphics::Material>& GetMaterialStorage() { return mMaterialStorage; }
-		inline core::AssetLibrary<graphics::Mesh>& GetMeshStorage() { return mMeshStorage; }
-		inline core::AssetLibrary<graphics::Model>& GetModelStorage() { return mModelStorage; }
-		inline core::AssetLibrary<Entity>& GetEntityStorage() { return mEntityStorage; }
-		inline core::AssetLibrary<animation::Animation>& GetAnimationStorage() { return mAnimationStorage; }
-		inline core::AssetLibrary<animation::Animator>& GetAnimatorStorage() { return mAnimatorStorage; }
-		inline core::AssetLibrary<graphics::Camera>& GetCameraStorage() { return mCameraStorage; }
+		static core::AssetLibrary<graphics::Texture>& GetTextureStorage() { return Engine::Instance().GetResourceManager().GetTextureStorage(); }
+		static core::AssetLibrary<graphics::Material>& GetMaterialStorage() { return Engine::Instance().GetResourceManager().GetMaterialStorage(); }
+		static core::AssetLibrary<graphics::Mesh>& GetMeshStorage() { return Engine::Instance().GetResourceManager().GetMeshStorage(); }
+		static core::AssetLibrary<graphics::Model>& GetModelStorage() { return Engine::Instance().GetResourceManager().GetModelStorage(); }
+		static core::AssetLibrary<animation::Animation>& GetAnimationStorage() { return Engine::Instance().GetResourceManager().GetAnimationStorage(); }
+		static core::AssetLibrary<animation::Animator>& GetAnimatorStorage() { return Engine::Instance().GetResourceManager().GetAnimatorStorage(); }
+
+		core::AssetLibrary<Entity>& GetEntityStorage() { return mEntityStorage; }
+		core::AssetLibrary<graphics::Camera>& GetCameraStorage() { return mCameraStorage; }
 
 		void SetActiveCamera(std::shared_ptr<graphics::Camera> cam);
 		void SetSceneName(const std::string& name) { mSceneName = name; }
@@ -61,13 +63,7 @@ namespace based::scene
 		std::shared_ptr<graphics::Camera> mActiveCamera;
 		std::string mSceneName = "Unnamed Scene";
 
-		core::AssetLibrary<graphics::Texture> mTextureStorage;
-		core::AssetLibrary<graphics::Material> mMaterialStorage;
-		core::AssetLibrary<graphics::Mesh> mMeshStorage;
-		core::AssetLibrary<graphics::Model> mModelStorage;
 		core::AssetLibrary<Entity> mEntityStorage;
-		core::AssetLibrary<animation::Animation> mAnimationStorage;
-		core::AssetLibrary<animation::Animator> mAnimatorStorage;
 		core::AssetLibrary<graphics::Camera> mCameraStorage;
 
 		friend class SceneSerializer;
