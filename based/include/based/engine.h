@@ -7,6 +7,8 @@
 #include "based/graphics/renderpass.h"
 #include "based/managers/physicsmanager.h"
 #include "based/memory/arena.h"
+#include "managers/jobmanager.h"
+#include "managers/resourcemanager.h"
 
 #define ASSET_PATH(usrPath) based::Engine::Instance().GetEngineDirectory().append("/Assets/").append(usrPath)
 
@@ -39,6 +41,8 @@ namespace based
 
         // Managers
         inline managers::RenderManager& GetRenderManager() { return mRenderManager; }
+        inline managers::JobManager& GetJobManager() { return mJobManager; }
+        inline managers::ResourceManager& GetResourceManager() { return mResourceManager; }
         inline managers::UiManager& GetUiManager() { return mUiManager; }
         inline managers::PhysicsManager& GetPhysicsManager() { return mPhysicsManager; }
 
@@ -71,6 +75,8 @@ namespace based
         managers::RenderManager mRenderManager;
         managers::UiManager mUiManager;
         managers::PhysicsManager mPhysicsManager;
+        managers::JobManager mJobManager;
+        managers::ResourceManager mResourceManager;
 
         // Singleton
         Engine();

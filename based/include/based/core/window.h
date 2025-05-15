@@ -60,6 +60,7 @@ namespace based::core
 		inline std::shared_ptr<graphics::Framebuffer> GetShadowBuffer() { return mShadowbuffer; }
 		void SetMaintainAspectRatio(bool newMaintain);
 		void SetWindowTitle(const std::string& title);
+		void SetFullscreen(bool isFullscreen);
 
 		void BeginRender();
 		void EndRender();

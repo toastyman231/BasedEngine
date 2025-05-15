@@ -19,7 +19,10 @@ namespace based::managers
 
 		Rml::Initialise();
 
-		Rml::LoadFontFace(ASSET_PATH("Fonts/Arimo-Regular.ttf"));
+		Rml::LoadFontFace(ASSET_PATH("Fonts/Arimo-Regular.ttf"), true);
+		Rml::LoadFontFace(ASSET_PATH("Fonts/Arimo-Italic.ttf"));
+		Rml::LoadFontFace(ASSET_PATH("Fonts/Arimo-BoldItalic.ttf"));
+		Rml::LoadFontFace(ASSET_PATH("Fonts/Arimo-Bold.ttf"));
 
 		Engine::Instance().GetUiManager().CreateContext("main", Engine::Instance().GetWindow().GetSize());
 	}

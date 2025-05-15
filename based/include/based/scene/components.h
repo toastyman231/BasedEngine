@@ -20,6 +20,8 @@
 #include "external/glm/gtx/euler_angles.hpp"
 #include "external/glm/gtx/orthonormalize.hpp"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
+#include "Jolt/Physics/Collision/Shape/MeshShape.h"
+#include "Jolt/Geometry/IndexedTriangle.h"
 
 namespace JPH
 {
@@ -699,6 +701,11 @@ namespace based::scene
 		}
 	};
 
+	struct MeshShapeComponent : public PhysicsShapeComponent
+	{
+		MeshShapeComponent(std::shared_ptr<graphics::Mesh> mesh);
+	};
+
 	struct RigidbodyComponent
 	{
 		JPH::BodyID rigidbodyID;
@@ -708,6 +715,15 @@ namespace based::scene
 		{
 			rigidbodyID = Engine::Instance().GetPhysicsManager().AddBody(
 				shape.shape, shape.center, shape.rotation * based::math::Deg2Rad, type, layer, activation
+			);
+		}
+
+		RigidbodyComponent(PhysicsShapeComponent shape,
+			JPH::EMotionType type, uint16_t layer, glm::vec3 position, glm::vec3 rotation,
+			JPH::EActivation activation = JPH::EActivation::Activate)
+		{
+			rigidbodyID = Engine::Instance().GetPhysicsManager().AddBody(
+				shape.shape, position, rotation * based::math::Deg2Rad, type, layer, activation
 			);
 		}
 
@@ -731,6 +747,25 @@ namespace based::scene
 				.GetPhysicsSystem()
 				.GetBodyInterface()
 				.SetUserData(rigidbodyID, static_cast<uint32_t>(entity));
+		}
+	};
+
+	struct TriggerComponent : RigidbodyComponent
+	{
+		TriggerComponent(const PhysicsShapeComponent& shape, JPH::EMotionType type, uint16_t layer,
+			JPH::EActivation activation = JPH::EActivation::Activate)
+			: RigidbodyComponent(shape, type, layer, activation)
+		{
+			auto& lock_interface = 
+				Engine::Instance().GetPhysicsManager().GetPhysicsSystem().GetBodyLockInterface();
+
+			JPH::BodyLockWrite lock(lock_interface, rigidbodyID);
+			if (lock.Succeeded()) // body id may no longer be valid (unlikely given this is a constructor, but still possible)
+			{
+				auto& body = lock.GetBody();
+				body.SetIsSensor(true);
+			}
+			else BASED_WARN("Could not lock body to create sensor!");
 		}
 	};
 

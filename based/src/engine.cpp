@@ -47,9 +47,9 @@ namespace based
     void Engine::Update(float deltaTime)
     {
         mWindow.PumpEvents();
-        mUiManager.Update();
         mApp->GetCurrentScene()->UpdateScene(deltaTime);
         mApp->Update(deltaTime);
+        mUiManager.Update();
     }
 
     void Engine::Render()
@@ -126,6 +126,7 @@ namespace based
 
                 Update(timeDelta);
                 Render();
+                mJobManager.Flush();
                 ClearArena(&mFrameArena);
             }
 
@@ -240,6 +241,8 @@ namespace based
                 {
                     // Initialize Managers
                     mRenderManager.Initialize();
+                    mJobManager.Initialize();
+                    mResourceManager.Initialize();
 
                     ret = true;
                     mIsRunning = true;
@@ -324,6 +327,8 @@ namespace based
         input::Joystick::Shutdown();
 
         // Managers - shutdown in reverse order
+        mResourceManager.Shutdown();
+        mJobManager.Shutdown();
         mRenderManager.Shutdown();
 
         // Shutdown SDL

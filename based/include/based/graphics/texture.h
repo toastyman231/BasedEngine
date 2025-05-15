@@ -8,6 +8,11 @@
 
 #define DEFAULT_TEX_LIB based::graphics::DefaultLibraries::GetTextureLibrary()
 
+namespace based::managers
+{
+	class ResourceManager;
+}
+
 struct SDL_Surface;
 
 namespace based::graphics
@@ -55,6 +60,8 @@ namespace based::graphics
 		static std::shared_ptr<Texture> CreateImageTexture(const std::string& name,
 			uint32_t width, uint32_t height, TextureAccessLevel accessLevel, core::AssetLibrary<Texture>& library);
 		static uint32_t GetNextImageTextureUnit() { return mNextId++; }
+
+		friend class managers::ResourceManager;
 	private:
 		TextureFilter mFilter;
 

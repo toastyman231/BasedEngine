@@ -8,6 +8,7 @@
 
 #include <SDL2/SDL_surface.h>
 
+#include "app.h"
 #include "engine.h"
 
 namespace based::graphics
@@ -23,6 +24,8 @@ namespace based::graphics
 		, mPixels(nullptr)
 		, mUUID(core::UUID())
 	{
+		PROFILE_FUNCTION();
+
 		int width, height, numChannels;
 		if (overrideFlip) stbi_set_flip_vertically_on_load(0);
 		else stbi_set_flip_vertically_on_load(1);
@@ -130,14 +133,15 @@ namespace based::graphics
 		mFilter = filter;
 
 		glBindTexture(GL_TEXTURE_2D, mId); BASED_CHECK_GL_ERROR;
+		glGenerateMipmap(GL_TEXTURE_2D); BASED_CHECK_GL_ERROR;
 		switch (mFilter)
 		{
 		case TextureFilter::Linear:
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); BASED_CHECK_GL_ERROR;
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); BASED_CHECK_GL_ERROR;
 			break;
 		case TextureFilter::Nearest:
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); BASED_CHECK_GL_ERROR;
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST); BASED_CHECK_GL_ERROR;
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); BASED_CHECK_GL_ERROR;
 			break;
 		}
@@ -192,9 +196,10 @@ namespace based::graphics
 
 		if (mPixels && dataFormat != 0)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, dataFormat, mWidth, mHeight, 0, dataFormat, GL_UNSIGNED_BYTE, mPixels); BASED_CHECK_GL_ERROR;
+			glTexImage2D(GL_TEXTURE_2D, 0, dataFormat, mWidth, mHeight, 
+				0, dataFormat, GL_UNSIGNED_BYTE, mPixels); BASED_CHECK_GL_ERROR;
 			SetTextureFilter(mFilter);
-			BASED_TRACE("Loaded {}-channel texture: {}", mNumChannels, mPath.c_str());
+			//BASED_TRACE("Loaded {}-channel texture: {}", mNumChannels, mPath.c_str());
 		}
 		else
 		{
@@ -209,9 +214,10 @@ namespace based::graphics
 			mHeight = 4;
 			mNumChannels = 3;
 
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight, 0, GL_RGB, GL_FLOAT, pixels); BASED_CHECK_GL_ERROR;
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight, 
+				0, GL_RGB, GL_FLOAT, pixels); BASED_CHECK_GL_ERROR;
 			SetTextureFilter(TextureFilter::Nearest);
-			BASED_WARN("Unable to load texture: {} - defaulting to checkerboard", mPath.c_str());
+			//BASED_WARN("Unable to load texture: {} - defaulting to checkerboard", mPath.c_str());
 		}
 		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
 	}

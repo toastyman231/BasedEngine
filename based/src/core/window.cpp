@@ -211,6 +211,13 @@ namespace based::core
 		mWindowProperties.title = title;
 	}
 
+	void Window::SetFullscreen(bool isFullscreen)
+	{
+		Uint32 flags = 0;
+		if (isFullscreen) flags = SDL_WINDOW_FULLSCREEN_DESKTOP; // TODO: Add support for true fullscreen
+		SDL_SetWindowFullscreen(mWindow, flags);
+	}
+
 	void Window::BeginRender()
 	{
 		PROFILE_FUNCTION();

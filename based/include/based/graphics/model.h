@@ -65,6 +65,8 @@ namespace based::graphics
         inline std::string GetModelSource() const { return mModelSource; }
         inline std::string GetModelName() const { return mModelName; }
 
+        std::vector<std::shared_ptr<scene::Entity>> GenerateModelCollisions(const scene::Transform& origin);
+
         inline core::UUID GetUUID() const { return mUUID; }
     private:
         // model data

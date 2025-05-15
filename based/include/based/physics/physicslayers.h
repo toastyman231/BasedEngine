@@ -69,6 +69,7 @@ namespace based::physics
 			case Layers::UNUSED1:
 			case Layers::UNUSED2:
 			case Layers::UNUSED3:
+			case Layers::UNUSED4:
 				return false;
 			default:
 				JPH_ASSERT(false);

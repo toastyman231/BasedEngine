@@ -73,15 +73,17 @@ namespace based::managers
 	}
 
 	JPH::BodyID PhysicsManager::AddBody(const JPH::Shape* shape, glm::vec3 position, glm::vec3 rotation, 
-	                                    JPH::EMotionType type, uint16_t layer, JPH::EActivation activation) const
+	                                    JPH::EMotionType type, uint16_t layer, JPH::EActivation activation,
+										bool isTrigger) const
 	{
-		return mPhysicsSystem->GetBodyInterface().CreateAndAddBody(
-			JPH::BodyCreationSettings(
-				shape, convert(position), 
-				JPH::Quat::sEulerAngles(convert(rotation)),
-				type,
-				layer
-				), activation
+		auto settings = JPH::BodyCreationSettings(
+			shape, convert(position),
+			JPH::Quat::sEulerAngles(convert(rotation)),
+			type,
+			layer
+		);
+		settings.mIsSensor = isTrigger;
+		return mPhysicsSystem->GetBodyInterface().CreateAndAddBody(settings, activation
 		);
 	}
 
@@ -103,7 +105,7 @@ namespace based::managers
 					JPH::Color::sGreen, false, true);
 			}
 
-			auto charView = registry.view<scene::Enabled, scene::CharacterController>();
+			/*auto charView = registry.view<scene::Enabled, scene::CharacterController>();
 
 			for (auto& e : charView)
 			{
@@ -115,7 +117,7 @@ namespace based::managers
 					character.Character->GetTransformedShape().GetShapeScale(),
 					JPH::Color::sGreen, false, true
 					);
-			}
+			}*/
 		}
 	}
 }

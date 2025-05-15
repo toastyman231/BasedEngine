@@ -33,7 +33,8 @@ namespace based::managers
 		void SetRenderDebug(bool renderDebug) { mRenderDebug = renderDebug; }
 
 		JPH::BodyID AddBody(const JPH::Shape* shape, glm::vec3 position, glm::vec3 rotation,
-		                    JPH::EMotionType type, uint16_t layer, JPH::EActivation activation = JPH::EActivation::Activate) const;
+		                    JPH::EMotionType type, uint16_t layer, JPH::EActivation activation = JPH::EActivation::Activate,
+							bool isTrigger = false) const;
 		void DrawDebugBodies();
 
 	protected:

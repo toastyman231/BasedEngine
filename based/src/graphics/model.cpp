@@ -55,13 +55,32 @@ namespace based::graphics
 		return model;
 	}
 
+	std::vector<std::shared_ptr<scene::Entity>> Model::GenerateModelCollisions(const scene::Transform& origin)
+	{
+		std::vector<std::shared_ptr<scene::Entity>> returnedEntities;
+
+		for (const auto& mesh : meshes)
+		{
+			auto collider = scene::Entity::CreateEntity(mesh->GetMeshName() + " Gen Collision");
+			collider->AddComponent<scene::MeshShapeComponent>(mesh);
+			auto meshShape = collider->GetComponent<scene::MeshShapeComponent>();
+			collider->AddComponent<scene::RigidbodyComponent>(meshShape, JPH::EMotionType::Static,
+				physics::Layers::STATIC, origin.Position(), origin.EulerAngles());
+
+			Engine::Instance().GetApp().GetCurrentScene()->GetEntityStorage().Load(collider->GetEntityName(), collider);
+			returnedEntities.push_back(collider);
+		}
+
+		return returnedEntities;
+	}
+
 	void Model::LoadModel(std::string path)
 	{
 		PROFILE_FUNCTION();
 		Assimp::Importer import;
 		const aiScene* scene = import.ReadFile(path, 
 			aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_PopulateArmatureData
-			| aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes);
+			| aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes | aiProcess_GenBoundingBoxes);
 
 		if (mDefaultBones.empty())
 		{
@@ -81,34 +100,6 @@ namespace based::graphics
 		mDirectory = path.substr(0, path.find_last_of('/'));
 		mModelSource = path;
 		mModelName = scene->mMeshes[0]->mName.C_Str();
-
-		/*if (scene->HasLights())
-		{
-			for (int i = 0; i < scene->mNumLights; i++)
-			{
-				auto sceneLight = scene->mLights[i];
-
-				auto lightName = std::string("Light ").append(std::to_string(i));
-				auto light = scene::Entity::CreateEntity(lightName);
-				light->SetPosition(glm::vec3(sceneLight->mPosition.x, sceneLight->mPosition.y + 0.5f, sceneLight->mPosition.z));
-				light->AddComponent<scene::PointLight>(
-					sceneLight->mAttenuationConstant,
-					sceneLight->mAttenuationLinear,
-					sceneLight->mAttenuationQuadratic,
-					1.f,
-					glm::vec3(sceneLight->mColorDiffuse.r, sceneLight->mColorDiffuse.g, sceneLight->mColorDiffuse.b));
-				light->AddComponent<scene::MeshRenderer>(
-					graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/cube.obj"),
-						Engine::Instance().GetApp().GetCurrentScene()->GetMeshStorage()),
-					graphics::Material::LoadMaterialFromFile(ASSET_PATH("Materials/Unlit.bmat"),
-						Engine::Instance().GetApp().GetCurrentScene()->GetMaterialStorage()));
-				light->SetScale(glm::vec3(0.3f));
-
-				BASED_TRACE("Created light {}", lightName);
-
-				Engine::Instance().GetApp().GetCurrentScene()->GetEntityStorage().Load(lightName, light);
-			}
-		}*/
 
 		ProcessNode(scene->mRootNode, scene);
 	}
@@ -209,7 +200,8 @@ namespace based::graphics
 
 		ExtractBoneWeightForVertices(vertices, mesh, scene);
 
-		meshes.emplace_back(std::make_shared<Mesh>(vertices, indices));
+		auto m = std::make_shared<Mesh>(vertices, indices);
+		meshes.emplace_back(m);
 
 		if (mesh->HasBones())
 		{
@@ -322,6 +314,8 @@ namespace based::graphics
 	                                std::shared_ptr<Material> material, const std::string& attributeName, int sampler,
 	                                int type)
 	{
+		PROFILE_FUNCTION();
+
 		aiTextureType textureType = static_cast<aiTextureType>(type);
 
 		if (mat->GetTextureCount(textureType) <= 0 || sampler < 0) return false;
@@ -366,7 +360,9 @@ namespace based::graphics
 			}
 			BASED_TRACE("{} texture location: {}", attributeName, str.C_Str());
 
-			material->AddTexture(std::make_shared<Texture>(str.C_Str(), true));
+			material->AddTexture(
+				Engine::Instance().GetResourceManager().LoadTextureAsync(std::string(str.C_Str()), true)
+			/*std::make_shared<Texture>(str.C_Str(), true)*/);
 		}
 		material->SetUniformValue("material." + attributeName + ".tex", sampler);
 		return true;
