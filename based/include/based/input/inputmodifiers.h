@@ -58,6 +58,49 @@ namespace based::input
 		}
 	};
 
+	class DeadzoneModifier : public InputActionModifierBase
+	{
+	public:
+		explicit DeadzoneModifier(float deadzone)
+			: InputActionModifierBase("Deadzone")
+			, mDeadzone(deadzone)
+		{
+		}
+
+		void Evaluate(InputActionValue& value) override
+		{
+			if (abs(value.axis1DValue) < mDeadzone)
+			{
+				value.axis1DValue = 0.f;
+			}
+
+			if (abs(value.axis2DValue.x) < mDeadzone)
+			{
+				value.axis2DValue.x = 0.f;
+			}
+			if (abs(value.axis2DValue.y) < mDeadzone)
+			{
+				value.axis2DValue.y = 0.f;
+			}
+
+			if (abs(value.axis3DValue.x) < mDeadzone)
+			{
+				value.axis3DValue.x = 0.f;
+			}
+			if (abs(value.axis3DValue.y) < mDeadzone)
+			{
+				value.axis3DValue.y = 0.f;
+			}
+			if (abs(value.axis3DValue.z) < mDeadzone)
+			{
+				value.axis3DValue.z = 0.f;
+			}
+		}
+
+	private:
+		float mDeadzone = 0.2f;
+	};
+
 	class HoldTrigger : public InputActionTriggerBase
 	{
 	public:

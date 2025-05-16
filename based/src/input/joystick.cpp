@@ -83,7 +83,7 @@ namespace based::input
 					c->axes[i] = std::clamp(
 						SDL_GameControllerGetAxis(c->gc, static_cast<SDL_GameControllerAxis>(i)) / 32767.f, 
 						-1.f, 1.f);
-					if (c->axes[i] > -deadzone && c->axes[i] < deadzone) c->axes[i] = 0.f;
+					//if (c->axes[i] > -deadzone && c->axes[i] < deadzone) c->axes[i] = 0.f;
 				}
 			}
 		}
@@ -150,7 +150,7 @@ namespace based::input
 		return false;
 	}
 
-	float Joystick::GetAxis(int joystickId, Axis axis)
+	float Joystick::GetAxis(int joystickId, Axis axis, bool useDeadzone)
 	{
 		static bool sentWarning = false;
 		auto it = availableJoysticks.find(joystickId);
@@ -158,7 +158,8 @@ namespace based::input
 		{
 			sentWarning = false;
 			float val = it->second->axes[static_cast<int>(axis)];
-			return abs(val) > deadzone ? val : 0.f;
+			if (useDeadzone) return abs(val) > deadzone ? val : 0.f;
+			return val;
 		}
 		if (!sentWarning)
 		{

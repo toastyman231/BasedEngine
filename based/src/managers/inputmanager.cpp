@@ -13,6 +13,7 @@ namespace based::managers
 {
 	void InputManager::Initialize()
 	{
+		RegisterModifier(new input::DeadzoneModifier(0.2f));
 		RegisterModifier(new input::NegateModifier());
 		RegisterModifier(new input::SwizzleYXModifier());
 

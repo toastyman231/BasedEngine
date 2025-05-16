@@ -51,7 +51,7 @@ namespace based::input
 		static bool GetButton(int joystickId, int button);
 		static bool GetButtonDown(int joystickId, Button button);
 		static bool GetButtonUp(int joystickId, Button button);
-		static float GetAxis(int joystickId, Axis axis);
+		static float GetAxis(int joystickId, Axis axis, bool useDeadzone = false);
 		static float GetAxis(int joystickId, int axis);
 	private:
 		static int GetNextFreeIndex();
