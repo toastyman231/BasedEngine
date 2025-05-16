@@ -66,7 +66,7 @@ namespace based::input
 		virtual ~InputActionTriggerBase() = default;
 
 		virtual bool Evaluate(const InputActionValue& value) = 0;
-		virtual void Reset() = 0;
+		virtual InputActionTriggerBase* Copy() const = 0;
 
 		std::string GetName() const { return mTriggerName; }
 		TriggerType GetType() const { return mTriggerType; }

@@ -72,14 +72,12 @@ namespace based::input
 				mHoldTimer += core::Time::DeltaTime();
 			else mHoldTimer = 0.f;
 
-			BASED_TRACE("Hold time: {}", mHoldTimer);
-
 			return mHoldTimer > mHoldTime;
 		}
 
-		void Reset() override
+		InputActionTriggerBase* Copy() const override
 		{
-			mHoldTimer = 0.f;
+			return new HoldTrigger(mHoldTime);
 		}
 
 	private:

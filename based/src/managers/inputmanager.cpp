@@ -163,7 +163,7 @@ namespace based::managers
 		{
 			for (auto& trigger : key.mTriggerOverrides)
 			{
-				//if (!trigger) continue;
+				if (!trigger) continue;
 
 				bool res = trigger->Evaluate(value);
 				if (res && trigger->GetType() == input::InputActionTriggerBase::TriggerType::Explicit)
@@ -239,6 +239,12 @@ namespace based::managers
 				{
 					auto& inputAction = mInputActions[actionName];
 					if (inputAction.mConsumedConfig && inputAction.mConsumedConfig != config) continue;
+					if (!inputAction.triggerWhenPaused && core::Time::TimeScale() == 0.f)
+					{
+						inputAction.mCurrentValue = inputAction.mRawValue = input::InputActionValue();
+						inputAction.state = input::InputState::Inactive;
+						continue;
+					}
 
 					input::InputActionValue accumulatedUnmodified;
 					input::InputActionValue accumulatedModified;
@@ -386,7 +392,7 @@ namespace based::managers
 				if (iter != mTriggers.end())
 				{
 					auto actionTrigger = mTriggers[triggerName];
-					inputAction.mTriggers.push_back(actionTrigger);
+					inputAction.mTriggers.push_back(actionTrigger->Copy());
 				}
 			}
 
@@ -432,7 +438,7 @@ namespace based::managers
 								if (iter != mTriggers.end())
 								{
 									auto actionTrigger = mTriggers[triggerName];
-									key.mTriggerOverrides.push_back(actionTrigger);
+									key.mTriggerOverrides.push_back(actionTrigger->Copy());
 								}
 							}
 
