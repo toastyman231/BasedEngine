@@ -80,8 +80,10 @@ namespace based::input
 				for (unsigned int i = 0; i < static_cast<int>(Axis::Count); i++)
 				{
 					// SDL ranges axes from -32768 to 32767
-					c->buttons[i] = std::clamp(
-						SDL_GameControllerGetAxis(c->gc, static_cast<SDL_GameControllerAxis>(i)) / 32767.f, -1.f, 1.f);
+					c->axes[i] = std::clamp(
+						SDL_GameControllerGetAxis(c->gc, static_cast<SDL_GameControllerAxis>(i)) / 32767.f, 
+						-1.f, 1.f);
+					if (c->axes[i] > -deadzone && c->axes[i] < deadzone) c->axes[i] = 0.f;
 				}
 			}
 		}
@@ -94,47 +96,81 @@ namespace based::input
 
 	bool Joystick::GetButton(int joystickId, Button button)
 	{
+		static bool sentWarning = false;
 		auto it = availableJoysticks.find(joystickId);
 		if (it != availableJoysticks.end())
 		{
+			sentWarning = false;
 			return it->second->buttons[static_cast<int>(button)];
 		}
-		BASED_ERROR("Joystick with id {} is not available!", joystickId);
+		if (!sentWarning)
+		{
+			sentWarning = true;
+			BASED_ERROR("Joystick with id {} is not available!", joystickId);
+		}
 		return false;
+	}
+
+	bool Joystick::GetButton(int joystickId, int button)
+	{
+		return GetButton(joystickId, (Button)button);
 	}
 
 	bool Joystick::GetButtonDown(int joystickId, Button button)
 	{
+		static bool sentWarning = false;
 		auto it = availableJoysticks.find(joystickId);
 		if (it != availableJoysticks.end())
 		{
+			sentWarning = false;
 			return it->second->buttons[static_cast<int>(button)] && !it->second->buttonsLast[static_cast<int>(button)];
 		}
-		BASED_ERROR("Joystick with id {} is not available!", joystickId);
+		if (!sentWarning)
+		{
+			sentWarning = true;
+			BASED_ERROR("Joystick with id {} is not available!", joystickId);
+		}
 		return false;
 	}
 
 	bool Joystick::GetButtonUp(int joystickId, Button button)
 	{
+		static bool sentWarning = false;
 		auto it = availableJoysticks.find(joystickId);
 		if (it != availableJoysticks.end())
 		{
+			sentWarning = false;
 			return !it->second->buttons[static_cast<int>(button)] && it->second->buttonsLast[static_cast<int>(button)];
 		}
-		BASED_ERROR("Joystick with id {} is not available!", joystickId);
+		if (!sentWarning)
+		{
+			sentWarning = true;
+			BASED_ERROR("Joystick with id {} is not available!", joystickId);
+		}
 		return false;
 	}
 
 	float Joystick::GetAxis(int joystickId, Axis axis)
 	{
+		static bool sentWarning = false;
 		auto it = availableJoysticks.find(joystickId);
 		if (it != availableJoysticks.end())
 		{
+			sentWarning = false;
 			float val = it->second->axes[static_cast<int>(axis)];
 			return abs(val) > deadzone ? val : 0.f;
 		}
-		BASED_ERROR("Joystick with id {} is not available!", joystickId);
+		if (!sentWarning)
+		{
+			sentWarning = true;
+			BASED_ERROR("Joystick with id {} is not available!", joystickId);
+		}
 		return 0.f;
+	}
+
+	float Joystick::GetAxis(int joystickId, int axis)
+	{
+		return GetAxis(joystickId, (Axis)axis);
 	}
 
 	int Joystick::GetNextFreeIndex()

@@ -7,6 +7,7 @@
 #include "based/graphics/renderpass.h"
 #include "based/managers/physicsmanager.h"
 #include "based/memory/arena.h"
+#include "managers/inputmanager.h"
 #include "managers/jobmanager.h"
 #include "managers/resourcemanager.h"
 
@@ -43,6 +44,7 @@ namespace based
         inline managers::RenderManager& GetRenderManager() { return mRenderManager; }
         inline managers::JobManager& GetJobManager() { return mJobManager; }
         inline managers::ResourceManager& GetResourceManager() { return mResourceManager; }
+        inline managers::InputManager& GetInputManager() { return mInputManager; }
         inline managers::UiManager& GetUiManager() { return mUiManager; }
         inline managers::PhysicsManager& GetPhysicsManager() { return mPhysicsManager; }
 
@@ -77,6 +79,7 @@ namespace based
         managers::PhysicsManager mPhysicsManager;
         managers::JobManager mJobManager;
         managers::ResourceManager mResourceManager;
+        managers::InputManager mInputManager;
 
         // Singleton
         Engine();

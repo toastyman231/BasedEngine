@@ -31,6 +31,7 @@ namespace based::managers
 		core::AssetLibrary<animation::Animator>& GetAnimatorStorage() { return mAnimatorStorage; }
 
 		std::shared_ptr<graphics::Texture> LoadTextureAsync(const std::string& path, bool overrideFlip = false);
+		std::shared_ptr<graphics::Texture> GetErrorTexture() { return mErrorTexture; }
 	private:
 		std::shared_ptr<graphics::Texture> mErrorTexture;
 

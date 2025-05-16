@@ -22,10 +22,10 @@ namespace based::input
 		// Adapted from SDL - see SDL_GameControllerButton
 		enum class Button
 		{
-			A,
-			B,
-			X,
-			Y,
+			Face_Bottom,
+			Face_Right,
+			Face_Left,
+			Face_Top,
 			Back,
 			Guide,
 			Start,
@@ -48,9 +48,11 @@ namespace based::input
 		static bool IsJoystickAvailable(int joystickId);
 
 		static bool GetButton(int joystickId, Button button);
+		static bool GetButton(int joystickId, int button);
 		static bool GetButtonDown(int joystickId, Button button);
 		static bool GetButtonUp(int joystickId, Button button);
 		static float GetAxis(int joystickId, Axis axis);
+		static float GetAxis(int joystickId, int axis);
 	private:
 		static int GetNextFreeIndex();
 

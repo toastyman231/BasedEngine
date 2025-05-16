@@ -47,6 +47,7 @@ namespace based
     void Engine::Update(float deltaTime)
     {
         mWindow.PumpEvents();
+        mInputManager.Update();
         mApp->GetCurrentScene()->UpdateScene(deltaTime);
         mApp->Update(deltaTime);
         mUiManager.Update();
@@ -243,6 +244,7 @@ namespace based
                     mRenderManager.Initialize();
                     mJobManager.Initialize();
                     mResourceManager.Initialize();
+                    mInputManager.Initialize();
 
                     ret = true;
                     mIsRunning = true;
@@ -327,6 +329,7 @@ namespace based
         input::Joystick::Shutdown();
 
         // Managers - shutdown in reverse order
+        mInputManager.Shutdown();
         mResourceManager.Shutdown();
         mJobManager.Shutdown();
         mRenderManager.Shutdown();

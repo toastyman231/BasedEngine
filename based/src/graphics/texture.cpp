@@ -203,22 +203,31 @@ namespace based::graphics
 		}
 		else
 		{
-			float pixels[] = {
+			if (auto errTex = Engine::Instance().GetResourceManager().GetErrorTexture())
+			{
+				mId = errTex->mId;
+				mWidth = errTex->mWidth;
+				mHeight = errTex->mHeight;
+				mNumChannels = errTex->mNumChannels;
+			} else
+			{
+				float pixels[] = {
 				1.f, 0.f, 1.f,	1.f, 1.f, 1.f,	1.f, 0.f, 1.f,	1.f, 1.f, 1.f,
 				1.f, 1.f, 1.f,	1.f, 0.f, 1.f,	1.f, 1.f, 1.f,	1.f, 0.f, 1.f,
 				1.f, 0.f, 1.f,	1.f, 1.f, 1.f,	1.f, 0.f, 1.f,	1.f, 1.f, 1.f,
 				1.f, 1.f, 1.f,	1.f, 0.f, 1.f,	1.f, 1.f, 1.f,	1.f, 0.f, 1.f,
-			};
+				};
 
-			mWidth = 4;
-			mHeight = 4;
-			mNumChannels = 3;
+				mWidth = 4;
+				mHeight = 4;
+				mNumChannels = 3;
 
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight, 
-				0, GL_RGB, GL_FLOAT, pixels); BASED_CHECK_GL_ERROR;
-			glGenerateMipmap(GL_TEXTURE_2D); BASED_CHECK_GL_ERROR;
-			SetTextureFilter(TextureFilter::Nearest);
-			//BASED_WARN("Unable to load texture: {} - defaulting to checkerboard", mPath.c_str());
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight,
+					0, GL_RGB, GL_FLOAT, pixels); BASED_CHECK_GL_ERROR;
+				glGenerateMipmap(GL_TEXTURE_2D); BASED_CHECK_GL_ERROR;
+				SetTextureFilter(TextureFilter::Nearest);
+				//BASED_WARN("Unable to load texture: {} - defaulting to checkerboard", mPath.c_str());
+			}
 		}
 		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
 	}
