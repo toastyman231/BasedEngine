@@ -45,9 +45,9 @@ namespace based::input
 			InputActionValue value;
 			value.type = type;
 			value.triggered = triggered || other.triggered;
-			value.axis1DValue = std::clamp(axis1DValue + other.axis1DValue, -1.f, 1.f);
-			value.axis2DValue = glm::clamp(axis2DValue + other.axis2DValue, -1.f, 1.f);
-			value.axis3DValue = glm::clamp(axis3DValue + other.axis3DValue, -1.f, 1.f);
+			value.axis1DValue = axis1DValue + other.axis1DValue;
+			value.axis2DValue = axis2DValue + other.axis2DValue;
+			value.axis3DValue = axis3DValue + other.axis3DValue;
 			return value;
 		}
 	};
@@ -157,10 +157,10 @@ namespace based::input
 		int controllerID = 0;
 		std::priority_queue<InputMappingConfig*, std::vector<InputMappingConfig*>, InputConfigComparator> mActiveMappings;
 
-		entt::delegate<void(const InputAction&)> mStartedEvent;
-		entt::delegate<void(const InputAction&)> mTriggeredEvent;
-		entt::delegate<void(const InputAction&)> mOngoingEvent;
-		entt::delegate<void(const InputAction&)> mCompletedEvent;
-		entt::delegate<void(const InputAction&)> mCanceledEvent;
+		entt::dispatcher mStartedEvent;
+		entt::dispatcher mTriggeredEvent;
+		entt::dispatcher mOngoingEvent;
+		entt::dispatcher mCompletedEvent;
+		entt::dispatcher mCanceledEvent;
 	};
 }

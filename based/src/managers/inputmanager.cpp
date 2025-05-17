@@ -72,8 +72,8 @@ namespace based::managers
 				value.axis1DValue = input::Keyboard::Key(key.key) ? 1.f : 0.f;
 				break;
 			case input::BasedKey::Mouse:
-				if (key.key == 0) value.axis1DValue = (float)(input::Mouse::DX() / Engine::Instance().GetWindow().GetSize().x);
-				else if (key.key == 1) value.axis1DValue = (float)(input::Mouse::DY() / Engine::Instance().GetWindow().GetSize().y);
+				if (key.key == 0) value.axis1DValue = (float)(input::Mouse::DX());
+				else if (key.key == 1) value.axis1DValue = (float)(-input::Mouse::DY());
 				else value.axis1DValue = 0.f;
 				break;
 			case input::BasedKey::Controller:
@@ -88,8 +88,7 @@ namespace based::managers
 				value.axis2DValue = glm::vec2(input::Keyboard::Key(key.key) ? 1.f : 0.f, 0.f);
 				break;
 			case input::BasedKey::Mouse:
-				value.axis2DValue = glm::vec2(input::Mouse::DX() / Engine::Instance().GetWindow().GetSize().x,
-				input::Mouse::DY() / Engine::Instance().GetWindow().GetSize().y);
+				value.axis2DValue = glm::vec2(input::Mouse::DX(), -input::Mouse::DY());
 				break;
 			case input::BasedKey::Controller:
 				if (key.key == (int)input::Joystick::Axis::LeftStickHorizontal 
@@ -120,8 +119,7 @@ namespace based::managers
 				value.axis3DValue = glm::vec3(input::Keyboard::Key(key.key) ? 1.f : 0.f, 0.f, 0.f);
 				break;
 			case input::BasedKey::Mouse:
-				value.axis3DValue = glm::vec3(input::Mouse::DX() / Engine::Instance().GetWindow().GetSize().x,
-					input::Mouse::DY() / Engine::Instance().GetWindow().GetSize().y, 0.f);
+				value.axis3DValue = glm::vec3(input::Mouse::DX(), -input::Mouse::DY(), 0.f);
 				break;
 			case input::BasedKey::Controller:
 				if (key.key == (int)input::Joystick::Axis::LeftStickHorizontal
@@ -297,7 +295,7 @@ namespace based::managers
 					case input::InputState::Inactive:
 						if (inputAction.GetValue().IsValueZero()) break;
 						inputAction.state = input::InputState::Started;
-						if (inputComp.mStartedEvent) inputComp.mStartedEvent(inputAction);
+						inputComp.mStartedEvent.trigger(inputAction);
 						if (shouldTrigger)
 						{
 							inputAction.state = input::InputState::Triggered;
@@ -311,10 +309,10 @@ namespace based::managers
 						if (!shouldTrigger)
 						{
 							inputAction.state = input::InputState::Completed;
-							if (inputComp.mCompletedEvent) inputComp.mCompletedEvent(inputAction);
+							inputComp.mCompletedEvent.trigger(inputAction);
 							break;
 						}
-						if (inputComp.mTriggeredEvent) inputComp.mTriggeredEvent(inputAction);
+						inputComp.mTriggeredEvent.trigger(inputAction);
 						break;
 					case input::InputState::Started:
 						inputAction.state = input::InputState::Ongoing;
@@ -322,10 +320,10 @@ namespace based::managers
 						if (inputAction.GetValue().IsValueZero())
 						{
 							inputAction.state = input::InputState::Canceled;
-							if (inputComp.mCanceledEvent) inputComp.mCanceledEvent(inputAction);
+							inputComp.mCanceledEvent.trigger(inputAction);
 							break;
 						}
-						if (inputComp.mOngoingEvent) inputComp.mOngoingEvent(inputAction);
+						inputComp.mOngoingEvent.trigger(inputAction);
 						if (shouldTrigger)
 						{
 							inputAction.state = input::InputState::Triggered;
