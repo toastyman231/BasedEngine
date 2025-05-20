@@ -47,9 +47,16 @@ namespace based::managers
 		}
 	}
 
-	bool GetRawKeyValue(input::InputActionValue& value, input::BasedKey key, input::InputActionType type, int controllerID,
+	bool GetRawKeyValue(
+		input::InputActionValue& value,
+		const input::BasedKey& key, 
+		std::vector<input::BasedKey>& consumedKeys,
+		input::InputActionType type, int controllerID,
 		bool consumeInput)
 	{
+		if (std::find(consumedKeys.begin(), consumedKeys.end(), key) != consumedKeys.end()) 
+			return true;
+
 		switch (type) {
 		case input::InputActionType::Boolean:
 			switch (key.type)
@@ -57,10 +64,12 @@ namespace based::managers
 			case input::BasedKey::Keyboard:
 				value.triggered = input::Keyboard::Key(key.key);
 				break;
-			case input::BasedKey::Mouse:
+			case input::BasedKey::MouseAxis:
+			case input::BasedKey::MouseButton:
 				value.triggered = input::Mouse::Button(key.key);
 				break;
-			case input::BasedKey::Controller:
+			case input::BasedKey::ControllerAxis:
+			case input::BasedKey::ControllerButton:
 				value.triggered = input::Joystick::GetButton(controllerID, key.key);
 				break;
 			}
@@ -71,12 +80,14 @@ namespace based::managers
 			case input::BasedKey::Keyboard:
 				value.axis1DValue = input::Keyboard::Key(key.key) ? 1.f : 0.f;
 				break;
-			case input::BasedKey::Mouse:
+			case input::BasedKey::MouseButton:
+			case input::BasedKey::MouseAxis:
 				if (key.key == 0) value.axis1DValue = (float)(input::Mouse::DX());
 				else if (key.key == 1) value.axis1DValue = (float)(-input::Mouse::DY());
 				else value.axis1DValue = 0.f;
 				break;
-			case input::BasedKey::Controller:
+			case input::BasedKey::ControllerButton:
+			case input::BasedKey::ControllerAxis:
 				value.axis1DValue = input::Joystick::GetAxis(controllerID, key.key);
 				break;
 			}
@@ -87,10 +98,12 @@ namespace based::managers
 			case input::BasedKey::Keyboard:
 				value.axis2DValue = glm::vec2(input::Keyboard::Key(key.key) ? 1.f : 0.f, 0.f);
 				break;
-			case input::BasedKey::Mouse:
+			case input::BasedKey::MouseButton:
+			case input::BasedKey::MouseAxis:
 				value.axis2DValue = glm::vec2(input::Mouse::DX(), -input::Mouse::DY());
 				break;
-			case input::BasedKey::Controller:
+			case input::BasedKey::ControllerButton:
+			case input::BasedKey::ControllerAxis:
 				if (key.key == (int)input::Joystick::Axis::LeftStickHorizontal 
 					|| key.key == (int)input::Joystick::Axis::LeftStickVertical)
 				{
@@ -118,10 +131,12 @@ namespace based::managers
 			case input::BasedKey::Keyboard:
 				value.axis3DValue = glm::vec3(input::Keyboard::Key(key.key) ? 1.f : 0.f, 0.f, 0.f);
 				break;
-			case input::BasedKey::Mouse:
+			case input::BasedKey::MouseButton:
+			case input::BasedKey::MouseAxis:
 				value.axis3DValue = glm::vec3(input::Mouse::DX(), -input::Mouse::DY(), 0.f);
 				break;
-			case input::BasedKey::Controller:
+			case input::BasedKey::ControllerButton:
+			case input::BasedKey::ControllerAxis:
 				if (key.key == (int)input::Joystick::Axis::LeftStickHorizontal
 					|| key.key == (int)input::Joystick::Axis::LeftStickVertical)
 				{
@@ -149,7 +164,12 @@ namespace based::managers
 			break;
 		}
 
-		if (consumeInput && !value.IsValueZero()) return true;
+		if (consumeInput && !value.IsValueZero())
+		{
+			consumedKeys.emplace_back(key);
+			//BASED_TRACE("CONSUMED KEY {}", key.key);
+			return true;
+		}
 		return false;
 	}
 
@@ -224,20 +244,27 @@ namespace based::managers
 			auto& inputComp = inputView.get<input::InputComponent>(e);
 			auto& activeMappings = inputComp.mActiveMappings;
 			std::vector<input::InputMappingConfig*> tempStorage;
+			std::vector <input::BasedKey> consumedKeys;
 
 			while (!activeMappings.empty())
 			{
 				auto config = activeMappings.top();
 				activeMappings.pop();
-
 				if (!config) continue;
 
 				tempStorage.push_back(config);
+			}
 
+			for (auto& config : tempStorage)
+			{
+				activeMappings.push(config);
+			}
+
+			for (auto& config : tempStorage)
+			{
 				for (auto& [actionName, mapping] : config->mMappings)
 				{
 					auto& inputAction = mInputActions[actionName];
-					if (inputAction.mConsumedConfig && inputAction.mConsumedConfig != config) continue;
 					if (!inputAction.triggerWhenPaused && core::Time::TimeScale() == 0.f)
 					{
 						inputAction.mCurrentValue = inputAction.mRawValue = input::InputActionValue();
@@ -256,11 +283,10 @@ namespace based::managers
 					{
 						input::InputActionValue keyRaw;
 						keyRaw.type = accumulatedUnmodified.type;
-						bool shouldConsume = GetRawKeyValue(keyRaw, key, inputAction.type, inputComp.controllerID, 
+						bool didConsume = GetRawKeyValue(keyRaw, key, consumedKeys, 
+							inputAction.type, inputComp.controllerID, 
 							inputAction.consumeInput);
 						accumulatedUnmodified = accumulatedUnmodified + keyRaw;
-						if (shouldConsume) inputAction.mConsumedConfig = config;
-						else inputAction.mConsumedConfig = nullptr;
 
 						input::InputActionValue value = keyRaw;
 
@@ -337,10 +363,11 @@ namespace based::managers
 				}
 			}
 
-			for (auto& config : tempStorage)
+			/*for (auto& config : tempStorage)
 			{
 				inputComp.mActiveMappings.push(config);
-			}
+				//BASED_TRACE("PUSHED BACK {}", config->name);
+			}*/
 		}
 	}
 
@@ -509,5 +536,11 @@ namespace based::managers
 	void InputManager::RegisterModifier(input::InputActionModifierBase* modifier)
 	{
 		mModifiers.emplace(modifier->GetName(), modifier);
+	}
+
+	const input::InputAction& InputManager::GetAction(const std::string& name) const
+	{
+		// TODO: Need a safety check here
+		return mInputActions.at(name);
 	}
 }

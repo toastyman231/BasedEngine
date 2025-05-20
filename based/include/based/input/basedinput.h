@@ -45,6 +45,7 @@ namespace based::input
 			InputActionValue value;
 			value.type = type;
 			value.triggered = triggered || other.triggered;
+			// TODO: Try switching this to max(abs)
 			value.axis1DValue = axis1DValue + other.axis1DValue;
 			value.axis2DValue = axis2DValue + other.axis2DValue;
 			value.axis3DValue = axis3DValue + other.axis3DValue;
@@ -129,9 +130,16 @@ namespace based::input
 		enum KeyType
 		{
 			Keyboard,
-			Mouse,
-			Controller
+			MouseButton,
+			MouseAxis,
+			ControllerButton,
+			ControllerAxis
 		} type;
+
+		bool operator==(const BasedKey& other) const
+		{
+			return key == other.key && type == other.type;
+		}
 
 		std::list<InputActionTriggerBase*> mTriggerOverrides = {};
 		std::list<InputActionModifierBase*> mModifierOverrides = {};
