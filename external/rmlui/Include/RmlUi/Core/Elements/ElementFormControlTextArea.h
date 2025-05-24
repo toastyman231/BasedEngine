@@ -4,7 +4,7 @@
  * For the latest information, see http://github.com/mikke89/RmlUi
  *
  * Copyright (c) 2008-2010 CodePoint Ltd, Shift Technology Ltd
- * Copyright (c) 2019 The RmlUi Team, and contributors
+ * Copyright (c) 2019-2023 The RmlUi Team, and contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -15,7 +15,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -37,13 +37,12 @@ namespace Rml {
 class WidgetTextInputMultiLine;
 
 /**
-	Default RmlUi implemention of a text area.
+    Default RmlUi implementation of a text area.
 
-	@author Peter Curry
+    @author Peter Curry
  */
 
-class RMLUICORE_API ElementFormControlTextArea : public ElementFormControl
-{
+class RMLUICORE_API ElementFormControlTextArea : public ElementFormControl {
 public:
 	RMLUI_RTTI_DefineWithParent(ElementFormControlTextArea, ElementFormControl)
 
@@ -63,7 +62,7 @@ public:
 
 	/// Sets the number of characters visible across the text area. Note that this will only be precise when using
 	/// a fixed-width font.
-	/// @param[in] size The number of visible characters.
+	/// @param[in] num_columns The number of visible columns (characters).
 	void SetNumColumns(int num_columns);
 	/// Returns the approximate number of characters visible at once.
 	/// @return The number of visible characters.
@@ -103,6 +102,11 @@ public:
 	/// @param[out] selected_text The selected text.
 	void GetSelection(int* selection_start, int* selection_end, String* selected_text) const;
 
+	/// Sets visual feedback used for the IME composition in the range.
+	/// @param[in] range_start The first character to be selected.
+	/// @param[in] range_end The first character *after* the selection.
+	void SetCompositionRange(int range_start, int range_end);
+
 	/// Returns the control's inherent size, based on the length of the input field and the current font size.
 	/// @return True.
 	bool GetIntrinsicDimensions(Vector2f& dimensions, float& ratio) override;
@@ -128,6 +132,9 @@ protected:
 	void GetInnerRML(String& content) const override;
 
 private:
+	/// Sets the necessary properties to display the widget in the current word wrap state.
+	void SetWordWrapProperties();
+
 	UniquePtr<WidgetTextInputMultiLine> widget;
 };
 

@@ -21,28 +21,27 @@ namespace based::ui
 
 		// -- Inherited from Rml::RenderInterface --
 
-		void RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture,
-			const Rml::Vector2f& translation) override;
-
-		Rml::CompiledGeometryHandle CompileGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices,
-			Rml::TextureHandle texture) override;
-		void RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry, const Rml::Vector2f& translation) override;
-		void ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry) override;
-
 		void EnableScissorRegion(bool enable) override;
-		void SetScissorRegion(int x, int y, int width, int height) override;
 
-		bool LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions, const Rml::String& source) override;
-		bool GenerateTexture(Rml::TextureHandle& texture_handle, const Rml::byte* source, const Rml::Vector2i& source_dimensions) override;
 		void ReleaseTexture(Rml::TextureHandle texture_handle) override;
 
 		void SetTransform(const Rml::Matrix4f* transform) override;
+
+		Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices) override;
+		void RenderGeometry(Rml::CompiledGeometryHandle geometry, Rml::Vector2f translation,
+			Rml::TextureHandle texture) override;
+		void ReleaseGeometry(Rml::CompiledGeometryHandle geometry) override;
+		Rml::TextureHandle LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source) override;
+		Rml::TextureHandle GenerateTexture(Rml::Span<const unsigned char> source, Rml::Vector2i source_dimensions) override;
+		void SetScissorRegion(Rml::Rectanglei region) override;
+		void EnableClipMask(bool enable) override;
+		void RenderToClipMask(Rml::ClipMaskOperation operation, Rml::CompiledGeometryHandle geometry,
+			Rml::Vector2f translation) override;
 
 		// Can be passed to RenderGeometry() to enable texture rendering without changing the bound texture.
 		static const Rml::TextureHandle TextureEnableWithoutBinding = Rml::TextureHandle(-1);
 	private:
 		std::unordered_map<core::UUID, std::shared_ptr<graphics::VertexArray>> mCompiledVAs;
-		std::unordered_map<core::UUID, Rml::TextureHandle> mCompiledTextures;
 		std::vector<std::shared_ptr<graphics::VertexArray>> mVAs; // Cleared every frame
 		std::shared_ptr<graphics::Shader> mFragColor;
 		std::shared_ptr<graphics::Shader> mFragTexture;

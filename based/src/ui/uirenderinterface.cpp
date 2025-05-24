@@ -91,129 +91,6 @@ namespace based::ui
 	{
 	}
 
-	void RenderInterface_GL4::RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices,
-	                                         Rml::TextureHandle texture, const Rml::Vector2f& translation)
-	{
-		// Build and upload vertex array
-		auto va = std::make_shared<graphics::VertexArray>();
-
-		BASED_CREATE_VERTEX_BUFFER(pos_vb, float);
-		BASED_CREATE_VERTEX_BUFFER(col_vb, unsigned char);
-		BASED_CREATE_VERTEX_BUFFER(uv_vb, float);
-
-		for (const auto *vertex = vertices; vertex != vertices + num_vertices; ++vertex)
-		{
-			pos_vb->PushVertex({ vertex->position.x, vertex->position.y });
-			col_vb->PushVertex({ vertex->colour.red, vertex->colour.green, vertex->colour.blue, vertex->colour.alpha });
-			uv_vb->PushVertex({ vertex->tex_coord.x, vertex->tex_coord.y });
-		}
-
-		pos_vb->SetLayout({ 2 });
-		col_vb->SetLayout({ 4 });
-		uv_vb->SetLayout({ 2 });
-		va->PushBuffer(std::move(pos_vb));
-		va->PushBuffer(std::move(col_vb));
-		va->PushBuffer(std::move(uv_vb));
-
-		va->SetElements(std::vector<uint32_t>(indices, indices + num_indices));
-		va->Upload();
-
-		mVAs.emplace_back(va);
-
-		// Set uniforms and render
-		if (texture)
-		{
-			// Use texture
-			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayUserInterface,
-				mVAs.back(), mFragTexture, static_cast<uint32_t>(texture), mTransform, glm::vec2{translation.x, translation.y}));
-		} else
-		{
-			// Render solid color
-			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayUserInterface,
-				mVAs.back(), mFragColor, 0, mTransform, glm::vec2{translation.x, translation.y}));
-		}
-
-		Engine::Instance().GetRenderManager().Flush();
-	}
-
-	Rml::CompiledGeometryHandle RenderInterface_GL4::CompileGeometry(Rml::Vertex* vertices, int num_vertices,
-		int* indices, int num_indices, Rml::TextureHandle texture)
-	{
-		// Build and upload vertex array
-		auto va = std::make_shared<graphics::VertexArray>();
-
-		BASED_CREATE_VERTEX_BUFFER(pos_vb, float);
-		BASED_CREATE_VERTEX_BUFFER(col_vb, unsigned char);
-		BASED_CREATE_VERTEX_BUFFER(uv_vb, float);
-
-		for (const auto* vertex = vertices; vertex != vertices + num_vertices; ++vertex)
-		{
-			pos_vb->PushVertex({ vertex->position.x, vertex->position.y });
-			col_vb->PushVertex({ vertex->colour.red, vertex->colour.green, vertex->colour.blue, vertex->colour.alpha });
-			uv_vb->PushVertex({ vertex->tex_coord.x, vertex->tex_coord.y });
-		}
-
-		pos_vb->SetLayout({ 2 });
-		col_vb->SetLayout({ 4 });
-		uv_vb->SetLayout({ 2 });
-		va->PushBuffer(std::move(pos_vb));
-		va->PushBuffer(std::move(col_vb));
-		va->PushBuffer(std::move(uv_vb));
-
-		va->SetElements(std::vector<uint32_t>(indices, indices + num_indices));
-		va->Upload();
-
-		auto id = core::UUID();
-
-		mCompiledVAs[id] = va;
-		mCompiledTextures[id] = texture;
-
-		return id;
-	}
-
-	void RenderInterface_GL4::RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry,
-		const Rml::Vector2f& translation)
-	{
-		auto va = mCompiledVAs[geometry];
-		auto texture = mCompiledTextures[geometry];
-		if (va)
-		{
-			if (texture)
-			{
-				// Use texture
-				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayUserInterface,
-					va, mFragTexture, static_cast<uint32_t>(texture), mTransform, glm::vec2{ translation.x, translation.y }));
-			}
-			else
-			{
-				// Render solid color
-				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayUserInterface,
-					va, mFragColor, 0, mTransform, glm::vec2{ translation.x, translation.y }));
-			}
-
-			Engine::Instance().GetRenderManager().Flush();
-		}
-	}
-
-	void RenderInterface_GL4::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry)
-	{
-		auto it = std::find_if(mCompiledVAs.begin(), mCompiledVAs.end(),
-			[geometry](auto pair)
-			{
-				return pair.first == (core::UUID)geometry;
-			});
-		if (it != mCompiledVAs.end())
-			mCompiledVAs.erase(it);
-
-		auto it2 = std::find_if(mCompiledTextures.begin(), mCompiledTextures.end(),
-			[geometry](auto pair)
-			{
-				return pair.first == (core::UUID)geometry;
-			});
-		if (it2 != mCompiledTextures.end())
-			mCompiledTextures.erase(it2);
-	}
-
 	void RenderInterface_GL4::EnableScissorRegion(bool enable)
 	{
 		ScissoringState new_state = ScissoringState::Disable;
@@ -247,178 +124,6 @@ namespace based::ui
 		}
 	}
 
-	void RenderInterface_GL4::SetScissorRegion(int x, int y, int width, int height)
-	{
-		if (transform_active)
-		{
-			const float left = float(x);
-			const float right = float(x + width);
-			const float top = float(y);
-			const float bottom = float(y + height);
-
-			Rml::Vertex vertices[4];
-			vertices[0].position = { left, top };
-			vertices[1].position = { right, top };
-			vertices[2].position = { right, bottom };
-			vertices[3].position = { left, bottom };
-
-			int indices[6] = { 0, 2, 1, 0, 3, 2 };
-
-			glClear(GL_STENCIL_BUFFER_BIT); BASED_CHECK_GL_ERROR;
-			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); BASED_CHECK_GL_ERROR;
-			glStencilFunc(GL_ALWAYS, 1, 0xFF); BASED_CHECK_GL_ERROR;
-			glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE); BASED_CHECK_GL_ERROR;
-
-			RenderGeometry(vertices, 4, indices, 6, 0, Rml::Vector2f(0, 0));
-
-			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); BASED_CHECK_GL_ERROR;
-			glStencilFunc(GL_EQUAL, 1, 0xFF); BASED_CHECK_GL_ERROR;
-			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); BASED_CHECK_GL_ERROR;
-		}
-		else
-		{
-			glScissor(x, Engine::Instance().GetWindow().GetSize().y - (y + height), width, height); BASED_CHECK_GL_ERROR;
-		}
-	}
-
-	// Set to byte packing, or the compiler will expand our struct, which means it won't read correctly from file
-#pragma pack(1)
-	struct TGAHeader {
-		char idLength;
-		char colourMapType;
-		char dataType;
-		short int colourMapOrigin;
-		short int colourMapLength;
-		char colourMapDepth;
-		short int xOrigin;
-		short int yOrigin;
-		short int width;
-		short int height;
-		char bitsPerPixel;
-		char imageDescriptor;
-	};
-	// Restore packing
-#pragma pack()
-
-	bool RenderInterface_GL4::LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions,
-		const Rml::String& source)
-	{
-		Rml::FileInterface* file_interface = Rml::GetFileInterface();
-		Rml::FileHandle file_handle = file_interface->Open(source);
-		if (!file_handle)
-		{
-			return false;
-		}
-
-		file_interface->Seek(file_handle, 0, SEEK_END);
-		size_t buffer_size = file_interface->Tell(file_handle);
-		file_interface->Seek(file_handle, 0, SEEK_SET);
-
-		auto texture = std::make_shared<graphics::Texture>(source);
-		if (texture->GetId() != 0)
-		{
-			texture_handle = (Rml::TextureHandle)texture->GetId();
-			return true;
-		}
-
-		if (buffer_size <= sizeof(TGAHeader))
-		{
-			//Rml::Log::Message(Rml::Log::LT_ERROR, "Texture file size is smaller than TGAHeader, file is not a valid TGA image.");
-			BASED_ERROR("Texture file size is smaller than TGAHeader, file is not a valid TGA image.");
-			file_interface->Close(file_handle);
-			return false;
-		}
-
-		using Rml::byte;
-		byte* buffer = new byte[buffer_size];
-		file_interface->Read(buffer, buffer_size, file_handle);
-		file_interface->Close(file_handle);
-
-		TGAHeader header;
-		memcpy(&header, buffer, sizeof(TGAHeader));
-
-		int color_mode = header.bitsPerPixel / 8;
-		int image_size = header.width * header.height * 4; // We always make 32bit textures
-
-		// Ensure we have at least 3 colors
-		if (color_mode < 3)
-		{
-			//Rml::Log::Message(Rml::Log::LT_ERROR, "Only 24 and 32bit textures are supported.");
-			BASED_ERROR("Only 24 and 32bit textures are supported.");
-			delete[] buffer;
-			return false;
-		}
-
-		const byte* image_src = buffer + sizeof(TGAHeader);
-		byte* image_dest = new byte[image_size];
-
-		// Targa is BGR, swap to RGB and flip Y axis
-		for (long y = 0; y < header.height; y++)
-		{
-			long read_index = y * header.width * color_mode;
-			long write_index = ((header.imageDescriptor & 32) != 0) ? read_index : (header.height - y - 1) * header.width * 4;
-			for (long x = 0; x < header.width; x++)
-			{
-				image_dest[write_index] = image_src[read_index + 2];
-				image_dest[write_index + 1] = image_src[read_index + 1];
-				image_dest[write_index + 2] = image_src[read_index];
-				if (color_mode == 4)
-				{
-					const int alpha = image_src[read_index + 3];
-#ifdef RMLUI_SRGB_PREMULTIPLIED_ALPHA
-					image_dest[write_index + 0] = (image_dest[write_index + 0] * alpha) / 255;
-					image_dest[write_index + 1] = (image_dest[write_index + 1] * alpha) / 255;
-					image_dest[write_index + 2] = (image_dest[write_index + 2] * alpha) / 255;
-#endif
-					image_dest[write_index + 3] = (byte)alpha;
-				}
-				else
-				{
-					image_dest[write_index + 3] = 255;
-				}
-
-				write_index += 4;
-				read_index += color_mode;
-			}
-		}
-
-		texture_dimensions.x = header.width;
-		texture_dimensions.y = header.height;
-
-		bool success = GenerateTexture(texture_handle, image_dest, texture_dimensions);
-
-		delete[] image_dest;
-		delete[] buffer;
-
-		return success;
-	}
-
-	bool RenderInterface_GL4::GenerateTexture(Rml::TextureHandle& texture_handle, const Rml::byte* source,
-		const Rml::Vector2i& source_dimensions)
-	{
-		GLuint texture_id = 0;
-		glGenTextures(1, &texture_id);
-		if (texture_id == 0)
-		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to generate texture.");
-			return false;
-		}
-
-		glBindTexture(GL_TEXTURE_2D, texture_id);
-
-		GLint internal_format = GL_RGBA8;
-		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, source_dimensions.x, source_dimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, source);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		 
-		texture_handle = (Rml::TextureHandle)texture_id;
-
-		return true;
-	}
-
 	void RenderInterface_GL4::ReleaseTexture(Rml::TextureHandle texture_handle)
 	{
 		glDeleteTextures(1, (GLuint*)&texture_handle);
@@ -436,6 +141,225 @@ namespace based::ui
 			}
 		}
 		transform_active = (transform != nullptr);
-		mTransform = mProjection * (transform ? trans : glm::mat4(1.f));
+		mTransform = mProjection * trans;
+	}
+
+	Rml::CompiledGeometryHandle RenderInterface_GL4::CompileGeometry(Rml::Span<const Rml::Vertex> vertices,
+		Rml::Span<const int> indices)
+	{
+		// Build and upload vertex array
+		auto va = std::make_shared<graphics::VertexArray>();
+
+		BASED_CREATE_VERTEX_BUFFER(pos_vb, float);
+		BASED_CREATE_VERTEX_BUFFER(col_vb, unsigned char);
+		BASED_CREATE_VERTEX_BUFFER(uv_vb, float);
+
+		for (const auto* vertex = vertices.begin(); vertex != vertices.end(); ++vertex)
+		{
+			pos_vb->PushVertex({ vertex->position.x, vertex->position.y });
+			col_vb->PushVertex({ vertex->colour.red, vertex->colour.green, vertex->colour.blue, vertex->colour.alpha });
+			uv_vb->PushVertex({ vertex->tex_coord.x, vertex->tex_coord.y });
+		}
+
+		pos_vb->SetLayout({ 2 });
+		col_vb->SetLayout({ 4 });
+		uv_vb->SetLayout({ 2 });
+		va->PushBuffer(std::move(pos_vb));
+		va->PushBuffer(std::move(col_vb));
+		va->PushBuffer(std::move(uv_vb));
+
+		va->SetElements(std::vector<uint32_t>(indices.begin(), indices.end()));
+		va->Upload();
+
+		auto id = core::UUID();
+
+		mCompiledVAs[id] = va;
+
+		return id;
+	}
+
+	void RenderInterface_GL4::RenderGeometry(Rml::CompiledGeometryHandle geometry, Rml::Vector2f translation,
+		Rml::TextureHandle texture)
+	{
+		auto va = mCompiledVAs[geometry];
+
+		if (va)
+		{
+			if (texture)
+			{
+				// Use texture
+				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayUserInterface,
+					va, mFragTexture, static_cast<uint32_t>(texture), mTransform, glm::vec2{ translation.x, translation.y }));
+			}
+			else
+			{
+				// Render solid color
+				Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderVertexArrayUserInterface,
+					va, mFragColor, 0, mTransform, glm::vec2{ translation.x, translation.y }));
+			}
+
+			Engine::Instance().GetRenderManager().Flush();
+		}
+	}
+
+	void RenderInterface_GL4::ReleaseGeometry(Rml::CompiledGeometryHandle geometry)
+	{
+		auto it = std::find_if(mCompiledVAs.begin(), mCompiledVAs.end(),
+			[geometry](auto pair)
+			{
+				return pair.first == (core::UUID)geometry;
+			});
+		if (it != mCompiledVAs.end())
+			mCompiledVAs.erase(it);
+
+	}
+
+	Rml::TextureHandle RenderInterface_GL4::LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source)
+	{
+		Rml::FileInterface* file_interface = Rml::GetFileInterface();
+		Rml::FileHandle file_handle = file_interface->Open(source);
+		if (!file_handle)
+		{
+			BASED_ERROR("Could not load RML texture from {}", source);
+			return false;
+		}
+
+		auto texture = std::make_shared<graphics::Texture>(source);
+		if (texture->GetId() != 0)
+		{
+			return texture->GetId();
+		}
+
+		BASED_ERROR("RML texture at {} was valid, but there was an error creating the texture!", source);
+		return false;
+	}
+
+	Rml::TextureHandle RenderInterface_GL4::GenerateTexture(Rml::Span<const unsigned char> source,
+		Rml::Vector2i source_dimensions)
+	{
+		GLuint texture_id = 0;
+		glGenTextures(1, &texture_id);
+		if (texture_id == 0)
+		{
+			BASED_ERROR("Failed to generate RML texture!");
+			return false;
+		}
+
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+
+		GLint internal_format = GL_RGBA8;
+		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, source_dimensions.x, 
+			source_dimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, source.data());
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		return texture_id;
+	}
+
+	void RenderInterface_GL4::SetScissorRegion(Rml::Rectanglei region)
+	{
+		if (transform_active)
+		{
+			const float left = static_cast<float>(region.Left());
+			const float right = static_cast<float>(region.Right());
+			const float top = static_cast<float>(region.Top());
+			const float bottom = static_cast<float>(region.Bottom());
+
+			Rml::Vertex p0;
+			Rml::Vertex p1;
+			Rml::Vertex p2;
+			Rml::Vertex p3;
+			p0.position = { left, top };
+			p1.position = { right, top };
+			p2.position = { right, bottom };
+			p3.position = { left, bottom };
+
+			Rml::Span<const Rml::Vertex> vertices = {
+				{
+					p0, p1, p2, p3
+				}
+			};
+
+			Rml::Span<const int> indices = { { 0,2,1,0,3,2 } };
+
+			glClear(GL_STENCIL_BUFFER_BIT); BASED_CHECK_GL_ERROR;
+			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); BASED_CHECK_GL_ERROR;
+			glStencilFunc(GL_ALWAYS, 1, 0xFF); BASED_CHECK_GL_ERROR;
+			glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE); BASED_CHECK_GL_ERROR;
+
+			auto handle = CompileGeometry(vertices, indices);
+			RenderGeometry(handle, Rml::Vector2f(0, 0), false);
+
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); BASED_CHECK_GL_ERROR;
+			glStencilFunc(GL_EQUAL, 1, 0xFF); BASED_CHECK_GL_ERROR;
+			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); BASED_CHECK_GL_ERROR;
+		}
+		else
+		{
+			glScissor(region.Left(), 
+				Engine::Instance().GetWindow().GetSize().y - region.Bottom(), 
+				region.Width(), region.Height()); BASED_CHECK_GL_ERROR;
+		}
+	}
+
+	void RenderInterface_GL4::EnableClipMask(bool enable)
+	{
+		if (enable)
+			glEnable(GL_STENCIL_TEST);
+		else
+			glDisable(GL_STENCIL_TEST);
+	}
+
+	void RenderInterface_GL4::RenderToClipMask(Rml::ClipMaskOperation operation, Rml::CompiledGeometryHandle geometry,
+		Rml::Vector2f translation)
+	{
+		BASED_ASSERT(glIsEnabled(GL_STENCIL_TEST), "Stencil testing needs to be enabled to render to clip mask!");
+		using Rml::ClipMaskOperation;
+
+		const bool clear_stencil = (operation == ClipMaskOperation::Set || operation == ClipMaskOperation::SetInverse);
+		if (clear_stencil)
+		{
+			// @performance Increment the reference value instead of clearing each time.
+			glClear(GL_STENCIL_BUFFER_BIT);
+		}
+
+		GLint stencil_test_value = 0;
+		glGetIntegerv(GL_STENCIL_REF, &stencil_test_value);
+
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		glStencilFunc(GL_ALWAYS, GLint(1), GLuint(-1));
+
+		switch (operation)
+		{
+		case ClipMaskOperation::Set:
+		{
+			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+			stencil_test_value = 1;
+		}
+		break;
+		case ClipMaskOperation::SetInverse:
+		{
+			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+			stencil_test_value = 0;
+		}
+		break;
+		case ClipMaskOperation::Intersect:
+		{
+			glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+			stencil_test_value += 1;
+		}
+		break;
+		}
+
+		RenderGeometry(geometry, translation, {});
+
+		// Restore state
+		// @performance Cache state so we don't toggle it unnecessarily.
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+		glStencilFunc(GL_EQUAL, stencil_test_value, GLuint(-1));
 	}
 }

@@ -53,8 +53,8 @@ project "based"
         "glad",
         "freetype",
         "assimp-vc143-mt",
-        "RmlCore",
-        "RmlDebugger",
+        "rmlui",
+        "rmlui_debugger",
         "yaml-cpp",
         "jolt"
         --"vld"

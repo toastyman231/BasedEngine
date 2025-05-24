@@ -4,7 +4,7 @@
  * For the latest information, see http://github.com/mikke89/RmlUi
  *
  * Copyright (c) 2008-2010 CodePoint Ltd, Shift Technology Ltd
- * Copyright (c) 2019 The RmlUi Team, and contributors
+ * Copyright (c) 2019-2023 The RmlUi Team, and contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -15,7 +15,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,29 +35,28 @@
 namespace Rml {
 
 /**
-	A tabulated set of panels.
+    A tabulated set of panels.
 
-	@author Lloyd Weehuizen
+    @author Lloyd Weehuizen
  */
 
-class RMLUICORE_API ElementTabSet : public Element
-{
+class RMLUICORE_API ElementTabSet : public Element {
 public:
 	RMLUI_RTTI_DefineWithParent(ElementTabSet, Element)
 
 	ElementTabSet(const String& tag);
 	~ElementTabSet();
 
-	/// Sets the specifed tab index's tab title RML.
+	/// Sets the specified tab index's tab title RML.
 	/// @param[in] tab_index The tab index to set. If it doesn't already exist, it will be created.
 	/// @param[in] rml The RML to set on the tab title.
 	void SetTab(int tab_index, const String& rml);
-	/// Sets the specifed tab index's tab panel RML.
+	/// Sets the specified tab index's tab panel RML.
 	/// @param[in] tab_index The tab index to set. If it doesn't already exist, it will be created.
 	/// @param[in] rml The RML to set on the tab panel.
 	void SetPanel(int tab_index, const String& rml);
 
-	/// Set the specifed tab index's title element.
+	/// Set the specified tab index's title element.
 	/// @param[in] tab_index The tab index to set. If it doesn't already exist, it will be created.
 	/// @param[in] element The root of the element tree to set as the tab title.
 	void SetTab(int tab_index, ElementPtr element);
