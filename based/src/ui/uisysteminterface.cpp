@@ -44,6 +44,56 @@ namespace based::ui
 		text = Rml::String(raw_text);
 		SDL_free(raw_text);
 	}
+
+	int SystemInterface_SDL::TranslateString(Rml::String& translated, const Rml::String& input)
+	{
+		if (mStringTranslationTable.empty())
+		{
+			return SystemInterface::TranslateString(translated, input);
+		}
+
+		for (const auto& row : mStringTranslationTable)
+		{
+			if (row.empty()) continue;
+			if (row[0] == input)
+			{
+				if (row.size() <= mCurrentLanguageIndex) break;
+
+				translated = row[mCurrentLanguageIndex];
+				BASED_TRACE("Translated {} to {}", input, translated);
+				return SystemInterface::TranslateString(translated, input);
+			}
+		}
+
+		return SystemInterface::TranslateString(translated, input);
+	}
+
+	void SystemInterface_SDL::SetTranslationTable(const std::string& path)
+	{
+		std::string line, word;
+		std::ifstream fin;
+
+		fin.open(path.c_str(), std::ios::in);
+		if (fin.is_open()) mStringTranslationTable.clear();
+		else return;
+
+		int index = 0;
+		while (std::getline(fin, line))
+		{
+			std::vector<std::string>& row = mStringTranslationTable.emplace_back();
+
+			std::stringstream stream(line);
+
+			while (std::getline(stream, word, ','))
+			{
+				row.emplace_back(word);
+			}
+
+			index++;
+		}
+
+		fin.close();
+	}
 }
 
 namespace RmlSDL

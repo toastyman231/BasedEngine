@@ -164,6 +164,18 @@ namespace based::managers
 		mUsePathPrefix = true;
 	}
 
+	void UiManager::SetTranslationTable(const std::string& path)
+	{
+		ui::SystemInterface_SDL* sys = (ui::SystemInterface_SDL*)&Engine::Instance().GetUiManager().GetSystemInterface();
+		sys->SetTranslationTable(path);
+	}
+
+	void UiManager::SetCurrentLanguageIndex(int index)
+	{
+		ui::SystemInterface_SDL* sys = (ui::SystemInterface_SDL*)&Engine::Instance().GetUiManager().GetSystemInterface();
+		sys->SetCurrentLanguageIndex(index);
+	}
+
 	std::deque<DocumentInfo> UiManager::GetDocuments()
 	{
 		return mDocuments;

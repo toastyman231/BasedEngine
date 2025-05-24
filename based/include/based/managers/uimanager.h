@@ -38,6 +38,9 @@ namespace based::managers
 		void RemoveContext(const Rml::Context* context);
 		void SetPathPrefix(const std::string& path);
 
+		void SetTranslationTable(const std::string& path);
+		void SetCurrentLanguageIndex(int index);
+
 		std::deque<DocumentInfo> GetDocuments();
 
 		Rml::SystemInterface& GetSystemInterface() const { return *mSystemInterface; }

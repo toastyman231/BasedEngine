@@ -10,7 +10,7 @@ namespace based::ui
 	class SystemInterface_SDL : public Rml::SystemInterface {
 	public:
 		SystemInterface_SDL();
-		~SystemInterface_SDL();
+		~SystemInterface_SDL() override;
 
 		// Optionally, provide or change the window to be used for setting the mouse cursors.
 		void SetWindow(SDL_Window* window);
@@ -23,9 +23,19 @@ namespace based::ui
 
 		void SetClipboardText(const Rml::String& text) override;
 		void GetClipboardText(Rml::String& text) override;
+		int TranslateString(Rml::String& translated, const Rml::String& input) override;
+
+		void SetTranslationTable(const std::string& path);
+		void SetCurrentLanguageIndex(int index)
+		{
+			BASED_ASSERT(index > 0, "Language index cannot be 0, that is reserved for identifiers");
+			mCurrentLanguageIndex = index;
+		}
 
 	private:
 		SDL_Window* window = nullptr;
+		std::vector<std::vector<std::string>> mStringTranslationTable = {};
+		int mCurrentLanguageIndex = 1;
 	};
 }
 
