@@ -40,6 +40,21 @@ namespace based::input
 			Count
 		};
 
+		// Adapted from SDL - See SDL_GameControllerType
+		enum class ControllerType
+		{
+			Unknown = 0,
+			Xbox360,
+			XboxOne,
+			PS3,
+			PS4,
+			SwitchPro,
+			PS5 = 7,
+			JoyconLeft = 11,
+			JoyconRight,
+			JoyconPair
+		};
+
 		static void OnJoystickConnected(SDL_ControllerDeviceEvent& e);
 		static void OnJoystickDisconnected(SDL_ControllerDeviceEvent& e);
 		static void Shutdown();
@@ -53,6 +68,9 @@ namespace based::input
 		static bool GetButtonUp(int joystickId, Button button);
 		static float GetAxis(int joystickId, Axis axis, bool useDeadzone = false);
 		static float GetAxis(int joystickId, int axis);
+
+		static ControllerType GetControllerType(int joystickId);
+		static std::string GetDeviceName(int joystickId);
 	private:
 		static int GetNextFreeIndex();
 

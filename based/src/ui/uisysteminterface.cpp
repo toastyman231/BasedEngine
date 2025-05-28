@@ -61,7 +61,7 @@ namespace based::ui
 
 				translated = row[mCurrentLanguageIndex];
 				BASED_TRACE("Translated {} to {}", input, translated);
-				return SystemInterface::TranslateString(translated, input);
+				return 1;
 			}
 		}
 

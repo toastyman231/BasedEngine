@@ -19,18 +19,11 @@ namespace based::managers
 		void RegisterTrigger(input::InputActionTriggerBase* trigger);
 		void RegisterModifier(input::InputActionModifierBase* modifier);
 
+		static input::InputComponent* GetInputComponentForPlayer(int playerId);
+
 		const input::InputAction& GetAction(const std::string& name) const;
 
 	private:
-		/*bool InputManager::GetRawKeyValue(
-			input::InputAction& action,
-			input::InputActionValue& value,
-			input::InputMappingConfig& config,
-			const input::BasedKey& key,
-			std::vector<input::BasedKey>& consumedKeys,
-			input::InputActionType type, int controllerID,
-			bool consumeInput);*/
-
 		std::string mPrimarySearchPath = "Assets/Input/";
 		std::unordered_map<std::string, input::InputAction> mInputActions;
 		std::unordered_map<std::string, input::InputMappingConfig> mMappingConfigs;

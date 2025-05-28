@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "input/joystick.h"
 
+#include "app.h"
+#include "engine.h"
 #include "SDL2/SDL_events.h"
 #include "SDL2/SDL_gamecontroller.h"
 
@@ -25,7 +27,8 @@ namespace based::input
 				std::fill(c->axesLast.begin(), c->axesLast.end(), 0.f);
 
 				int mapIndex = GetNextFreeIndex();
-				BASED_TRACE("Joystick connected: mapIndex({}), deviceIndex({})", mapIndex, deviceIndex);
+				BASED_TRACE("Joystick connected: mapIndex({}), deviceIndex({}), name({})", 
+					mapIndex, deviceIndex, SDL_GameControllerName(c->gc));
 				availableJoysticks[mapIndex] = std::move(c);
 			}
 			else
@@ -38,14 +41,30 @@ namespace based::input
 	void Joystick::OnJoystickDisconnected(SDL_ControllerDeviceEvent& e)
 	{
 		int deviceIndex = e.which;
+		BASED_TRACE("Trying to disconnect joystick {}", deviceIndex);
 		for (auto it = availableJoysticks.begin(); it != availableJoysticks.end(); it++)
 		{
 			Controller* c = it->second.get();
-			if (c->joystickIndex == deviceIndex)
+			// Only required with SDL2, in SDL3 e.which matches the Connected event properly
+			auto gc = SDL_GameControllerFromInstanceID(deviceIndex);
+			if (c->joystickIndex == deviceIndex || (gc && c->gc == gc))
 			{
+				auto view = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry()
+					.view<scene::Enabled, input::InputComponent>();
+				for (const auto& e : view)
+				{
+					auto& inputComp = view.get<input::InputComponent>(e);
+
+					if (inputComp.controllerID == it->first)
+					{
+						inputComp.mInputMethod = InputMethod::KeyboardMouse;
+					}
+				}
+
 				BASED_TRACE("Joystick disconnected {}", deviceIndex);
 				SDL_GameControllerClose(c->gc);
 				availableJoysticks.erase(it);
+
 				break;
 			}
 		}
@@ -172,6 +191,26 @@ namespace based::input
 	float Joystick::GetAxis(int joystickId, int axis)
 	{
 		return GetAxis(joystickId, (Axis)axis);
+	}
+
+	Joystick::ControllerType Joystick::GetControllerType(int joystickId)
+	{
+		if (auto& c = availableJoysticks[joystickId])
+		{
+			return static_cast<ControllerType>(SDL_GameControllerGetType(c->gc));
+		}
+
+		return ControllerType::Unknown;
+	}
+
+	std::string Joystick::GetDeviceName(int joystickId)
+	{
+		if (auto& c = availableJoysticks[joystickId])
+		{
+			return SDL_GameControllerName(c->gc);
+		}
+
+		return "INVALID CONTROLLER ID";
 	}
 
 	int Joystick::GetNextFreeIndex()

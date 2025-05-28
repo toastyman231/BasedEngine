@@ -30,6 +30,14 @@ namespace based::graphics
 		ReadWrite = 0x88BA
 	};
 
+	enum class TextureWrapMode
+	{
+		Repeat = 0x2901,
+		MirroredRepeat = 0x8370,
+		ClampEdge = 0x812F,
+		ClampBorder = 0x812D
+	};
+
 	class Texture
 	{
 	public:
@@ -50,11 +58,13 @@ namespace based::graphics
 		inline uint32_t GetNumChannels() const { return mNumChannels; }
 		inline const std::string& GetPath() const { return mPath; }
 		inline TextureFilter GetTextureFilter() const { return mFilter; }
+		inline TextureWrapMode GetWrapMode() const { return mWrapMode; }
 
 		void Bind();
 		void Unbind();
 
 		void SetTextureFilter(TextureFilter filter);
+		void SetWrapMode(TextureWrapMode mode);
 		void SetName(const std::string& name) { mName = name; }
 
 		static std::shared_ptr<Texture> CreateImageTexture(const std::string& name,
@@ -64,6 +74,7 @@ namespace based::graphics
 		friend class managers::ResourceManager;
 	private:
 		TextureFilter mFilter = TextureFilter::Linear;
+		TextureWrapMode mWrapMode = TextureWrapMode::Repeat;
 
 		std::string mPath = "";
 		std::string mName = "New Texture";

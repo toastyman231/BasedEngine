@@ -74,11 +74,7 @@ namespace based::ui
 
 	void RenderInterface_GL4::BeginFrame()
 	{
-		// Clear VAs at the start of the next frame (we can't clear in EndFrame because that actually runs before
-		// the scene is even rendered, so we still need the VAs after that point)
-		mVAs.clear();
-
-		auto& cam = Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera();
+		auto cam = Engine::Instance().GetApp().GetCurrentScene()->GetActiveCamera();
 		mProjection = glm::ortho(0.f,
 			static_cast<float>(Engine::Instance().GetWindow().GetSize().x),
 			static_cast<float>(Engine::Instance().GetWindow().GetSize().y), 0.f,
@@ -224,9 +220,10 @@ namespace based::ui
 			return false;
 		}
 
-		auto texture = std::make_shared<graphics::Texture>(source);
+		auto texture = std::make_shared<graphics::Texture>(source, true);
 		if (texture->GetId() != 0)
 		{
+			texture_dimensions = Rml::Vector2i(texture->GetWidth(), texture->GetHeight());
 			return texture->GetId();
 		}
 

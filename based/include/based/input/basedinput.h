@@ -15,6 +15,13 @@ namespace based::input
 		Axis3D
 	};
 
+	enum class InputMethod
+	{
+		KeyboardMouse,
+		Controller,
+		Other
+	};
+
 	struct InputActionValue
 	{
 		InputActionType type = InputActionType::Boolean;
@@ -163,7 +170,16 @@ namespace based::input
 	struct InputComponent
 	{
 		int controllerID = 0;
+		int playerID = 0;
 		std::priority_queue<InputMappingConfig*, std::vector<InputMappingConfig*>, InputConfigComparator> mActiveMappings;
+		InputMethod mInputMethod = InputMethod::KeyboardMouse;
+
+		std::string GetMappedKeyForAction(const std::string& action);
+		std::vector<std::string> GetMappedKeysForAction(const std::string& action, int keyCount);
+		std::string GetKeyImageForAction(const std::string& action, 
+			const std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& keyMaps);
+		std::vector<std::string> GetKeyImagesForAction(const std::string& action, int keyCount,
+			const std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& keyMaps);
 
 		entt::dispatcher mStartedEvent;
 		entt::dispatcher mTriggeredEvent;

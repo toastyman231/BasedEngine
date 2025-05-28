@@ -5,6 +5,8 @@
 
 #include <RmlUi/Core.h>
 
+#include "based/ui/elementbinding.h"
+
 namespace based::managers
 {
 	struct DocumentInfo
@@ -41,6 +43,8 @@ namespace based::managers
 		void SetTranslationTable(const std::string& path);
 		void SetCurrentLanguageIndex(int index);
 
+		void AddBinding(ui::ElementBinding& binding);
+
 		std::deque<DocumentInfo> GetDocuments();
 
 		Rml::SystemInterface& GetSystemInterface() const { return *mSystemInterface; }
@@ -53,6 +57,7 @@ namespace based::managers
 
 		std::vector<Rml::Context*> mContexts;
 		std::deque<DocumentInfo> mDocuments;
+		std::vector<ui::ElementBinding> mBindings;
 
 		Rml::String mPathPrefix;
 

@@ -93,8 +93,7 @@ namespace based::graphics
 		mUUID(core::UUID())
 	{
 		glGenTextures(1, &mId); BASED_CHECK_GL_ERROR;
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); BASED_CHECK_GL_ERROR;
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); BASED_CHECK_GL_ERROR;
+		SetWrapMode(TextureWrapMode::ClampEdge);
 		SetTextureFilter(mFilter);
 		glBindTexture(GL_TEXTURE_2D, mId); BASED_CHECK_GL_ERROR;
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, mWidth, mHeight, 0, GL_RGBA,
@@ -147,8 +146,16 @@ namespace based::graphics
 		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
 	}
 
+	void Texture::SetWrapMode(TextureWrapMode mode)
+	{
+		glBindTexture(GL_TEXTURE_2D, mId);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (int)mode); BASED_CHECK_GL_ERROR;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (int)mode); BASED_CHECK_GL_ERROR;
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
 	std::shared_ptr<Texture> Texture::CreateImageTexture(const std::string& name, 
-		uint32_t width, uint32_t height, TextureAccessLevel accessLevel, core::AssetLibrary<Texture>& library)
+	                                                     uint32_t width, uint32_t height, TextureAccessLevel accessLevel, core::AssetLibrary<Texture>& library)
 	{
 		auto tex = std::make_shared<Texture>(width, height);
 		library.Load(name, tex);

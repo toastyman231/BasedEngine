@@ -44,6 +44,11 @@ namespace based::managers
 			HotReloadDocuments();
 #endif
 
+		for (const auto& binding : mBindings)
+		{
+			binding.ResolveBinding();
+		}
+
 		for (const auto context : mContexts)
 		{
 			if (context) context->Update();
@@ -174,6 +179,11 @@ namespace based::managers
 	{
 		ui::SystemInterface_SDL* sys = (ui::SystemInterface_SDL*)&Engine::Instance().GetUiManager().GetSystemInterface();
 		sys->SetCurrentLanguageIndex(index);
+	}
+
+	void UiManager::AddBinding(ui::ElementBinding& binding)
+	{
+		mBindings.emplace_back(std::move(binding));
 	}
 
 	std::deque<DocumentInfo> UiManager::GetDocuments()

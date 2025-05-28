@@ -312,6 +312,21 @@ namespace based::managers
 
 						shouldTrigger = ShouldActionTrigger(inputAction, accumulatedModified, key);
 
+						if (!value.IsValueZero())
+						{
+							switch (key.type) {
+							case input::BasedKey::Keyboard:
+							case input::BasedKey::MouseButton:
+							case input::BasedKey::MouseAxis:
+								inputComp.mInputMethod = input::InputMethod::KeyboardMouse;
+								break;
+							case input::BasedKey::ControllerButton:
+							case input::BasedKey::ControllerAxis:
+								inputComp.mInputMethod = input::InputMethod::Controller;
+								break;
+							}
+						}
+
 						inputAction.mCurrentValue = accumulatedModified;
 						inputAction.mRawValue = accumulatedUnmodified;
 					}
@@ -362,12 +377,6 @@ namespace based::managers
 					}
 				}
 			}
-
-			/*for (auto& config : tempStorage)
-			{
-				inputComp.mActiveMappings.push(config);
-				//BASED_TRACE("PUSHED BACK {}", config->name);
-			}*/
 		}
 	}
 
@@ -536,6 +545,20 @@ namespace based::managers
 	void InputManager::RegisterModifier(input::InputActionModifierBase* modifier)
 	{
 		mModifiers.emplace(modifier->GetName(), modifier);
+	}
+
+	input::InputComponent* InputManager::GetInputComponentForPlayer(int playerId)
+	{
+		auto view = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry().view<scene::Enabled, input::InputComponent>();
+
+		for (const auto& e : view)
+		{
+			auto& inputComp = view.get<input::InputComponent>(e);
+
+			if (inputComp.playerID == playerId) return &inputComp;
+		}
+
+		return nullptr;
 	}
 
 	const input::InputAction& InputManager::GetAction(const std::string& name) const

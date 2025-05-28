@@ -42,7 +42,6 @@ namespace based::ui
 		static const Rml::TextureHandle TextureEnableWithoutBinding = Rml::TextureHandle(-1);
 	private:
 		std::unordered_map<core::UUID, std::shared_ptr<graphics::VertexArray>> mCompiledVAs;
-		std::vector<std::shared_ptr<graphics::VertexArray>> mVAs; // Cleared every frame
 		std::shared_ptr<graphics::Shader> mFragColor;
 		std::shared_ptr<graphics::Shader> mFragTexture;
 
