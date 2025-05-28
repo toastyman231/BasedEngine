@@ -14,6 +14,20 @@ namespace based::managers
 
 		std::vector<spdlog::sink_ptr> sinks{ consoleSink };
 #ifdef BASED_CONFIG_DEBUG
+		if (std::filesystem::exists("Logs/recent_log.txt"))
+		{
+			auto dirIter = std::filesystem::directory_iterator("Logs");
+
+			int fileCount = std::count_if(
+				begin(dirIter),
+				end(dirIter),
+				[](auto& entry) { return entry.is_regular_file(); }
+			);
+
+			std::string newName = "Logs/log_" + std::to_string(fileCount) + ".txt";
+			std::filesystem::rename("Logs/recent_log.txt", newName);
+		}
+
 		sinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("Logs/recent_log.txt"));
 #endif
 		auto logger = std::make_shared<spdlog::logger>(BASED_DEFAULT_LOGGER_NAME, sinks.begin(), sinks.end());

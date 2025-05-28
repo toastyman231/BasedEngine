@@ -44,9 +44,19 @@ namespace based::managers
 			HotReloadDocuments();
 #endif
 
-		for (const auto& binding : mBindings)
+		std::vector<std::vector<ui::ElementBinding>::const_iterator> invalidBindings;
+		for (auto it = mBindings.cbegin(); it != mBindings.cend(); ++it)
 		{
-			binding.ResolveBinding();
+			const auto& binding = *it;
+
+			if (binding.IsValid())
+				binding.ResolveBinding();
+			else invalidBindings.emplace_back(it);
+		}
+
+		for (const auto& it : invalidBindings)
+		{
+			mBindings.erase(it);
 		}
 
 		for (const auto context : mContexts)
