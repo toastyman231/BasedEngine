@@ -68,6 +68,7 @@ namespace based::input
 		static bool GetButtonUp(int joystickId, Button button);
 		static float GetAxis(int joystickId, Axis axis, bool useDeadzone = false);
 		static float GetAxis(int joystickId, int axis);
+		static float GetAxisFromAnyController(Axis axis);
 
 		static ControllerType GetControllerType(int joystickId);
 		static std::string GetDeviceName(int joystickId);

@@ -193,6 +193,19 @@ namespace based::input
 		return GetAxis(joystickId, (Axis)axis);
 	}
 
+	float Joystick::GetAxisFromAnyController(Axis axis)
+	{
+		for (auto& pair : availableJoysticks)
+		{
+			if (pair.second)
+			{
+				return SDL_GameControllerGetAxis(pair.second->gc, (SDL_GameControllerAxis)axis);
+			}
+		}
+
+		return 0.f;
+	}
+
 	Joystick::ControllerType Joystick::GetControllerType(int joystickId)
 	{
 		if (auto& c = availableJoysticks[joystickId])

@@ -122,6 +122,12 @@ namespace based::math
 		return log(x);
 	}
 
+	template <typename T>
+	static T MapRange(T value, T InMin, T InMax, T OutMin, T OutMax)
+	{
+		return OutMin + (value - InMin) * (OutMax - OutMin) / (InMax - InMin);
+	}
+
 	static float Max(float a, float b)
 	{
 		return (a > b) ? a : b;

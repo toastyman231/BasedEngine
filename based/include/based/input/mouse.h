@@ -27,6 +27,7 @@ namespace based::input
 		static void SetCursorMode(CursorMode mode);
 		static void SetCursorVisible(bool visible);
 
+		static void SetMousePosition(glm::ivec2 position, bool zeroDelta = false);
 		static glm::ivec2 GetMousePosition();
 
 		inline static glm::vec2 xBounds = {-999, -999};

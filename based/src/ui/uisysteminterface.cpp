@@ -3,7 +3,10 @@
 
 #include <SDL2/SDL.h>
 
+#include "basedtime.h"
 #include "engine.h"
+#include "input/mouse.h"
+#include "math/basedmath.h"
 
 namespace based::ui
 {
@@ -98,14 +101,21 @@ namespace based::ui
 
 namespace RmlSDL
 {
-	bool RmlSDL::InputEventHandler(Rml::Context* context, SDL_Event& ev)
+	bool InputEventHandler(Rml::Context* context, SDL_Event& ev)
 	{
+		if (!context) return false;
+
 		bool result = true;
+		static std::vector navigationKeycodes = {
+			SDLK_UP, SDLK_DOWN, SDLK_RIGHT, SDLK_LEFT, SDLK_w, SDLK_a, SDLK_s, SDLK_d
+		};
 
 		switch (ev.type)
 		{
 		case SDL_MOUSEMOTION:
+			//if (based::Engine::Instance().GetUiManager().IsInControllerMode()) break;
 			result = context->ProcessMouseMove(ev.motion.x, ev.motion.y, RmlSDL::GetKeyModifierState());
+			if(context->IsMouseInteracting()) based::input::Mouse::SetCursorVisible(true);
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			result = context->ProcessMouseButtonDown(RmlSDL::ConvertMouseButton(ev.button.button), RmlSDL::GetKeyModifierState());
@@ -118,13 +128,103 @@ namespace RmlSDL
 		case SDL_MOUSEWHEEL:
 			result = context->ProcessMouseWheel(float(-ev.wheel.y), RmlSDL::GetKeyModifierState());
 			break;
+		case SDL_CONTROLLERAXISMOTION:
+			// Handled in UIManager::Update because axis input requires continuous input detection,
+			// which this event handler does not seem to support
+			break;
+		case SDL_CONTROLLERBUTTONDOWN:
+			if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_A)
+			{
+				// Directly dispatch click event to focused element if it exists
+				// because controllers don't care about mouse location
+				auto target = context->GetFocusElement();
+				Rml::Rectanglef rect;
+				Rml::ElementUtilities::GetBoundingBox(rect, target, Rml::BoxArea::Border);
+
+				if (target)
+				{
+					based::input::Mouse::SetMousePosition(glm::ivec2(rect.Center().x, rect.Center().y), true);
+				}
+				result = context->ProcessMouseButtonDown(0, 0);
+				if (target && !context->IsMouseInteracting())
+				{
+					Rml::Dictionary params;
+					params["mouse_x"] = rect.Center().x;
+					params["mouse_y"] = rect.Center().y;
+					params["button"] = 0;
+					target->DispatchEvent(Rml::EventId::Mousedown, params);
+				}
+			}
+			if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+				result = context->ProcessKeyDown(RmlSDL::ConvertKey(SDLK_DOWN), 0);
+			if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+				result = context->ProcessKeyDown(RmlSDL::ConvertKey(SDLK_UP), 0);
+			if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+				result = context->ProcessKeyDown(RmlSDL::ConvertKey(SDLK_LEFT), 0);
+			if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+				result = context->ProcessKeyDown(RmlSDL::ConvertKey(SDLK_RIGHT), 0);
+			break;
+		case SDL_CONTROLLERBUTTONUP:
+			if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_A)
+			{
+				if (auto target = context->GetFocusElement())
+				{
+					Rml::Rectanglef rect;
+					Rml::ElementUtilities::GetBoundingBox(rect, target, Rml::BoxArea::Border);
+					based::input::Mouse::SetMousePosition(glm::ivec2(rect.Center().x, rect.Center().y), true);
+				}
+				result = context->ProcessMouseButtonUp(0, 0);
+			}
+			if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+				result = context->ProcessKeyUp(RmlSDL::ConvertKey(SDLK_DOWN), 0);
+			if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+				result = context->ProcessKeyUp(RmlSDL::ConvertKey(SDLK_UP), 0);
+			if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+				result = context->ProcessKeyUp(RmlSDL::ConvertKey(SDLK_LEFT), 0);
+			if (ev.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+				result = context->ProcessKeyUp(RmlSDL::ConvertKey(SDLK_RIGHT), 0);
+			break;
 		case SDL_KEYDOWN:
+			if (std::find(navigationKeycodes.begin(), navigationKeycodes.end(), ev.key.keysym.sym) 
+				!= navigationKeycodes.end())
+			{
+				based::input::Mouse::SetCursorVisible(false);
+			}
 			result = context->ProcessKeyDown(RmlSDL::ConvertKey(ev.key.keysym.sym), RmlSDL::GetKeyModifierState());
 			if (ev.key.keysym.sym == SDLK_RETURN || ev.key.keysym.sym == SDLK_KP_ENTER)
+			{
 				result &= context->ProcessTextInput('\n');
+				auto target = context->GetFocusElement();
+				Rml::Rectanglef rect;
+				Rml::ElementUtilities::GetBoundingBox(rect, target, Rml::BoxArea::Border);
+
+				if (target)
+				{
+					based::input::Mouse::SetMousePosition(glm::ivec2(rect.Center().x, rect.Center().y), true);
+				}
+				bool res = context->ProcessMouseButtonDown(0, 0);
+				if (target && !res)
+				{
+					Rml::Dictionary params;
+					params["mouse_x"] = rect.Center().x;
+					params["mouse_y"] = rect.Center().y;
+					params["button"] = 0;
+					target->DispatchEvent(Rml::EventId::Mousedown, params);
+				}
+			}
 			break;
 		case SDL_KEYUP:
 			result = context->ProcessKeyUp(RmlSDL::ConvertKey(ev.key.keysym.sym), RmlSDL::GetKeyModifierState());
+			if (ev.key.keysym.sym == SDLK_RETURN || ev.key.keysym.sym == SDLK_KP_ENTER)
+			{
+				if (auto target = context->GetFocusElement())
+				{
+					Rml::Rectanglef rect;
+					Rml::ElementUtilities::GetBoundingBox(rect, target, Rml::BoxArea::Border);
+					based::input::Mouse::SetMousePosition(glm::ivec2(rect.Center().x, rect.Center().y), true);
+				}
+				result &= context->ProcessMouseButtonUp(0, 0);
+			}
 			break;
 		case SDL_TEXTINPUT:
 			result = context->ProcessTextInput(Rml::String(&ev.text.text[0]));
@@ -152,7 +252,7 @@ namespace RmlSDL
 		return result;
 	}
 
-	Rml::Input::KeyIdentifier RmlSDL::ConvertKey(int sdlkey)
+	Rml::Input::KeyIdentifier ConvertKey(int sdlkey)
 	{
 		// clang-format off
 		switch (sdlkey)
@@ -277,7 +377,7 @@ namespace RmlSDL
 		return Rml::Input::KI_UNKNOWN;
 	}
 
-	int RmlSDL::ConvertMouseButton(int button)
+	int ConvertMouseButton(int button)
 	{
 		switch (button)
 		{
@@ -292,7 +392,7 @@ namespace RmlSDL
 		}
 	}
 
-	int RmlSDL::GetKeyModifierState()
+	int GetKeyModifierState()
 	{
 		SDL_Keymod sdl_mods = SDL_GetModState();
 

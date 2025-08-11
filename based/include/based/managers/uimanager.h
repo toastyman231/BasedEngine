@@ -6,6 +6,7 @@
 #include <RmlUi/Core.h>
 
 #include "based/ui/elementbinding.h"
+#include "external/glm/detail/_features.hpp"
 
 namespace based::managers
 {
@@ -33,7 +34,7 @@ namespace based::managers
 		void Render() const;
 		void Shutdown();
 
-		DocumentInfo* LoadWindow(const std::string& path, Rml::Context* context, std::string id = "");
+		DocumentInfo* LoadWindow(const std::string& path, Rml::Context* context, std::string id = "", bool show = true);
 		bool CloseWindow(const DocumentInfo& document);
 		Rml::Context* CreateContext(const std::string& name, glm::ivec2 size);
 		Rml::Context* GetContext(const std::string& name);
@@ -52,6 +53,7 @@ namespace based::managers
 	private:
 		void HotReloadDocuments();
 
+	private:
 		Rml::SystemInterface* mSystemInterface;
 		Rml::RenderInterface* mRenderInterface;
 
@@ -62,6 +64,19 @@ namespace based::managers
 		Rml::String mPathPrefix;
 
 		bool mUsePathPrefix;
+
+		class CustomEventInstancer : public Rml::EventInstancer
+		{
+		protected:
+			void Release() override;
+
+		public:
+			Rml::EventPtr InstanceEvent(Rml::Element* target, Rml::EventId id, const Rml::String& type,
+				const Rml::Dictionary& parameters, bool interruptible) override;
+			void ReleaseEvent(Rml::Event* event) override;
+		};
+
+		CustomEventInstancer mEventInstancer;
 	};
 }
 

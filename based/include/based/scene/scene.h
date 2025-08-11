@@ -31,13 +31,13 @@ namespace based::scene
 		{
 			mSceneName = name;
 		}
-		~Scene() = default;
+		virtual ~Scene() = default;
 
-		void InitializeScene() const;
+		virtual void InitializeScene();
 		void AnimateScene() const;
-		void RenderScene() const;
-		void UpdateScene(float deltaTime);
-		void ShutdownScene() const;
+		virtual void RenderScene() const;
+		virtual void UpdateScene(float deltaTime);
+		virtual void ShutdownScene();
 
 		entt::registry& GetRegistry() { return mRegistry; }
 		std::shared_ptr<graphics::Camera> GetActiveCamera() const { return mActiveCamera; }

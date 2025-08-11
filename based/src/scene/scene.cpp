@@ -12,7 +12,7 @@
 
 namespace based::scene
 {
-	void Scene::InitializeScene() const
+	void Scene::InitializeScene()
 	{
 		PROFILE_FUNCTION();
 		const auto entityView = mRegistry.view<EntityReference>();
@@ -198,7 +198,7 @@ namespace based::scene
 		AnimateScene();
 	}
 
-	void Scene::ShutdownScene() const
+	void Scene::ShutdownScene()
 	{
 		PROFILE_FUNCTION();
 

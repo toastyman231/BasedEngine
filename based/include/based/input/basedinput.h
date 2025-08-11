@@ -96,7 +96,7 @@ namespace based::input
 		std::string mModifierName;
 	};
 
-	enum class InputState
+	enum class InputState : int8_t
 	{
 		Inactive = -1,
 		Triggered,
@@ -134,7 +134,7 @@ namespace based::input
 	struct BasedKey
 	{
 		int key;
-		enum KeyType
+		enum KeyType : uint8_t
 		{
 			Keyboard,
 			MouseButton,

@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "input/mouse.h"
 
+#include <SDL2/SDL_events.h>
+
 #include "engine.h"
 #include "input/keyboard.h"
 #include "SDL2/SDL_mouse.h"
@@ -126,11 +128,39 @@ namespace based::input
 	void Mouse::SetCursorMode(CursorMode mode)
 	{
 		mCursorMode = mode;
+
+		// TODO: Figure this out
+		/*switch (mode)
+		{
+		case CursorMode::Free:
+			SDL_SetRelativeMouseMode(SDL_FALSE);
+			break;
+		case CursorMode::Confined:
+			SDL_SetRelativeMouseMode(SDL_TRUE);
+			break;
+		}*/
 	}
 
 	void Mouse::SetCursorVisible(bool visible)
 	{
 		SDL_ShowCursor(visible);
+	}
+
+	void Mouse::SetMousePosition(glm::ivec2 position, bool zeroDelta)
+	{
+		SDL_bool wasPreviouslyRelative = SDL_GetRelativeMouseMode();
+		int wasPreviouslyVisible = SDL_ShowCursor(SDL_QUERY);
+		if (zeroDelta) SDL_SetRelativeMouseMode(SDL_TRUE);
+		SDL_WarpMouseInWindow(Engine::Instance().GetWindow().GetSDLWindow(), position.x, position.y);
+		if (zeroDelta)
+		{
+			x = position.x;
+			y = position.y;
+			xLast = x;
+			yLast = y;
+			SDL_SetRelativeMouseMode(wasPreviouslyRelative);
+			SDL_ShowCursor(wasPreviouslyVisible);
+		}
 	}
 
 	glm::ivec2 Mouse::GetMousePosition()

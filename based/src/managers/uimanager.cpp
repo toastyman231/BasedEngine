@@ -1,10 +1,14 @@
 #include "pch.h"
 #include "managers/uimanager.h"
 
+#include "basedtime.h"
 #include "engine.h"
 #include "based/ui/uisysteminterface.h"
 #include "based/ui/uirenderinterface.h"
+#include "input/joystick.h"
 #include "input/keyboard.h"
+#include "input/mouse.h"
+#include "math/basedmath.h"
 
 namespace based::managers
 {
@@ -25,6 +29,7 @@ namespace based::managers
 		Rml::LoadFontFace(ASSET_PATH("Fonts/Arimo-Bold.ttf"));
 
 		Engine::Instance().GetUiManager().CreateContext("main", Engine::Instance().GetWindow().GetSize());
+		Rml::Factory::RegisterEventInstancer(&mEventInstancer);
 	}
 
 	void UiManager::ProcessEvents(SDL_Event e) const
@@ -43,6 +48,67 @@ namespace based::managers
 		if (input::Keyboard::Key(BASED_INPUT_KEY_LALT) && input::Keyboard::KeyDown(BASED_INPUT_KEY_R))
 			HotReloadDocuments();
 #endif
+
+		auto rawYValue = input::Joystick::GetAxisFromAnyController(input::Joystick::Axis::LeftStickVertical);
+		auto rawXValue = input::Joystick::GetAxisFromAnyController(input::Joystick::Axis::LeftStickHorizontal);
+		float valueY = math::MapRange(rawYValue, -32768.f, 32767.f, -1.f, 1.f);
+		float valueX = math::MapRange(rawXValue, -32768.f, 32767.f, -1.f, 1.f);
+
+		static float lastAxisTime = 0.f;
+		constexpr float minAxisTime = 0.25f;
+		if (core::Time::GetUnscaledTime() - lastAxisTime >= minAxisTime)
+		{
+			if (math::Abs(valueY) > 0.5f || math::Abs(valueX) > 0.5f)
+			{
+				input::Mouse::SetCursorVisible(false);
+				lastAxisTime = core::Time::GetUnscaledTime();
+			}
+
+			if (valueY < -0.5f)
+			{
+				for (auto context : mContexts)
+				{
+					context->ProcessKeyDown(RmlSDL::ConvertKey(SDLK_UP), 0);
+				}
+			}
+			else if (valueY > 0.5f)
+			{
+				for (auto context : mContexts)
+				{
+					context->ProcessKeyDown(RmlSDL::ConvertKey(SDLK_DOWN), 0);
+				}
+			}
+
+			if (valueX < -0.5f)
+			{
+				for (auto context : mContexts)
+				{
+					context->ProcessKeyDown(RmlSDL::ConvertKey(SDLK_LEFT), 0);
+				}
+			}
+			else if (valueX > 0.5f)
+			{
+				for (auto context : mContexts)
+				{
+					context->ProcessKeyDown(RmlSDL::ConvertKey(SDLK_RIGHT), 0);
+				}
+			}
+		}
+
+		if (math::Abs(valueY) >= 0.2f)
+		{
+			for (auto context : mContexts)
+			{
+				context->ProcessMouseWheel(Rml::Vector2f(0.f, valueY), 0);
+			}
+		}
+		if (math::Abs(valueX) >= 0.2f)
+		{
+			for (auto context : mContexts)
+			{
+				context->ProcessMouseWheel(Rml::Vector2f(valueX, 0.f), 0);
+			}
+		}
 
 		std::vector<std::vector<ui::ElementBinding>::const_iterator> invalidBindings;
 		for (auto it = mBindings.cbegin(); it != mBindings.cend(); ++it)
@@ -84,7 +150,7 @@ namespace based::managers
 		delete mSystemInterface;
 	}
 
-	DocumentInfo* UiManager::LoadWindow(const std::string& path, Rml::Context* context, std::string id)
+	DocumentInfo* UiManager::LoadWindow(const std::string& path, Rml::Context* context, std::string id, bool show)
 	{
 		PROFILE_FUNCTION();
 		Rml::String documentPath = path + Rml::String(".rml");
@@ -101,7 +167,7 @@ namespace based::managers
 			title->SetInnerRML(document->GetTitle());
 
 		if (!id.empty()) document->SetId(id);
-		document->Show();
+		if (show) document->Show();
 
 		mDocuments.emplace_back(DocumentInfo{ document, documentPath, context });
 
@@ -177,6 +243,111 @@ namespace based::managers
 
 		mPathPrefix = path;
 		mUsePathPrefix = true;
+	}
+
+	Rml::EventPtr UiManager::CustomEventInstancer::InstanceEvent(
+		Rml::Element* target, 
+		Rml::EventId id, 
+		const Rml::String& type, 
+		const Rml::Dictionary& parameters, 
+		bool interruptible)
+	{
+		switch (id)
+		{
+		case Rml::EventId::Invalid:
+			break;
+		case Rml::EventId::Mousedown:
+			break;
+		case Rml::EventId::Mousescroll:
+			break;
+		case Rml::EventId::Mouseover:
+			break;
+		case Rml::EventId::Mouseout:
+			break;
+		case Rml::EventId::Focus:
+			BASED_TRACE("FOCUSING {}", target->GetId());
+			if (target)
+			{
+				Rml::Rectanglef rect;
+				Rml::ElementUtilities::GetBoundingBox(rect, target, Rml::BoxArea::Border);
+				input::Mouse::SetMousePosition(glm::ivec2(rect.Center().x, rect.Center().y), true);
+				auto context = target->GetContext();
+				if (!context) break;
+				context->ProcessMouseMove(static_cast<int>(rect.Center().x), static_cast<int>(rect.Center().y), 0);
+			}
+			break;
+		case Rml::EventId::Blur:
+			BASED_TRACE("BLUR {}", target->GetId());
+			break;
+		case Rml::EventId::Keydown:
+			break;
+		case Rml::EventId::Keyup:
+			break;
+		case Rml::EventId::Textinput:
+			break;
+		case Rml::EventId::Mouseup:
+			break;
+		case Rml::EventId::Click:
+			break;
+		case Rml::EventId::Dblclick:
+			break;
+		case Rml::EventId::Load:
+			break;
+		case Rml::EventId::Unload:
+			break;
+		case Rml::EventId::Show:
+			break;
+		case Rml::EventId::Hide:
+			break;
+		case Rml::EventId::Mousemove:
+			break;
+		case Rml::EventId::Dragmove:
+			break;
+		case Rml::EventId::Drag:
+			break;
+		case Rml::EventId::Dragstart:
+			break;
+		case Rml::EventId::Dragover:
+			break;
+		case Rml::EventId::Dragdrop:
+			break;
+		case Rml::EventId::Dragout:
+			break;
+		case Rml::EventId::Dragend:
+			break;
+		case Rml::EventId::Handledrag:
+			break;
+		case Rml::EventId::Resize:
+			break;
+		case Rml::EventId::Scroll:
+			break;
+		case Rml::EventId::Animationend:
+			break;
+		case Rml::EventId::Transitionend:
+			break;
+		case Rml::EventId::Change:
+			break;
+		case Rml::EventId::Submit:
+			break;
+		case Rml::EventId::Tabchange:
+			break;
+		case Rml::EventId::NumDefinedIds:
+			break;
+		case Rml::EventId::MaxNumIds:
+			break;
+		}
+
+		return Rml::EventPtr(new Rml::Event(target, id, type, parameters, interruptible));
+	}
+
+	void UiManager::CustomEventInstancer::ReleaseEvent(Rml::Event* event)
+	{
+		delete event;
+	}
+
+	void UiManager::CustomEventInstancer::Release()
+	{
+		
 	}
 
 	void UiManager::SetTranslationTable(const std::string& path)
