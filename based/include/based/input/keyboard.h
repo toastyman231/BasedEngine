@@ -12,7 +12,7 @@ namespace based::input
 		static bool KeyDown(int button);
 		static bool KeyUp(int button);
 	private:
-		constexpr static const int KeyCount = 287; // SDL supports up to index 286 - see SDL_NUM_SCANCODES
+		constexpr static int KeyCount = 287; // SDL supports up to index 286 - see SDL_NUM_SCANCODES
 
 		static std::array<bool, KeyCount> keys;
 		static std::array<bool, KeyCount> keysLast;
