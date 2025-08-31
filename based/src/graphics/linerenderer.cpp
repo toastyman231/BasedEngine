@@ -14,7 +14,7 @@ namespace based::graphics
 	{
 		auto va = std::make_shared<VertexArray>();
 
-		std::shared_ptr<Material> mat = Material::LoadMaterialFromFile(
+		static std::shared_ptr<Material> mat = Material::LoadMaterialFromFile(
 			ASSET_PATH("Materials/DefaultLine.bmat"),  
 			Engine::Instance().GetApp().GetCurrentScene()->GetMaterialStorage());
 		mat->SetUniformValue("color", color);

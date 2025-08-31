@@ -14,15 +14,19 @@ namespace based::physics
 		static constexpr JPH::ObjectLayer UNUSED4 = 3;
 		static constexpr JPH::ObjectLayer STATIC = 4;
 		static constexpr JPH::ObjectLayer MOVING = 5;
-		static constexpr JPH::ObjectLayer NUM_LAYERS = 6;
+		static constexpr JPH::ObjectLayer SENSOR = 6;
+		static constexpr JPH::ObjectLayer CHARACTER = 7;
+		static constexpr JPH::ObjectLayer NUM_LAYERS = 8;
 	};
 
 	namespace BroadPhaseLayers
 	{
 		static constexpr JPH::BroadPhaseLayer STATIC(0);
 		static constexpr JPH::BroadPhaseLayer MOVING(1);
-		static constexpr JPH::BroadPhaseLayer UNUSED(2);
-		static constexpr JPH::uint NUM_LAYERS(3);
+		static constexpr JPH::BroadPhaseLayer SENSOR(2);
+		static constexpr JPH::BroadPhaseLayer CHARACTER(3);
+		static constexpr JPH::BroadPhaseLayer UNUSED(4);
+		static constexpr JPH::uint NUM_LAYERS(5);
 	};
 
 	/// BroadPhaseLayerInterface implementation
@@ -38,6 +42,8 @@ namespace based::physics
 			mObjectToBroadPhase[Layers::UNUSED4] = BroadPhaseLayers::UNUSED;
 			mObjectToBroadPhase[Layers::STATIC] = BroadPhaseLayers::STATIC;
 			mObjectToBroadPhase[Layers::MOVING] = BroadPhaseLayers::MOVING;
+			mObjectToBroadPhase[Layers::SENSOR] = BroadPhaseLayers::SENSOR;
+			mObjectToBroadPhase[Layers::CHARACTER] = BroadPhaseLayers::CHARACTER;
 		}
 
 		virtual JPH::uint GetNumBroadPhaseLayers() const override
@@ -65,7 +71,13 @@ namespace based::physics
 			case Layers::STATIC:
 				return inLayer2 == BroadPhaseLayers::MOVING;
 			case Layers::MOVING:
-				return inLayer2 == BroadPhaseLayers::STATIC || inLayer2 == BroadPhaseLayers::MOVING;
+				return inLayer2 == BroadPhaseLayers::STATIC
+					|| inLayer2 == BroadPhaseLayers::MOVING
+					|| inLayer2 == BroadPhaseLayers::SENSOR;
+			case Layers::CHARACTER:
+				return inLayer2 == BroadPhaseLayers::CHARACTER
+					|| inLayer2 == BroadPhaseLayers::STATIC
+					|| inLayer2 == BroadPhaseLayers::SENSOR;
 			case Layers::UNUSED1:
 			case Layers::UNUSED2:
 			case Layers::UNUSED3:
@@ -93,7 +105,11 @@ namespace based::physics
 			case Layers::STATIC:
 				return inObject2 == Layers::MOVING;
 			case Layers::MOVING:
-				return inObject2 == Layers::STATIC || inObject2 == Layers::MOVING;
+				return inObject2 == Layers::STATIC || inObject2 == Layers::MOVING || inObject2 == Layers::SENSOR;
+			case Layers::CHARACTER:
+				return inObject2 == Layers::CHARACTER
+					|| inObject2 == Layers::STATIC
+					|| inObject2 == Layers::SENSOR;
 			default:
 				JPH_ASSERT(false);
 				return false;

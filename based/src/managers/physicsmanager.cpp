@@ -21,8 +21,9 @@ namespace based::managers
 		JPH::RegisterDefaultAllocator();
 		JPH::Factory::sInstance = new JPH::Factory();
 		mTempAllocator = new JPH::TempAllocatorImpl(32 * 1024 * 1024);
+		// TODO: Switch over to my own job manager
 		mJobSystem = new JPH::JobSystemThreadPool(2048, 8,
-			std::thread::hardware_concurrency() - 1);
+			std::thread::hardware_concurrency() - 1u);
 		JPH::RegisterTypes();
 
 		mPhysicsSystem = new JPH::PhysicsSystem();
@@ -46,7 +47,7 @@ namespace based::managers
 
 		for (auto& e : physicsEntityView)
 		{
-			if (auto& entity = registry.get<scene::EntityReference>(e).entity.lock())
+			if (auto entity = registry.get<scene::EntityReference>(e).entity.lock())
 			{
 				auto& rigidbody = registry.get<scene::RigidbodyComponent>(e);
 				auto id = rigidbody.rigidbodyID;
@@ -83,8 +84,7 @@ namespace based::managers
 			layer
 		);
 		settings.mIsSensor = isTrigger;
-		return mPhysicsSystem->GetBodyInterface().CreateAndAddBody(settings, activation
-		);
+		return mPhysicsSystem->GetBodyInterface().CreateAndAddBody(settings, activation);
 	}
 
 	void PhysicsManager::DrawDebugBodies()
@@ -105,19 +105,31 @@ namespace based::managers
 					JPH::Color::sGreen, false, true);
 			}
 
-			/*auto charView = registry.view<scene::Enabled, scene::CharacterController>();
+			auto charView = registry.view<scene::Enabled, scene::CharacterController>();
 
 			for (auto& e : charView)
 			{
 				scene::CharacterController& character = charView.get<scene::CharacterController>(e);
+				auto& trans = registry.get<scene::Transform>(e);
 
-				character.Character->GetShape()->Draw(
+				/*character.Character->GetShape()->Draw(
 					mDebugRenderer,
 					character.Character->GetCenterOfMassTransform(),
 					character.Character->GetTransformedShape().GetShapeScale(),
 					JPH::Color::sGreen, false, true
-					);
-			}*/
+					);*/
+
+				auto& lockInterface = mPhysicsSystem->GetBodyLockInterface();
+				JPH::BodyLockRead lock(lockInterface, character.Character->GetInnerBodyID());
+
+				if (lock.Succeeded())
+				{
+					auto& body = lock.GetBody();
+					auto shape = body.GetShape();
+					shape->Draw(mDebugRenderer, body.GetCenterOfMassTransform(), body.GetTransformedShape().GetShapeScale(),
+						JPH::Color::sBlue, false, true);
+				}
+			}
 		}
 	}
 }

@@ -44,29 +44,9 @@ namespace based::input
 		}
 #endif
 
-		xLast = x;
-		yLast = y;
 		buttonsLast = buttons;
 		Uint32 state = SDL_GetMouseState(&x, &y);
-		glm::vec2 size = based::Engine::Instance().GetWindow().GetSize();
-		auto xMin = xBounds.x != -999.f ? static_cast<int>(xBounds.x) : 1;
-		auto xMax = xBounds.y != -999.f ? static_cast<int>(xBounds.y) : static_cast<int>(size.x) - 1;
-		if (mCursorMode == CursorMode::Confined && (x <= xMin || x >= xMax))
-		{
-			int newX = x <= xMin ? xMax - 1 : xMin + 1;
-			SDL_WarpMouseInWindow(based::Engine::Instance().GetWindow().GetSDLWindow(), newX, y);
-			x = newX;
-			xLast = newX;
-		}
-		auto yMin = yBounds.x != -999.f ? static_cast<int>(yBounds.x) : 1;
-		auto yMax = yBounds.y != -999.f ? static_cast<int>(yBounds.y) : static_cast<int>(size.y) - 1;
-		if (mCursorMode == CursorMode::Confined && (y <= yMin || y >= yMax))
-		{
-			int newY = y <= yMin ? yMax - 1 : yMin + 1;
-			SDL_WarpMouseInWindow(based::Engine::Instance().GetWindow().GetSDLWindow(), x, newY);
-			y = newY;
-			yLast = newY;
-		}
+		SDL_GetRelativeMouseState(&xLast, &yLast);
 
 		for (int i = 0; i < ButtonCount; i++)
 		{
@@ -129,8 +109,7 @@ namespace based::input
 	{
 		mCursorMode = mode;
 
-		// TODO: Figure this out
-		/*switch (mode)
+		switch (mode)
 		{
 		case CursorMode::Free:
 			SDL_SetRelativeMouseMode(SDL_FALSE);
@@ -138,7 +117,7 @@ namespace based::input
 		case CursorMode::Confined:
 			SDL_SetRelativeMouseMode(SDL_TRUE);
 			break;
-		}*/
+		}
 	}
 
 	void Mouse::SetCursorVisible(bool visible)

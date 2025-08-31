@@ -17,8 +17,8 @@ namespace based::input
 		inline static int X() { return x; }
 		inline static int Y() { return y; }
 
-		inline static int DX() { return x - xLast; }
-		inline static int DY() { return y - yLast; }
+		inline static int DX() { return xLast; }//return x - xLast; }
+		inline static int DY() { return yLast; }//return y - yLast; }
 
 		static bool Button(int button);
 		static bool ButtonDown(int button);

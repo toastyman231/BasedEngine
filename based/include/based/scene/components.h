@@ -718,6 +718,16 @@ namespace based::scene
 			);
 		}
 
+		RigidbodyComponent(JPH::RefConst<JPH::Shape> shape,
+			JPH::EMotionType type, uint16_t layer, glm::vec3 rotation,
+			JPH::EActivation activation = JPH::EActivation::Activate)
+		{
+			rigidbodyID = Engine::Instance().GetPhysicsManager().AddBody(
+				shape, convert(shape->GetCenterOfMass()), 
+				rotation * based::math::Deg2Rad, type, layer, activation
+			);
+		}
+
 		RigidbodyComponent(PhysicsShapeComponent shape,
 			JPH::EMotionType type, uint16_t layer, glm::vec3 position, glm::vec3 rotation,
 			JPH::EActivation activation = JPH::EActivation::Activate)
@@ -752,9 +762,9 @@ namespace based::scene
 
 	struct TriggerComponent : RigidbodyComponent
 	{
-		TriggerComponent(const PhysicsShapeComponent& shape, JPH::EMotionType type, uint16_t layer,
+		TriggerComponent(const PhysicsShapeComponent& shape, JPH::EMotionType type,
 			JPH::EActivation activation = JPH::EActivation::Activate)
-			: RigidbodyComponent(shape, type, layer, activation)
+			: RigidbodyComponent(shape, type, physics::Layers::SENSOR, activation)
 		{
 			auto& lock_interface = 
 				Engine::Instance().GetPhysicsManager().GetPhysicsSystem().GetBodyLockInterface();
@@ -787,7 +797,8 @@ namespace based::scene
 				&Engine::Instance().GetPhysicsManager().GetPhysicsSystem());
 		}
 
-		CharacterController(Transform transform, JPH::RefConst<JPH::Shape> shape)
+		CharacterController(Transform transform, JPH::RefConst<JPH::Shape> shape, 
+			JPH::RefConst<JPH::Shape> innerShape = nullptr)
 		{
 			JPH::CharacterVirtualSettings settings;
 			settings.mMaxSlopeAngle = math::Deg2Rad * 45.f;
@@ -799,8 +810,8 @@ namespace based::scene
 			settings.mPredictiveContactDistance = 0.1f;
 			settings.mSupportingVolume = JPH::Plane(JPH::Vec3::sAxisY(), -0.3f); // Accept contacts that touch the lower sphere of the capsule
 			settings.mEnhancedInternalEdgeRemoval = false;
-			/*settings.mInnerBodyShape = sCreateInnerBody ? mInnerStandingShape : nullptr;*/
-			settings.mInnerBodyLayer = physics::Layers::MOVING;
+			settings.mInnerBodyShape = innerShape != nullptr ? innerShape : nullptr;
+			settings.mInnerBodyLayer = physics::Layers::CHARACTER;
 
 			Settings = settings;
 			Character = new JPH::CharacterVirtual(&settings, convert(transform.Position()),

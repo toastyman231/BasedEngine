@@ -54,6 +54,11 @@ namespace based::scene
 				auto component = mRegistry.emplace<RigidbodyComponent>(mEntity, args...);
 				component.RegisterBody(GetEntityHandle());
 			}
+			else if constexpr (std::is_same_v<Type, TriggerComponent>)
+			{
+				auto component = mRegistry.emplace<TriggerComponent>(mEntity, args...);
+				component.RegisterBody(GetEntityHandle());
+			}
 			else mRegistry.emplace<Type>(mEntity, args...);
 		}
 
