@@ -1,9 +1,23 @@
+engineLocation = os.getenv("BASED_ENGINE_HOME")
+if not engineLocation then
+    error("BASED_ENGINE_HOME environment variable is not set. Please try restarting your terminal, or configure it to point to the engine directory.")
+end
+
 project "Sandbox"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
     staticruntime "on"
-    links "based"
+    links
+    {
+        "based",
+        "SDL2",
+        "freetype",
+        "assimp-vc143-mt",
+        "rmlui",
+        "rmlui_debugger",
+        "ktx",
+    }
 
     targetdir(tdir)
     objdir(odir)
@@ -24,6 +38,15 @@ project "Sandbox"
         "%{externals.jolt}"
     }
 
+    libdirs
+    {
+        "%{libraries.sdl2}",
+        "%{libraries.freetype}",
+        "%{libraries.assimp}",
+        "%{libraries.rmlui}",
+        "%{libraries.ktx_software}"
+    }
+
     include "Plugins/FMOD"
 
     flags
@@ -33,13 +56,14 @@ project "Sandbox"
 
     postbuildcommands
     {
-        "python3 " .. path.getabsolute("../%{prj.name}") .. "/postbuild.py config=%{cfg.buildcfg} prj=%{prj.name}"
+        engineLocation .. "/tools/bin/BasedBuildTool -i " .. path.getabsolute("../%{prj.name}") .. " -gen-mipmaps -c %{cfg.buildcfg}" 
     }
 
     filter {"system:windows", "configurations:*"}
         systemversion "latest"
         files { "resources.rc", "Assets/**.ico" }
         vpaths { ['Assets/*'] = { '*.rc', '**.ico' } }
+        debugdir(tdir)
 
         defines
         {

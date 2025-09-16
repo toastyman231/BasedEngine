@@ -1,0 +1,2 @@
+Sandbox/Assets/Models/sponza.bin filter=lfs diff=lfs merge=lfs -text
+Sandbox/Assets/Models/sponza_curtains.bin filter=lfs diff=lfs merge=lfs -text

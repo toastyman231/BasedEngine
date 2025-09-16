@@ -1,14 +1,10 @@
 ﻿#include <typeindex>
 
 #include "based/pch.h"
-
 #include "based/core/assetlibrary.h"
 #include "based/engine.h"
 #include "based/graphics/camera.h"
 #include "based/graphics/defaultassetlibraries.h"
-#include "based/graphics/linerenderer.h"
-#include "based/graphics/framebuffer.h"
-#include "based/graphics/mesh.h"
 #include "based/graphics/model.h"
 #include "based/input/keyboard.h"
 #include "based/input/mouse.h"
@@ -18,141 +14,27 @@
 #include "based/scene/components.h"
 #include "based/scene/entity.h"
 #include "external/imgui/imgui.h"
-
-#include "based/animation/animation.h"
-#include "based/animation/animator.h"
 #include "based/core/basedtime.h"
-#include "based/core/yamlformatter.h"
-#include "based/graphics/sprite.h"
-#include "based/math/random.h"
-#include "based/scene/audio.h"
-#include "based/scene/sceneserializer.h"
-#include "based/ui/textentity.h"
 #include "external/entt/core/hashed_string.hpp"
-#include "Models-Surfaces/Generators.h"
-#include "Water/water.h"
-
-#include "fmod.hpp"
-#include <Jolt/Physics/PhysicsSystem.h>
-#include <Jolt/Physics/Body/Body.h>
-#include <Jolt/Physics/Body/BodyCreationSettings.h>
-#include <Jolt/Physics/Collision/Shape/Shape.h>
-#include <Jolt/Physics/Collision/Shape/BoxShape.h>
-#include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
-#include <Jolt/Physics/Collision/ObjectLayer.h>
-#include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
-
-#include "based/physics/debugrenderer.h"
-#include "based/physics/physicslayers.h"
-#include "Jolt/RegisterTypes.h"
-#include "Jolt/Core/JobSystemThreadPool.h"
-#include "Jolt/Physics/Collision/CastResult.h"
-#include "Jolt/Physics/Collision/RayCast.h"
-#include "Jolt/Renderer/DebugRenderer.h"
-#include "Jolt/Renderer/DebugRendererSimple.h"
+#include "external/imgui/imgui_internal.h"
 
 using namespace based;
 
-class SmallClass
-{
-public:
-	SmallClass() = default;
-	SmallClass(std::string in) : temp(in) {}
-
-	std::string temp;
-};
-
-struct MyComponent : public scene::ScriptComponent
-{
-	MyComponent() = default;
-
-	void OnInitialize()
-	{
-		BASED_TRACE("Initializing My Component!");
-	}
-
-	void OnUpdate(float deltaTime)
-	{
-		if (!Enabled) return;
-		BASED_TRACE("Update! DeltaTime: {}, Id: {}", deltaTime, myId);
-	}
-
-	void OnShutdown()
-	{
-		BASED_TRACE("Shutting down my Component!");
-	}
-
-	SmallClass myScript;
-	graphics::Projection myProj = graphics::PERSPECTIVE;
-	std::string myId = "Default";
-	float myFloat = 0;
-};
-
 class Sandbox : public based::App
 {
-private:
-	/*std::shared_ptr<scene::Scene> secondScene;
-
-	std::shared_ptr<scene::Entity> modelEntity;
-	std::shared_ptr<scene::Entity> boxEntity;
-	std::shared_ptr<scene::Entity> skyEntity;
-	std::shared_ptr<scene::Entity> planeEntity;*/
-	std::shared_ptr<scene::Entity> crateEntity;
-	std::shared_ptr<scene::Entity> floorEntity;
 	std::shared_ptr<scene::Entity> cameraEntity;
-	/*std::shared_ptr<scene::Entity> lightPlaceholder;
-	std::shared_ptr<scene::Entity> otherLight;
-	std::shared_ptr<scene::Entity> grassInstance;
-	std::shared_ptr<scene::Entity> sunLight;
-	std::shared_ptr<scene::Entity> arms;
-	std::shared_ptr<scene::Entity> sphere;
-	std::shared_ptr<scene::Entity> wallEntity;
-	std::shared_ptr<scene::Entity> iconEntity;
-	std::shared_ptr<ui::TextEntity> text;*/
+	std::shared_ptr<scene::Entity> sponzaEntity;
+	std::shared_ptr<scene::Entity> curtainsEntity;
 
-	bool mouseControl = false;
-	float speed = 2.5f;
+	float speed = 6.f;
+	float pitch = 0.f;
 	float yaw = 0.f;
-	float pitch = 0.0f;
-	float sensitivity = 0.8f;
+	float sensitivity = 6.f;
 	float ambientStrength = 0.1f;
-	float R = 100.f;
-	float heightCoef = 1.f;
 
-	int32_t curRenderMode = 0;
+	int curRenderMode = 0;
 
 	bool useNormalMaps = true;
-
-	std::shared_ptr<animation::Animator> animator;
-
-	/*glm::vec3 camPos = glm::vec3(0.f, 0.f, 1.5f);
-	glm::vec3 camRot = glm::vec3(0.f);
-
-	glm::vec3 cubeRot;
-	glm::vec3 lightPosition;
-	glm::ivec2 initialPos;
-	glm::vec3 sunDirection;
-	glm::vec3 sunColor = glm::vec3(1.0f, 1.0f, 1.0f);
-	glm::vec3 albedo = glm::vec3(1.0f, 0.84f, 0.0f);
-
-	std::shared_ptr<animation::Animation> handsAnim;
-	std::shared_ptr<animation::Animation> handsAnim2;
-	std::shared_ptr<animation::AnimationStateMachine> armsStateMachine;
-	std::shared_ptr<animation::AnimationState> idleState;
-	std::shared_ptr<animation::AnimationState> punchState;
-	std::shared_ptr<animation::AnimationTransition> idleToPunchTransition;
-	std::shared_ptr<animation::AnimationTransition> punchToIdleTransition;
-
-	std::shared_ptr<graphics::ComputeShader> compShader;
-
-	managers::DocumentInfo* document;
-
-	core::AssetLibrary<scene::Entity> entityStorage;*/
-
-	FMOD::System* system;
-	FMOD::Sound* sound1;
-	FMOD::Channel* channel = 0;
-	FMOD_RESULT       result;
 
 public:
 	core::WindowProperties GetWindowProperties() override
@@ -182,346 +64,27 @@ public:
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
 
-		{
-			using namespace entt::literals;
-			entt::meta<SmallClass>()
-				.type(entt::type_hash<SmallClass>())
-				.data<&SmallClass::temp>("temp"_hs);
-			entt::meta<MyComponent>()
-				.base<scene::ScriptComponent>()
-				.type(entt::type_hash<MyComponent>())
-				.data<&MyComponent::myScript>("myScript"_hs)
-				.data<&MyComponent::myProj>("myProj"_hs)
-				.data<&MyComponent::myId>("myId"_hs)
-				.data<&MyComponent::myFloat>("myFloat"_hs)
-				.func<&scene::SceneSerializer::AddMetaComponent<MyComponent>, entt::as_void_t>("AddMetaComponent"_hs)
-				.func<&scene::SceneSerializer::SerializeScriptComponent<MyComponent>>("SerializeScriptComponent"_hs);
-			/*entt::meta_any any{ std::string("") };
-			any.allow_cast<float>();*/
-		}
+		scene::Scene::LoadScene(ASSET_PATH("Scenes/Default3DMinimal.bscn"));
 
-		result = FMOD::System_Create(&system);
-		BASED_ASSERT(result == FMOD_OK, "Error creating FMOD system!");
+		cameraEntity = GetCurrentScene()->GetEntityStorage().Get("Main Camera");
 
-		result = system->init(32, FMOD_INIT_NORMAL, nullptr);
-		BASED_ASSERT(result == FMOD_OK, "Error initializing FMOD system!");
+		sponzaEntity = scene::Entity::CreateEntity("Sponza Geometry");
+		curtainsEntity = scene::Entity::CreateEntity("Curtains Geometry");
 
-		result = system->createSound("Assets/sounds/TestSound.wav", FMOD_DEFAULT, 0, &sound1);
-		BASED_ASSERT(result == FMOD_OK, "Error creating FMOD sound!");
+		auto sponzaMesh = graphics::Model::CreateModel("Assets/Models/sponza.gltf",
+		                                               DEFAULT_MODEL_LIB, "Sponza");
+		auto curtainsMesh = graphics::Model::CreateModel("Assets/Models/sponza_curtains.gltf",
+		                                                 DEFAULT_MODEL_LIB, "Sponza Curtains");
 
-#define SERIALIZE_SCENE 0
+		sponzaEntity->AddComponent<scene::ModelRenderer>(sponzaMesh);
+		curtainsEntity->AddComponent<scene::ModelRenderer>(curtainsMesh);
 
-#if SERIALIZE_SCENE
-		// UI Setup
-		Rml::Context* context = Engine::Instance().GetUiManager().CreateContext("main",
-			Engine::Instance().GetWindow().GetSize());
-
-		if (Rml::DataModelConstructor constructor = context->CreateDataModel("animals"))
-		{
-			constructor.Bind("show_text", &my_data.show_text);
-			constructor.Bind("animal", &my_data.animal);
-			constructor.Bind("my_value", &my_data.my_value);
-		}
-
-		// Load UI
-		Engine::Instance().GetUiManager().SetPathPrefix("Assets/ui/");
-
-		document = Engine::Instance().GetUiManager().LoadWindow("help_screen", context);
-		document->document->Hide();
-
-		// Old stuff, plus setting camera to perspective mode
-		cubeRot = glm::vec3(0.f);
-		auto camera = GetCurrentScene()->GetActiveCamera();
-		camera->SetProjection(based::graphics::PERSPECTIVE);
-
-		const auto& camTransform = camera->GetTransform();
-		cameraEntity = scene::Entity::CreateEntity<scene::Entity>("Camera", camTransform.Position,
-			camTransform.Rotation, camTransform.Scale);
-		cameraEntity->AddComponent<scene::CameraComponent>(camera);
-
-		// TODO: Confirm local transforms work in 2D
-		
-		// Set up crate object and material
-		const auto crateTex = std::make_shared<graphics::Texture>("Assets/crate.png");
-		const auto crateMat = graphics::Material::LoadMaterialFromFile("Assets/Materials/Crate.bmat", 
-			GetCurrentScene()->GetMaterialStorage());
-		const auto crateMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/cube.obj"),
-			GetCurrentScene()->GetMeshStorage());
-		crateMesh->material = crateMat;
-		crateEntity = scene::Entity::CreateEntity<scene::Entity>("Crate");
-		crateEntity->AddComponent<scene::MeshRenderer>(crateMesh);
-		crateEntity->SetPosition(glm::vec3(2.7f, 1.f, 1.7f));
-		crateEntity->SetEntityName("Crate");
-		crateEntity->SetActive(false);
-
-		// Set up second cube object
-		const auto distanceMat = graphics::Material::CreateMaterial(
-			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), "Assets/shaders/custom/cube_distance.frag"),
-			DEFAULT_MAT_LIB, "DistCube");
-		distanceMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
-		distanceMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
-		const auto boxMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/cube.obj"),
-			GetCurrentScene()->GetMeshStorage());
-		boxMesh->material = distanceMat;
-		boxEntity = scene::Entity::CreateEntity<scene::Entity>("Box");
-		boxEntity->AddComponent<scene::MeshRenderer>(boxMesh);
-		boxEntity->SetPosition(glm::vec3(0.f, 2.f, 0.f));
-		boxEntity->SetEntityName("Box");
-		boxEntity->SetActive(false);
-
-		lightPosition = glm::vec3(1, 1.2f, 0.3f);
-
-		// Skybox material setup
-
-		const auto skyboxTex = std::make_shared<graphics::Texture>("Assets/skybox_tex.png", true);
-		const auto skybox = graphics::Material::CreateMaterial(
-			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), ASSET_PATH("Shaders/basic_unlit.frag")),
-			DEFAULT_MAT_LIB, "Skybox");
-		skybox->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
-		skybox->SetUniformValue("material.diffuseMat.useSampler", 1);
-		skybox->AddTexture(skyboxTex, "material.diffuseMat.tex");
-
-		// Generate plane mesh and skybox cube
-		const auto planeMesh = GeneratePlane(100, 100);
-		const auto skyboxMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/atlas_cube.obj"),
-			GetCurrentScene()->GetMeshStorage());
-		skyboxMesh->material = skybox;
-
-		// Skybox setup
-		skyEntity = scene::Entity::CreateEntity<scene::Entity>("Sky");
-		skyEntity->AddComponent<scene::MeshRenderer>(skyboxMesh);
-		skyEntity->SetScale(glm::vec3(500.f));
-		skyEntity->SetEntityName("Skybox");
-
-		// Set up plane material
-		planeEntity = scene::Entity::CreateEntity<scene::Entity>("Plane");
-		planeEntity->SetPosition({-50.f, 0.f, -50.f});
-		planeMesh->material = graphics::Material::CreateMaterial(
-			LOAD_SHADER("Assets/shaders/custom/water.vert", "Assets/shaders/custom/water.frag"),
-			DEFAULT_MAT_LIB, "Plane");
-		planeMesh->material->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
-		planeMesh->material->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
-		planeMesh->material->SetUniformValue("material.diffuseMat.useSampler", 0);
-		const auto heightMap = std::make_shared<graphics::Texture>("Assets/heightmap.png");
-		//planeMesh->material->AddTexture(heightMap, "height");
-		planeEntity->AddComponent<scene::MeshRenderer>(planeMesh);
-		planeEntity->SetEntityName("Ground");
-
-		waterMaterial = planeMesh->material;
-		UpdateWaterShader();
-
-		// Load grass mesh and set up material
-		const auto grassMesh = graphics::Mesh::LoadMeshFromFile("Assets/Models/grass_highPoly.obj", 
-			GetCurrentScene()->GetMeshStorage());
-		graphics::DefaultLibraries::GetMeshLibrary().Load("GrassMesh", grassMesh);
-		const auto grassMatBase = graphics::Material::LoadMaterialFromFile(
-			"Assets/Materials/Grass.bmat",
-			GetCurrentScene()->GetMaterialStorage());
-		grassMesh->material = grassMatBase;
-
-		// Set up grass instancing
-		const auto grassInstanceMesh = graphics::Mesh::CreateInstancedMesh(
-			grassMesh, DEFAULT_MESH_LIB, "GrassInstanceMesh");
-		grassInstanceMesh->material = grassMatBase;
-		grassInstance = scene::Entity::CreateEntity<scene::Entity>("Grass");
-		grassInstance->AddComponent<scene::MeshRenderer>(grassInstanceMesh);
-		grassInstance->SetEntityName("Grass");
-
-		// Instance a bunch of grass blades in an offset grid
-		constexpr int GRASS_BLADES = 100000;
-		const float GRASS_X = based::math::Sqrt(GRASS_BLADES);
-
-		for (int i = 0; i < GRASS_X; i++)
-		{
-			const float x = (static_cast<float>(i) / GRASS_X) - 0.5f;
-			for (int j = 0; j < GRASS_X; j++)
-			{
-				const float y = (static_cast<float>(j) / GRASS_X) - 0.5f;
-				glm::vec3 pos = { x * 20 + based::math::RandomRange(-0.2f, 0.2f), 0,
-					y * 20 + based::math::RandomRange(-0.2f, 0.2f) };
-				glm::vec3 rot = { 0, based::math::RandomRange(0, 45), 0 };
-				grassInstanceMesh->AddInstance(scene::Transform(pos, rot, glm::vec3(1)));
-			}
-		}
-		grassInstance->SetActive(false);
-
-		// Set up light placeholder
-		const auto cubeMat = graphics::Material::CreateMaterial(
-			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), ASSET_PATH("Shaders/basic_unlit.frag")),
-			DEFAULT_MAT_LIB, "Cube");
-		cubeMat->SetUniformValue("material.diffuseMat.color", glm::vec4(1.f));
-		cubeMat->SetUniformValue("material.diffuseMat.useSampler", 0);
-		cubeMat->SetUniformValue("castShadows", 0);
-		const auto cubeMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/cube.obj"),
-			GetCurrentScene()->GetMeshStorage());
-		cubeMesh->material = cubeMat;
-		lightPlaceholder = scene::Entity::CreateEntity<scene::Entity>("Light1");
-		lightPlaceholder->AddComponent<scene::MeshRenderer>(cubeMesh);
-		lightPlaceholder->AddComponent<scene::PointLight>(1.0f, 0.0014f, 0.0007f, glm::vec3(1.f));
-		lightPlaceholder->SetPosition(lightPosition);
-		lightPlaceholder->SetScale(glm::vec3(0.1f));
-		lightPlaceholder->SetEntityName("LIGHT 1");
-
-		// Set up second light
-		otherLight = scene::Entity::CreateEntity<scene::Entity>("Light2");
-		otherLight->AddComponent<scene::MeshRenderer>(cubeMesh);
-		otherLight->AddComponent<scene::PointLight>(1.0f, 0.09f, 0.032f, glm::vec3(1.f));
-		otherLight->SetPosition(glm::vec3(1.8f, 2.4f, 2.2f));
-		otherLight->SetScale(glm::vec3(0.1f));
-		otherLight->SetEntityName("LIGHT 2");
-
-		// Add sun light
-		sunLight = scene::Entity::CreateEntity<scene::Entity>("Sun");
-		sunLight->AddComponent<scene::DirectionalLight>(glm::vec3(1.f));
-		sunLight->SetEntityName("Sun");
-		sunLight->SetRotation(glm::vec3(60.f, -60.f, 0.f));
-
-		// Set up brick wall material
-		const auto wallDiffuseTex = std::make_shared<graphics::Texture>("Assets/brick-wall/brickwall-diff.jpg", true);
-		const auto wallNormalMapTex = std::make_shared<graphics::Texture>("Assets/brick-wall/brickwall-norm.jpg", true);
-		const auto wallMat = graphics::Material::CreateMaterial(
-			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit.vert"), ASSET_PATH("Shaders/basic_lit.frag")),
-			DEFAULT_MAT_LIB, "Wall");
-		wallMat->AddTexture(wallDiffuseTex, "material.diffuseMat.tex");
-		wallMat->SetUniformValue("material.diffuseMat.useSampler", 1);
-		wallMat->AddTexture(wallNormalMapTex, "material.normalMat.tex");
-		wallMat->SetUniformValue("material.normalMat.useSampler", 1);
-		wallMat->SetUniformValue("material.shininessMat.color", glm::vec4(32.f));
-		// Add brick wall entity
-		wallEntity = scene::Entity::CreateEntity<scene::Entity>("Wall", glm::vec3(5, 3.5f, 0)
-			, glm::vec3(90, 0, 0));
-		const auto wallMesh = GeneratePlane(2, 2);
-		wallMesh->material = wallMat;
-		wallEntity->AddComponent<scene::MeshRenderer>(wallMesh);
-		wallEntity->SetEntityName("Wall");
-		wallEntity->SetActive(false);
-
-		// Create arms material
-		const auto armsMat = graphics::Material::CreateMaterial(
-			LOAD_SHADER(ASSET_PATH("Shaders/basic_lit_bones.vert"), ASSET_PATH("Shaders/basic_lit.frag")),
-			DEFAULT_MAT_LIB, "Arms");
-		const auto armsTex = std::make_shared<graphics::Texture>("Assets/Models/Base Color Palette Diffuse.png", true);
-		armsTex->SetName("ArmsTexture");
-		armsMat->AddTexture(armsTex, "material.diffuseMat.tex");
-		armsMat->SetUniformValue("material.diffuseMat.tint", glm::vec4(0.77f, 0.4f, 0.35f, 1.f));
-		armsMat->SetUniformValue("material.diffuseMat.useSampler", 1);
-		armsMat->SetUniformValue("receiveShadows", 0);
-		// Create arms
-		const auto armModel = graphics::Model::CreateModel(
-			"Assets/Models/Arms.fbx", DEFAULT_MODEL_LIB, "ArmsModel");
-		auto lib = graphics::DefaultLibraries::GetModelLibrary();
-		armModel->SetMaterial(armsMat);
-		arms = scene::Entity::CreateEntity<scene::Entity>("Arms");
-		arms->AddComponent<scene::ModelRenderer>(armModel);
-		arms->SetPosition({ 0, 5, 0 });
-		arms->SetScale({ 0.01f, 0.01f, 0.01f });
-		// Create arms animations and animator
-		handsAnim = std::make_shared<animation::Animation>("Assets/Models/Arms.fbx", armModel, 0);
-		handsAnim2 = std::make_shared<animation::Animation>("Assets/Models/Arms.fbx", 
-			armModel, "HumanFPS|Punch");
-		handsAnim->SetPlaybackSpeed(0.5f);
-		handsAnim->SetLooping(true);
-		animator = std::make_shared<animation::Animator>(handsAnim);
-		// Create state machine, states, and transitions
-		armsStateMachine = std::make_shared<animation::AnimationStateMachine>(animator);
-		idleState = std::make_shared<animation::AnimationState>(handsAnim, "IdleState");
-		punchState = std::make_shared<animation::AnimationState>(handsAnim2, "PunchState");
-
-		idleToPunchTransition = std::make_shared<animation::AnimationTransition>(idleState, punchState, animator, 
-			armsStateMachine, animation::TransitionRules{ {}, {},
-				{animation::TransitionRule<bool>{"punch", true, false}}, {}
-			}, true);
-		punchToIdleTransition = std::make_shared<animation::AnimationTransition>(punchState, idleState, animator,
-			armsStateMachine);
-		idleState->AddTransition(idleToPunchTransition);
-		punchState->AddTransition(punchToIdleTransition);
-		armsStateMachine->AddState(idleState, true);
-		armsStateMachine->AddState(punchState);
-		animator->SetStateMachine(armsStateMachine);
-		animator->SetTimeMode(animation::TimeMode::Unscaled);
-		arms->AddComponent<scene::AnimatorComponent>(animator);
-		arms->SetEntityName("Arms");
-
-		const auto sphereMat = graphics::Material::CreateMaterial(
-			LOAD_SHADER(ASSET_PATH("Shaders/pbr_lit.vert"), ASSET_PATH("Shaders/pbr_lit.frag")),
-			DEFAULT_MAT_LIB, "Sphere");
-		const auto sandAlbedo = std::make_shared<graphics::Texture>("Assets/sand_albedo.png");
-		const auto sandRoughness = std::make_shared<graphics::Texture>("Assets/sand_roughness.png");
-		const auto sandNormal = std::make_shared<graphics::Texture>("Assets/sand_normal.png");
-		const auto sandAo = std::make_shared<graphics::Texture>("Assets/sand_ao.png");
-		graphics::DefaultLibraries::GetTextureLibrary().Load("SandAlbedo", sandAlbedo);
-		graphics::DefaultLibraries::GetTextureLibrary().Load("SandRough", sandRoughness);
-		graphics::DefaultLibraries::GetTextureLibrary().Load("SandNormal", sandNormal);
-		graphics::DefaultLibraries::GetTextureLibrary().Load("SandAo", sandAo);
-		sphereMat->AddTexture(sandAlbedo, "material.albedo.tex");
-		sphereMat->AddTexture(sandRoughness, "material.roughness.tex");
-		sphereMat->AddTexture(sandNormal, "material.normal.tex");
-		sphereMat->AddTexture(sandAlbedo, "material.ambientOcclusion.tex");
-		sphereMat->SetUniformValue("material.albedo.useSampler", 1);
-		sphereMat->SetUniformValue("material.roughness.useSampler", 1);
-		sphereMat->SetUniformValue("material.normal.useSampler", 1);
-		sphereMat->SetUniformValue("material.ambientOcclusion.useSampler", 1);
-		//sphereMat->SetUniformValue("material.albedo.color", glm::vec4(1.0f, 0.84f, 0.0f, 1.0f));
-		const auto sphereMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/sphere.obj"),
-			GetCurrentScene()->GetMeshStorage());
-		sphereMesh->material = sphereMat;
-		sphere = scene::Entity::CreateEntity<scene::Entity>("Sphere");
-		sphere->AddComponent<scene::MeshRenderer>(sphereMesh);
-		sphere->SetEntityName("Sphere");
-		sphere->SetPosition({ 0.f, 2.f, 0.f });
-		sphere->SetActive(false);
-
-		// TODO: Add a way to tie object lifetimes to scene lifetime (scene serialization)
-
-		cameraEntity->SetPosition(glm::vec3(-1, 2, 4));
-		cameraEntity->SetRotation(glm::vec3(6, 53, 0));
-
-		arms->SetParent(cameraEntity);
-		arms->SetLocalPosition(glm::vec3(0.f, 0.f, -0.2f));
-		arms->SetLocalRotation(glm::vec3(0.f, 180.f, 0.f));
-#endif
-
-		scene::SceneSerializer serializer(persistentScene);
-
-#if SERIALIZE_SCENE
-		serializer.Serialize("Assets/Scenes/Test.bscn");
-#else
-		serializer.Deserialize("Assets/Scenes/Test.bscn");
-
-		animator = GetCurrentScene()->GetAnimatorStorage().Get("Animator");
-		waterMaterial = GetCurrentScene()->GetMaterialStorage().Get("Plane");
-		GetCurrentScene()->GetEntityStorage().Get("Ground")->SetActive(false);
-		GetCurrentScene()->GetEntityStorage().Get("Crate")->SetActive(true);
-		cameraEntity = GetCurrentScene()->GetEntityStorage().Get("Camera");
-		crateEntity = GetCurrentScene()->GetEntityStorage().Get("Crate");
-		crateEntity->SetPosition(crateEntity->GetTransform().Position() + glm::vec3(0, 30.f, 0));
-		crateEntity->SetRotation(glm::vec3(45.f, 0.f, 0.f));
-#endif
-
-		crateEntity->AddComponent<scene::BoxShapeComponent>(
-			crateEntity->GetTransform().Scale,
-			crateEntity->GetTransform().Position,
-			crateEntity->GetTransform().EulerAngles);
-		auto boxComp = crateEntity->GetComponent<scene::BoxShapeComponent>();
-		crateEntity->AddComponent<scene::RigidbodyComponent>(boxComp, JPH::EMotionType::Dynamic, physics::Layers::MOVING);
-
-		floorEntity = scene::Entity::CreateEntity("Floor");
-		floorEntity->SetScale(glm::vec3(10.f, 0.3f, 10.f));
-		floorEntity->AddComponent<scene::MeshRenderer>(graphics::Mesh::LoadMeshFromFile(
-			ASSET_PATH("Meshes/cube.obj"),
-			GetCurrentScene()->GetMeshStorage()));
-		floorEntity->AddComponent<scene::BoxShapeComponent>(
-			floorEntity->GetTransform().Scale,
-			floorEntity->GetTransform().Position,
-			floorEntity->GetTransform().EulerAngles);
-		boxComp = floorEntity->GetComponent<scene::BoxShapeComponent>();
-		floorEntity->AddComponent<scene::RigidbodyComponent>(boxComp, JPH::EMotionType::Static, physics::Layers::STATIC);
-		Engine::Instance().GetPhysicsManager().SetRenderDebug(true);
+		curtainsEntity->SetRotation(glm::vec3(90.f, 0.f, 0.f));
+		curtainsEntity->SetPosition(glm::vec3(0.05f, 0.f, -6.36f));
 
 		core::Time::SetTimeScale(0);
 		BASED_TRACE("Done initializing");
 
-		// TODO: Fix text rendering behind sprites even when handled last
 		// TODO: Decide what to do about Sprites
 	}
 
@@ -558,160 +121,17 @@ public:
 			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
 			cameraEntity->SetPosition(transform.Position() + speed * core::Time::UnscaledDeltaTime() * camera->GetRight());
 		}
-
-		// Enable/disable mouse control
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_R))
-		{
-			mouseControl = !mouseControl;
-		}
-
-		// Mouse input
-		if (mouseControl)
+		
+		if (input::Mouse::Button(BASED_INPUT_MOUSE_RIGHT))
 		{
 			pitch += static_cast<float>(input::Mouse::DX()) * sensitivity;
 			yaw += static_cast<float>(input::Mouse::DY()) * sensitivity;
 
 			yaw = based::math::Clamp(yaw, -89.f, 89.f);
 
-			const auto& camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
+			const auto camera = cameraEntity->GetComponent<scene::CameraComponent>().camera.lock();
 			cameraEntity->SetRotation(glm::vec3(yaw, pitch, camera->GetTransform().EulerAngles().z));
 		}
-
-		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
-		{
-			animator->GetStateMachine()->SetBool("punch", true);
-			JPH::RRayCast ray{
-				convert(cameraEntity->GetTransform().Position()),
-				convert(glm::normalize(GetCurrentScene()->GetActiveCamera()->GetForward())) * 1000.f
-			};
-
-			JPH::RayCastResult hit;
-			auto res = Engine::Instance().GetPhysicsManager().GetPhysicsSystem().GetNarrowPhaseQuery().CastRay(ray, hit);
-
-			graphics::DebugLineRenderer::DrawDebugLine(convert(ray.mOrigin),
-				convert(ray.mOrigin + ray.mDirection), 3, { 1, 0, 0, 1 }, 5);
-
-			if (res)
-			{
-				auto hitPos = ray.GetPointOnRay(hit.mFraction);
-				Engine::Instance().GetPhysicsManager().GetDebugRenderer()->DrawMarker(
-					hitPos, JPH::Color::sGreen, 0.3f);
-			}
-		}
-
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
-		{
-			core::Time::SetTimeScale(1);
-			result = system->playSound(sound1, 0, false, &channel);
-			BASED_ASSERT(result == FMOD_OK, "Error playing sound!");
-		}
-
-		UpdateShaderVisuals();
-		UpdateWaterShader();
-
-		return;
-
-		/*// Movement input
-
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_SPACE))
-		{
-			//if (core::Time::TimeScale() == 0.1f) core::Time::SetTimeScale(1.0f);
-			//else core::Time::SetTimeScale(0.1f);
-			core::Time::SetTimeScale(1.0f - core::Time::TimeScale());
-		}
-
-		// Save initial mouse position for rolling ball
-		if (input::Mouse::ButtonDown(BASED_INPUT_MOUSE_LEFT))
-		{
-			initialPos = input::Mouse::GetMousePosition();
-			animator->GetStateMachine()->SetBool("punch", true);
-		}
-
-		if (input::Mouse::Button(BASED_INPUT_MOUSE_LEFT))
-		{
-			// Rolling ball algorithm
-			glm::ivec2 current = input::Mouse::GetMousePosition();
-
-			float dx = static_cast<float>(current.x) - static_cast<float>(initialPos.x);
-			float dy = static_cast<float>(current.y) - static_cast<float>(initialPos.y);
-
-			float dr = glm::length(glm::vec2(dx, dy));
-			glm::vec3 n = glm::vec3(-dy / dr, dx / dr, 0.f);
-			float theta = dr / R;
-
-			glm::vec3 rot = AngleAxisToEuler(glm::normalize(n), theta);
-			if (isnan(rot.x) || isnan(rot.y) || isnan(rot.z)) return;
-
-			cubeRot += rot;
-		}
-
-		if (input::Mouse::ButtonUp(BASED_INPUT_MOUSE_LEFT))
-		{
-			animator->GetStateMachine()->SetBool("punch", false);
-		}
-
-		// Show/Hide UI
-		if (input::Keyboard::KeyDown(BASED_INPUT_KEY_H))
-		{
-			if (document->document->IsVisible()) document->document->Hide();
-			else document->document->Show();
-		}
-
-		// Set light position and pass info to shaders
-		lightPosition = glm::vec3(based::math::Sin(based::core::Time::GetTime()) * 4, 
-			lightPosition.y, lightPosition.z);
-
-		lightPlaceholder->SetPosition(lightPosition);
-
-		sunLight->SetRotation(sunDirection);
-
-		crateEntity->SetRotation(cubeRot);
-
-		auto matLib = graphics::DefaultLibraries::GetMaterialLibrary();
-		const auto boxMat = matLib.Get("DistCube");
-		const auto crateMat = matLib.Get("Crate");
-		const auto planeMat = matLib.Get("Plane");
-		const auto sphereMat = matLib.Get("Sphere");
-		const auto wallMat = matLib.Get("Wall");
-		const auto grassMat = matLib.Get("Grass");
-
-		if (boxMat && crateMat && planeMat)
-		{
-			boxMat->SetUniformValue("cratePos", crateEntity->GetTransform().Position);
-
-			crateMat->SetUniformValue("ambientStrength", ambientStrength);
-
-			planeMat->SetUniformValue("ambientStrength", ambientStrength);
-			planeMat->SetUniformValue("heightCoef", heightCoef);
-		}
-
-		// Disable lights when not using lighting
-		entt::registry& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
-		registry.patch<scene::DirectionalLight>(sunLight->GetEntityHandle(),
-			[this](auto& l)
-			{
-				l.direction = sunDirection;
-				l.color = sunColor;
-			});
-
-		const auto lights = registry.view<scene::PointLight, scene::EntityReference>();
-
-		for (const auto light : lights)
-		{
-			auto ent = registry.get<scene::EntityReference>(light).entity;
-			if (auto e = ent.lock()) e->SetActive(curRenderMode == 0);
-		}
-
-		UpdateShaders(grassMat, ambientStrength, heightCoef);
-
-		// Disable normal maps when not using them
-		if (!useNormalMaps)
-		{
-			wallMat->SetUniformValue("material.normalMat.useSampler", 0);
-		} else
-		{
-			wallMat->SetUniformValue("material.normalMat.useSampler", 1);
-		}*/
 	}
 
 	void Render() override
@@ -720,9 +140,39 @@ public:
 
 	void ImguiRender() override
 	{
+		PROFILE_FUNCTION();
 		auto& registry = GetCurrentScene()->GetRegistry();
 
 		if (Engine::Instance().GetWindow().GetShouldRenderToScreen()) return;
+
+		ImGuiWindowFlags flags = 0;
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+		ImGui::Begin("MainWindow", nullptr, flags);
+
+		if (ImGui::DockBuilderGetNode(ImGui::GetID("MainDockspace")) == NULL)
+		{
+			ImGuiID dockspaceId = ImGui::GetID("MainDockspace");
+			ImGui::DockBuilderRemoveNode(dockspaceId);
+			ImGui::DockBuilderAddNode(dockspaceId, ImGuiDockNodeFlags_DockSpace | ImGuiDockNodeFlags_NoTabBar);
+			ImGui::DockBuilderSetNodeSize(dockspaceId, ImGui::GetWindowSize());
+
+			ImGuiID mainDockspaceId = dockspaceId;
+			ImGuiID leftBarId = ImGui::DockBuilderSplitNode(mainDockspaceId,
+				ImGuiDir_Left, 0.25f, nullptr, &mainDockspaceId);
+
+			ImGui::DockBuilderDockWindow("Settings", leftBarId);
+			ImGui::DockBuilderDockWindow("GameView", mainDockspaceId);
+			ImGui::DockBuilderFinish(dockspaceId);
+		}
+
+		ImGui::DockSpace(ImGui::GetID("MainDockspace"), ImVec2(0.0f, 0.0f), 0);
+		ImGui::End();
 
 		// Draw rendered frame to an ImGui image to simulate a game view window
 		if (ImGui::Begin("GameView"))
@@ -753,6 +203,14 @@ public:
 
 		if (ImGui::Begin("Settings"))
 		{
+			int currentFps = static_cast<int>(std::floor(1.f / core::Time::UnscaledDeltaTime()));
+			static uint64_t allTimeFps = 0;
+			static uint64_t fpsCount = 0;
+			allTimeFps += currentFps;
+			fpsCount++;
+			ImGui::Text("FPS: %i", currentFps);
+			ImGui::Text("Avg FPS: %zu", allTimeFps / fpsCount);
+			
 			if (persistentScene->GetActiveCamera())
 			{
 				// Camera Settings
@@ -782,7 +240,7 @@ public:
 			ImGui::Spacing();
 
 			// Misc. parameters
-			const char* renderModes[] = {"Lit", "Unlit"};
+			const char* renderModes[] = { "Lit", "Unlit", "Normal", "Metallic", "Roughness", "AO", "Emission" };
 			if (ImGui::BeginCombo("Render Mode", renderModes[curRenderMode]))
 			{
 				for (int i = 0; i < IM_ARRAYSIZE(renderModes); i++)
@@ -802,13 +260,6 @@ public:
 			ImGui::Checkbox("Wireframe", &wireFrame);
 			Engine::Instance().GetRenderManager().SetWireframeMode(wireFrame);
 
-			ImGui::DragFloat("Rolling Ball Scale", &R, 0.01f);
-			ImGui::DragFloat("Height Coefficient", &heightCoef, 0.01f);
-
-			/*WaterSettings();
-			UpdateShaderVisuals();
-			UpdateWaterShader();*/
-
 			// Lighting controls
 			if (ImGui::CollapsingHeader("Lights"))
 			{
@@ -818,8 +269,8 @@ public:
 				int i = 0;
 				for (const auto light : lights)
 				{
-					scene::PointLight lightComponent = registry.get<scene::PointLight>(light);
-					scene::Transform trans = registry.get<scene::Transform>(light);
+					scene::PointLight& lightComponent = registry.get<scene::PointLight>(light);
+					scene::Transform& trans = registry.get<scene::Transform>(light);
 
 					glm::vec3 col = lightComponent.color;
 					glm::vec3 position = trans.Position();
@@ -828,8 +279,8 @@ public:
 					ImGui::DragFloat3("Light Color", glm::value_ptr(col), 0.01f);
 					ImGui::DragFloat3("Light Position", glm::value_ptr(position), 0.01f);
 					ImGui::PopID();
-					registry.patch<scene::Transform>(light, [position](auto& t) {t.Position = position; });
-					registry.patch<scene::PointLight>(light, [col](auto& l) {l.color = col; });
+					trans.SetPosition(position);
+					lightComponent.color = col;
 					i++;
 				}
 
@@ -838,8 +289,8 @@ public:
 
 				for (const auto light : dirLights)
 				{
-					scene::DirectionalLight lightComponent = registry.get<scene::DirectionalLight>(light);
-					scene::Transform trans = registry.get<scene::Transform>(light);
+					scene::DirectionalLight& lightComponent = registry.get<scene::DirectionalLight>(light);
+					scene::Transform& trans = registry.get<scene::Transform>(light);
 
 					glm::vec3 col = lightComponent.color;
 					glm::vec3 direction = trans.EulerAngles();
@@ -848,8 +299,8 @@ public:
 					ImGui::DragFloat3("Light Color", glm::value_ptr(col), 0.01f);
 					ImGui::DragFloat3("Light Direction", glm::value_ptr(direction), 0.01f);
 					ImGui::PopID();
-					registry.patch<scene::Transform>(light, [direction](auto& t) { t.Rotation = direction; });
-					registry.patch<scene::DirectionalLight>(light, [col](auto& l) { l.color = col; });
+					lightComponent.color = col;
+					trans.SetEulerAngles(direction);
 					i++;
 				}
 
@@ -868,16 +319,16 @@ public:
 				for (const auto obj : objects)
 				{
 					auto ent = registry.get<scene::EntityReference>(obj).entity;
-					scene::Transform trans = registry.get<scene::Transform>(obj);
+					scene::Transform& trans = registry.get<scene::Transform>(obj);
 
 					if (auto e = ent.lock())
 					{
-						/*glm::vec3 position = trans.Position;
-						glm::vec3 rotation = trans.Rotation;
-						glm::vec3 scale = trans.Scale;
-						glm::vec3 localPos = trans.LocalPosition;
-						glm::vec3 localRot = trans.LocalRotation;
-						glm::vec3 localScale = trans.LocalScale;
+						glm::vec3 position = trans.Position();
+						glm::vec3 rotation = trans.EulerAngles();
+						glm::vec3 scale = trans.Scale();
+						glm::vec3 localPos = trans.LocalPosition();
+						glm::vec3 localRot = trans.LocalEulerAngles();
+						glm::vec3 localScale = trans.LocalScale();
 						bool enabled = e->IsActive();
 						ImGui::PushID(i);
 						ImGui::Checkbox("", &enabled);
@@ -896,7 +347,7 @@ public:
 						e->SetTransform(position, rotation, scale);
 						if (!e->Parent.expired()) e->SetLocalTransform(localPos, localRot, localScale);
 						e->SetActive(enabled);
-						i++;*/
+						i++;
 					}
 				}
 			}
@@ -907,7 +358,7 @@ public:
 				int i = 0;
 				ImGui::Indent(10.0f);
 				// Loop over each saved material and create a dropdown for each one
-				for (const auto mat : GetCurrentScene()->GetMaterialStorage().GetAll())
+				for (const auto& mat : GetCurrentScene()->GetMaterialStorage().GetAll())
 				{
 					if (auto matPtr = mat.second)
 					{
@@ -951,7 +402,7 @@ public:
 									matPtr->SetUniformValue(f.first, temp);
 								}
 
-								// Setup for texture combo box, each texture must have it's own current index
+								// Setup for texture combo box, each texture must have its own current index
 								int j = 0;
 								static std::vector<int> itemIndex;
 								itemIndex.resize(static_cast<int>(shader->GetUniformSamplers().size()));

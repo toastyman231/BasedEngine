@@ -30,6 +30,6 @@ std::shared_ptr<based::graphics::Mesh> GeneratePlane(int xSize, int ySize)
 		}
 	}
 
-	return based::graphics::Mesh::CreateMesh(vertices, indices, std::vector<based::graphics::Texture>(),
+	return based::graphics::Mesh::CreateMesh(vertices, indices,
 		DEFAULT_MESH_LIB, "Plane");
 }
