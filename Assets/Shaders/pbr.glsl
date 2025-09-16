@@ -4,6 +4,19 @@ struct MaterialProperty {
     int useSampler;
     sampler2D tex;
 };
+
+const int RenderMode_Lit                   = 0;
+const int RenderMode_Unlit                 = 1;
+const int RenderMode_NormalDebug           = 2;
+const int RenderMode_MetallicDebug         = 3;
+const int RenderMode_RoughnessDebug        = 4;
+const int RenderMode_AmbientOcclusionDebug = 5;
+const int RenderMode_EmissionDebug         = 6;
+
+const int BlendMode_Opaque                 = 0;
+const int BlendMode_Masked                 = 1;
+const int BlendMode_Translucent            = 2;
+
 struct Material {
     MaterialProperty albedo;
     MaterialProperty normal;
@@ -11,6 +24,8 @@ struct Material {
     MaterialProperty roughness;
     MaterialProperty ambientOcclusion;
     MaterialProperty emission;
+    int deriveNormalZ;
+    int blendMode;
 };
 
 uniform Material material;
@@ -57,20 +72,30 @@ vec4 GetMaterialColor(MaterialProperty mat, vec2 uv) {
 }
 
 vec4 GetMaterialAlbedo(vec2 uv) {
-    vec3 color = GetMaterialColor(material.albedo, uv).rgb;
-    return vec4(pow(color.r, 2.2), pow(color.g, 2.2), pow(color.b, 2.2), 1.0);
+    vec4 color = GetMaterialColor(material.albedo, uv);
+    return vec4(pow(color.r, 2.2), pow(color.g, 2.2), pow(color.b, 2.2), color.a);
 }
 
 vec4 GetMaterialNormal(vec2 uv) {
-    return GetMaterialColor(material.normal, uv);
+    vec4 normal = GetMaterialColor(material.normal, uv);
+    normal = normal * 2.0 - 1.0;
+    
+    if (material.deriveNormalZ > 0) {
+        vec2 normalXY = normal.rg;
+        float normalZ = sqrt(saturate(1.0 - dot(normalXY, normalXY)));
+        return vec4(normalXY.xy, normalZ, 1.0);
+    } 
+    else {
+        return normal;
+    }
 }
 
 float GetMaterialMetallic(vec2 uv) {
-    return GetMaterialColor(material.metallic, uv).r;
+    return GetMaterialColor(material.metallic, uv).b;
 }
 
 float GetMaterialRoughness(vec2 uv) {
-    return GetMaterialColor(material.roughness, uv).r;
+    return GetMaterialColor(material.roughness, uv).g;
 }
 
 float GetMaterialAmbientOcclusion(vec2 uv) {

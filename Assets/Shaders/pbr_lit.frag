@@ -14,13 +14,14 @@ in mat3 TBN;
 void main() {
     float roughness = GetMaterialRoughness(uvs);
     float metallic = GetMaterialMetallic(uvs);
-    vec3 albedo = vec3(GetMaterialAlbedo(uvs));
+    vec4 full_albedo = GetMaterialAlbedo(uvs);
+    vec3 albedo = full_albedo.rgb;
+    float alpha = full_albedo.a;
 
     vec3 N = normalize(fragNormal);
     vec3 V = normalize(vec3(eyePos) - fragPos);
     if (material.normal.useSampler == 1) {
         N = vec3(GetMaterialNormal(uvs));
-        N = N * 2.0 - 1.0;
         N = normalize(TBN * N);
     }
 
@@ -73,10 +74,25 @@ void main() {
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
 
-    if (renderMode == 0) {
-        outColor = vec4(color + GetMaterialEmission(uvs).xyz, 1.0);
-    } else if (renderMode == 1) {
-        outColor = vec4(albedo, 1.0);
+    if (renderMode == RenderMode_Lit) {
+        if (material.blendMode == BlendMode_Masked && alpha < 0.1) discard; 
+        outColor = vec4(color + GetMaterialEmission(uvs).xyz, material.blendMode == BlendMode_Opaque ? 1.0 : alpha);
+    } else if (renderMode == RenderMode_Unlit) {
+        if (material.blendMode == BlendMode_Masked && alpha < 0.1) discard; 
+        outColor = vec4(albedo + GetMaterialEmission(uvs).xyz, material.blendMode == BlendMode_Opaque ? 1.0 : alpha);
+    } else if (renderMode == RenderMode_NormalDebug) {
+        if (material.deriveNormalZ > 0)
+            outColor = vec4((vec3(GetMaterialNormal(uvs)) + 1.0) / 2.0, 1.0);
+        else
+            outColor = GetMaterialNormal(uvs);
+    } else if (renderMode == RenderMode_MetallicDebug) {
+        outColor = vec4(vec3(GetMaterialMetallic(uvs)), 1.0);
+    } else if (renderMode == RenderMode_RoughnessDebug) {
+        outColor = vec4(vec3(GetMaterialRoughness(uvs)), 1.0);
+    } else if (renderMode == RenderMode_AmbientOcclusionDebug) {
+        outColor = vec4(vec3(GetMaterialAmbientOcclusion(uvs)), 1.0);
+    } else if (renderMode == RenderMode_EmissionDebug) {
+        outColor = vec4(vec3(GetMaterialEmission(uvs)), 1.0);
     } else {
         outColor = vec4(1.0, 0.0, 1.0, 1.0);
     }
