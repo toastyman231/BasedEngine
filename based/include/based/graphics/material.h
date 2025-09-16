@@ -9,6 +9,14 @@ namespace based::graphics
 {
 	class Shader;
 	class Texture;
+
+	enum class BlendMode : uint8_t
+	{
+		Opaque = 0,
+		Masked,
+		Translucent
+	};
+	
 	class Material
 	{
 	public:
@@ -21,6 +29,9 @@ namespace based::graphics
 			core::AssetLibrary<Material>& assetLibrary, const std::string& name = "New Material");
 		static std::shared_ptr<Material> LoadMaterialFromFile(const std::string& filepath,
 			core::AssetLibrary<Material>& assetLibrary, const std::string& filePrefix = "", 
+			const std::string& saveAs = "");
+		static std::shared_ptr<Material> LoadMaterialFromFileWithUUID(const std::string& filepath,
+			core::AssetLibrary<Material>& assetLibrary, core::UUID uuid, const std::string& filePrefix = "", 
 			const std::string& saveAs = "");
 		static std::shared_ptr<Material> LoadMaterialWithUUID(const std::string& filepath, 
 			core::UUID id, const std::string& filePrefix = "", bool absolute = false);
@@ -39,6 +50,13 @@ namespace based::graphics
 
 		std::string GetTextureLocationByIndex(int index) const;
 
+		void SetBlendMode(BlendMode mode)
+		{
+			mBlendMode = mode;
+			SetUniformValue("material.blendMode", static_cast<int>(mBlendMode));
+		}
+		BlendMode GetBlendMode() const { return mBlendMode; }
+		
 		std::unordered_map<std::string, int> GetTextureOrder() const { return mTextureOrder; }
 
 		bool IsFileMaterial() const { return !mMaterialSource.empty(); }
@@ -117,6 +135,8 @@ namespace based::graphics
 		std::shared_ptr<Shader> mShader;
 		std::vector<std::shared_ptr<Texture>> mTextures;
 		std::unordered_map<std::string, int> mTextureOrder;
+
+		BlendMode mBlendMode = BlendMode::Opaque;
 
 		std::string mMaterialSource;
 

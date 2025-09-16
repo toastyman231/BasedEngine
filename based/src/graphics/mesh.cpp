@@ -49,7 +49,7 @@ namespace based::graphics
 	std::shared_ptr<InstancedMesh> Mesh::CreateInstancedMesh(const std::shared_ptr<Mesh>& mesh,
 		core::AssetLibrary<Mesh>& assetLibrary, const std::string& name)
 	{
-		auto asset = std::make_shared<InstancedMesh>(mesh->vertices, mesh->indices);
+		auto asset = std::make_shared<InstancedMesh>(mesh->mVA, 1);
 		asset->mMeshSource = mesh->mMeshSource;
 		assetLibrary.Load(name, asset);
 		asset->mMeshName = name;
@@ -86,48 +86,72 @@ namespace based::graphics
 
 		if (aiMesh* mesh = scene->mMeshes[0])
 		{
-			std::vector<Vertex> vertices;
 			std::vector<unsigned int> indices;
 
-			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-			{
-				Vertex vertex;
+			auto va = std::make_shared<VertexArray>();
 
-				//SetVertexBoneDataToDefault(vertex);
+			BASED_CREATE_VERTEX_BUFFER(pos_vb, float);
+			BASED_CREATE_VERTEX_BUFFER(norm_vb, float);
+			BASED_CREATE_VERTEX_BUFFER(uv_vb, float);
+			BASED_CREATE_VERTEX_BUFFER(tan_vb, float);
+			BASED_CREATE_VERTEX_BUFFER(bitan_vb, float);
 
-				// process vertex positions, normals and texture coordinates
-				glm::vec3 vector;
-				vector.x = mesh->mVertices[i].x;
-				vector.y = mesh->mVertices[i].y;
-				vector.z = mesh->mVertices[i].z;
-				vertex.Position = vector;
+			const bool hasNormals   = mesh->HasNormals();
+			const bool hasUVs       = mesh->mTextureCoords[0] != nullptr;
+			const bool hasTangents  = mesh->mTangents != nullptr;
+			const bool hasBitangents= mesh->mBitangents != nullptr;
 
-				vector.x = mesh->mNormals[i].x;
-				vector.y = mesh->mNormals[i].y;
-				vector.z = mesh->mNormals[i].z;
-				vertex.Normal = vector;
+			pos_vb->Resize(mesh->mNumVertices * 3);
+			if (hasNormals) norm_vb->Resize(mesh->mNumVertices * 3);
+			if (hasUVs) uv_vb->Resize(mesh->mNumVertices * 2);
+			if (hasTangents) tan_vb->Resize(mesh->mNumVertices * 3);
+			if (hasBitangents) bitan_vb->Resize(mesh->mNumVertices * 3);
 
-				if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
+			PROFILE_ZONE(fillVerticesZone, "Fill vertices", true);
+			for (size_t i = 0; i < mesh->mNumVertices; ++i) {
+				auto pos = mesh->mVertices[i];
+				pos_vb->GetData()[i*3 + 0] = pos.x;
+				pos_vb->GetData()[i*3 + 1] = pos.y;
+				pos_vb->GetData()[i*3 + 2] = pos.z;
+
+				if (hasNormals)
 				{
-					glm::vec2 vec;
-					vec.x = mesh->mTextureCoords[0][i].x;
-					vec.y = mesh->mTextureCoords[0][i].y;
-					vertex.TexCoords = vec;
-				}
-				else
-					vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-
-				// process vertex tangent space
-				if (mesh->mTangents)
-				{
-					vector.x = mesh->mTangents[i].x;
-					vector.y = mesh->mTangents[i].y;
-					vector.z = mesh->mTangents[i].z;
-					vertex.Tangent = vector;
+					auto normal = mesh->mNormals[i];
+					norm_vb->GetData()[i*3 + 0] = normal.x;
+					norm_vb->GetData()[i*3 + 1] = normal.y;
+					norm_vb->GetData()[i*3 + 2] = normal.z;
 				}
 
-				vertices.emplace_back(vertex);
+				if (hasUVs)
+				{
+					auto texcoord = mesh->mTextureCoords[0][i];
+					uv_vb->GetData()[i*2 + 0] = texcoord.x;
+					uv_vb->GetData()[i*2 + 1] = texcoord.y;
+				}
+			
+				if (hasTangents)
+				{
+					auto tangent = mesh->mTangents[i];
+					tan_vb->GetData()[i*3 + 0] = tangent.x;
+					tan_vb->GetData()[i*3 + 1] = tangent.y;
+					tan_vb->GetData()[i*3 + 2] = tangent.z;
+				}
+
+				if (hasBitangents)
+				{
+					auto bitangent = mesh->mBitangents[i];
+					bitan_vb->GetData()[i*3 + 0] = bitangent.x;
+					bitan_vb->GetData()[i*3 + 1] = bitangent.y;
+					bitan_vb->GetData()[i*3 + 2] = bitangent.z;
+				}
 			}
+			PROFILE_ZONE_END(fillVerticesZone);
+
+			pos_vb->SetLayout({ 3 });
+			norm_vb->SetLayout({ 3 });
+			uv_vb->SetLayout({ 2 });
+			tan_vb->SetLayout({ 3 });
+			bitan_vb->SetLayout({ 3 });
 
 			// process indices
 			for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -137,7 +161,16 @@ namespace based::graphics
 					indices.emplace_back(face.mIndices[j]);
 			}
 
-			auto loadedMesh = std::make_shared<Mesh>(vertices, indices, uuid);
+			va->PushBuffer(std::move(pos_vb));
+			if (uv_vb->GetVertexCount() > 0) va->PushBuffer(std::move(uv_vb));
+			if (norm_vb->GetVertexCount() > 0) va->PushBuffer(std::move(norm_vb));
+			if (tan_vb->GetVertexCount() > 0) va->PushBuffer(std::move(tan_vb));
+			if (bitan_vb->GetVertexCount() > 0) va->PushBuffer(std::move(bitan_vb));
+
+			va->SetElements(indices);
+			va->Upload();
+			
+			auto loadedMesh = std::make_shared<Mesh>(va, uuid);
 			loadedMesh->mMeshSource = filepath;
 			assetLibrary.Load(scene->mMeshes[0]->mName.C_Str(), loadedMesh);
 			loadedMesh->mMeshName = scene->mMeshes[0]->mName.C_Str();
@@ -150,11 +183,69 @@ namespace based::graphics
 
 	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 	{
-		this->vertices = vertices;
+		BASED_ASSERT(vertices.size() > 0, "Trying to create mesh with no vertices!");
+		
+		auto va = std::make_shared<VertexArray>();
+
+		BASED_CREATE_VERTEX_BUFFER(pos_vb, float);
+		BASED_CREATE_VERTEX_BUFFER(norm_vb, float);
+		BASED_CREATE_VERTEX_BUFFER(uv_vb, float);
+		BASED_CREATE_VERTEX_BUFFER(tan_vb, float);
+		BASED_CREATE_VERTEX_BUFFER(bitan_vb, float);
+
+		pos_vb->Resize(vertices.size() * 3);
+		norm_vb->Resize(vertices.size() * 3);
+		uv_vb->Resize(vertices.size() * 2);
+		tan_vb->Resize(vertices.size() * 3);
+		bitan_vb->Resize(vertices.size() * 3);
+
+		PROFILE_ZONE(fillVerticesZone, "Fill vertices", true);
+		for (size_t i = 0; i < vertices.size(); ++i) {
+			auto& vertex = vertices[i];
+			auto pos = vertex.Position;
+			pos_vb->GetData()[i*3 + 0] = pos.x;
+			pos_vb->GetData()[i*3 + 1] = pos.y;
+			pos_vb->GetData()[i*3 + 2] = pos.z;
+
+			auto normal = vertex.Normal;
+			norm_vb->GetData()[i*3 + 0] = normal.x;
+			norm_vb->GetData()[i*3 + 1] = normal.y;
+			norm_vb->GetData()[i*3 + 2] = normal.z;
+
+			auto texcoord = vertex.TexCoords;
+			uv_vb->GetData()[i*2 + 0] = texcoord.x;
+			uv_vb->GetData()[i*2 + 1] = texcoord.y;
+			
+			auto tangent = vertex.Tangent;
+			tan_vb->GetData()[i*3 + 0] = tangent.x;
+			tan_vb->GetData()[i*3 + 1] = tangent.y;
+			tan_vb->GetData()[i*3 + 2] = tangent.z;
+
+			auto bitangent = vertex.Bitangent;
+			bitan_vb->GetData()[i*3 + 0] = bitangent.x;
+			bitan_vb->GetData()[i*3 + 1] = bitangent.y;
+			bitan_vb->GetData()[i*3 + 2] = bitangent.z;
+		}
+		PROFILE_ZONE_END(fillVerticesZone);
+
+		pos_vb->SetLayout({ 3 });
+		norm_vb->SetLayout({ 3 });
+		uv_vb->SetLayout({ 2 });
+		tan_vb->SetLayout({ 3 });
+		bitan_vb->SetLayout({ 3 });
+
+		va->PushBuffer(std::move(pos_vb));
+		if (uv_vb->GetVertexCount() > 0) va->PushBuffer(std::move(uv_vb));
+		if (norm_vb->GetVertexCount() > 0) va->PushBuffer(std::move(norm_vb));
+		if (tan_vb->GetVertexCount() > 0) va->PushBuffer(std::move(tan_vb));
+		if (bitan_vb->GetVertexCount() > 0) va->PushBuffer(std::move(bitan_vb));
+
+		va->SetElements(indices);
+		va->Upload();
+		
 		this->indices = indices;
 		mUUID = core::UUID();
-
-		SetupMesh();
+		mVA = va;
 	}
 
 	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, core::UUID uuid)
@@ -221,52 +312,6 @@ namespace based::graphics
 				BASED_SUBMIT_RC(RenderVertexArrayMaterial, mVA, material, transform.GetGlobalMatrix()));
 		}
 		Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(PopCamera));
-	}
-
-	void Mesh::SetupMesh(bool upload)
-	{
-		PROFILE_FUNCTION();
-		auto va = std::make_shared<graphics::VertexArray>();
-
-		BASED_CREATE_VERTEX_BUFFER(pos_vb, float);
-		BASED_CREATE_VERTEX_BUFFER(norm_vb, float);
-		BASED_CREATE_VERTEX_BUFFER(uv_vb, float);
-		BASED_CREATE_VERTEX_BUFFER(tan_vb, float);
-		BASED_CREATE_VERTEX_BUFFER(bitan_vb, float);
-		BASED_CREATE_VERTEX_BUFFER(boneid_vb, int);
-		BASED_CREATE_VERTEX_BUFFER(weight_vb, float);
-
-		for (const auto& vertex : vertices)
-		{
-			pos_vb->PushVertex({ vertex.Position.x, vertex.Position.y, vertex.Position.z });
-			norm_vb->PushVertex({ vertex.Normal.x, vertex.Normal.y, vertex.Normal.z });
-			uv_vb->PushVertex({ vertex.TexCoords.x, vertex.TexCoords.y });
-			tan_vb->PushVertex({ vertex.Tangent.x, vertex.Tangent.y, vertex.Tangent.z });
-			bitan_vb->PushVertex({ vertex.Bitangent.x, vertex.Bitangent.y, vertex.Bitangent.z });
-			boneid_vb->PushVertex({ vertex.m_BoneIDs[0], vertex.m_BoneIDs[1], vertex.m_BoneIDs[2], vertex.m_BoneIDs[3] });
-			weight_vb->PushVertex({ vertex.m_Weights[0], vertex.m_Weights[1], vertex.m_Weights[2], vertex.m_Weights[3] });
-		}
-
-		pos_vb->SetLayout({ 3 });
-		norm_vb->SetLayout({ 3 });
-		uv_vb->SetLayout({ 2 });
-		tan_vb->SetLayout({ 3 });
-		bitan_vb->SetLayout({ 3 });
-		boneid_vb->SetLayout({ 4 });
-		weight_vb->SetLayout({ 4 });
-		va->PushBuffer(std::move(pos_vb));
-		va->PushBuffer(std::move(uv_vb));
-		va->PushBuffer(std::move(norm_vb));
-		va->PushBuffer(std::move(tan_vb));
-		va->PushBuffer(std::move(bitan_vb));
-		va->PushBuffer(std::move(boneid_vb));
-		va->PushBuffer(std::move(weight_vb));
-
-		va->SetElements(indices);
-		if (upload) va->Upload();
-
-		//mVA.reset();
-		mVA = va;
 	}
 
 	void InstancedMesh::SetInstanceTransform(int index, const scene::Transform& transform)
@@ -378,10 +423,18 @@ namespace based::graphics
 
 	void InstancedMesh::RegenVertexArray()
 	{
-		SetupMesh(false);
-		
+		static bool uploaded_models = false;
+		InstancedVertexBuffer<float>* model_vb;
 
-		BASED_CREATE_INSTANCED_VERTEX_BUFFER_FULL(model_vb, float, mInstanceCount * 4, true);
+		BASED_CREATE_INSTANCED_VERTEX_BUFFER_FULL(vb, float, mInstanceCount * 4, true);
+		
+		if (uploaded_models)
+		{
+			model_vb = (InstancedVertexBuffer<float>*)mVA->GetVertexBuffer(mVA->GetVBOCount() - 1u);
+		} else
+		{
+			model_vb = vb.get();
+		}
 
 		for (int i = 0; i < mInstanceCount; i++)
 		{
@@ -396,8 +449,9 @@ namespace based::graphics
 		}
 
 		model_vb->SetLayout({ 4, 4, 4, 4 });
-		mVA->PushBuffer(std::move(model_vb));
+		if (!uploaded_models) mVA->PushBuffer(std::move(vb));
 		mVA->Upload();
+		uploaded_models = true;
 
 		mIsDirty = false;
 	}

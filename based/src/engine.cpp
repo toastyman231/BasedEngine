@@ -137,7 +137,7 @@ namespace based
 
     void Engine::SetIcon(std::string path)
     {
-        if (FILE* file = fopen(path.c_str(), "r"))
+        if (std::filesystem::exists(path))
         {
             int width = 0, height = 0;
             int numChannels = 0;
@@ -202,6 +202,7 @@ namespace based
 
     bool Engine::Initialize()
     {
+        PROFILE_FUNCTION();
         BASED_ASSERT(!mIsInitialized, "Attempting to call Engine::Initialize() more than once!");
         bool ret = false;
         if (!mIsInitialized)
@@ -265,11 +266,17 @@ namespace based
                         graphics::DefaultLibraries::GetMaterialLibrary().Get("ShadowDepthMaterial"));
                     shadowDepthPass->AddOutputName("ShadowMap");
                     mRenderManager.InjectPass(shadowDepthPass);
-                    auto mainRenderPass = new graphics::CustomRenderPass(
-                        "MainColorPass", mWindow.GetFramebuffer());
+                    auto mainRenderPass = new graphics::OpaqueMaskedColorPass(
+                        "OpaqueAndMaskedPass", mWindow.GetFramebuffer());
                     mainRenderPass->AddOutputName("SceneColor");
                     mainRenderPass->AddOutputName("SceneDepth");
                     mRenderManager.InjectPass(mainRenderPass);
+                    auto translucentPass = new graphics::TranslucentColorPass(
+                        "TranslucentPass", mWindow.GetFramebuffer());
+                    translucentPass->AddOutputName("SceneColor");
+                    translucentPass->AddOutputName("SceneDepth");
+                    translucentPass->mShouldClear = false;
+                    mRenderManager.InjectPass(translucentPass);
                     auto uiRenderPass = new graphics::UIRenderPass("UserInterfacePass", mWindow.GetFramebuffer());
                     uiRenderPass->AddOutputName("SceneColor");
                     mRenderManager.InjectPass(uiRenderPass);

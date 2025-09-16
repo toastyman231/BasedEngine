@@ -30,10 +30,11 @@ namespace based::graphics
 		inline bool IsUploaded() const { return mIsUploaded; }
 		virtual bool IsInstanced() const { return false; }
 		inline uint32_t GetId() const { return mVbo; }
-		inline uint32_t GetVertexCount() const { return mVertexCount; }
+		inline size_t GetVertexCount() const { return mVertexCount; }
 		inline uint32_t GetStride() const { return mStride; }
 		inline uint32_t GetGLType() const { return mGLType; }
 		inline const std::vector<uint32_t>& GetLayout() const { return mLayout; }
+		void* GetRawData() { return mData; }
 
 		void SetLayout(const std::vector<uint32_t>& layout);
 
@@ -45,12 +46,12 @@ namespace based::graphics
 	protected:
 		bool mIsUploaded = false;
 		uint32_t mVbo = 0;
-		uint32_t mVertexCount = 0;
+		size_t mVertexCount = 0;
 		uint32_t mStride = 0;
 
 		std::vector<uint32_t> mLayout;
 		void* mData = nullptr;
-		uint32_t mSize = 0;
+		size_t mSize = 0;
 		uint32_t mGLType = 0;
 	};
 
@@ -85,6 +86,13 @@ namespace based::graphics
 
 		uint32_t GetTypeSize() const override { return sizeof(T); }
 
+		void Reserve(uint32_t count) { mDataVec.reserve(count); }
+		void Resize(size_t size)
+		{
+			mDataVec.resize(size);
+			mVertexCount = size;
+		}
+
 		void PushVertex(const std::vector<T>& vert)
 		{
 			BASED_ASSERT(vert.size() > 0, "No values passed in for vertex");
@@ -105,6 +113,15 @@ namespace based::graphics
 			}
 		}
 
+		void SetVertices(const std::vector<T>& vertices)
+		{
+			BASED_ASSERT(vertices.size() > 0, "VertexBuffer::PushVertices - Attempting to push 0 vertices!");
+			
+			mDataVec = vertices;
+			mValueCount = vertices[0].size();
+			mVertexCount = vertices.size() / mValueCount;
+		} 
+
 		void Upload(bool dynamic = false) override
 		{
 			PROFILE_FUNCTION();
@@ -115,6 +132,9 @@ namespace based::graphics
 			mData = &mDataVec[0];
 			RawVertexBuffer::Upload(dynamic);
 		}
+
+		std::vector<T> GetDataVec() const { return mDataVec; }
+		T* GetData() { return mDataVec.data(); }
 	private:
 		std::vector<T> mDataVec;
 		uint32_t mValueCount;
@@ -185,7 +205,7 @@ namespace based::graphics
 		{
 			PROFILE_FUNCTION();
 			mStride *= sizeof(T);
-			mSize = (mVertexCount / 4) * sizeof(glm::mat4);
+			mSize = (mVertexCount / static_cast<size_t>(4)) * sizeof(glm::mat4);
 			mData = &mDataVec[0];
 			RawVertexBuffer::Upload(dynamic);
 			//glBindBuffer(GL_ARRAY_BUFFER, mVbo); BASED_CHECK_GL_ERROR;
@@ -208,6 +228,8 @@ namespace based::graphics
 		inline bool IsValid() const { return mIsValid; }
 		inline uint32_t GetVertexCount() const { return mVertexCount; }
 		inline uint32_t GetElementCount() const { return mElementCount; }
+		RawVertexBuffer* GetVertexBuffer(size_t index) { return mVbos[index].get(); }
+		size_t GetVBOCount() const { return mVbos.size(); }
 
 		void PushBuffer(std::unique_ptr<RawVertexBuffer> vbo);
 		void SetElements(const std::vector<uint32_t>& elements);

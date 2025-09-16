@@ -14,6 +14,7 @@ namespace based::managers
 {
 	void InputManager::Initialize()
 	{
+		PROFILE_FUNCTION();
 		RegisterModifier(new input::DeadzoneModifier(0.2f));
 		RegisterModifier(new input::NegateModifier());
 		RegisterModifier(new input::SwizzleYXModifier());
@@ -203,7 +204,7 @@ namespace based::managers
 					continue;
 				}
 
-				LoadActionFile(dir.path().string());
+				if (dir.path().extension().string() == ".bactions") LoadActionFile(dir.path().string());
 			}
 		}
 	}
@@ -420,6 +421,7 @@ namespace based::managers
 
 	void InputManager::Update()
 	{
+		PROFILE_FUNCTION();
 		auto& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
 		auto inputView = registry.view<input::InputComponent>();
 
@@ -556,6 +558,7 @@ namespace based::managers
 
 	void InputManager::Shutdown()
 	{
+		PROFILE_FUNCTION();
 		for (auto& [id, val] : mTriggers)
 		{
 			delete val;

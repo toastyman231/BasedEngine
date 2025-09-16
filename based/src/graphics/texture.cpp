@@ -2,6 +2,8 @@
 #include "graphics/texture.h"
 
 #define STB_IMAGE_IMPLEMENTATION
+#include <ktx.h>
+
 #include "external/stb/stb_image.h"
 
 #include "glad/glad.h"
@@ -218,7 +220,7 @@ namespace based::graphics
 				mNumChannels = errTex->mNumChannels;
 			} else
 			{
-				float pixels[] = {
+				static float pixels[] = {
 				1.f, 0.f, 1.f,	1.f, 1.f, 1.f,	1.f, 0.f, 1.f,	1.f, 1.f, 1.f,
 				1.f, 1.f, 1.f,	1.f, 0.f, 1.f,	1.f, 1.f, 1.f,	1.f, 0.f, 1.f,
 				1.f, 0.f, 1.f,	1.f, 1.f, 1.f,	1.f, 0.f, 1.f,	1.f, 1.f, 1.f,
@@ -233,10 +235,30 @@ namespace based::graphics
 					0, GL_RGB, GL_FLOAT, pixels); BASED_CHECK_GL_ERROR;
 				glGenerateMipmap(GL_TEXTURE_2D); BASED_CHECK_GL_ERROR;
 				SetTextureFilter(TextureFilter::Nearest);
-				//BASED_WARN("Unable to load texture: {} - defaulting to checkerboard", mPath.c_str());
+				BASED_WARN("Unable to load texture: {} - defaulting to checkerboard", mPath.c_str());
 			}
 		}
 		glBindTexture(GL_TEXTURE_2D, 0); BASED_CHECK_GL_ERROR;
+	}
+
+	void Texture::LoadKTXTexture(ktxTexture2* kTexture)
+	{
+		PROFILE_FUNCTION();
+		GLenum target, glerror;
+		GLuint texture;
+								
+		glGenTextures(1, &texture); BASED_CHECK_GL_ERROR;
+		ktx_error_code_e result = ktxTexture_GLUpload((ktxTexture*)kTexture, &texture,
+		                                               &target, &glerror); BASED_CHECK_GL_ERROR;
+
+		BASED_ASSERT(result == KTX_SUCCESS, "Error creating KTX texture!");
+								
+		mHeight = kTexture->baseHeight;
+		mWidth = kTexture->baseWidth;
+		mNumChannels = ktxTexture2_GetNumComponents(kTexture);
+		mId = texture;
+
+		ktxTexture2_Destroy(kTexture);
 	}
 
 	void Texture::ResetUUID(uint64_t id)

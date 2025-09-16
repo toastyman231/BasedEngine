@@ -35,7 +35,7 @@ namespace based::scene
 
 		virtual void InitializeScene();
 		void AnimateScene() const;
-		virtual void RenderScene() const;
+		virtual void RenderScene(graphics::RenderFlags renderFlags = graphics::RenderFlags::None) const;
 		virtual void UpdateScene(float deltaTime);
 		virtual void ShutdownScene();
 

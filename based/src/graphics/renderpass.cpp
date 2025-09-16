@@ -80,7 +80,7 @@ namespace based::graphics
 			return;
 		}
 
-		Engine::Instance().GetApp().GetCurrentScene()->RenderScene();
+		Engine::Instance().GetApp().GetCurrentScene()->RenderScene(mRenderFlags);
 	}
 
 	void CustomRenderPass::EndRender()
@@ -108,6 +108,20 @@ namespace based::graphics
 		}
 
 		mLastFrameBuffer = mPassBuffer;
+	}
+
+	void OpaqueMaskedColorPass::BeginRender()
+	{
+		CustomRenderPass::BeginRender();
+
+		managers::RenderManager::SetBlendingEnabled(false);
+	}
+
+	void TranslucentColorPass::BeginRender()
+	{
+		CustomRenderPass::BeginRender();
+
+		managers::RenderManager::SetBlendingEnabled(true);
 	}
 
 	UIRenderPass::UIRenderPass(std::string name) : CustomRenderPass(std::move(name)) {}

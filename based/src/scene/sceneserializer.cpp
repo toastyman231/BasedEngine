@@ -119,7 +119,7 @@ namespace based::scene
 		out << YAML::EndMap; // Material
 	}
 
-	std::shared_ptr<graphics::Material> SceneSerializer::DeserializeMaterial(const std::string& filepath)
+	std::shared_ptr<graphics::Material> SceneSerializer::DeserializeMaterial(const std::string& filepath, bool save)
 	{
 		std::ifstream stream(filepath);
 		std::stringstream strStream;
@@ -236,12 +236,12 @@ namespace based::scene
 				auto tex = std::make_shared<graphics::Texture>(path, true);
 				tex->SetName(texture.first.as<std::string>());
 				mLoadedTextures[id] = tex;
-				if (mScene) mScene->GetTextureStorage().Load(tex->GetName(), tex);
+				if (mScene) Engine::Instance().GetResourceManager().GetTextureStorage().Load(tex->GetName(), tex);
 				material->AddTexture(tex, texture.second["Location"].as<std::string>());
 			}
 		}
 
-		if (mScene) mScene->GetMaterialStorage().Load(materialName, material);
+		if (save) Engine::Instance().GetResourceManager().GetMaterialStorage().Load(materialName, material);
 		return material;
 	}
 
@@ -578,14 +578,16 @@ namespace based::scene
 
 					std::ofstream ofs(pathname, std::ios::binary);
 
-					size_t size = m->vertices.size();
+					BASED_ASSERT(false, "TODO: FIX THIS");
+					
+					/*size_t size = m->GetVertexArray()->GetVertexBuffer(0)->GetVertexCount();
 					ofs.write(reinterpret_cast<const char*>(&size), sizeof(size_t)); // Write vertex size
-					ofs.write(reinterpret_cast<const char*>(m->vertices.data()), 
+					ofs.write(static_cast<const char*>(m->GetVertexArray()->GetVertexBuffer(0)->GetRawData()), 
 						size * sizeof(graphics::Vertex)); // Write vertices
 					size = m->indices.size();
 					ofs.write(reinterpret_cast<const char*>(&size), sizeof(size_t)); // Write index size
 					ofs.write(reinterpret_cast<const char*>(m->indices.data()),
-						size * sizeof(unsigned int)); // Write indices
+						size * sizeof(unsigned int)); // Write indices*/
 
 					out << YAML::Key << "Path" << YAML::Value << pathname;
 					out << YAML::Key << "IsBinary" << YAML::Value << true;

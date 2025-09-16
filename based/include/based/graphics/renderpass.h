@@ -2,6 +2,7 @@
 #include "framebuffer.h"
 #include "material.h"
 #include "rendercommands.h"
+#include "renderflags.h"
 #include "vertex.h"
 
 #define CRP_NO_OUTPUT "No Output"
@@ -24,6 +25,7 @@ namespace based::graphics
 		std::shared_ptr<Material> GetOverrideMaterial();
 		const std::string& GetPassName();
 		void AddOutputName(const std::string& name);
+		void SetRenderFlags(RenderFlags flags) { mRenderFlags = flags; }
 
 		virtual void BeginRender();
 		virtual void Render();
@@ -38,8 +40,34 @@ namespace based::graphics
 		std::shared_ptr<Material> mOverrideMaterial;
 		std::shared_ptr<Camera> mPassCamera;
 		bool mDidBypassCamera = false;
+		static_assert(std::is_enum_v<RenderFlags>,
+			  "based::managers::RenderFlags is not visible here");
+		RenderFlags mRenderFlags = RenderFlags::DrawAll;
 
 		static std::shared_ptr<Framebuffer> mLastFrameBuffer;
+	};
+
+	class OpaqueMaskedColorPass : public CustomRenderPass
+	{
+	public:
+		OpaqueMaskedColorPass(const std::string& name, std::shared_ptr<Framebuffer> buffer)
+			: CustomRenderPass(name, buffer)
+		{
+			mRenderFlags = RenderFlags::DrawOpaque | RenderFlags::DrawMasked;
+		}
+		
+		void BeginRender() override;
+	};
+
+	class TranslucentColorPass : public CustomRenderPass
+	{
+	public:
+		TranslucentColorPass(const std::string& name, std::shared_ptr<Framebuffer> buffer)
+			: CustomRenderPass(name, buffer)
+		{
+			mRenderFlags = RenderFlags::DrawTranslucent;
+		}
+		void BeginRender() override;
 	};
 
 	class UIRenderPass : public CustomRenderPass

@@ -57,7 +57,7 @@ namespace based::graphics
 		}
 	}
 #else
-	void DebugLineRenderer::DrawDebugLine(glm::vec3 startPos, glm::vec3 endPos, int width, glm::vec4 color)
+	void DebugLineRenderer::DrawDebugLine(glm::vec3 startPos, glm::vec3 endPos, float width, glm::vec4 color, float duration)
 	{
 		return;
 	}

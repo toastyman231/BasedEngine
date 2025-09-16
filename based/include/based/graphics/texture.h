@@ -14,6 +14,8 @@ namespace based::managers
 }
 
 struct SDL_Surface;
+struct ktxTexture;
+struct ktxTexture2;
 
 namespace based::graphics
 {
@@ -67,6 +69,8 @@ namespace based::graphics
 		void SetWrapMode(TextureWrapMode mode);
 		void SetName(const std::string& name) { mName = name; }
 
+		bool IsBC5Compressed() const { return mBC5Compressed; }
+
 		static std::shared_ptr<Texture> CreateImageTexture(const std::string& name,
 			uint32_t width, uint32_t height, TextureAccessLevel accessLevel, core::AssetLibrary<Texture>& library);
 		static uint32_t GetNextImageTextureUnit() { return mNextId++; }
@@ -86,10 +90,12 @@ namespace based::graphics
 
 		bool mStbiTex;
 		bool mSdlSurface;
+		bool mBC5Compressed = false;
 
 		unsigned char* mPixels;
 
 		void LoadTexture();
+		void LoadKTXTexture(ktxTexture2* kTexture);
 		void ResetUUID(uint64_t id);
 
 		inline static uint32_t mNextId = 0;

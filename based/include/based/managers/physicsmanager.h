@@ -5,6 +5,11 @@
 
 #include "physics/physicslayers.h"
 
+namespace JPH
+{
+	class DebugRenderer;
+}
+
 namespace based::physics
 {
 	class JoltDebugRendererImpl;

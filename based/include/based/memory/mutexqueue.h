@@ -19,6 +19,11 @@ namespace based::memory
 			mCondition.notify_all();
 		}
 
+		inline void PushBackUnsafe(const T& item)
+		{
+			mBackingQueue.push(item);
+		}
+
 		inline bool PopFront(T& item)
 		{
 			bool result = false;
@@ -67,9 +72,22 @@ namespace based::memory
 			mLock.unlock();
 		}
 
+		inline void ClearUnsafe()
+		{
+			while (!mBackingQueue.empty())
+			{
+				mBackingQueue.pop();
+			}
+		}
+
 		inline bool Empty()
 		{
 			return mBackingQueue.empty();
+		}
+
+		inline void NotifyAll()
+		{
+			mCondition.notify_all();
 		}
 
 		inline std::mutex& GetLock() { return mLock; }

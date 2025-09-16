@@ -23,7 +23,7 @@ namespace based::scene
 		SceneSerializer(const std::shared_ptr<Scene>& scene);
 
 		void SerializeMaterial(YAML::Emitter& out, const std::shared_ptr<graphics::Material>& material);
-		std::shared_ptr<graphics::Material> DeserializeMaterial(const std::string& filepath);
+		std::shared_ptr<graphics::Material> DeserializeMaterial(const std::string& filepath, bool save = true);
 
 		void SerializeAnimation(YAML::Emitter& out, const std::shared_ptr<animation::Animation>& animation);
 		std::shared_ptr<animation::Animation> DeserializeAnimation(const std::string& filepath);

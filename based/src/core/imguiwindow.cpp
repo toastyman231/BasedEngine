@@ -56,6 +56,7 @@ namespace based::core
 
 	void ImguiWindow::BeginRender()
 	{
+		PROFILE_FUNCTION();
 		auto& rm = Engine::Instance().GetRenderManager();
 		rm.PushDebugGroup("ImGuiPass");
 		ImGui_ImplOpenGL3_NewFrame();
@@ -65,6 +66,7 @@ namespace based::core
 
 	void ImguiWindow::EndRender()
 	{
+		PROFILE_FUNCTION();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

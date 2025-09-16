@@ -9,7 +9,7 @@
 
 #include <utility>
 
-#define DEFAULT_MODEL_LIB based::graphics::DefaultLibraries::GetModelLibrary()
+#define DEFAULT_MODEL_LIB based::Engine::Instance().GetResourceManager().GetModelStorage()
 
 struct aiMaterial;
 struct aiMesh;
@@ -56,8 +56,9 @@ namespace based::graphics
         auto& GetBoneInfoMap() { return m_BoneInfoMap; }
         int& GetBoneCount() { return m_BoneCounter; }
 
+        const std::vector<std::shared_ptr<Mesh>>& GetMeshes() const { return meshes; }
         inline std::shared_ptr<Material> GetMaterial(int index = 0) const { return mMaterials[index]; }
-        inline std::vector<std::shared_ptr<Material>> GetMaterials() const { return mMaterials; }
+        const std::vector<std::shared_ptr<Material>>& GetMaterials() const { return mMaterials; }
 
         inline int GetNumMeshes() const { return (int)meshes.size(); }
 

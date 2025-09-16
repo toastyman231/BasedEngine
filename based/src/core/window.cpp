@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "core/window.h"
+
+#include <ktx.h>
+
 #include "SDL2/SDL.h"
 #include "engine.h"
 #include "app.h"
@@ -87,6 +90,10 @@ namespace based::core
 		}
 
 		gladLoadGLLoader(SDL_GL_GetProcAddress);
+
+		auto result = ktxLoadOpenGL((PFNGLGETPROCADDRESS)SDL_GL_GetProcAddress);
+
+		BASED_ASSERT(result == KTX_SUCCESS, "Fatal error loading KTX OGL Context!");
 
 		mFramebuffer = std::make_shared<graphics::Framebuffer>(props.w, props.h);
 		mFramebuffer->SetClearColor({ props.clearColor.r, props.clearColor.g, props.clearColor.b, 1.f });

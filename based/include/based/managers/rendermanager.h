@@ -6,6 +6,7 @@
 #include <stack>
 #include <queue>
 
+#include "core/basedtypes.h"
 #include "graphics/renderpass.h"
 
 #define BASED_SUBMIT_RC(type, ...) std::move(std::make_unique<based::graphics::rendercommands::type>(__VA_ARGS__))
@@ -20,7 +21,12 @@ namespace based::managers
 	enum class RenderMode : int32_t
 	{
 		Lit = 0,
-		Unlit
+		Unlit,
+		NormalDebug,
+		MetallicDebug,
+		RoughnessDebug,
+		AmbientOcclusionDebug,
+		EmissionDebug
 	};
 
 	class RenderManager
@@ -37,7 +43,7 @@ namespace based::managers
 
 		std::shared_ptr<graphics::Camera> GetActiveCamera() const;
 
-		void Initialize();;
+		void Initialize();
 		void Shutdown();
 
 		void Clear();
@@ -45,6 +51,8 @@ namespace based::managers
 		void SetClearColor(const glm::vec4 clearColor);
 		void SetWireframeMode(bool enabled);
 		static void SetDepthFunction(uint32_t func);
+		static void SetBlendingEnabled(bool enabled);
+		static void SetBlendFunction(uint32_t srcFactor, uint32_t dstFactor);
 
 		// Render pass handling
 		void SetEnablePassInjection(bool enable);

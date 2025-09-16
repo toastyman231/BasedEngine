@@ -55,56 +55,93 @@ namespace based::scene
 		}
 	}
 
-	void Scene::RenderScene() const
+	void Scene::RenderScene(graphics::RenderFlags renderFlags) const
 	{
 		PROFILE_FUNCTION();
+
+		auto cam = Engine::Instance().GetRenderManager().GetActiveCamera();
 		
 		const auto view = mRegistry.view<Enabled, Transform, SpriteRenderer>();
-		std::vector<std::shared_ptr<graphics::Sprite>> sprites;
-		sprites.reserve(view.size_hint());
+		std::map<float, std::shared_ptr<graphics::Sprite>> sprites;
 
-		// TODO: Find a better way to sort entities
 		for (const auto entity : view)
 		{
-			auto sprite = mRegistry.get<SpriteRenderer>(entity);
+			auto& sprite = view.get<SpriteRenderer>(entity);
+			auto& trans = view.get<Transform>(entity);
 			if (auto spr = sprite.sprite.lock())
-				sprites.emplace_back(spr);
+			{
+				float distance = glm::length(cam->GetTransform().Position() - trans.Position());
+				sprites[distance] = spr;
+			}
 		}
 
-		std::sort(sprites.begin(), sprites.end(), [](const auto& ent1, const auto& ent2)
-			{
-				return static_cast<std::shared_ptr<graphics::Sprite>>(ent1)->GetSortOrder() < 
-					static_cast<std::shared_ptr<graphics::Sprite>>(ent2)->GetSortOrder();
-			});
-
-		for (auto& sprite : sprites)
+		// Reverse iterator means we draw from farthest to nearest
+		for (auto it = sprites.rbegin(); it != sprites.rend(); ++it)
 		{
-			sprite->Draw();
+			it->second->Draw();
 		}
 
 		auto modelView = mRegistry.view<Enabled, Transform, ModelRenderer, EntityReference>();
+		std::map<float,
+			std::vector<std::tuple<
+				std::shared_ptr<graphics::Mesh>,
+				std::shared_ptr<graphics::Material>,
+				Transform>>>
+		models;
 
-		for (auto entity : modelView)
+		for (auto& entity : modelView)
 		{
-			scene::ModelRenderer renderer = mRegistry.get<ModelRenderer>(entity);
-			scene::EntityReference ent = mRegistry.get<EntityReference>(entity);
+			auto& renderer = modelView.get<ModelRenderer>(entity);
+			auto& ent = modelView.get<EntityReference>(entity);
+			auto e = ent.entity.lock();
+			if (!e) continue;
+			
 			scene::Transform& trans = ent.entity.lock()->GetTransform();
 
-			auto m = renderer.model.lock();
-			auto e = ent.entity.lock();
-			if (m)
+			if (auto m = renderer.model.lock())
 			{
-				m->Draw(trans);
-			}
-			else
+				auto& meshes = m->GetMeshes();
+				auto& materials = m->GetMaterials();
+				BASED_ASSERT(meshes.size() == materials.size(), "Mismatched mesh and material arrays for model.");
+
+				for (size_t i = 0; i < meshes.size(); ++i)
+				{
+					auto& mesh = meshes[i];
+					auto& material = materials[i];
+					graphics::BlendMode mode = material->GetBlendMode();
+
+					if ((renderFlags & graphics::RenderFlags::DrawOpaque) == graphics::RenderFlags::DrawOpaque
+						&& mode == graphics::BlendMode::Opaque)
+					{
+						mesh->Draw(trans, material);
+					} else if ((renderFlags & graphics::RenderFlags::DrawMasked) == graphics::RenderFlags::DrawMasked
+						&& mode == graphics::BlendMode::Masked)
+					{
+						mesh->Draw(trans, material);
+					} else if ((renderFlags & graphics::RenderFlags::DrawTranslucent) == graphics::RenderFlags::DrawTranslucent
+						&& mode == graphics::BlendMode::Translucent)
+					{
+						float distance = glm::length(cam->GetTransform().Position() - trans.Position());
+						models[distance].emplace_back(mesh, material, trans);
+					}
+				}
+			} else BASED_WARN("Could not lock mesh for entity {}", e->GetEntityName());
+		}
+
+		if ((renderFlags & graphics::RenderFlags::DrawTranslucent) == graphics::RenderFlags::DrawTranslucent)
+		{
+			for (auto it = models.rbegin(); it != models.rend(); ++it)
 			{
-				BASED_WARN("Could not lock mesh for entity {}", e->GetEntityName());
+				for (auto& [mesh, material, trans] : it->second)
+				{
+					mesh->Draw(trans, material);
+				}
 			}
 		}
 
 		auto meshView = mRegistry.view<Enabled, Transform, MeshRenderer, EntityReference>();
 
-		for (auto entity : meshView)
+		for (auto& entity : meshView)
 		{
 			//mRegistry.get<Transform>(entity);
 			scene::MeshRenderer renderer = mRegistry.get<MeshRenderer>(entity);
@@ -253,12 +290,13 @@ namespace based::scene
 
 		if (!keepLoadedAssets)
 		{
-			currentScene->GetMeshStorage().Clear();
+			// TODO: Figure out what to do with loaded assets from previous scene
+			/*currentScene->GetMeshStorage().Clear();
 			currentScene->GetModelStorage().Clear();
 			currentScene->GetMaterialStorage().Clear();
 			currentScene->GetTextureStorage().Clear();
 			currentScene->GetAnimationStorage().Clear();
-			currentScene->GetAnimatorStorage().Clear();
+			currentScene->GetAnimatorStorage().Clear();*/
 		}
 
 		auto serializer = SceneSerializer(currentScene);

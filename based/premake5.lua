@@ -35,7 +35,8 @@ project "based"
         "%{externals.rmlui}",
         "%{externals.tracy}",
         "%{externals.yaml_cpp}",
-        "%{externals.jolt}"
+        "%{externals.jolt}",
+        "%{externals.ktx_software}"
         --"C:/Program Files (x86)/Visual Leak Detector/include"
     }
 
@@ -48,15 +49,10 @@ project "based"
 
     links
     {
-        "SDL2",
         "SDL2_ttf",
         "glad",
-        "freetype",
-        "assimp-vc143-mt",
-        "rmlui",
-        "rmlui_debugger",
         "yaml-cpp",
-        "jolt"
+        "jolt",
         --"vld"
     }
 
@@ -69,7 +65,7 @@ project "based"
         "%{libraries.assimp}",
         "%{libraries.rmlui}",
         "%{libraries.tracy}",
-        --"%{libraries.jolt}"
+        "%{libraries.ktx_software}",
         --"C:/Program Files (x86)/Visual Leak Detector/lib"
     }
 

@@ -122,8 +122,10 @@ namespace based::graphics::rendercommands
 				BASED_ASSERT(shader, "Attempting to execute invalid RenderVertexArrayMaterial - shader is nullptr");
 				if (shader)
 				{
-					managers::RenderManager::SetDepthFunction(mDepthFunc);
 					mat->UpdateShaderUniforms();
+					
+					managers::RenderManager::SetDepthFunction(mDepthFunc);
+					
 					shader->Bind();
 					int index = -1;
 					for (const auto& texture : mat->GetTextures())
@@ -133,6 +135,7 @@ namespace based::graphics::rendercommands
 						glActiveTexture(GL_TEXTURE0 + index); // See GL_TEXTURE macro
 						BASED_CHECK_GL_ERROR;
 						texture->Bind();
+						if (texture->IsBC5Compressed()) mat->SetUniformValue("material.deriveNormalZ", 1);
 					}
 
 					if (Engine::Instance().GetRenderManager().GetCurrentPassName() != "ShadowDepthPass")

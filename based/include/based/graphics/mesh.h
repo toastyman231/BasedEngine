@@ -10,7 +10,7 @@
 
 // Taken from learnopengl.com : https://learnopengl.com/Model-Loading/Mesh
 
-#define DEFAULT_MESH_LIB based::graphics::DefaultLibraries::GetMeshLibrary()
+#define DEFAULT_MESH_LIB based::Engine::Instance().GetResourceManager().GetMeshStorage()
 
 struct aiNode;
 struct aiMesh;
@@ -24,11 +24,11 @@ namespace based::graphics
 #define MAX_BONE_INFLUENCE 4
 	struct Vertex
 	{
-		glm::vec3 Position;
-		glm::vec3 Normal;
-		glm::vec2 TexCoords;
-        glm::vec3 Tangent;
-        glm::vec3 Bitangent;
+		glm::vec3 Position = glm::vec3(0.f);
+		glm::vec3 Normal = glm::vec3(0.f);
+		glm::vec2 TexCoords = glm::vec3(0.f);
+        glm::vec3 Tangent = glm::vec3(0.f);
+        glm::vec3 Bitangent = glm::vec3(0.f);
         //bone indexes which will influence this vertex
         int m_BoneIDs[MAX_BONE_INFLUENCE];
         //weights from each bone
@@ -39,7 +39,8 @@ namespace based::graphics
 	{
     public:
         // mesh data
-        std::vector<Vertex>       vertices;
+	    std::vector<std::array<int, MAX_BONE_INFLUENCE>> boneIds;
+	    std::vector<std::array<float, MAX_BONE_INFLUENCE>> boneWeights;
         std::vector<unsigned int> indices;
 
         static std::shared_ptr<Mesh> CreateMesh(
@@ -104,16 +105,15 @@ namespace based::graphics
         void SetMeshName(const std::string& name) { mMeshName = name; }
         std::string GetMeshName() const { return mMeshName; }
 
+	    std::shared_ptr<VertexArray> GetVertexArray() { return mVA; }
+
         core::UUID GetUUID() const { return mUUID; }
     protected:
         //  render data
-        //unsigned int VAO, VBO, EBO;
         core::UUID mUUID;
-        std::shared_ptr<VertexArray> mVA;
+        std::shared_ptr<VertexArray> mVA; // Mesh data is kept on the CPU here
         std::string mMeshSource;
         std::string mMeshName;
-
-        void SetupMesh(bool upload = true);
 
         friend class SceneSerializer;
 	};

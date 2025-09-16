@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Jolt/Jolt.h>
+#ifdef BASED_CONFIG_DEBUG
 #include <Jolt/Renderer/DebugRenderer.h>
 
 #include "based/core/assetlibrary.h"
@@ -48,3 +49,4 @@ namespace based::physics
 		std::shared_ptr<graphics::Material> mGeometryMaterial;
 	};
 }
+#endif

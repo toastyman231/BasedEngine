@@ -31,12 +31,15 @@ namespace based::scene
 		JPH::MeshShapeSettings settings;
 		JPH::VertexList v;
 		JPH::IndexedTriangleList t;
-		v.reserve(mesh->vertices.size());
+		v.reserve(mesh->GetVertexArray()->GetVertexBuffer(0)->GetVertexCount());
 		t.reserve(mesh->indices.size());
 
-		for (auto& vertex : mesh->vertices)
+		graphics::VertexBuffer<float>* vb = (graphics::VertexBuffer<float>*)mesh->GetVertexArray()->GetVertexBuffer(0);
+		auto vertices = vb->GetData();
+
+		for (size_t i = 0; i < vb->GetVertexCount(); ++i)
 		{
-			v.push_back(JPH::Float3(vertex.Position.x, vertex.Position.y, vertex.Position.z));
+			v.push_back(JPH::Float3(vertices[i*3 + 0], vertices[i*3 + 1], vertices[i*3 + 2]));
 		}
 
 		for (auto i = 0; i < mesh->indices.size() - 3; i += 3)

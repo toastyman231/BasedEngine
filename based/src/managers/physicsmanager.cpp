@@ -32,7 +32,9 @@ namespace based::managers
 		mPhysicsSystem->SetPhysicsSettings(mPhysicsSettings);
 		mPhysicsSystem->SetGravity(JPH::Vec3(0, -9.81f, 0));
 
+#ifdef BASED_CONFIG_DEBUG
 		mDebugRenderer = new physics::JoltDebugRendererImpl();
+#endif
 	}
 
 	void PhysicsManager::Update(float deltaTime)
@@ -77,6 +79,7 @@ namespace based::managers
 	                                    JPH::EMotionType type, uint16_t layer, JPH::EActivation activation,
 										bool isTrigger) const
 	{
+		PROFILE_FUNCTION();
 		auto settings = JPH::BodyCreationSettings(
 			shape, convert(position),
 			JPH::Quat::sEulerAngles(convert(rotation)),
@@ -89,6 +92,7 @@ namespace based::managers
 
 	void PhysicsManager::DrawDebugBodies()
 	{
+#ifdef BASED_CONFIG_DEBUG
 		if (mRenderDebug)
 		{
 			auto& registry = Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
@@ -131,5 +135,6 @@ namespace based::managers
 				}
 			}
 		}
+#endif
 	}
 }

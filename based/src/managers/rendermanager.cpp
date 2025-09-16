@@ -92,6 +92,22 @@ namespace based::managers
 		glDepthFunc(func); BASED_CHECK_GL_ERROR;
 	}
 
+	void RenderManager::SetBlendingEnabled(bool enabled)
+	{
+		if (enabled)
+		{
+			glEnable(GL_BLEND); BASED_CHECK_GL_ERROR;
+		} else
+		{
+			glDisable(GL_BLEND); BASED_CHECK_GL_ERROR;
+		}
+	}
+
+	void RenderManager::SetBlendFunction(uint32_t srcFactor, uint32_t dstFactor)
+	{
+		glBlendFunc(srcFactor, dstFactor); BASED_CHECK_GL_ERROR;
+	}
+
 	void RenderManager::SetEnablePassInjection(bool enable)
 	{
 		mAllowPassInjection = enable;

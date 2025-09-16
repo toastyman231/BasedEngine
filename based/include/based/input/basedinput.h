@@ -1,5 +1,7 @@
 #pragma once
 
+#include "external/entt/entt.hpp"
+
 namespace based::managers
 {
 	class InputManager;

@@ -57,14 +57,31 @@ namespace based::graphics
 	{
 		PROFILE_FUNCTION();
 		scene::SceneSerializer serializer(Engine::Instance().GetApp().GetCurrentScene());
-		auto material = serializer.DeserializeMaterial(filePrefix + filepath);
+		auto material = serializer.DeserializeMaterial(filePrefix + filepath, false);
 		BASED_ASSERT(material != nullptr, "Material is null!");
+		Engine::Instance().GetResourceManager().GetMaterialStorage()
+			.Load(saveAs.empty() ? material->mMaterialName : saveAs, material);
 		material->mMaterialSource = filepath;
 		return material;
 	}
 
+	std::shared_ptr<Material> Material::LoadMaterialFromFileWithUUID(const std::string& filepath,
+		core::AssetLibrary<Material>& assetLibrary, core::UUID uuid, const std::string& filePrefix,
+		const std::string& saveAs)
+	{
+		PROFILE_FUNCTION();
+		scene::SceneSerializer serializer(Engine::Instance().GetApp().GetCurrentScene());
+		auto material = serializer.DeserializeMaterial(filePrefix + filepath, false);
+		BASED_ASSERT(material != nullptr, "Material is null!");
+		Engine::Instance().GetResourceManager().GetMaterialStorage()
+			.Load(saveAs.empty() ? material->mMaterialName : saveAs, material);
+		material->mMaterialSource = filepath;
+		material->mUUID = uuid;
+		return material;
+	}
+
 	std::shared_ptr<Material> Material::LoadMaterialWithUUID(const std::string& filepath, 
-		core::UUID id, const std::string& filePrefix, bool absolute)
+	                                                         core::UUID id, const std::string& filePrefix, bool absolute)
 	{
 		scene::SceneSerializer serializer(Engine::Instance().GetApp().GetCurrentScene());
 		if (absolute) serializer.SetProjectDirectory(filePrefix);

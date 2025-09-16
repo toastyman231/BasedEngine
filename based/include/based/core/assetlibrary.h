@@ -47,7 +47,6 @@ namespace based::core
 			}
 			else
 			{
-				BASED_ERROR("AssetLibrary::Get() - Asset not found: {}", name.c_str());
 				return NULL;
 			}
 		}

@@ -1,4 +1,6 @@
 #include "pch.h"
+
+#ifdef BASED_CONFIG_DEBUG
 #include "based/physics/debugrenderer.h"
 
 #include "app.h"
@@ -149,3 +151,4 @@ namespace based::physics
 	{
 	}
 }
+#endif

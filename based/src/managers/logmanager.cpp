@@ -18,7 +18,7 @@ namespace based::managers
 		{
 			auto dirIter = std::filesystem::directory_iterator("Logs");
 
-			int fileCount = std::count_if(
+			auto fileCount = std::count_if(
 				begin(dirIter),
 				end(dirIter),
 				[](auto& entry) { return entry.is_regular_file(); }
