@@ -32,6 +32,7 @@ group ""
 
 group "Tools"
     include "BasedEditor"
+    include "BasedBuildTool"
 group ""
 
 group "Misc"

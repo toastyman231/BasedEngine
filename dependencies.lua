@@ -11,6 +11,7 @@ externals["rmlui"] = (engineLocation or "%{wks.location}") .. "/external/rmlui/I
 externals["tracy"] = (engineLocation or "%{wks.location}") .. "/external/tracy"
 externals["yaml_cpp"] = (engineLocation or "%{wks.location}") .. "/external/yaml-cpp/include"
 externals["jolt"] = (engineLocation or "%{wks.location}") .. "/external/jolt/include"
+externals["ktx_software"] = (engineLocation or "%{wks.location}") .. "/external/ktx-software/include"
 
 -- External libraries
 libraries = {}
@@ -21,3 +22,4 @@ libraries["freetype"] = (engineLocation or "%{wks.location}") .. "/external/free
 libraries["assimp"] = (engineLocation or "%{wks.location}") .. "/external/assimp/lib"
 libraries["rmlui"] = (engineLocation or "%{wks.location}") .. "/external/rmlui/lib"
 libraries["jolt"] = (engineLocation or "%{wks.location}") .. "/external/jolt/lib/%{cfg.buildcfg}"
+libraries["ktx_software"] = (engineLocation or "%{wks.location}") .. "/external/ktx-software/lib"
