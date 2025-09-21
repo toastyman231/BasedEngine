@@ -16,6 +16,11 @@ namespace based::graphics
 			glm::vec4 inCol) :
 			va(inVA), mat(inMat), width(inWidth), duration(inDuration), color(inCol) {}
 
+		bool operator==(const Line& other) const
+		{
+			return other.va == va && other.mat == mat && other.width == width && other.duration == duration && other.color == color;
+		}
+
 		std::shared_ptr<VertexArray> va;
 		std::shared_ptr<Material> mat;
 		float width = 1;
@@ -35,5 +40,6 @@ namespace based::graphics
 		static void DrawLines();
 
 		inline static std::vector<Line> mLines;
+		inline static std::vector<Line> mLinesToRemoveNextFrame;
 	};
 }

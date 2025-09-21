@@ -165,11 +165,13 @@ namespace based::graphics
 	}
 
 	PostProcessPass::PostProcessPass(const std::string& name, const std::string& output, std::shared_ptr<Material> material)
-		: CustomRenderPass(name, std::move(material))
+		: CustomRenderPass(name, Engine::Instance().GetWindow().GetFramebuffer(), std::move(material))
 	{
 		AddOutputName(output);
 
 		mVA = std::make_shared<VertexArray>();
+
+		mShouldClear = false;
 
 		BASED_CREATE_VERTEX_BUFFER(vb, short);
 		vb->PushVertex({ 1, 1, 1, 1 });
@@ -189,6 +191,8 @@ namespace based::graphics
 		AddOutputName(output);
 
 		mVA = std::make_shared<VertexArray>();
+
+		mShouldClear = false;
 
 		BASED_CREATE_VERTEX_BUFFER(vb, short);
 		vb->PushVertex({ 1, 1, 1, 1 });

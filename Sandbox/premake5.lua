@@ -8,6 +8,10 @@ project "Sandbox"
     language "C++"
     cppdialect "C++17"
     staticruntime "on"
+
+    targetdir(tdir)
+    objdir(odir)
+
     links
     {
         "based",
@@ -18,9 +22,6 @@ project "Sandbox"
         "rmlui_debugger",
         "ktx",
     }
-
-    targetdir(tdir)
-    objdir(odir)
 
     files 
     {
@@ -71,6 +72,11 @@ project "Sandbox"
             "_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING",
             "JPH_DEBUG_RENDERER"
         }
+
+    filter {"system:windows", "configurations:Release"}
+        kind "WindowedApp"
+    filter {"system:macosx", "configurations:Release"}
+        kind "WindowedApp"
 
     filter {"system:macosx", "configurations:*"}
         xcodebuildsettings

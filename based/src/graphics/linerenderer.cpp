@@ -33,7 +33,13 @@ namespace based::graphics
 	// SHOULD ONLY BE CALLED ONCE PER FRAME BY ENGINE
 	void DebugLineRenderer::DrawLines()
 	{
-		std::vector<size_t> linesToRemove;
+		for (auto& line : mLinesToRemoveNextFrame)
+		{
+			auto it = std::find(mLines.cbegin(), mLines.cend(), line);
+			if (it != mLines.end()) mLines.erase(it);
+		}
+		mLinesToRemoveNextFrame.clear();
+		
 		for (size_t i = 0; i < mLines.size(); ++i)
 		{
 			auto& line = mLines[i];
@@ -42,18 +48,10 @@ namespace based::graphics
 				line.duration -= core::Time::DeltaTime();
 				if (line.duration <= 0)
 				{
-					linesToRemove.push_back(i);
-					continue;
+					mLinesToRemoveNextFrame.push_back(mLines[i]);
 				}
 			}
 			Engine::Instance().GetRenderManager().Submit(BASED_SUBMIT_RC(RenderLineMaterial, line.va, line.mat));
-		}
-
-		if (linesToRemove.empty()) return;
-		for (auto line : linesToRemove)
-		{
-			mLines[line] = mLines.back();
-			mLines.pop_back();
 		}
 	}
 #else

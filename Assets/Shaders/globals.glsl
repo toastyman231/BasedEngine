@@ -14,7 +14,3 @@ layout (std140) uniform Globals
     float time;     // 4               // 148
     int renderMode; // 4               // 152
 };
-
-float saturate(float val) {
-    return clamp(val, 0.0, 1.0);
-}

@@ -80,9 +80,7 @@ namespace editor
 
 	void TextureImporter::HandleImport(const std::string& path)
 	{
-		auto tex = std::make_shared<based::graphics::Texture>(path);
-		auto storage = based::Engine::Instance().GetApp().GetCurrentScene()->GetTextureStorage();
-		storage.Load(std::filesystem::path(path).filename().replace_extension("").string(), tex);
+		auto tex = based::Engine::Instance().GetResourceManager().LoadTextureAsync(path);
 	}
 
 	bool MaterialImporter::CanHandleFile(const std::string& path)

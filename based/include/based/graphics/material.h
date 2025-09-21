@@ -3,7 +3,7 @@
 #include "based/core/uuid.h"
 #include "based/core/assetlibrary.h"
 
-#define DEFAULT_MAT_LIB based::graphics::DefaultLibraries::GetMaterialLibrary()
+#define DEFAULT_MAT_LIB based::Engine::Instance().GetResourceManager().GetMaterialStorage()
 
 namespace based::graphics
 {

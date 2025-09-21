@@ -51,19 +51,17 @@ void main() {
     vec3 Do = vec3(0.0);
     float intensityMult = 1.0;
 
-    if (directionalLight.direction != vec3(0)) {
-        if (directionalLight.color != vec3(0.0)) {
-            vec3 L = normalize(-directionalLight.direction);
-            vec3 lightColor = directionalLight.color;
-            vec3 H = normalize(L + V);
+    if (directionalLight.color != vec3(0.0)) {
+        vec3 L = normalize(-directionalLight.direction);
+        vec3 lightColor = directionalLight.color;
+        vec3 H = normalize(L + V);
 
-            float NdotL = DotClamped(N, L);
+        float NdotL = DotClamped(N, L);
 
-            BRDFResults res = DisneyBRDF(albedo, L, V, N, X, Y);
+        BRDFResults res = DisneyBRDF(albedo, L, V, N, X, Y);
 
-            Do += (lightColor * (res.diffuse + res.specular + res.clearcoat)) * (NdotL + ambientStrength) * (1.0 - shadow);
-            intensityMult = directionalLight.intensity;
-        }
+        Do += (lightColor * (res.diffuse + res.specular + res.clearcoat)) * (NdotL + ambientStrength) * (1.0 - shadow);
+        intensityMult = directionalLight.intensity;
     }
 
     float ao = GetMaterialAmbientOcclusion(uvs);

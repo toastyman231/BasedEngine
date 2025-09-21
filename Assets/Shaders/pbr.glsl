@@ -1,3 +1,5 @@
+#include "color.glsl"
+
 struct MaterialProperty {
     vec4 color;
     vec4 tint;
@@ -73,7 +75,7 @@ vec4 GetMaterialColor(MaterialProperty mat, vec2 uv) {
 
 vec4 GetMaterialAlbedo(vec2 uv) {
     vec4 color = GetMaterialColor(material.albedo, uv);
-    return vec4(pow(color.r, 2.2), pow(color.g, 2.2), pow(color.b, 2.2), color.a);
+    return vec4(SRGBToLinear(color.rgb), color.a);
 }
 
 vec4 GetMaterialNormal(vec2 uv) {
@@ -82,7 +84,7 @@ vec4 GetMaterialNormal(vec2 uv) {
     
     if (material.deriveNormalZ > 0) {
         vec2 normalXY = normal.rg;
-        float normalZ = sqrt(saturate(1.0 - dot(normalXY, normalXY)));
+        float normalZ = sqrt(clamp(1.0 - dot(normalXY, normalXY), 0.0, 1.0));
         return vec4(normalXY.xy, normalZ, 1.0);
     } 
     else {

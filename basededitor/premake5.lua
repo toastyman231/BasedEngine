@@ -3,7 +3,6 @@ project "BasedEditor"
     language "C++"
     cppdialect "C++17"
     staticruntime "on"
-    links "based"
 
     if externalBuild then location "%{wks.location}/ProjectFiles" end
 
@@ -14,6 +13,17 @@ project "BasedEditor"
     {
         "src/**.h",
         "src/**.cpp"
+    }
+
+    links
+    {
+        "based",
+        "SDL2",
+        "freetype",
+        "assimp-vc143-mt",
+        "rmlui",
+        "rmlui_debugger",
+        "ktx",
     }
 
     includedirs(
@@ -32,6 +42,22 @@ project "BasedEditor"
             "%{externals.yaml_cpp}",
             "%{externals.jolt}",
             "%{externals.assimp}",
+        }
+    ))
+
+    libdirs(
+        (externalBuild and {
+            (engineLocation .. "%{libraries.sdl2}"),
+            (engineLocation .. "%{libraries.freetype}"),
+            (engineLocation .. "%{libraries.assimp}"),
+            (engineLocation .. "%{libraries.rmlui}"),
+            (engineLocation .. "%{libraries.ktx_software}"),
+        } or {
+            "%{libraries.sdl2}",
+            "%{libraries.freetype}",
+            "%{libraries.assimp}",
+            "%{libraries.rmlui}",
+            "%{libraries.ktx_software}"
         }
     ))
 

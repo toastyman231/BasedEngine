@@ -67,6 +67,7 @@ public:
 		scene::Scene::LoadScene(ASSET_PATH("Scenes/Default3DMinimal.bscn"));
 
 		cameraEntity = GetCurrentScene()->GetEntityStorage().Get("Main Camera");
+		GetCurrentScene()->GetEntityStorage().Get("Directional Light")->SetPosition(glm::vec3(7.f, 0.f, -3.f));
 
 		sponzaEntity = scene::Entity::CreateEntity("Sponza Geometry");
 		curtainsEntity = scene::Entity::CreateEntity("Curtains Geometry");
@@ -81,6 +82,15 @@ public:
 
 		curtainsEntity->SetRotation(glm::vec3(90.f, 0.f, 0.f));
 		curtainsEntity->SetPosition(glm::vec3(0.05f, 0.f, -6.36f));
+
+		cameraEntity->SetPosition(glm::vec3(7.f, 0.f, -3.f));
+		cameraEntity->SetRotation(glm::vec3(6.f, 270.f, 0.f));
+
+		/*auto gammaMaterial = graphics::Material::LoadMaterialFromFile(ASSET_PATH("Materials/PP_Gamma.bmat"),
+			DEFAULT_MAT_LIB);
+		auto post_process = new graphics::PostProcessPass("PP_Gamma", "SceneColor", gammaMaterial);
+		Engine::Instance().GetRenderManager().InjectPass(post_process,
+			(int)graphics::PassInjectionPoint::BeforeUserInterface);*/
 
 		core::Time::SetTimeScale(0);
 		BASED_TRACE("Done initializing");
@@ -141,6 +151,7 @@ public:
 	void ImguiRender() override
 	{
 		PROFILE_FUNCTION();
+		
 		auto& registry = GetCurrentScene()->GetRegistry();
 
 		if (Engine::Instance().GetWindow().GetShouldRenderToScreen()) return;
@@ -297,10 +308,22 @@ public:
 					ImGui::PushID(i);
 					ImGui::Text("Light %d", i);
 					ImGui::DragFloat3("Light Color", glm::value_ptr(col), 0.01f);
-					ImGui::DragFloat3("Light Direction", glm::value_ptr(direction), 0.01f);
+					ImGui::DragFloat3("Light Direction", glm::value_ptr(direction), 10.f);
 					ImGui::PopID();
 					lightComponent.color = col;
 					trans.SetEulerAngles(direction);
+					auto model = glm::mat4(1.f);
+					model = glm::rotate(model, glm::radians(direction.y), glm::vec3(0.f, 1.f, 0.f));
+					model = glm::rotate(model, glm::radians(direction.x), glm::vec3(1.f, 0.f, 0.f));
+					model = glm::rotate(model, glm::radians(direction.z), glm::vec3(0.f, 0.f, 1.f));
+
+					glm::vec3 toPos = trans.Position() - glm::mat3(model) * glm::vec3(0.f, 0.f, 1.f);
+					Engine::Instance().GetPhysicsManager().GetDebugRenderer()->DrawArrow(
+							JPH::Vec3(trans.Position().x, trans.Position().y, trans.Position().z),
+							JPH::Vec3(toPos.x, toPos.y, toPos.z),
+							JPH::Color::sRed,
+							0.25f
+						);
 					i++;
 				}
 

@@ -57,7 +57,7 @@ namespace based::memory
 			return result;
 		}
 
-		inline uint32_t Size()
+		inline size_t Size()
 		{
 			return mBackingQueue.size();
 		}

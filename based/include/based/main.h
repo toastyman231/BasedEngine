@@ -20,8 +20,22 @@
 // based::App* CreateApp() { return new ClientApp(); }
 based::App* CreateApp();
 
+#ifdef BASED_CONFIG_RELEASE
+#ifdef BASED_PLATFORM_WINDOWS
+#include <windows.h>
+int WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow)
+#endif
+#else
 int main(int argc, char* argv[])
+#endif
 {
+#ifdef BASED_CONFIG_RELEASE
+#ifdef BASED_PLATFORM_WINDOWS
+    int argc = __argc;
+    char** argv = __argv;
+#endif
+#endif
+    
     based::App* app = CreateApp();
     based::Engine::Instance().SetArgs(argc, argv);
     based::Engine::Instance().Run(app);

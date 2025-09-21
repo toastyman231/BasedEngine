@@ -1,0 +1,23 @@
+Material: PP_Gamma
+ID: 12258132568693765796
+VertexSource: Shaders/postprocess.vert
+VertexIsEngineAsset: true
+FragmentSource: Shaders/pp_gamma.frag
+FragmentIsEngineAsset: true
+UniformInts:
+  castShadows: 0
+  receiveShadows: 0
+UniformFloats:
+  {}
+UniformFloat2s:
+  {}
+UniformFloat3s:
+  {}
+UniformFloat4s:
+  {}
+UniformMat3s:
+  {}
+UniformMat4s:
+  {}
+Textures:
+  {}

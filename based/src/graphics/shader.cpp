@@ -381,6 +381,15 @@ namespace based::graphics
 				scene::Transform& trans = registry.get<scene::Transform>(entity);
 				scene::DirectionalLight& light = registry.get<scene::DirectionalLight>(entity);
 				light.direction = trans.EulerAngles();
+				auto model = glm::mat4(1.f);
+				// Rotations are passed as degrees and converted to radians here automatically
+				model = glm::rotate(model, glm::radians(light.direction.y), glm::vec3(0.f, 1.f, 0.f));
+				model = glm::rotate(model, glm::radians(light.direction.x), glm::vec3(1.f, 0.f, 0.f));
+				model = glm::rotate(model, glm::radians(light.direction.z), glm::vec3(0.f, 0.f, 1.f));
+				// The default direction for any object points straight down the positive Z axis,
+				// so to get the actual light direction we rotate that default direction by the
+				// light's rotation matrix
+				light.direction = glm::mat3(model) * glm::vec3(0.f, 0.f, 1.f);
 
 				shdr->SetUniformFloat3("directionalLight.direction", light.direction);
 				shdr->SetUniformFloat3("directionalLight.color", light.color);

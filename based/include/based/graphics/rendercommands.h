@@ -25,7 +25,8 @@ namespace based::graphics
 		BeforeCompute = 0,
 		BeforeShadowDepth = 1,
 		BeforeMainColor = 2,
-		BeforeUserInterface = 3
+		BeforeTranslucent = 3,
+		BeforeUserInterface = 4
 	};
 
 	namespace rendercommands

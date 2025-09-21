@@ -192,7 +192,23 @@ namespace based::scene
 			return mLocalScale;
 		}
 
-		glm::mat4 GetGlobalMatrix()
+		glm::vec3 Forward() const
+		{
+			auto model = GetGlobalMatrix();
+			return glm::normalize(glm::vec3(model[0][2], model[1][2], model[2][2]));
+		}
+
+		glm::vec3 Right() const
+		{
+			return glm::normalize(glm::cross(glm::vec3(0.f, 1.f, 0.f), Forward()));
+		}
+
+		glm::vec3 Up() const
+		{
+			return glm::cross(Forward(), Right());
+		}
+
+		glm::mat4 GetGlobalMatrix() const
 		{
 			if (Parent)
 			{
@@ -201,7 +217,7 @@ namespace based::scene
 			else return GetLocalMatrix();
 		}
 
-		glm::mat4 GetLocalMatrix()
+		glm::mat4 GetLocalMatrix() const
 		{
 			return mCachedMatrix;
 		}

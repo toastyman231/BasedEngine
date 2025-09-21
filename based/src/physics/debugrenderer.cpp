@@ -22,7 +22,7 @@ namespace based::physics
 	void JoltDebugRendererImpl::DrawLine(JPH::RVec3Arg inFrom, JPH::RVec3Arg inTo, JPH::ColorArg inColor)
 	{
 		graphics::DebugLineRenderer::DrawDebugLine(convert(inFrom), convert(inTo), 5,
-			glm::vec4(inColor.r, inColor.g, inColor.b, inColor.a));
+			glm::vec4(inColor.r, inColor.g, inColor.b, inColor.a), 0.f);
 	}
 
 	void JoltDebugRendererImpl::DrawTriangle(JPH::RVec3Arg inV1, JPH::RVec3Arg inV2, JPH::RVec3Arg inV3,
