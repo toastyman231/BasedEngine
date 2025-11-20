@@ -128,7 +128,7 @@ namespace based::scene
 			} else BASED_WARN("Could not lock mesh for entity {}", e->GetEntityName());
 		}
 
-		if ((renderFlags & graphics::RenderFlags::DrawTranslucent) == graphics::RenderFlags::DrawTranslucent)
+		/*if ((renderFlags & graphics::RenderFlags::DrawTranslucent) == graphics::RenderFlags::DrawTranslucent)
 		{
 			for (auto it = models.rbegin(); it != models.rend(); ++it)
 			{
@@ -137,7 +137,7 @@ namespace based::scene
 					mesh->Draw(trans, material);
 				}
 			}
-		}
+		}*/
 
 		auto meshView = mRegistry.view<Enabled, Transform, MeshRenderer, EntityReference>();
 

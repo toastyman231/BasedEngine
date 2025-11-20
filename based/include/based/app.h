@@ -7,7 +7,7 @@
 #include "memory/memoryhelpers.h"
 #include "scene/sceneserializer.h"
 
-#define REFLECT_SIMPLE_TYPE(T) entt::meta<T>().type(entt::type_hash<T>());
+#define REFLECT_SIMPLE_TYPE(T) entt::meta_factory<T>().type(entt::type_hash<T>());
 
 namespace based
 {
@@ -59,11 +59,11 @@ namespace based
 			REFLECT_SIMPLE_TYPE(unsigned long)
 			REFLECT_SIMPLE_TYPE(long long)
 			REFLECT_SIMPLE_TYPE(unsigned long long)
-			entt::meta<graphics::Projection>()
+			entt::meta_factory<graphics::Projection>()
 				.type(entt::type_hash<graphics::Projection>())
 				.data<graphics::Projection::ORTHOGRAPHIC>("Orthographic"_hs)
 				.data<graphics::Projection::PERSPECTIVE>("Perspective"_hs);
-			entt::meta<scene::ScriptComponent>()
+			entt::meta_factory<scene::ScriptComponent>()
 				.type(entt::type_hash<scene::ScriptComponent>())
 				.data<&scene::ScriptComponent::Enabled>("Enabled"_hs);
 

@@ -25,6 +25,7 @@ class Sandbox : public based::App
 	std::shared_ptr<scene::Entity> cameraEntity;
 	std::shared_ptr<scene::Entity> sponzaEntity;
 	std::shared_ptr<scene::Entity> curtainsEntity;
+	std::shared_ptr<scene::Entity> sphereEntity;
 
 	float speed = 6.f;
 	float pitch = 0.f;
@@ -56,6 +57,11 @@ public:
 		return settings;
 	}
 
+	struct TestStruct
+	{
+		int testData = 0;
+	};
+
 	void Initialize() override
 	{
 		App::Initialize();
@@ -71,6 +77,7 @@ public:
 
 		sponzaEntity = scene::Entity::CreateEntity("Sponza Geometry");
 		curtainsEntity = scene::Entity::CreateEntity("Curtains Geometry");
+		sphereEntity = scene::Entity::CreateEntity("Sphere");
 
 		auto sponzaMesh = graphics::Model::CreateModel("Assets/Models/sponza.gltf",
 		                                               DEFAULT_MODEL_LIB, "Sponza");
@@ -83,8 +90,31 @@ public:
 		curtainsEntity->SetRotation(glm::vec3(90.f, 0.f, 0.f));
 		curtainsEntity->SetPosition(glm::vec3(0.05f, 0.f, -6.36f));
 
+		sphereEntity->SetPosition(glm::vec3(3.f, 0.f, -3.f));
+		
+		auto sphereMat = graphics::Material::LoadMaterialFromFile(ASSET_PATH("Materials/Lit.bmat"),
+			DEFAULT_MAT_LIB);
+		auto sphereMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/sphere.obj"),
+			DEFAULT_MESH_LIB);
+		sphereMat->SetUniformValue("material.albedo.color", glm::vec4(0.94f, 0.75f, 0.016f, 1.f));
+		sphereEntity->AddComponent<scene::MeshRenderer>(sphereMesh, sphereMat);
+
 		cameraEntity->SetPosition(glm::vec3(7.f, 0.f, -3.f));
 		cameraEntity->SetRotation(glm::vec3(6.f, 270.f, 0.f));
+
+		entt::meta_factory<TestStruct>{}
+			.type(entt::hashed_string("TestStruct"), "TestStruct")
+			.data<&TestStruct::testData>(entt::hashed_string("TestData"), "testData");
+
+		auto structType = entt::resolve(entt::hashed_string("TestStruct"));
+		auto myStruct = structType.construct();
+		myStruct.set(entt::hashed_string("TestData"), 42);
+
+		BASED_TRACE("The value is: {}", myStruct.cast<TestStruct>().testData);
+		for (auto& [id, data] : structType.data())
+		{
+			BASED_TRACE("Data: {}, Value: {}", data.name(), myStruct.get(id).cast<int>());
+		}
 
 		/*auto gammaMaterial = graphics::Material::LoadMaterialFromFile(ASSET_PATH("Materials/PP_Gamma.bmat"),
 			DEFAULT_MAT_LIB);
@@ -317,7 +347,7 @@ public:
 					model = glm::rotate(model, glm::radians(direction.x), glm::vec3(1.f, 0.f, 0.f));
 					model = glm::rotate(model, glm::radians(direction.z), glm::vec3(0.f, 0.f, 1.f));
 
-					glm::vec3 toPos = trans.Position() - glm::mat3(model) * glm::vec3(0.f, 0.f, 1.f);
+					glm::vec3 toPos = trans.Position() + glm::mat3(model) * glm::vec3(0.f, 0.f, 1.f);
 					Engine::Instance().GetPhysicsManager().GetDebugRenderer()->DrawArrow(
 							JPH::Vec3(trans.Position().x, trans.Position().y, trans.Position().z),
 							JPH::Vec3(toPos.x, toPos.y, toPos.z),
@@ -330,6 +360,13 @@ public:
 				ImGui::Text("General");
 				ImGui::DragFloat("Ambient Strength", &ambientStrength, 0.01f);
 				ImGui::Checkbox("Use Normal Maps", &useNormalMaps);
+
+				auto mats = Engine::Instance().GetResourceManager().GetMaterialStorage();
+				for (auto& mat : mats.GetAll())
+				{
+					mat.second->SetUniformValue("ambientStrength", ambientStrength);
+					mat.second->SetUniformValue("material.normal.useSampler", (int)useNormalMaps);
+				}
 			}
 
 			// Object controls

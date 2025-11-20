@@ -35,7 +35,7 @@ void main() {
 
     float shadow = CalculateShadows(fragPosLightSpace);
 
-    for (int i = 0; i < NR_POINT_LIGHTS; ++i) {
+    /**for (int i = 0; i < NR_POINT_LIGHTS; ++i) {
         PointLight light = pointLights[i];
         if (light.color == vec3(0.0)) continue;
         vec3 lightPos = light.position;
@@ -46,21 +46,21 @@ void main() {
         BRDFResults reflection = DisneyBRDF(albedo, L, V, N, X, Y);
 
         Lo += (lightColor * (reflection.diffuse + reflection.specular + reflection.clearcoat)) * DotClamped(N, L) * (1.0 - shadow) * light.intensity;
-    }
+    }*/
 
     vec3 Do = vec3(0.0);
     float intensityMult = 1.0;
 
     if (directionalLight.color != vec3(0.0)) {
         vec3 L = normalize(-directionalLight.direction);
-        vec3 lightColor = directionalLight.color;
+        vec3 lightColor = directionalLight.color; // TODO: Consider multiplying intensity here
         vec3 H = normalize(L + V);
 
         float NdotL = DotClamped(N, L);
-
+        
         BRDFResults res = DisneyBRDF(albedo, L, V, N, X, Y);
 
-        Do += (lightColor * (res.diffuse + res.specular + res.clearcoat)) * (NdotL + ambientStrength) * (1.0 - shadow);
+        Do += lightColor * (res.diffuse + res.specular + res.clearcoat) * NdotL /*** (1.0 - shadow)*/;
         intensityMult = directionalLight.intensity;
     }
 
@@ -68,9 +68,9 @@ void main() {
     vec3 ambient = vec3(ambientStrength) * albedo;
     if (ao > 0.0) ambient *= ao;
     vec3 color = ambient + Do + Lo;
-    color *= intensityMult;
     color = color / (color + vec3(1.0));
-    color = pow(color, vec3(1.0/2.2));
+    color *= intensityMult;
+    color = LinearToSRGB(color);
 
     if (renderMode == RenderMode_Lit) {
         if (material.blendMode == BlendMode_Masked && alpha < 0.1) discard; 
@@ -79,14 +79,11 @@ void main() {
         if (material.blendMode == BlendMode_Masked && alpha < 0.1) discard; 
         outColor = vec4(albedo + GetMaterialEmission(uvs).xyz, material.blendMode == BlendMode_Opaque ? 1.0 : alpha);
     } else if (renderMode == RenderMode_NormalDebug) {
-        if (material.deriveNormalZ > 0)
-            outColor = vec4((vec3(GetMaterialNormal(uvs)) + 1.0) / 2.0, 1.0);
-        else
-            outColor = GetMaterialNormal(uvs);
+        outColor = vec4((N + 1.0) / 2.0, 1.0);
     } else if (renderMode == RenderMode_MetallicDebug) {
-        outColor = vec4(vec3(GetMaterialMetallic(uvs)), 1.0);
+        outColor = vec4(vec3(max(Metallic, GetMaterialMetallic(uvs))), 1.0);
     } else if (renderMode == RenderMode_RoughnessDebug) {
-        outColor = vec4(vec3(GetMaterialRoughness(uvs)), 1.0);
+        outColor = vec4(vec3(max(Roughness, GetMaterialRoughness(uvs))), 1.0);
     } else if (renderMode == RenderMode_AmbientOcclusionDebug) {
         outColor = vec4(vec3(GetMaterialAmbientOcclusion(uvs)), 1.0);
     } else if (renderMode == RenderMode_EmissionDebug) {

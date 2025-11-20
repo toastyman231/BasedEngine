@@ -137,6 +137,8 @@ float CalculateShadows(vec4 fragPosLightSpace) {
 
 // DISNEY VERSIONS
 
+uniform float Roughness = 0.5;
+uniform float Metallic = 0;
 uniform float Subsurface = 0.0;
 uniform float Specular = 0.5;
 uniform float SpecularTint = 0.0;
@@ -154,10 +156,30 @@ float CalculateLuminance(vec3 baseColor) {
     return dot(vec3(0.3, 0.6, 1.0), baseColor);
 }
 
+vec3 CalculateTint(vec3 baseColor) {
+    float luminance = CalculateLuminance(baseColor);
+    return (luminance > 0.0) ? baseColor * (1.0 / luminance) : vec3(1);
+}
+
 float SchlickFresnel(float x) {
-    x = clamp(1.0 - x, 0.0, 1.0);
-    float x2 = x * x;
-    return x2 * x2 * x;
+    float m = clamp(1.0 - x, 0.0, 1.0);
+    float m2 = m * m;
+    return m * m2 * m2;
+}
+
+float Schlick(float r0, float rad) {
+    return mix(1.0, SchlickFresnel(rad), r0);
+}
+
+vec3 Schlick(vec3 r0, float rad) {
+    float exponential = pow(1.0 - rad, 5.0);
+    return r0 + (vec3(1.0) - r0) * exponential;
+}
+
+float SchlickR0FromRelativeIOR(float eta)
+{
+    // https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
+    return sqr(eta - 1.0f) / sqr(eta + 1.0f);
 }
 
 float GTR1(float NdotH, float a) {
@@ -165,7 +187,7 @@ float GTR1(float NdotH, float a) {
 
     float a2 = a * a;
     float t = 1.0 + (a2 - 1.0) * NdotH * NdotH;
-    return (a2 - 1.0) / (PI * log(a2) * t);
+    return (a2 - 1.0) / (PI * log2(a2) * t);
 }
 
 float AnisotropicGTR2(float NdotH, float HdotX, float HdotY, float ax, float ay) {
@@ -178,13 +200,42 @@ float SmithGGX(float alpha, float NdotV) {
     return 1 / (NdotV + sqrt(a + b - a*b));
 }
 
-float AnisotropicSmithGGX(float NdotS, float SdotX, float SdotY, float ax, float ay) {
-    return 1.0 / (NdotS + sqrt(sqr(SdotX * ax) + sqr(SdotY * ay) + sqr(NdotS)));
+float SmithGGX(float alphaSquared, float ndotl, float ndotv) {
+    float a = ndotv * sqrt(alphaSquared + ndotl * (ndotl - alphaSquared * ndotl));
+    float b = ndotl * sqrt(alphaSquared + ndotv * (ndotv - alphaSquared * ndotv));
+
+    return 0.5f / (a + b);
 }
 
-vec3 mon2lin(vec3 x)
+float SeparableSmithGGXG1(float NdotV, float a)
 {
-    return vec3(pow(x[0], 2.2), pow(x[1], 2.2), pow(x[2], 2.2));
+    float a2 = a * a;
+    float absDotNV = abs(NdotV);
+
+    return 2.0f / (1.0f + sqrt(a2 + (1 - a2) * absDotNV * absDotNV));
+}
+
+/**float SeparableSmithGGXG1(vec3 w, vec3 wm, float ax, float ay)
+{
+    float dotHW = Dot(w, wm);
+    if (dotHW <= 0.0f) {
+        return 0.0f;
+    }
+
+    float absTanTheta = Absf(TanTheta(w));
+    if(IsInf(absTanTheta)) {
+        return 0.0f;
+    }
+
+    float a = Sqrtf(Cos2Phi(w) * ax * ax + Sin2Phi(w) * ay * ay);
+    float a2Tan2Theta = Square(a * absTanTheta);
+
+    float lambda = 0.5f * (-1.0f + Sqrtf(1.0f + a2Tan2Theta));
+    return 1.0f / (1.0f + lambda);
+}*/
+
+float AnisotropicSmithGGX(float NdotS, float SdotX, float SdotY, float ax, float ay) {
+    return 1.0 / (NdotS + sqrt(sqr(SdotX * ax) + sqr(SdotY * ay) + sqr(NdotS)));
 }
 
 float DotClamped(vec3 x, vec3 y) {
@@ -203,8 +254,8 @@ BRDFResults DisneyBRDF(vec3 baseColor, vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y) {
     brdfResult.specular = vec3(0.0);
     brdfResult.clearcoat = vec3(0.0);
 
-    float rough = GetMaterialRoughness(uvs);
-    float metal = GetMaterialMetallic(uvs);
+    float rough = max(Roughness, GetMaterialRoughness(uvs));
+    float metal = max(Metallic, GetMaterialMetallic(uvs));
 
     vec3 H = normalize(L + V);
 
@@ -212,50 +263,63 @@ BRDFResults DisneyBRDF(vec3 baseColor, vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y) {
     float NdotV = DotClamped(N, V);
     float NdotH = DotClamped(N, H);
     float LdotH = DotClamped(L, H);
-
-    vec3 Cdlin = mon2lin(baseColor); // * material.albedo.tint; TODO: ADD THIS BACK IN LATER
+    
+    // Sheen lobe: Gives the surface a sheen at grazing angles, optionally tinted based on the surface color
+    // Sheen - Sheen lobe strength
+    // SheenTint - Sheen color strength
+    vec3 Cdlin = baseColor;// We expect this in linear space already // * material.albedo.tint; TODO: ADD THIS BACK IN LATER
     float Cdlum = CalculateLuminance(Cdlin);
-
     vec3 Ctint = Cdlum > 0.0 ? Cdlin / Cdlum : vec3(1.0);
-    vec3 Cspec0 = mix(Specular * 0.08 * mix(vec3(1.0), Ctint, SpecularTint), Cdlin, metal);
     vec3 Csheen = mix(vec3(1.0), Ctint, SheenTint);
-
+    float FH = SchlickFresnel(LdotH);
+    vec3 Fsheen = FH * Sheen * Csheen;
+    
+    // Diffuse lobe: Light reflected off the surface in many directions depending on Roughness
     float FL = SchlickFresnel(NdotL);
     float FV = SchlickFresnel(NdotV);
-
+    
+    // Fresnel term: Greater reflectance at grazing angles
     float Fss90 = LdotH * LdotH * rough;
     float Fd90 = 0.5 + 2.0 * Fss90;
 
     float Fd = mix(1.0, Fd90, FL) * mix(1.0, Fd90, FV);
 
+    // Subsurface Scattering approximation (Hanrahan-Krueger)
     float Fss = mix(1.0, Fss90, FL) * mix(1.0, Fss90, FV);
     float ss = 1.25 * (Fss * (1.0 / (NdotL + NdotV) - 0.5) + 0.5);
-
+    
+    // Specular lobe: Light reflected back towards the viewer
+    // Light is more likely to be reflected when the microfacet normal aligns w/
+    // the vector of ideal reflectance (H)
+    // Anisotropic - Microfacet distribution varies based on axis, making specular highlights more elliptical
     float alpha = rough;
     float alphaSquared = alpha * alpha;
 
+    // Anisotropic Microfacet Normal Distribution (Normalized Anisotropic GTR gamma == 2)
     float aspectRatio = sqrt(1.0 - Anisotropic * 0.9);
     float alphaX = max(0.001, alphaSquared / aspectRatio);
     float alphaY = max(0.001, alphaSquared * aspectRatio);
     float Ds = AnisotropicGTR2(NdotH, dot(H, X), dot(H, Y), alphaX, alphaY);
 
+    // Geometric Attenuation (shadowing and masking due to microfacets)
     float GalphaSquared = sqr(0.5 + rough * 0.5);
     float GalphaX = max(0.001, GalphaSquared / aspectRatio);
     float GalphaY = max(0.001, GalphaSquared * aspectRatio);
     float G = AnisotropicSmithGGX(NdotL, dot(L, X), dot(L, Y), alphaX, alphaY);
     G *= AnisotropicSmithGGX(NdotV, dot(V, X), dot(V, Y), alphaX, alphaY);
 
-    float FH = SchlickFresnel(LdotH);
+    vec3 Cspec0 = mix(Specular * 0.08 * mix(vec3(1.0), Ctint, SpecularTint), Cdlin, metal);
     vec3 F = mix(Cspec0, vec3(1.0), FH);
-
-    vec3 Fsheen = FH * Sheen * Csheen;
-
+    
+    // Clearcoat lobe: Mixes in a clear coating on top of the base color
+    // ClearCoat - lobe intensity
+    // ClearCoatGloss - lobe shape
     float Dr = GTR1(NdotH, mix(0.1, 0.001, ClearCoatGloss));
-    float Fr = mix(0.04, 1.0, FH);
+    float Fr = mix(1.0, SchlickFresnel(LdotH), 0.04);//mix(0.04, 1.0, FH);
     float Gr = SmithGGX(0.25, NdotL) * SmithGGX(0.25, NdotV);
 
     brdfResult.diffuse = (1.0 / PI) * (mix(Fd, ss, Subsurface) * Cdlin + Fsheen) * (1 - metal);
-    brdfResult.specular = Ds * F * G;
+    brdfResult.specular = Ds * F * G;/** / (4.0 * NdotL * NdotV)*/;
     brdfResult.clearcoat = vec3(0.25 * ClearCoat * Gr * Fr * Dr);
 
     return brdfResult;
