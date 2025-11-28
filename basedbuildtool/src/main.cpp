@@ -4,8 +4,6 @@
 #include <queue>
 #include <thread>
 
-//#include "profiler.h"
-#define PROFILE_FUNCTION()
 
 namespace fs = std::filesystem;
 
@@ -16,22 +14,20 @@ namespace fs = std::filesystem;
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize2.h"
 
-#include "jobmanager.h"
-
 namespace
 {
     fs::path destination_path;
     fs::path source_path;
-    based::managers::JobManager* job_manager;
 
     bool* help = flag_bool("help", false, "Display cli usage flags.");
     char** project_directory = flag_str("i", "", "Root directory of the project to build.");
     char** config = flag_str("c", "Debug", "Debug or Release.");
-    //bool* multithread = flag_bool("mt", false, "Run multithreaded.");
-    bool* generate_mips = flag_bool("gen-mipmaps", false, "Automatically generate mipmaps by "
-                                           "downsampling the input texture.");
+    uint64_t* quality = flag_uint64("q", 0, "Compression quality. 0 = Fastest, 4 = Slowest.");
+    uint64_t* deflate_level = flag_uint64("l", 10, "Zstandard supercompression level. Range: 1-22");
+    bool* no_mips = flag_bool("no-mips", false, "Disable automatic mip generation.");
     bool* no_transcode = flag_bool("no-transcode", false, "Prevent transcoding into GPU-specific formats."
                                                           " This will force the engine to do this at runtime instead.");
+    bool* no_deflate = flag_bool("no-deflate", false, "Disable Zstandard supercompression.");
     char** override_name = flag_str("override-name", "",
                                            "Name to use when outputting baked assets and other built files, "
                                            "in case the default is incorrect.\n"
@@ -42,7 +38,7 @@ namespace
                                              "Options are: desktop, legacy-desktop, web, ios, android");
     Flag_List* normal_id = flag_list("normal-identifiers",
                                                     "String to identify which textures are normal maps. "
-                                                    "\nDefault: normal (non-case sensitive).");
+                                                    "\n        Default: normal (non-case sensitive).");
 
     // TODO: Get rid of this
     int files = 0;
@@ -93,8 +89,6 @@ namespace
 
     bool is_normal_map(const fs::path& path)
     {
-        PROFILE_FUNCTION();
-        
         std::string filename = path.filename().string();
         std::transform(filename.begin(), filename.end(),
             filename.begin(), ::tolower);
@@ -119,8 +113,6 @@ namespace
 
     ktx_transcode_fmt_e get_transcode_format(const fs::path& path, bool is_normal_map, uint32_t channels)
     {
-        PROFILE_FUNCTION();
-        
         if (strcmp(*target, "ios") == 0)
         {
             return KTX_TTF_PVRTC1_4_RGBA;
@@ -163,8 +155,6 @@ namespace
     stbi_uc* prepare_normal_map(const stbi_uc* src,
                                       int width, int height, int& channels)
     {
-        PROFILE_FUNCTION();
-        
         stbi_uc* dst = (stbi_uc*)malloc(width * height * 4 * sizeof(stbi_uc));
 
         for (int i = 0; i < width * height; ++i) {
@@ -184,9 +174,6 @@ namespace
 
     bool handle_texture_compression(const fs::path& path)
     {
-        PROFILE_FUNCTION();
-        //PROFILE_SCOPE_TEXT("Compressing texture: %s", path.filename().string().c_str());
-        
         if (!is_regular_file(path)) return false;
         
         fs::path output_path = make_output_path(path, source_path, destination_path, ".ktx2");
@@ -228,15 +215,15 @@ namespace
             createInfo.baseHeight = height;
             createInfo.baseDepth = 1;
             createInfo.numDimensions = 2;
-            createInfo.numLevels = *generate_mips
+            createInfo.numLevels = !*no_mips
                                        ? 1u + static_cast<uint32_t>(floor(log2(std::max(width, height))))
                                        : 1;
             createInfo.numLayers = 1;
             createInfo.numFaces = 1;
             createInfo.isArray = KTX_FALSE;
             // If we didn't pre-generate mips then we'll need to do it when uploading to the GPU
-            createInfo.generateMipmaps = !*generate_mips; 
-
+            createInfo.generateMipmaps = *no_mips; 
+            
             ktx_error_code_e result = ktxTexture2_Create(&createInfo,
                                                          KTX_TEXTURE_CREATE_ALLOC_STORAGE, &texture);
             if (result != KTX_SUCCESS)
@@ -245,7 +232,7 @@ namespace
                 stbi_image_free(data);
                 return false;
             }
-
+            
             result = ktxTexture_SetImageFromMemory(ktxTexture(texture), 0, 0, 0,
                                                    data, width * height * channels);
             if (result != KTX_SUCCESS)
@@ -259,7 +246,7 @@ namespace
             std::vector<std::vector<stbi_uc>> mip_list;
             int prev_width = width;
             int prev_height = height;
-
+            
             for (uint32_t level = 1; level < texture->numLevels; ++level)
             {
                 int mip_width = std::max(1, prev_width / 2);
@@ -268,13 +255,13 @@ namespace
                 stbi_uc* last_mip_pixels = mip_list.empty() ? data : mip_list.back().data();
                 mip_list.emplace_back(mip_width * mip_height * channels);
                 std::vector<stbi_uc>& mip_pixels = mip_list.back();
-
+                
                 stbir_resize_uint8_srgb(
                     last_mip_pixels, prev_width, prev_height, 0,
                     mip_pixels.data(), mip_width, mip_height, 0,
                     static_cast<stbir_pixel_layout>(channels)
                 );
-
+                
                 result = ktxTexture_SetImageFromMemory(ktxTexture(texture), level, 0, 0, mip_pixels.data(),
                                                        mip_pixels.size());
                 if (result != KTX_SUCCESS)
@@ -292,8 +279,8 @@ namespace
 
             ktxBasisParams basisParams = {0};
             basisParams.structSize = sizeof(basisParams);
-            basisParams.threadCount = std::thread::hardware_concurrency() - 1u;
-            basisParams.uastcFlags = KTX_PACK_UASTC_LEVEL_DEFAULT;
+            basisParams.threadCount = std::thread::hardware_concurrency();
+            basisParams.uastcFlags = static_cast<ktx_pack_uastc_flag_bits_e>(*quality);
             basisParams.uastc = KTX_TRUE;
 
             printf("    Compressing with %u threads.\n", basisParams.threadCount);
@@ -333,7 +320,7 @@ namespace
                 printf("    Directory %s does not exist! Creating it now.\n", output_path.parent_path().string().c_str());
                 fs::create_directories(output_path.parent_path());
             }
-
+            
             result = ktxTexture2_WriteToNamedFile(texture, output_path.string().c_str());
             if (result != KTX_SUCCESS)
             {
@@ -341,6 +328,15 @@ namespace
                 ktxTexture2_Destroy(texture);
                 stbi_image_free(data);
                 return false;
+            }
+
+            if (!*no_deflate && BASED_PLATFORM_WINDOWS)
+            {
+                // TODO: Add cross platform support for supercompression
+                printf("    Deflating texture with Zstandard.\n");
+                std::string command = "ktx.exe deflate --zstd " + std::to_string(*deflate_level) +
+                    " " + output_path.string() + " " + output_path.string();
+                std::system(command.c_str());
             }
 
             now = std::chrono::system_clock::now();
@@ -362,8 +358,6 @@ namespace
 
     bool handle_copy(const fs::path& source, const fs::path& dest)
     {
-        PROFILE_FUNCTION();
-        
         if (!is_regular_file(source)) return false;
 
         printf("Copying %s to %s\n", source.filename().string().c_str(), dest.string().c_str());
@@ -393,8 +387,6 @@ namespace
 
     bool handle_file(const fs::path& path)
     {
-        PROFILE_FUNCTION();
-        
         bool handled = handle_texture_compression(path);
         if (!handled)
             handled = handle_copy(path, make_output_path(path, source_path, destination_path));
@@ -438,12 +430,19 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    /*if (*multithread)
+    if (*quality > 4)
     {
-        job_manager = new based::managers::JobManager();
-        job_manager->Initialize();
-        printf("Running multithreaded with %u threads.\n", job_manager->GetNumThreads());
-    }*/
+        usage(stderr);
+        fprintf(stderr, "Quality level must be a value between 0 and 4.");
+        exit(1);
+    }
+
+    if (*deflate_level > 22 || *deflate_level < 1)
+    {
+        usage(stderr);
+        fprintf(stderr, "Deflate level must be a value between 1 and 22.");
+        exit(1);
+    }
 
     const std::string project_name = get_project_name(source_path, override_name);
     destination_path = source_path / "bin" / *config / project_name;
@@ -499,12 +498,4 @@ int main(int argc, char* argv[])
 
     int rest_argc = flag_rest_argc();
     char **rest_argv = flag_rest_argv();
-
-    // Cleanup
-
-    /*if (*multithread)
-    {
-        job_manager->Shutdown();
-        delete job_manager;
-    }*/
 }

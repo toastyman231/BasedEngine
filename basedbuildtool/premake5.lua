@@ -18,12 +18,11 @@ project "BasedBuildTool"
         "src",
         "../based/include/external/stb",
         "%{externals.ktx_software}",
-        "%{externals.tracy}"
     }
 
     libdirs
     {
-        "%{libraries.ktx_software}"
+        "%{libraries.ktx_software}",
     }
 
     links
