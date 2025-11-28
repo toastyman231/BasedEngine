@@ -28,6 +28,8 @@ namespace
     bool* no_transcode = flag_bool("no-transcode", false, "Prevent transcoding into GPU-specific formats."
                                                           " This will force the engine to do this at runtime instead.");
     bool* no_deflate = flag_bool("no-deflate", false, "Disable Zstandard supercompression.");
+    bool* force_textures = flag_bool("force-textures", false, "Force build all textures, even if they're"
+                                                              " up to date.");
     char** override_name = flag_str("override-name", "",
                                            "Name to use when outputting baked assets and other built files, "
                                            "in case the default is incorrect.\n"
@@ -179,7 +181,7 @@ namespace
         fs::path output_path = make_output_path(path, source_path, destination_path, ".ktx2");
 
         // Skip compressing files that already exist and are newer than their original input
-        if (fs::exists(output_path) && fs::last_write_time(path) < fs::last_write_time(output_path))
+        if (!force_textures && fs::exists(output_path) && fs::last_write_time(path) < fs::last_write_time(output_path))
         {
             printf("Target %s is up to date, skipping.\n", output_path.filename().string().c_str());
             return true;
