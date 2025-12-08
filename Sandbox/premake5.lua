@@ -48,8 +48,6 @@ project "Sandbox"
         "%{libraries.ktx_software}"
     }
 
-    include "Plugins/FMOD"
-
     flags
     {
         "FatalWarnings"
@@ -57,7 +55,7 @@ project "Sandbox"
 
     postbuildcommands
     {
-        engineLocation .. "/tools/bin/BasedBuildTool -i " .. path.getabsolute("../%{prj.name}") .. " -gen-mipmaps -c %{cfg.buildcfg}" 
+        engineLocation .. "/tools/bin/BasedBuildTool -i " .. path.getabsolute("../%{prj.name}") .. " -c %{cfg.buildcfg}" 
     }
 
     filter {"system:windows", "configurations:*"}

@@ -181,7 +181,7 @@ namespace
         fs::path output_path = make_output_path(path, source_path, destination_path, ".ktx2");
 
         // Skip compressing files that already exist and are newer than their original input
-        if (!force_textures && fs::exists(output_path) && fs::last_write_time(path) < fs::last_write_time(output_path))
+        if (!*force_textures && fs::exists(output_path) && fs::last_write_time(path) < fs::last_write_time(output_path))
         {
             printf("Target %s is up to date, skipping.\n", output_path.filename().string().c_str());
             return true;

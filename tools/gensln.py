@@ -25,7 +25,7 @@ def CopyBuildFiles(dest, project):
         finalFile.write(postBuiltTemplate)
         finalFile.close()
     except:
-        print("Could not find premake build file!")
+        print("Either premake file already exists, or could not find template to create!")
         ret = 1
     return
 

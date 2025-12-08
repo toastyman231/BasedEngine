@@ -128,6 +128,7 @@ namespace based::scene
 			} else BASED_WARN("Could not lock mesh for entity {}", e->GetEntityName());
 		}
 
+		// TODO: Bring this back and figure out why debugging crashes when putting a breakpoint above
 		/*if ((renderFlags & graphics::RenderFlags::DrawTranslucent) == graphics::RenderFlags::DrawTranslucent)
 		{
 			for (auto it = models.rbegin(); it != models.rend(); ++it)

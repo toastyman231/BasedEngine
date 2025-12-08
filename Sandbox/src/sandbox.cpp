@@ -96,25 +96,13 @@ public:
 			DEFAULT_MAT_LIB);
 		auto sphereMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/sphere.obj"),
 			DEFAULT_MESH_LIB);
+		sphereMat->SetBlendMode(graphics::BlendMode::Opaque);
 		sphereMat->SetUniformValue("material.albedo.color", glm::vec4(0.94f, 0.75f, 0.016f, 1.f));
+		sphereMat->SetUniformValue("material.albedo.useTex", 0);
 		sphereEntity->AddComponent<scene::MeshRenderer>(sphereMesh, sphereMat);
 
 		cameraEntity->SetPosition(glm::vec3(7.f, 0.f, -3.f));
 		cameraEntity->SetRotation(glm::vec3(6.f, 270.f, 0.f));
-
-		entt::meta_factory<TestStruct>{}
-			.type(entt::hashed_string("TestStruct"), "TestStruct")
-			.data<&TestStruct::testData>(entt::hashed_string("TestData"), "testData");
-
-		auto structType = entt::resolve(entt::hashed_string("TestStruct"));
-		auto myStruct = structType.construct();
-		myStruct.set(entt::hashed_string("TestData"), 42);
-
-		BASED_TRACE("The value is: {}", myStruct.cast<TestStruct>().testData);
-		for (auto& [id, data] : structType.data())
-		{
-			BASED_TRACE("Data: {}, Value: {}", data.name(), myStruct.get(id).cast<int>());
-		}
 
 		/*auto gammaMaterial = graphics::Material::LoadMaterialFromFile(ASSET_PATH("Materials/PP_Gamma.bmat"),
 			DEFAULT_MAT_LIB);
