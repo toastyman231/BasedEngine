@@ -29,7 +29,7 @@ void main() {
     F0 = mix(F0, albedo, metallic);
 
     vec3 X = normalize(TBN[0]);
-    vec3 Y = normalize(cross(N, TBN[0]));
+    vec3 Y = normalize(TBN[1]);
 
     vec3 Lo = vec3(0.0);
 
@@ -50,28 +50,45 @@ void main() {
 
     vec3 Do = vec3(0.0);
     float intensityMult = 1.0;
-
+    
     if (directionalLight.color != vec3(0.0)) {
         vec3 L = normalize(-directionalLight.direction);
         vec3 lightColor = directionalLight.color; // TODO: Consider multiplying intensity here
         vec3 H = normalize(L + V);
 
         float NdotL = DotClamped(N, L);
-        
-        BRDFResults res = DisneyBRDF(albedo, L, V, N, X, Y);
 
-        Do += lightColor * (res.diffuse + res.specular + res.clearcoat) * NdotL /*** (1.0 - shadow)*/;
+        BRDFResults res;
+        res = DisneyBRDF(albedo, L, V, N, X, Y);
+        
+        if (renderMode == RenderMode_DiffuseDebug) {
+            Do += res.diffuse;
+        } else if (renderMode == RenderMode_SpecularDebug) {
+            Do += res.specular;
+        } else if (renderMode == RenderMode_ClearCoatDebug) {
+            Do += res.clearcoat;
+        } else {
+            Do += lightColor * (res.diffuse + res.specular + res.clearcoat) * NdotL /*** (1.0 - shadow)*/;
+        }
+        
+        //outColor = vec4(res.specular, 1.0);
         intensityMult = directionalLight.intensity;
     }
-
-    float ao = GetMaterialAmbientOcclusion(uvs);
-    vec3 ambient = vec3(ambientStrength) * albedo;
-    if (ao > 0.0) ambient *= ao;
-    vec3 color = ambient + Do + Lo;
-    color = color / (color + vec3(1.0));
-    color *= intensityMult;
-    color = LinearToSRGB(color);
-
+    
+    vec3 color;
+    if (renderMode == RenderMode_DiffuseDebug || renderMode == RenderMode_SpecularDebug ||
+        renderMode == RenderMode_ClearCoatDebug) {
+        color = Do;
+    } else {
+        float ao = GetMaterialAmbientOcclusion(uvs);
+        vec3 ambient = vec3(ambientStrength) * albedo;
+        if (ao > 0.0) ambient *= ao;
+        color = ambient + Do + Lo;
+        color = color / (color + vec3(1.0));
+        color *= intensityMult;
+        color = LinearToSRGB(color);
+    }
+    
     if (renderMode == RenderMode_Lit) {
         if (material.blendMode == BlendMode_Masked && alpha < 0.1) discard; 
         outColor = vec4(color + GetMaterialEmission(uvs).xyz, material.blendMode == BlendMode_Opaque ? 1.0 : alpha);
@@ -88,6 +105,12 @@ void main() {
         outColor = vec4(vec3(GetMaterialAmbientOcclusion(uvs)), 1.0);
     } else if (renderMode == RenderMode_EmissionDebug) {
         outColor = vec4(vec3(GetMaterialEmission(uvs)), 1.0);
+    } else if (renderMode == RenderMode_DiffuseDebug) {
+        outColor = vec4(color, 1.0);
+    } else if (renderMode == RenderMode_SpecularDebug) {
+        outColor = vec4(color, 1.0);
+    } else if (renderMode == RenderMode_ClearCoatDebug) {
+        outColor = vec4(color, 1.0);
     } else {
         outColor = vec4(1.0, 0.0, 1.0, 1.0);
     }

@@ -26,7 +26,10 @@ namespace based::managers
 		MetallicDebug,
 		RoughnessDebug,
 		AmbientOcclusionDebug,
-		EmissionDebug
+		EmissionDebug,
+		DiffuseDebug,
+		SpecularDebug,
+		ClearCoatDebug
 	};
 
 	class RenderManager

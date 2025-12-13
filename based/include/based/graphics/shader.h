@@ -21,6 +21,7 @@ namespace based::graphics
 	{
 	public:
 		Shader(const std::string& vertex, const std::string& fragment);
+		Shader(const std::string& vertex, const std::string& geometry, const std::string& fragment);
 		Shader(const std::string& vertex, const std::string& fragment, const std::string& vSrc, const std::string& fSrc);
 		Shader(const Shader& other);
 		~Shader();
@@ -28,6 +29,7 @@ namespace based::graphics
 		static void InitializeUniformBuffers();
 		static unsigned int GetGlobalBufferID();
 		static Shader* LoadShader(const std::string& vsPath, const std::string& fsPath);
+		static Shader* LoadShader(const std::string& vsPath, const std::string& geomPath, const std::string& fsPath);
 		static std::string PreprocessShader(const std::string source, const std::string includeIdentifier,
 			const std::string includeSearchDir, std::set<std::string>& alreadyIncluded);
 

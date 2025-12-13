@@ -80,8 +80,93 @@ namespace based::graphics
 		glDeleteShader(fragmentShaderId); BASED_CHECK_GL_ERROR;
 	}
 
+	Shader::Shader(const std::string& vertex, const std::string& geometry, const std::string& fragment)
+	{
+		PROFILE_FUNCTION();
+		mProgramId = glCreateProgram(); BASED_CHECK_GL_ERROR;
+
+		int status = GL_FALSE;
+		char errorLog[512];
+
+		uint32_t vertexShaderId = glCreateShader(GL_VERTEX_SHADER); BASED_CHECK_GL_ERROR;
+		{
+			const GLchar* glSource = vertex.c_str();
+			glShaderSource(vertexShaderId, 1, &glSource, NULL); BASED_CHECK_GL_ERROR;
+			glCompileShader(vertexShaderId); BASED_CHECK_GL_ERROR;
+			glGetShaderiv(vertexShaderId, GL_COMPILE_STATUS, &status); BASED_CHECK_GL_ERROR;
+			if (status != GL_TRUE)
+			{
+				glGetShaderInfoLog(vertexShaderId, sizeof(errorLog), NULL, errorLog); BASED_CHECK_GL_ERROR;
+				BASED_ERROR("Vertex Shader compilation error: {}", errorLog);
+				glDeleteShader(vertexShaderId); BASED_CHECK_GL_ERROR;
+			}
+			else
+			{
+				glAttachShader(mProgramId, vertexShaderId); BASED_CHECK_GL_ERROR;
+			}
+		}
+
+		uint32_t geometryShaderId = glCreateShader(GL_GEOMETRY_SHADER); BASED_CHECK_GL_ERROR;
+		{
+			const GLchar* glSource = geometry.c_str();
+			glShaderSource(geometryShaderId, 1, &glSource, NULL); BASED_CHECK_GL_ERROR;
+			glCompileShader(geometryShaderId); BASED_CHECK_GL_ERROR;
+			glGetShaderiv(geometryShaderId, GL_COMPILE_STATUS, &status); BASED_CHECK_GL_ERROR;
+			if (status != GL_TRUE)
+			{
+				glGetShaderInfoLog(geometryShaderId, sizeof(errorLog), NULL, errorLog); BASED_CHECK_GL_ERROR;
+				BASED_ERROR("Geometry Shader compilation error: {}", errorLog);
+				glDeleteShader(geometryShaderId); BASED_CHECK_GL_ERROR;
+			}
+			else
+			{
+				glAttachShader(mProgramId, geometryShaderId); BASED_CHECK_GL_ERROR;
+			}
+		}
+
+		uint32_t fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER); BASED_CHECK_GL_ERROR;
+		if (status == GL_TRUE)
+		{
+			const GLchar* glSource = fragment.c_str();
+			glShaderSource(fragmentShaderId, 1, &glSource, NULL); BASED_CHECK_GL_ERROR;
+			glCompileShader(fragmentShaderId); BASED_CHECK_GL_ERROR;
+			glGetShaderiv(fragmentShaderId, GL_COMPILE_STATUS, &status); BASED_CHECK_GL_ERROR;
+			if (status != GL_TRUE)
+			{
+				glGetShaderInfoLog(fragmentShaderId, sizeof(errorLog), NULL, errorLog); BASED_CHECK_GL_ERROR;
+				BASED_ERROR("Fragment Shader compilation error: {}", errorLog);
+			}
+			else
+			{
+				glAttachShader(mProgramId, fragmentShaderId); BASED_CHECK_GL_ERROR;
+			}
+		}
+
+		BASED_ASSERT(status == GL_TRUE, "Error compiling shader");
+		if (status == GL_TRUE)
+		{
+			glLinkProgram(mProgramId); BASED_CHECK_GL_ERROR;
+			glValidateProgram(mProgramId); BASED_CHECK_GL_ERROR;
+			glGetProgramiv(mProgramId, GL_LINK_STATUS, &status); BASED_CHECK_GL_ERROR;
+			if (status != GL_TRUE)
+			{
+				glGetProgramInfoLog(mProgramId, sizeof(errorLog), NULL, errorLog); BASED_CHECK_GL_ERROR;
+				BASED_ERROR("Shader link error: {}", errorLog); 
+				glDeleteProgram(mProgramId); BASED_CHECK_GL_ERROR;
+				mProgramId = -1;
+			}
+		}
+
+		unsigned int globalsIndex = glGetUniformBlockIndex(mProgramId, "Globals");
+		if (globalsIndex != GL_INVALID_INDEX)
+			glUniformBlockBinding(mProgramId, globalsIndex, 0); BASED_CHECK_GL_ERROR;
+
+		glDeleteShader(vertexShaderId); BASED_CHECK_GL_ERROR;
+		glDeleteShader(fragmentShaderId); BASED_CHECK_GL_ERROR;
+	}
+
 	Shader::Shader(const std::string& vertex, const std::string& fragment, const std::string& vSrc,
-		const std::string& fSrc)
+	               const std::string& fSrc)
 		: Shader(vertex, fragment)
 	{
 		mVertexPath = vSrc;
@@ -151,8 +236,55 @@ namespace based::graphics
 		return nullptr;
 	}
 
+	Shader* Shader::LoadShader(const std::string& vsPath, const std::string& geomPath, const std::string& fsPath)
+	{
+		PROFILE_FUNCTION();
+		std::ifstream vsFile(vsPath);
+		std::ifstream fsFile(fsPath);
+		std::ifstream geomFile(geomPath);
+
+		BASED_ASSERT(vsFile && fsFile, "Could not load shaders! Make sure your path is correct!");
+
+		if (vsFile && fsFile && geomFile)
+		{
+			std::string temp;
+			std::string vertexSource;
+			while (std::getline(vsFile, temp))
+			{
+				vertexSource = vertexSource.append(temp).append("\n");
+			}
+			vsFile.close();
+
+			std::string geomSource;
+			while (std::getline(geomFile, temp))
+			{
+				geomSource = geomSource.append(temp).append("\n");
+			}
+			geomFile.close();
+
+			std::string fragSource;
+			while (std::getline(fsFile, temp))
+			{
+				fragSource = fragSource.append(temp).append("\n");
+			}
+			fsFile.close();
+
+			std::set<std::string> alreadyIncluded = {};
+			vertexSource = PreprocessShader(vertexSource, "#include ", ASSET_PATH("Shaders/"), alreadyIncluded);
+			alreadyIncluded = {};
+			geomSource = PreprocessShader(geomSource, "#include ", ASSET_PATH("Shaders/"), alreadyIncluded);
+			alreadyIncluded = {};
+			fragSource = PreprocessShader(fragSource, "#include ", ASSET_PATH("Shaders/"), alreadyIncluded);
+
+			return new Shader(vertexSource, geomSource, fragSource);
+		}
+
+		BASED_ERROR("Failed to load shader with source {}, {}", vsPath, fsPath);
+		return nullptr;
+	}
+
 	std::string Shader::PreprocessShader(const std::string source, const std::string includeIdentifier,
-		const std::string includeSearchDir, std::set<std::string>& alreadyIncluded)
+	                                     const std::string includeSearchDir, std::set<std::string>& alreadyIncluded)
 	{
 		// Shader preprocessing code by Grayson Clark: https://github.com/FaultyPine/tiny_engine/blob/master/engine/src/render/shader.cpp
 		static bool isRecursiveCall = false;
@@ -389,7 +521,7 @@ namespace based::graphics
 				// The default direction for any object points straight down the positive Z axis,
 				// so to get the actual light direction we rotate that default direction by the
 				// light's rotation matrix
-				light.direction = glm::mat3(model) * glm::vec3(0.f, 0.f, 1.f);
+				light.direction = glm::mat3(model) * glm::vec3(0.f, 0.f, -1.f);
 
 				shdr->SetUniformFloat3("directionalLight.direction", light.direction);
 				shdr->SetUniformFloat3("directionalLight.color", light.color);

@@ -96,9 +96,32 @@ public:
 			DEFAULT_MAT_LIB);
 		auto sphereMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/sphere.obj"),
 			DEFAULT_MESH_LIB);
-		sphereMat->SetBlendMode(graphics::BlendMode::Opaque);
+		auto sphereAlbedo = std::make_shared<graphics::Texture>("Assets/sand_albedo.png");
+		auto sphereRough = std::make_shared<graphics::Texture>("Assets/sand_roughness.png");
+		auto sphereNormal = std::make_shared<graphics::Texture>("Assets/sand_normal.png");
+		sphereMat->AddTexture(sphereAlbedo, "material.albedo.tex");
+		sphereMat->SetUniformValue("material.albedo.useSampler", 1);
+		sphereMat->AddTexture(sphereRough, "material.roughness.tex");
+		sphereMat->SetUniformValue("material.roughness.useSampler", 1);
+		sphereMat->AddTexture(sphereNormal, "material.normal.tex");
+		sphereMat->SetUniformValue("material.normal.useSampler", 1);
+		
+		/*auto normalShader = std::shared_ptr<graphics::Shader>(graphics::Shader::LoadShader(
+				"Assets/Shaders/normal_vis.vert",
+				"Assets/Shaders/normal_vis.geom",
+				ASSET_PATH("Shaders/basic_unlit.frag")
+			));
+		normalShader->SetUniformFloat4("color", glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
+		auto normalMat = std::make_shared<graphics::Material>(normalShader, "Normal Material");
+
+		graphics::CustomRenderPass* normalPass = new graphics::CustomRenderPass("Normal Pass",
+			Engine::Instance().GetWindow().GetFramebuffer(), normalMat);
+		normalPass->mShouldClear = false;
+		Engine::Instance().GetRenderManager().InjectPass(normalPass, 3);*/
+		
+		/*sphereMat->SetBlendMode(graphics::BlendMode::Opaque);
 		sphereMat->SetUniformValue("material.albedo.color", glm::vec4(0.94f, 0.75f, 0.016f, 1.f));
-		sphereMat->SetUniformValue("material.albedo.useTex", 0);
+		sphereMat->SetUniformValue("material.albedo.useTex", 0);*/
 		sphereEntity->AddComponent<scene::MeshRenderer>(sphereMesh, sphereMat);
 
 		cameraEntity->SetPosition(glm::vec3(7.f, 0.f, -3.f));
@@ -269,7 +292,8 @@ public:
 			ImGui::Spacing();
 
 			// Misc. parameters
-			const char* renderModes[] = { "Lit", "Unlit", "Normal", "Metallic", "Roughness", "AO", "Emission" };
+			const char* renderModes[] = { "Lit", "Unlit", "Normal", "Metallic", "Roughness",
+				"AO", "Emission", "Diffuse", "Specular", "ClearCoat" };
 			if (ImGui::BeginCombo("Render Mode", renderModes[curRenderMode]))
 			{
 				for (int i = 0; i < IM_ARRAYSIZE(renderModes); i++)
@@ -335,7 +359,7 @@ public:
 					model = glm::rotate(model, glm::radians(direction.x), glm::vec3(1.f, 0.f, 0.f));
 					model = glm::rotate(model, glm::radians(direction.z), glm::vec3(0.f, 0.f, 1.f));
 
-					glm::vec3 toPos = trans.Position() + glm::mat3(model) * glm::vec3(0.f, 0.f, 1.f);
+					glm::vec3 toPos = trans.Position() + glm::mat3(model) * glm::vec3(0.f, 0.f, -1.f);
 					Engine::Instance().GetPhysicsManager().GetDebugRenderer()->DrawArrow(
 							JPH::Vec3(trans.Position().x, trans.Position().y, trans.Position().z),
 							JPH::Vec3(toPos.x, toPos.y, toPos.z),
@@ -406,7 +430,7 @@ public:
 				int i = 0;
 				ImGui::Indent(10.0f);
 				// Loop over each saved material and create a dropdown for each one
-				for (const auto& mat : GetCurrentScene()->GetMaterialStorage().GetAll())
+				for (const auto& mat : Engine::Instance().GetResourceManager().GetMaterialStorage().GetAll())
 				{
 					if (auto matPtr = mat.second)
 					{
@@ -462,7 +486,7 @@ public:
 									items.reserve(graphics::DefaultLibraries::GetTextureLibrary().Size());
 
 									for (const auto& kv : 
-										graphics::DefaultLibraries::GetTextureLibrary().GetAll())
+										Engine::Instance().GetResourceManager().GetTextureStorage().GetAll())
 									{
 										items.emplace_back(kv.first);
 									}
@@ -474,7 +498,9 @@ public:
 									if (ImGui::BeginCombo(f.first.c_str(), preview.c_str()))
 									{
 										// Create a selectable in the dropdown for each texture
-										for (int n = 0; n < (int)(graphics::DefaultLibraries::GetTextureLibrary().GetAll().size()) + 1; n++)
+										for (int n = 0; n <
+											(int)(Engine::Instance().GetResourceManager().GetTextureStorage()
+												.GetAll().size()) + 1; n++)
 										{
 											auto item = items[n];
 											const bool isSelected = itemIndex[j] == n;

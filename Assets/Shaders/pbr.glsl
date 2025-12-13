@@ -14,6 +14,9 @@ const int RenderMode_MetallicDebug         = 3;
 const int RenderMode_RoughnessDebug        = 4;
 const int RenderMode_AmbientOcclusionDebug = 5;
 const int RenderMode_EmissionDebug         = 6;
+const int RenderMode_DiffuseDebug          = 7;
+const int RenderMode_SpecularDebug         = 8;
+const int RenderMode_ClearCoatDebug        = 9;
 
 const int BlendMode_Opaque                 = 0;
 const int BlendMode_Masked                 = 1;

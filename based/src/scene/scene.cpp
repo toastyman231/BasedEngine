@@ -106,8 +106,10 @@ namespace based::scene
 
 				for (size_t i = 0; i < meshes.size(); ++i)
 				{
-					auto& mesh = meshes[i];
-					auto& material = materials[i];
+					auto mesh = meshes[i];
+					auto material = materials[i];
+					if (auto overrideMat = Engine::Instance().GetRenderManager().GetCurrentPassOverrideMaterial())
+						material = overrideMat;
 					graphics::BlendMode mode = material->GetBlendMode();
 
 					if ((renderFlags & graphics::RenderFlags::DrawOpaque) == graphics::RenderFlags::DrawOpaque
@@ -159,6 +161,8 @@ namespace based::scene
 
 			auto m = renderer.mesh.lock();
 			auto material = renderer.material.lock();
+			if (auto overrideMat = Engine::Instance().GetRenderManager().GetCurrentPassOverrideMaterial())
+				material = overrideMat;
 
 			if (m && material)
 			{

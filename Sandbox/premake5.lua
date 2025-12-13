@@ -55,7 +55,7 @@ project "Sandbox"
 
     postbuildcommands
     {
-        engineLocation .. "/tools/bin/BasedBuildTool -i " .. path.getabsolute("../%{prj.name}") .. " -c %{cfg.buildcfg}" 
+        "python3 " .. engineLocation .. "/tools/bin/basedbuildtool.py -i " .. path.getabsolute("../%{prj.name}") .. " -c %{cfg.buildcfg} --ci" 
     }
 
     filter {"system:windows", "configurations:*"}

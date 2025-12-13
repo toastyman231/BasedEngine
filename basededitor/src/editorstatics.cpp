@@ -11,7 +11,7 @@
 
 #define REFLECT_COMPONENT(ComponentType)                                            \
 {                                                                                   \
-	entt::meta<ComponentType>()                                                     \
+	entt::meta_factory<ComponentType>()                                                     \
 	.type(entt::type_hash<ComponentType>())                                         \
 	.func<&EngineOperations::AddComponent<ComponentType>>("AddComponent"_hs)        \
 	.func<&EngineOperations::RemoveComponent<ComponentType>>("RemoveComponent"_hs); \

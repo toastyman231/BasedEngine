@@ -199,8 +199,9 @@ namespace
             printf("Processing: %s\n", path.filename().string().c_str());
 
             // Normal maps must copy the G channel to the A channel, otherwise
-            // libktx just fills G in with 255 (see ktx_transcode_fmt_e documentation)
-            if (texture_is_normal_map)
+            // libktx just fills G in with 255 (see ktx_transcode_fmt_e documentation).
+            // Unless the target is legacy-desktop, since that platform uses BC3.
+            if (texture_is_normal_map && strcmp(*target, "legacy-desktop") != 0)
             {
                 stbi_uc* original_data = data;
                 data = prepare_normal_map(data, width, height, channels);
