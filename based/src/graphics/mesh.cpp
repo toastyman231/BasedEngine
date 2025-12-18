@@ -76,7 +76,9 @@ namespace based::graphics
 	{
 		PROFILE_FUNCTION();
 		Assimp::Importer import;
-		const aiScene * scene = import.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs);
+		const aiScene * scene = import.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs |
+			aiProcess_GenSmoothNormals | aiProcess_PopulateArmatureData | aiProcess_CalcTangentSpace
+			| aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes | aiProcess_GenBoundingBoxes);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{

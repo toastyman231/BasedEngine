@@ -96,15 +96,23 @@ public:
 			DEFAULT_MAT_LIB);
 		auto sphereMesh = graphics::Mesh::LoadMeshFromFile(ASSET_PATH("Meshes/sphere.obj"),
 			DEFAULT_MESH_LIB);
-		auto sphereAlbedo = std::make_shared<graphics::Texture>("Assets/sand_albedo.png");
-		auto sphereRough = std::make_shared<graphics::Texture>("Assets/sand_roughness.png");
-		auto sphereNormal = std::make_shared<graphics::Texture>("Assets/sand_normal.png");
+		auto sphereAlbedo = Engine::Instance().GetResourceManager().LoadTextureAsync("Assets/sand_albedo.ktx2");
+		auto sphereRough = Engine::Instance().GetResourceManager().LoadTextureAsync("Assets/sand_roughness.ktx2");
+		auto sphereNormal = Engine::Instance().GetResourceManager().LoadTextureAsync("Assets/sand_normal.ktx2");
 		sphereMat->AddTexture(sphereAlbedo, "material.albedo.tex");
 		sphereMat->SetUniformValue("material.albedo.useSampler", 1);
 		sphereMat->AddTexture(sphereRough, "material.roughness.tex");
 		sphereMat->SetUniformValue("material.roughness.useSampler", 1);
 		sphereMat->AddTexture(sphereNormal, "material.normal.tex");
 		sphereMat->SetUniformValue("material.normal.useSampler", 1);
+
+		auto light = scene::Entity::CreateEntity("Light");
+		GetCurrentScene()->GetEntityStorage().Load("Light", light);
+		light->AddComponent<scene::PointLight>();
+		auto& lightComp = light->GetComponent<scene::PointLight>();
+		lightComp.intensity = 1.f;
+		light->AddComponent<scene::MeshRenderer>(sphereMesh, sphereMat);
+		light->SetScale(glm::vec3(0.1f));
 		
 		/*auto normalShader = std::shared_ptr<graphics::Shader>(graphics::Shader::LoadShader(
 				"Assets/Shaders/normal_vis.vert",
@@ -331,6 +339,7 @@ public:
 					ImGui::Text("Light %d", i);
 					ImGui::DragFloat3("Light Color", glm::value_ptr(col), 0.01f);
 					ImGui::DragFloat3("Light Position", glm::value_ptr(position), 0.01f);
+					ImGui::DragFloat("Light Intensity", &lightComponent.intensity, 0.1f, 0.0f, 10.f);
 					ImGui::PopID();
 					trans.SetPosition(position);
 					lightComponent.color = col;

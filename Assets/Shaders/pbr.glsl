@@ -96,15 +96,20 @@ vec4 GetMaterialNormal(vec2 uv) {
 }
 
 float GetMaterialMetallic(vec2 uv) {
-    return GetMaterialColor(material.metallic, uv).b;
+    vec4 metallic = GetMaterialColor(material.metallic, uv);
+    if (metallic.r != 0.0) return metallic.r;
+    return metallic.b;
 }
 
 float GetMaterialRoughness(vec2 uv) {
-    return GetMaterialColor(material.roughness, uv).g;
+    vec4 roughness = GetMaterialColor(material.roughness, uv);
+    if (roughness.r != 0.0) return roughness.r;
+    return roughness.g;
 }
 
 float GetMaterialAmbientOcclusion(vec2 uv) {
-    return GetMaterialColor(material.ambientOcclusion, uv).r;
+    vec4 ao = GetMaterialColor(material.ambientOcclusion, uv);
+    return ao.r;
 }
 
 vec4 GetMaterialEmission(vec2 uv) {
@@ -140,7 +145,7 @@ float CalculateShadows(vec4 fragPosLightSpace) {
 
 // DISNEY VERSIONS
 
-uniform float Roughness = 0.5;
+uniform float Roughness = 1.0;
 uniform float Metallic = 0;
 uniform float Subsurface = 0.0;
 uniform float Specular = 0.5;
@@ -151,12 +156,14 @@ uniform float SheenTint = 0.5;
 uniform float ClearCoat = 0.0;
 uniform float ClearCoatGloss = 1.0;
 
+uniform float NormalStrength = 1.0;
+
 float sqr(float x) {
     return x * x;
 }
 
 float CalculateLuminance(vec3 baseColor) {
-    return dot(vec3(0.3, 0.6, 1.0), baseColor);
+    return dot(vec3(0.299, 0.587, 0.114), baseColor);
 }
 
 vec3 CalculateTint(vec3 baseColor) {
@@ -190,17 +197,12 @@ float GTR1(float NdotH, float a) {
 
     float a2 = a * a;
     float t = 1.0 + (a2 - 1.0) * NdotH * NdotH;
-    return (a2 - 1.0) / (PI * log2(a2) * t);
+    float result = (a2 - 1.0) / (PI * log(a2) * t);
+    return clamp(result, 0.0, 1000.0);
 }
 
 float AnisotropicGTR2(float NdotH, float HdotX, float HdotY, float ax, float ay) {
     return 1.0 / (PI * ax * ay * sqr(sqr(HdotX / ax) + sqr(HdotY / ay) + sqr(NdotH)));
-}
-
-float SmithGGX(float alpha, float NdotV) {
-    float a = alpha * alpha;
-    float b = sqr(NdotV);
-    return 1 / (NdotV + sqrt(a + b - a*b));
 }
 
 float SmithGGX(float alphaSquared, float ndotl, float ndotv) {
@@ -217,25 +219,6 @@ float SeparableSmithGGXG1(float NdotV, float a)
 
     return 2.0f / (1.0f + sqrt(a2 + (1 - a2) * absDotNV * absDotNV));
 }
-
-/**float SeparableSmithGGXG1(vec3 w, vec3 wm, float ax, float ay)
-{
-    float dotHW = Dot(w, wm);
-    if (dotHW <= 0.0f) {
-        return 0.0f;
-    }
-
-    float absTanTheta = Absf(TanTheta(w));
-    if(IsInf(absTanTheta)) {
-        return 0.0f;
-    }
-
-    float a = Sqrtf(Cos2Phi(w) * ax * ax + Sin2Phi(w) * ay * ay);
-    float a2Tan2Theta = Square(a * absTanTheta);
-
-    float lambda = 0.5f * (-1.0f + Sqrtf(1.0f + a2Tan2Theta));
-    return 1.0f / (1.0f + lambda);
-}*/
 
 float AnisotropicSmithGGX(float NdotS, float SdotX, float SdotY, float ax, float ay) {
     return 1.0 / (NdotS + sqrt(sqr(SdotX * ax) + sqr(SdotY * ay) + sqr(NdotS)));
@@ -257,8 +240,8 @@ BRDFResults DisneyBRDF(vec3 baseColor, vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y) {
     brdfResult.specular = vec3(0.0);
     brdfResult.clearcoat = vec3(0.0);
 
-    float rough = max(Roughness, GetMaterialRoughness(uvs));
-    float metal = max(Metallic, GetMaterialMetallic(uvs));
+    float rough = Roughness * GetMaterialRoughness(uvs);
+    float metal = Metallic * GetMaterialMetallic(uvs);
 
     vec3 H = normalize(L + V);
 
@@ -308,22 +291,22 @@ BRDFResults DisneyBRDF(vec3 baseColor, vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y) {
     float GalphaSquared = sqr(0.5 + rough * 0.5);
     float GalphaX = max(0.001, GalphaSquared / aspectRatio);
     float GalphaY = max(0.001, GalphaSquared * aspectRatio);
-    float G = AnisotropicSmithGGX(NdotL, dot(L, X), dot(L, Y), alphaX, alphaY);
-    G *= AnisotropicSmithGGX(NdotV, dot(V, X), dot(V, Y), alphaX, alphaY);
+    float G = AnisotropicSmithGGX(NdotL, dot(L, X), dot(L, Y), GalphaX, GalphaY);
+    G *= AnisotropicSmithGGX(NdotV, dot(V, X), dot(V, Y), GalphaX, GalphaY);
 
     vec3 Cspec0 = mix(Specular * 0.08 * mix(vec3(1.0), Ctint, SpecularTint), Cdlin, metal);
     vec3 F = mix(Cspec0, vec3(1.0), FH);
-    
+
     // Clearcoat lobe: Mixes in a clear coating on top of the base color
     // ClearCoat - lobe intensity
     // ClearCoatGloss - lobe shape
-    float Dr = GTR1(NdotH, mix(0.1, 0.001, ClearCoatGloss));
-    float Fr = mix(1.0, SchlickFresnel(LdotH), 0.04);//mix(0.04, 1.0, FH);
-    float Gr = SmithGGX(0.25, NdotL) * SmithGGX(0.25, NdotV);
+    float Dr = GTR1(NdotH, mix(0.1, 0.02, ClearCoatGloss));
+    float Fr = mix(0.04, 1.0, FH);
+    float Gr = SmithGGX(NdotL, NdotV, 0.25);
 
     brdfResult.diffuse = (1.0 / PI) * (mix(Fd, ss, Subsurface) * Cdlin + Fsheen) * (1 - metal);
     brdfResult.specular = Ds * F * G;/** / (4.0 * NdotL * NdotV)*/;
-    brdfResult.clearcoat = vec3(0.25 * ClearCoat * Gr * Fr * Dr);
+    brdfResult.clearcoat = clamp(vec3(0.25 * ClearCoat * Gr * Fr * Dr), vec3(0.0), vec3(10.0));
 
     return brdfResult;
 }

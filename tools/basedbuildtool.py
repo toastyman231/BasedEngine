@@ -222,7 +222,7 @@ def handle_texture_compression(path, source_path, destination_path, args, progre
         # Mipmap generation
         if not args.no_mips:
             # Generate all mipmaps now during compression
-            cmd.extend(["-mipsize", "1"])     # Generate down to 1x1
+            cmd.extend(["-mipsize", "4"])     # Generate down to 1x1
         
         # Use GPU encoding for massive speedup
         cmd.extend(["-EncodeWith", "GPU"])

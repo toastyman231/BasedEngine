@@ -1,4 +1,4 @@
-#version 410 core
+#version 460 core
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 texcoords;
@@ -36,7 +36,7 @@ void main()
     TBN = mat3(T, B, N);
     fragPosLightSpace = lightSpaceMatrix * vec4(fragPos, 1.0);
 
-    vec4 totalPosition = vec4(0.0);
+    /**vec4 totalPosition = vec4(0.0);
     for(int i = 0 ; i < MAX_BONE_INFLUENCE ; i++)
     {
         if(boneIds[i] == -1) 
@@ -50,7 +50,7 @@ void main()
         totalPosition += localPosition * weights[i];
         vec3 localNormal = mat3(finalBonesMatrices[boneIds[i]]) * normal;
     }
-    if (totalPosition == vec4(0.0)) totalPosition = vec4(position, 1.0);
+    if (totalPosition == vec4(0.0)) totalPosition = vec4(position, 1.0);*/
 
-    gl_Position = proj * view * model * totalPosition;
+    gl_Position = proj * view * model * vec4(position, 1.0);
 }

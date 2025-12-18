@@ -257,6 +257,7 @@ namespace based::graphics
 		mWidth = kTexture->baseWidth;
 		mNumChannels = ktxTexture2_GetNumComponents(kTexture);
 		mId = texture;
+		SetTextureFilter(mFilter);
 
 		ktxTexture2_Destroy(kTexture);
 	}
