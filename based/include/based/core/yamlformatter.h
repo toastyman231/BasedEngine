@@ -29,7 +29,8 @@ namespace based::core::YAMLFormatter
 			for (auto& [id, member] : type.data())
 			{
 				auto field = member.get(object);
-				out << YAML::Key << id << YAML::BeginMap;
+				out << YAML::Key << std::string(member.name()) << YAML::BeginMap;
+				out << YAML::Key << "ID" << YAML::Value << id;
 				if (member.type().is_class() && member.type().id() != entt::type_hash<std::string>())
 				{
 					out << YAML::Key << "ChildObject" << YAML::BeginMap;
@@ -128,7 +129,8 @@ namespace based::core::YAMLFormatter
 		auto membersData = data["Data"];
 		for (auto memberInfo : membersData)
 		{
-			auto memberId = memberInfo.first.as<unsigned>();
+			//auto memberName = memberInfo.first.as<const char*>();
+			auto memberId = memberInfo.second["ID"].as<unsigned>();
 
 			if (auto childNode = memberInfo.second["ChildObject"])
 			{

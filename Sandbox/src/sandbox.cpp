@@ -20,6 +20,25 @@
 
 using namespace based;
 
+class SmallClass
+{
+public:
+	SmallClass() = default;
+	SmallClass(std::string in) : temp(in) {}
+
+	std::string temp;
+};
+
+struct MyComponent
+{
+	MyComponent() : myScript("This is a test of serialization") {}
+
+	SmallClass myScript;
+	graphics::Projection myProj = graphics::PERSPECTIVE;
+	std::string myId = "Default";
+	float myFloat = 0;
+};
+
 class Sandbox : public based::App
 {
 	std::shared_ptr<scene::Entity> cameraEntity;
@@ -70,8 +89,27 @@ public:
 		input::Mouse::SetCursorMode(Engine::Instance().GetWindow().GetShouldRenderToScreen() ?
 			input::CursorMode::Confined : input::CursorMode::Free);
 
-		scene::Scene::LoadScene(ASSET_PATH("Scenes/Default3DMinimal.bscn"));
+		{
+			using namespace entt::literals;
+			entt::meta_factory<SmallClass>()
+				.type(entt::type_hash<SmallClass>(), "SmallClass")
+				.data<&SmallClass::temp>("temp"_hs, "temp");
+			entt::meta_factory<MyComponent>()
+				.type(entt::type_hash<MyComponent>(), "MyComponent")
+				.data<&MyComponent::myScript>("myScript"_hs, "myScript")
+				.data<&MyComponent::myProj>("myProj"_hs, "myProj")
+				.data<&MyComponent::myId>("myId"_hs, "myId")
+				.data<&MyComponent::myFloat>("myFloat"_hs, "myFloat")
+				.func<&scene::SceneSerializer::AddMetaComponent<MyComponent>, entt::as_void_t>("AddMetaComponent"_hs,
+					"AddMetaComponent");
+				/*.func<&scene::SceneSerializer::SerializeScriptComponent<MyComponent>, entt::as_void_t>("SerializeScriptComponent"_hs,
+					"SerializeScriptComponent");*/
+			/*entt::meta_any any{ std::string("") };
+			any.allow_cast<float>();*/
+		}
 
+		scene::Scene::LoadScene(ASSET_PATH("Scenes/Default3DMinimal.bscn"));
+		
 		cameraEntity = GetCurrentScene()->GetEntityStorage().Get("Main Camera");
 		GetCurrentScene()->GetEntityStorage().Get("Directional Light")->SetPosition(glm::vec3(7.f, 0.f, -3.f));
 
@@ -91,6 +129,7 @@ public:
 		curtainsEntity->SetPosition(glm::vec3(0.05f, 0.f, -6.36f));
 
 		sphereEntity->SetPosition(glm::vec3(3.f, 0.f, -3.f));
+		sphereEntity->AddComponent<MyComponent>();
 		
 		auto sphereMat = graphics::Material::LoadMaterialFromFile(ASSET_PATH("Materials/Lit.bmat"),
 			DEFAULT_MAT_LIB);

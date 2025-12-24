@@ -92,7 +92,7 @@ namespace editor::panels
 				ImGui::GetItemRectSize().x, ImGui::GetItemRectSize().y);
 
 			ImVec2 buttonSize(25, 25);
-
+			
 			ImGui::SetCursorPos(pos);
 			ImGui::Spacing();
 			ImGui::Indent(5);

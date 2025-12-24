@@ -158,8 +158,6 @@ namespace editor
 
 	bool Statics::SaveScene(const std::string& path, bool forceSave)
 	{
-		if (!mEditorSceneDirty && !forceSave) return false;
-
 		static char const* patterns = { "*.bscn" };
 		const char* saveLocation = (!path.empty() && path != "FORCE") ? path.c_str() :
 			tinyfd_saveFileDialog(

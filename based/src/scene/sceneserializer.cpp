@@ -785,28 +785,19 @@ namespace based::scene
 
 			if (auto& storage = curr.second; storage.contains(entity->GetEntityHandle()))
 			{
-				auto type = entt::resolve(storage.type().hash());
+				auto type = entt::resolve(storage.info().hash());
+				void* component = storage.value(entity->GetEntityHandle());
 				if (!type)
 				{
-					//BASED_WARN("Cannot serialize component with type: {}", storage.type().hash());
+					// We don't warn here because some engine types are intentionally left unreflected,
+					// and it just gets annoying
 					continue;
 				}
+				
+				out << YAML::Key << std::string(type.name()) << YAML::BeginMap;
+				SerializeUserComponent(out, type, component);
 
-				for (auto baseType : type.base())
-				{
-					if (baseType.second.id() == entt::type_hash<ScriptComponent>())
-					{
-						auto typeName = std::string(type.info().name());
-						typeName = typeName.substr(typeName.find(" ") + 1);
-						out << YAML::Key << typeName << YAML::BeginMap;
-						auto component = static_cast<ScriptComponent*>(storage.value(entity->GetEntityHandle()));
-
-						type.func("SerializeScriptComponent"_hs).invoke(*component, &out, component);
-
-						out << YAML::EndMap;
-						break;
-					}
-				}
+				out << YAML::EndMap; // User Type
 			}
 		}
 

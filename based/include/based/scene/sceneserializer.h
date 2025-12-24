@@ -38,13 +38,10 @@ namespace based::scene
 		bool DeserializeRuntime(const std::string& filepath) override;
 
 		void SetProjectDirectory(const std::string& dir) { mProjectDirectory = dir; }
-
-		template <typename T>
-		static void SerializeScriptComponent(YAML::Emitter* out, scene::ScriptComponent* component)
+		
+		static void SerializeUserComponent(YAML::Emitter& out, entt::meta_type type, void* component)
 		{
-			BASED_TRACE("Serializing scriptable component");
-			auto compCast = (T*)component;
-			core::YAMLFormatter::Serialize(*out, entt::meta_any{ *compCast });
+			core::YAMLFormatter::Serialize(out, type.from_void(component));
 		}
 
 		template <typename T>
