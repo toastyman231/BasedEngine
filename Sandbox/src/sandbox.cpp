@@ -76,11 +76,6 @@ public:
 		return settings;
 	}
 
-	struct TestStruct
-	{
-		int testData = 0;
-	};
-
 	void Initialize() override
 	{
 		App::Initialize();
@@ -404,6 +399,7 @@ public:
 					model = glm::rotate(model, glm::radians(direction.z), glm::vec3(0.f, 0.f, 1.f));
 
 					glm::vec3 toPos = trans.Position() + glm::mat3(model) * glm::vec3(0.f, 0.f, -1.f);
+					// TODO: Add a proper debug renderer that no-ops everything in release
 					Engine::Instance().GetPhysicsManager().GetDebugRenderer()->DrawArrow(
 							JPH::Vec3(trans.Position().x, trans.Position().y, trans.Position().z),
 							JPH::Vec3(toPos.x, toPos.y, toPos.z),
