@@ -1,8 +1,18 @@
-import globals, os, subprocess, sys
+import globals, os, subprocess, sys, argparse
+
+# TODO: Make this work on a per-project basis, and make sure it executes pre/post build scripts
 
 if __name__ == "__main__":
-    args = globals.ProcessArguments(sys.argv)
-    CONFIG = globals.GetArgumentValue(args, "config", "debug")
+    parser = argparse.ArgumentParser(
+        description="Based CLI action for building projects",
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+
+    parser.add_argument("-c", "--config", default="debug",
+                        help="Configuration to build (release or debug)")
+
+    args = parser.parse_args()
+    CONFIG = args.config
 
     print("Building config: " + CONFIG)
     print("\n")

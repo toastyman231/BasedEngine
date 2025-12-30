@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, argparse
 import subprocess
 
 TOOLS_DIR = "tools"
@@ -16,22 +16,37 @@ def RunCommand(cmds):
     return ret
 
 # ----- Main Entry Point ----- #
-if __name__ == "__main__":
-    argc = len(sys.argv)
-    i = 1
-    while(i < argc):
-        cmds = [sys.argv[i]]
+def main():
+    argv = sys.argv[1:]
+    i = 0
+    argc = len(argv)
 
-        while True:
-            if i < argc - 1 and sys.argv[i+1][0] == "-":
-                cmds.append(sys.argv[i+1][1:])
-                i = i + 1
-            else:
-                break;
+    while i < argc:
+        cmd = argv[i]
+        i += 1
+
+        args = []
+        while i < argc:
+            # If this starts a new command, stop
+            if not argv[i].startswith("-"):
+                break
+
+            flag = argv[i]
+            args.append(flag)
+            i += 1
+
+            # If flag expects a value, capture it
+            if i < argc and not argv[i].startswith("-"):
+                args.append(argv[i])
+                i += 1
 
         print("\n--------------------------")
-        print("Executing: ", cmds[0])
-        if (len(cmds) > 1):
-            print("With arguments: {}".format(", ".join(cmds[1:])))
-        if RunCommand(cmds) != 0: break
-        i = i + 1
+        print("Executing:", cmd)
+        if args:
+            print("With arguments:", args)
+
+        if RunCommand([cmd] + args) != 0:
+            break
+
+if __name__ == "__main__":
+    main()

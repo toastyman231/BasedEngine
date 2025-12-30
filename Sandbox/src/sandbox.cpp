@@ -102,10 +102,6 @@ public:
 				.data<&MyComponent::myFloat>("myFloat"_hs, "myFloat")
 				.func<&scene::SceneSerializer::AddMetaComponent<MyComponent>, entt::as_void_t>("AddMetaComponent"_hs,
 					"AddMetaComponent");
-				/*.func<&scene::SceneSerializer::SerializeScriptComponent<MyComponent>, entt::as_void_t>("SerializeScriptComponent"_hs,
-					"SerializeScriptComponent");*/
-			/*entt::meta_any any{ std::string("") };
-			any.allow_cast<float>();*/
 		}
 
 		scene::Scene::LoadScene(ASSET_PATH("Scenes/Default3DMinimal.bscn"));

@@ -35,22 +35,17 @@ def GetOSExtension():
     if IsWindows(): return ".exe"
     else: return ""
 
-def ProcessArguments(argv):
-    ret = {} # return a key:value dict
-    for arg in argv:
-        try:
-            k = arg[0:arg.index("=")]
-            v = arg[arg.index("=")+1:]
-        except:
-            k = arg
-            v = 0
-        ret[k] = v
+def SafeCopyDir(src, dest):
+    ret = 0
+    if IsWindows():
+        ret = subprocess.call(["cmd.exe", "/c", "robocopy", src, dest, "/E"])
+    elif IsLinux() or IsMac():
+        ret = subprocess.call(["cp", "-R", src, dest])
+    else: ret = 1
     return ret
 
-def GetArgumentValue(args, name, default):
-    return args[name] if name in args else default
-
 def SetHome():
+    ENGINE_DIR = os.environ.get("BASED_ENGINE_HOME")
     if IsWindows() and ENGINE_DIR is None:
         subprocess.call(["setx", "BASED_ENGINE_HOME", os.getcwd()])
         ENGINE_DIR = os.environ.get("BASED_ENGINE_HOME")
@@ -65,7 +60,7 @@ def CopyBuildFiles(dest, project):
         premakeFile = open("{}/Templates/premakeTemplate.txt".format(os.getcwd()), "r").read();
         #premakeFile = premakeFile.replace("ENGINE_LOCATION", os.getcwd())
         premakeFile = premakeFile.replace("PROJ_NAME", project)
-        premakeFile = premakeFile.replace("\\", "\\\\")
+        #premakeFile = premakeFile.replace("\\", "\\\\")
         finalFile = open("{}/premake5.lua".format(dest), "x")
         finalFile.write(premakeFile)
         finalFile.close()
@@ -76,12 +71,12 @@ def CopyBuildFiles(dest, project):
 
 def CheckForPremakeScript(loc, project):
     if not os.path.exists("{}/premake5.lua".format(loc)):
-            print("WARNING: A premake5.lua script was not found in: {}".format(loc))
+        print("WARNING: A premake5.lua script was not found in: {}".format(loc))
 
-            try:
-                choice = input("\nWould you like to clone a basic premake template to this directory? [Y/n]: ").strip().lower()
-            except EOFError:
-                choice = "y"
+        try:
+            choice = input("\nWould you like to clone a basic premake template to this directory? [Y/n]: ").strip().lower()
+        except EOFError:
+            choice = "y"
 
-            if choice in ("", "y", "yes"):
-                CopyBuildFiles(loc, project)
+        if choice in ("", "y", "yes"):
+            CopyBuildFiles(loc, project)
