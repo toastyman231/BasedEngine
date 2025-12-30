@@ -18,3 +18,4 @@ logs/
 !premake5.exe
 !*.dll
 !*.lib
+!tools/bin

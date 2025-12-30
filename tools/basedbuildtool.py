@@ -562,4 +562,10 @@ if __name__ == "__main__":
             f"Compressonator CLI not found at:\n  {COMPRESSONATOR_CLI}"
         )
         sys.exit(1)
+    if not KTX_CLI.exists():
+        print(
+            f"{Fore.RED}Error:{Style.RESET_ALL} "
+            f"KTX CLI not found at:\n  {KTX_CLI}"
+        )
+        sys.exit(1)
     main()
