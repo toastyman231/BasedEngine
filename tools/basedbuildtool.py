@@ -2,6 +2,8 @@
 
 import os
 import sys
+import globals
+import traceback
 
 CI_MODE = False
 
@@ -72,8 +74,8 @@ from colorama import init as colorama_init
 from colorama import Fore
 from colorama import Style
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-COMPRESSONATOR_CLI = SCRIPT_DIR / "bin" / "Compressonator" / "compressonatorcli.exe"
+COMPRESSONATOR_CLI = Path(globals.ENGINE_DIR).resolve() / "tools" / "bin" / globals.GetOSDir() / "Compressonator" / "compressonatorcli{}".format(globals.GetOSExtension())
+KTX_CLI = Path(globals.ENGINE_DIR).resolve() / "tools" / "bin" / globals.GetOSDir() / "KTX" / "ktx{}".format(globals.GetOSExtension())
 
 BULLET = "•"
 CHECK = "✓"
@@ -153,6 +155,8 @@ def prepare_normal_map(image):
 def handle_texture_compression(path, source_path, destination_path, args, progress_callback=None, error_logger=None):
     if not path.is_file() or ".ico" in path.name.lower():
         return False
+    
+    wrote_successfully = False
     
     output_path = make_output_path(path, source_path, destination_path, ".ktx2")
     original_path = path;
@@ -259,9 +263,11 @@ def handle_texture_compression(path, source_path, destination_path, args, progre
                 progress_callback(path.name, "failed")
             return False
         
+        wrote_successfully = True
+        
         # Apply zstandard compression if requested using ktx tool
         if not args.no_deflate and output_path.exists():
-            deflate_cmd = ["ktx", "deflate", "--zstd", str(args.deflate_level), 
+            deflate_cmd = [str(KTX_CLI), "deflate", "--zstd", str(args.deflate_level), 
                           str(output_path), str(output_path)]
             deflate_result = subprocess.run(deflate_cmd, capture_output=True, text=True, encoding="utf-8")
             if deflate_result.returncode != 0:
@@ -281,9 +287,10 @@ def handle_texture_compression(path, source_path, destination_path, args, progre
         
     except Exception as e:
         if error_logger:
-            error_logger(f"Exception while processing {path.name}: {str(e)}\n")
+            error_logger(f"Exception while processing {path.name}: {str(e)}\n       Path checked: {str(path)}\n")
+            error_logger(f"{traceback.format_exc()}")
         # Silent failure for non-image files
-        return False
+        return wrote_successfully
 
 def handle_copy(source, dest, progress_callback=None, error_logger=None):
     if not source.is_file():

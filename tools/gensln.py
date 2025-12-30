@@ -1,47 +1,26 @@
-import subprocess, globals, sys, os, sethome
+import subprocess, globals, sys, os
 
-args = globals.ProcessArguments(sys.argv)
-prj = globals.GetArgumentValue(args, "prj", "New Project")
-location = globals.GetArgumentValue(args, "location", "{}".format(os.getcwd()))
-version = globals.GetArgumentValue(args, "v", "vs2022")
-ret = 0;
+if __name__ == "__main__":
+    globals.SetHome()
 
-def CopyBuildFiles(dest, project):
-    try:
-        # Copy premake5 template
-        premakeFile = open("{}/Templates/premakeTemplate.txt".format(os.getcwd()), "r").read();
-        #premakeFile = premakeFile.replace("ENGINE_LOCATION", os.getcwd())
-        premakeFile = premakeFile.replace("PROJ_NAME", project)
-        premakeFile = premakeFile.replace("\\", "\\\\")
-        finalFile = open("{}/premake5.lua".format(dest), "x")
-        finalFile.write(premakeFile)
-        finalFile.close()
+    args = globals.ProcessArguments(sys.argv)
+    prj = globals.GetArgumentValue(args, "prj", "New Project")
+    location = globals.GetArgumentValue(args, "location", "{}".format(os.getcwd()))
+    version = globals.GetArgumentValue(args, "v", "vs2022")
+    ret = 0
 
-        # Copy postbuild script
-        postBuiltTemplate = open("{}/Templates/postbuildTemplate.txt".format(os.getcwd()), "r").read();
-        #postBuiltTemplate = postBuiltTemplate.replace("ENGINE_LOCATION", os.getcwd())
-        postBuiltTemplate = postBuiltTemplate.replace("\\", "\\\\")
-        finalFile = open("{}/postbuild.py".format(dest), "x")
-        finalFile.write(postBuiltTemplate)
-        finalFile.close()
-    except:
-        print("Either premake file already exists, or could not find template to create!")
-        ret = 1
-    return
-
-sethome.SetHome()
-
-if (globals.IsWindows()):
-        if (not os.path.exists("{}/premake5.lua".format(location)) or not os.path.exists("{}/postbuild.py".format(location))):
-            CopyBuildFiles(location, prj)
+    if (globals.IsWindows()):
+        globals.CheckForPremakeScript(location, prj)
         ret = subprocess.call(["cmd.exe", "/c", "cd", location, "&&", "{}/premake/premake5".format(os.getcwd()), version])
 
-if (globals.IsLinux()):
-    ret = subprocess.call(["premake/premake5.linux", "gmake2"])
+    if (globals.IsLinux()):
+        globals.CheckForPremakeScript(location, prj)
+        ret = subprocess.call(["premake/premake5.linux", "gmake2"])
 
-if (globals.IsMac()):
-    ret = subprocess.call(["premake/premake5", "gmake2"])
-    if ret == 0:
-        subprocess.call(["premake/premake5", "xcode4"])
+    if (globals.IsMac()):
+        globals.CheckForPremakeScript(location, prj)
+        ret = subprocess.call(["premake/premake5", "gmake2"])
+        if ret == 0:
+            subprocess.call(["premake/premake5", "xcode4"])
 
-sys.exit(ret)
+    sys.exit(ret)

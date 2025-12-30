@@ -16,21 +16,22 @@ def RunCommand(cmds):
     return ret
 
 # ----- Main Entry Point ----- #
-argc = len(sys.argv)
-i = 1
-while(i < argc):
-    cmds = [sys.argv[i]]
+if __name__ == "__main__":
+    argc = len(sys.argv)
+    i = 1
+    while(i < argc):
+        cmds = [sys.argv[i]]
 
-    while True:
-        if i < argc - 1 and sys.argv[i+1][0] == "-":
-            cmds.append(sys.argv[i+1][1:])
-            i = i + 1
-        else:
-            break;
+        while True:
+            if i < argc - 1 and sys.argv[i+1][0] == "-":
+                cmds.append(sys.argv[i+1][1:])
+                i = i + 1
+            else:
+                break;
 
-    print("\n--------------------------")
-    print("Executing: ", cmds[0])
-    if (len(cmds) > 1):
-        print("With arguments: {}".format(", ".join(cmds[1:])))
-    if RunCommand(cmds) != 0: break
-    i = i + 1
+        print("\n--------------------------")
+        print("Executing: ", cmds[0])
+        if (len(cmds) > 1):
+            print("With arguments: {}".format(", ".join(cmds[1:])))
+        if RunCommand(cmds) != 0: break
+        i = i + 1

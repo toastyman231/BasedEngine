@@ -1,9 +1,9 @@
-import globals
 import globals, sys
 
-print("based tools - v{}.{}".format(globals.V_MAJOR, globals.V_MINOR))
-print("System: {}".format(globals.PLATFORM))
-if (len(sys.argv) >= 2):
-    print(", ".join(sys.argv))
+if __name__ == "__main__":
+    print("based tools - v{}.{}".format(globals.V_MAJOR, globals.V_MINOR))
+    print("System: {} {}".format(globals.PLATFORM,  "({})".format(sys.platform) if globals.PLATFORM != sys.platform else ""))
+    if (len(sys.argv) >= 2):
+        print(", ".join(sys.argv))
 
-sys.exit(0)
+    sys.exit(0)
