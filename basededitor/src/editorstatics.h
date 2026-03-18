@@ -1,5 +1,5 @@
 #pragma once
-#include "engineoperations.h"
+#include "based/scene/components.h"
 #include "external/history/History.h"
 
 namespace based::scene
@@ -25,6 +25,7 @@ namespace editor
 	{
 	public:
 		static void InitializeEditorStatics();
+		static void InitializeImGui();
 
 		static bool NewScene();
 		static bool OpenScene(const std::string& path = "", bool keepLoadedAssets = true);
@@ -68,7 +69,6 @@ namespace editor
 
 		static EditorSettings& GetEditorSettings() { return mEditorSettings; }
 
-		inline static EngineOperations EngineOperations;
 	private:
 		inline static std::shared_ptr<based::graphics::Camera> mEditorCamera;
 

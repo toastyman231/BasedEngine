@@ -8,6 +8,7 @@
 #include "based/scene/entity.h"
 #include "external/imgui/imgui.h"
 #include "../editorstatics.h"
+#include "../engineoperations.h"
 #include "external/imgui/imgui_internal.h"
 
 namespace editor::panels
@@ -69,7 +70,7 @@ namespace editor::panels
 					{
 						if (auto ent = e.lock())
 						{
-							Statics::EngineOperations.EditorSetEntityParent(nullptr, ent);
+							g_EngineOperations.EditorSetEntityParent(nullptr, ent);
 						}
 					}
 				}
@@ -99,7 +100,7 @@ namespace editor::panels
 			{
 				if (auto entity = e.lock())
 				{
-					Statics::EngineOperations.EditorDuplicateEntity(entity);
+					g_EngineOperations.EditorDuplicateEntity(entity);
 				}
 			}
 			break;
@@ -108,7 +109,7 @@ namespace editor::panels
 			{
 				if (auto entity = e.lock())
 				{
-					Statics::EngineOperations.EditorDeleteEntity(entity);
+					g_EngineOperations.EditorDeleteEntity(entity);
 				}
 			}
 			break;
@@ -159,7 +160,7 @@ namespace editor::panels
 			{
 				if (!buffer.empty())
 				{
-					Statics::EngineOperations.EditorSetEntityName(entity, buffer);
+					g_EngineOperations.EditorSetEntityName(entity, buffer);
 					mRenameIndex = 0;
 				}
 			}
@@ -238,12 +239,12 @@ namespace editor::panels
 
 						if (ent->Parent.lock() == entity)
 						{
-							Statics::EngineOperations.EditorSetEntityParent(nullptr, ent);
+							g_EngineOperations.EditorSetEntityParent(nullptr, ent);
 							mReparentCooldown = true;
 							continue;
 						}
 
-						Statics::EngineOperations.EditorSetEntityParent(entity, ent);
+						g_EngineOperations.EditorSetEntityParent(entity, ent);
 						mReparentCooldown = true;
 					}
 				}
@@ -283,7 +284,7 @@ namespace editor::panels
 						if (auto entity = e.lock())
 						{
 							std::string name;
-							Statics::EngineOperations.EditorCreateEntity(&name);
+							g_EngineOperations.EditorCreateEntity(&name);
 							auto scene = based::Engine::Instance().GetApp().GetCurrentScene();
 							auto newEnt = scene->GetEntityStorage().Get(name);
 							newEnt->SetParent(entity);
@@ -292,7 +293,7 @@ namespace editor::panels
 				} else
 				{
 					std::string name;
-					Statics::EngineOperations.EditorCreateEntity(&name);
+					g_EngineOperations.EditorCreateEntity(&name);
 					mRenameIndex =
 						based::Engine::Instance().GetApp().GetCurrentScene()->GetEntityStorage().Get(name)->GetUUID();
 				}

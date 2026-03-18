@@ -1,5 +1,7 @@
 #pragma once
+#include "editorstatics.h"
 #include "based/scene/entity.h"
+#include "external/history/History.h"
 
 namespace editor
 {
@@ -19,12 +21,81 @@ namespace editor
 
 		bool EditorSetEntityActive(std::shared_ptr<based::scene::Entity> entity, bool active);
 		bool EditorSetEntityActive_Undo(std::shared_ptr<based::scene::Entity> entity, bool active);
+		
+		template <typename T>
+		bool EditorAddComponent(std::shared_ptr<based::scene::Entity> entity)
+		{
+			HISTORY_PUSH_T(EditorAddComponent, T, entity);
 
-		bool EditorAddComponent(const entt::meta_type type, std::shared_ptr<based::scene::Entity> entity);
-		bool EditorAddComponent_Undo(const entt::meta_type type, std::shared_ptr<based::scene::Entity> entity);
+			bool isSceneDirty = Statics::IsSceneDirty();
+			HISTORY_SAVE(isSceneDirty);
 
-		bool EditorRemoveComponent(const entt::meta_type type, std::shared_ptr<based::scene::Entity> entity);
-		bool EditorRemoveComponent_Undo(const entt::meta_type type, std::shared_ptr<based::scene::Entity> entity);
+			entity->AddComponent<T>();
+
+			Statics::SetSceneDirty(true);
+
+			return true;
+		}
+
+		template <typename T>
+		bool EditorAddComponent_Undo(std::shared_ptr<based::scene::Entity> entity)
+		{
+			HISTORY_POP();
+
+			bool isSceneDirty;
+			HISTORY_LOAD(isSceneDirty);
+
+			entity->RemoveComponent<T>();
+
+			Statics::SetSceneDirty(isSceneDirty);
+
+			return true;
+		}
+
+		template <typename T>
+		bool EditorRemoveComponent(std::shared_ptr<based::scene::Entity> entity)
+		{
+			HISTORY_PUSH_T(EditorRemoveComponent, T, entity);
+
+			bool isSceneDirty = Statics::IsSceneDirty();
+			HISTORY_SAVE(isSceneDirty);
+
+			if constexpr (entt::type_hash<T>() == entt::type_hash<based::scene::MeshRenderer>())
+			{
+				auto oldMeshPtr = entity->GetComponent<based::scene::MeshRenderer>().mesh.lock();
+				HISTORY_SAVE(oldMeshPtr);
+			}
+
+			entity->RemoveComponent<T>();
+
+			Statics::SetSceneDirty(true);
+
+			return true;
+		}
+
+		template <typename T>
+		bool EditorRemoveComponent_Undo(std::shared_ptr<based::scene::Entity> entity)
+		{
+			HISTORY_POP();
+
+			bool isSceneDirty;
+			HISTORY_LOAD(isSceneDirty);
+
+			entity->AddComponent<T>();
+
+			if constexpr (std::is_same_v<T, based::scene::MeshRenderer>)
+			{
+				std::shared_ptr<based::graphics::Mesh> oldMeshPtr;
+				HISTORY_LOAD(oldMeshPtr);
+
+				auto& component = entity->GetComponent<T>();
+				component.mesh = oldMeshPtr;
+			}
+
+			Statics::SetSceneDirty(isSceneDirty);
+
+			return true;
+		}
 
 		bool EditorSetMeshMaterial(std::shared_ptr<based::scene::Entity> entity,
 			std::shared_ptr<based::graphics::Material> newMat);
@@ -76,3 +147,5 @@ namespace editor
 		}
 	};
 }
+
+extern editor::EngineOperations g_EngineOperations;

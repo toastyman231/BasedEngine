@@ -308,6 +308,27 @@ std::function<bool(Ts...)> hBind(bool(*func)(Ts...))
     return hBindImpl(func, Indices());
 }
 
+template<typename Obj, typename Func, typename UndoFunc, typename... Args>
+void HistoryPush(Obj* obj, const std::string& name, Func f, UndoFunc uf, Args&&... args)
+{
+    using Fn = std::function<bool(std::decay_t<Args>...)>;
+
+    Fn doFunc = [obj, f](std::decay_t<Args>... a) -> bool {
+        return f(std::forward<std::decay_t<Args>>(a)...);
+    };
+
+    Fn undoFunc = [obj, uf](std::decay_t<Args>... a) -> bool {
+        return uf(std::forward<std::decay_t<Args>>(a)...);
+    };
+
+    History::GetContext()->Push(
+        name,
+        std::move(doFunc),
+        std::move(undoFunc),
+        std::forward<std::decay_t<Args>>(args)...
+    );
+}
+
 // Push a new History object onto the stack.
 // @param func: MEMBER Function name within which this is called.
 // @param ...: func's parameters to store as copies for later use.
@@ -320,6 +341,21 @@ std::function<bool(Ts...)> hBind(bool(*func)(Ts...))
     assert(History::GetContext() && "You have to set history context first!"); \
     History::GetContext()->Push(#func, hBind(func), hBind(func##_Undo), __VA_ARGS__); \
 	HistoryPushController _use_HISTORY_PUSH_for_DoFunc_or_HISTORY_POP_for_UndoFunc;
+
+#define HISTORY_PUSH_T(func, TEMPLATE_ARG, ...) \
+    assert(History::GetContext() && "You have to set history context first!"); \
+    HistoryPush( \
+        this, \
+        #func, \
+        [this](auto&&... a) -> bool { \
+            return this->template func<TEMPLATE_ARG>(std::forward<decltype(a)>(a)...); \
+        }, \
+        [this](auto&&... a) -> bool { \
+            return this->template func##_Undo<TEMPLATE_ARG>(std::forward<decltype(a)>(a)...); \
+        }, \
+        __VA_ARGS__ \
+    ); \
+    HistoryPushController _use_HISTORY_PUSH_for_DoFunc_or_HISTORY_POP_for_UndoFunc;
 
 #define HISTORY_ABORT_PUSH() \
     _use_HISTORY_PUSH_for_DoFunc_or_HISTORY_POP_for_UndoFunc.~HistoryPushController(); \

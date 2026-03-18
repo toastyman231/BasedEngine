@@ -6,6 +6,8 @@
 #include "editorstatics.h"
 #include "based/graphics/mesh.h"
 
+editor::EngineOperations g_EngineOperations;
+
 namespace editor
 {
 	bool EngineOperations::EditorSetEntityParent(std::shared_ptr<based::scene::Entity> parent,
@@ -140,118 +142,6 @@ namespace editor
 		entity->SetActive(!active);
 
 		Statics::SetSceneDirty(isSceneDirty);
-
-		return true;
-	}
-
-	bool EngineOperations::EditorAddComponent(const entt::meta_type type, std::shared_ptr<based::scene::Entity> entity)
-	{
-		HISTORY_PUSH(EditorAddComponent, type, entity);
-
-		bool isSceneDirty = Statics::IsSceneDirty();
-		HISTORY_SAVE(isSceneDirty);
-
-		using namespace entt::literals;
-
-		// TODO: Evil, no good, very bad way of doing this
-		if (auto func = type.func("AddComponent"_hs))
-		{
-			func.invoke({}, entity.get());
-
-			Statics::SetSceneDirty(true);
-		} else
-		{
-			BASED_ERROR("Add Component was invalid for type {}. Have you reflected it?", type.info().name());
-		}
-
-		return true;
-	}
-
-	bool EngineOperations::EditorAddComponent_Undo(const entt::meta_type type,
-		std::shared_ptr<based::scene::Entity> entity)
-	{
-		HISTORY_POP();
-
-		bool isSceneDirty;
-		HISTORY_LOAD(isSceneDirty);
-
-		using namespace entt::literals;
-
-		if (auto func = type.func("RemoveComponent"_hs))
-		{
-			func.invoke({}, entity.get());
-
-			Statics::SetSceneDirty(isSceneDirty);
-		}
-		else
-		{
-			BASED_ERROR("Remove Component was invalid for type {}. Have you reflected it?", type.info().name());
-		}
-
-		return true;
-	}
-
-	bool EngineOperations::EditorRemoveComponent(const entt::meta_type type, std::shared_ptr<based::scene::Entity> entity)
-	{
-		HISTORY_PUSH(EditorRemoveComponent, type, entity);
-
-		bool isSceneDirty = Statics::IsSceneDirty();
-		HISTORY_SAVE(isSceneDirty);
-
-		using namespace entt::literals;
-
-		if (auto func = type.func("RemoveComponent"_hs))
-		{
-			if (type.info().name().find("MeshRenderer") != std::string::npos)
-			{
-				auto oldMeshPtr = entity->GetComponent<based::scene::MeshRenderer>().mesh.lock();
-				HISTORY_SAVE(oldMeshPtr);
-			}
-
-			func.invoke({}, entity.get());
-
-			Statics::SetSceneDirty(true);
-		}
-		else
-		{
-			BASED_ERROR("Remove Component was invalid for type {}. Have you reflected it?", type.info().name());
-		}
-		return true;
-	}
-
-	bool EngineOperations::EditorRemoveComponent_Undo(const entt::meta_type type,
-		std::shared_ptr<based::scene::Entity> entity)
-	{
-		HISTORY_POP();
-
-		bool isSceneDirty;
-		HISTORY_LOAD(isSceneDirty);
-
-		using namespace entt::literals;
-
-		if (auto func = type.func("AddComponent"_hs))
-		{
-			func.invoke({}, entity.get());
-
-			if (type.info().name().find("MeshRenderer") != std::string::npos)
-			{
-				std::shared_ptr<based::graphics::Mesh> oldMeshPtr;
-				HISTORY_LOAD(oldMeshPtr);
-
-				auto& registry = based::Engine::Instance().GetApp().GetCurrentScene()->GetRegistry();
-				registry.patch<based::scene::MeshRenderer>(entity->GetEntityHandle(),
-					[oldMeshPtr](based::scene::MeshRenderer& mr)
-					{
-						mr.mesh = oldMeshPtr;
-					});
-			}
-
-			Statics::SetSceneDirty(isSceneDirty);
-		}
-		else
-		{
-			BASED_ERROR("Add Component was invalid for type {}. Have you reflected it?", type.info().name());
-		}
 
 		return true;
 	}

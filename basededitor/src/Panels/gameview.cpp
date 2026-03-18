@@ -10,6 +10,8 @@
 #include "based/input/joystick.h"
 #include "based/input/keyboard.h"
 #include "based/input/mouse.h"
+#include "based/scene/entity.h"
+#include "external/imgui/imgui_internal.h"
 
 namespace editor::panels
 {
@@ -87,50 +89,13 @@ namespace editor::panels
 				ImGui::GetItemRectMin().y,
 				ImGui::GetItemRectMin().y + ImGui::GetItemRectSize().y
 			};
+			
+			ImRect viewClip = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
 
 			ImGuizmo::SetRect(ImGui::GetItemRectMin().x, ImGui::GetItemRectMin().y,
 				ImGui::GetItemRectSize().x, ImGui::GetItemRectSize().y);
 
 			ImVec2 buttonSize(25, 25);
-			
-			ImGui::SetCursorPos(pos);
-			ImGui::Spacing();
-			ImGui::Indent(5);
-			if (ImGui::ToggleButton(mTranslateIcon->GetId(), buttonSize,
-				mOperation == ImGuizmo::TRANSLATE))
-			{
-				mOperation = ImGuizmo::OPERATION::TRANSLATE;
-			}
-			ImGui::SameLine();
-			if (ImGui::ImageButton(
-				mMode == ImGuizmo::WORLD ?
-				(void*)static_cast<intptr_t>(mGlobalIcon->GetId())
-				: (void*)static_cast<intptr_t>(mLocalIcon->GetId()),
-				buttonSize))
-			{
-				if (mMode == ImGuizmo::WORLD)
-				{
-					mMode = ImGuizmo::LOCAL;
-				} else
-				{
-					mMode = ImGuizmo::WORLD;
-				}
-			}
-			if (ImGui::ToggleButton(mRotateIcon->GetId(), buttonSize,
-				mOperation == ImGuizmo::ROTATE))
-			{
-				mOperation = ImGuizmo::OPERATION::ROTATE;
-			}
-			if (ImGui::ToggleButton(mScaleIcon->GetId(), buttonSize,
-				mOperation == ImGuizmo::SCALE))
-			{
-				mOperation = ImGuizmo::OPERATION::SCALE;
-			}
-			ImGui::Unindent();
-
-			ImGui::SetCursorPos(ImVec2(pos.x + (size.x - buttonSize.x) - 15.f, pos.y + 5.f));
-			static bool t = false;
-			ImGui::ToggleButton(mScaleIcon->GetId(), buttonSize, t);
 
 			if (!Statics::GetSelectedEntities().empty())
 			{
@@ -155,12 +120,15 @@ namespace editor::panels
 					auto deltaMat = glm::mat4(0.f);
 					auto snap = GetSnap();
 					ImGuizmo::SetDrawlist();
+					ImGuizmo::AllowAxisFlip(false);
+					ImGui::PushClipRect(viewClip.Min, viewClip.Max, false);
 					ImGuizmo::Manipulate(
 						glm::value_ptr(viewMat),
 						glm::value_ptr(projMat),
 						mOperation, mOperation == ImGuizmo::SCALE ? ImGuizmo::LOCAL : mMode,
 						glm::value_ptr(modelMat), glm::value_ptr(deltaMat),
 						input::Keyboard::Key(BASED_INPUT_KEY_LCTRL) ? glm::value_ptr(snap) : nullptr);
+					ImGui::PopClipRect();
 					ImGuizmo::SetGizmoSizeClipSpace(0.25f);
 
 					if (based::input::Keyboard::Key(BASED_INPUT_KEY_LCTRL) &&
@@ -200,6 +168,45 @@ namespace editor::panels
 					}
 				}
 			}
+
+			ImGui::SetCursorPos(pos);
+			ImGui::Spacing();
+			ImGui::Indent(5);
+			if (ImGui::ToggleButton(mTranslateIcon->GetId(), buttonSize,
+				mOperation == ImGuizmo::TRANSLATE))
+			{
+				mOperation = ImGuizmo::OPERATION::TRANSLATE;
+			}
+			ImGui::SameLine();
+			if (ImGui::ImageButton(
+				mMode == ImGuizmo::WORLD ?
+				(void*)static_cast<intptr_t>(mGlobalIcon->GetId())
+				: (void*)static_cast<intptr_t>(mLocalIcon->GetId()),
+				buttonSize))
+			{
+				if (mMode == ImGuizmo::WORLD)
+				{
+					mMode = ImGuizmo::LOCAL;
+				} else
+				{
+					mMode = ImGuizmo::WORLD;
+				}
+			}
+			if (ImGui::ToggleButton(mRotateIcon->GetId(), buttonSize,
+				mOperation == ImGuizmo::ROTATE))
+			{
+				mOperation = ImGuizmo::OPERATION::ROTATE;
+			}
+			if (ImGui::ToggleButton(mScaleIcon->GetId(), buttonSize,
+				mOperation == ImGuizmo::SCALE))
+			{
+				mOperation = ImGuizmo::OPERATION::SCALE;
+			}
+			ImGui::Unindent();
+
+			ImGui::SetCursorPos(ImVec2(pos.x + (size.x - buttonSize.x) - 15.f, pos.y + 5.f));
+			static bool t = false;
+			ImGui::ToggleButton(mScaleIcon->GetId(), buttonSize, t);
 		}
 		mIsFocused = ImGui::IsWindowFocused() && !ImGuizmo::IsUsing();
 		ImGui::End();

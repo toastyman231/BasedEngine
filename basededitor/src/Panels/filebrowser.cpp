@@ -1,6 +1,7 @@
 #include "based/pch.h"
 #include "filebrowser.h"
 
+#include "based/app.h"
 #include "based/input/keyboard.h"
 #include "external/imgui/imgui.h"
 #include "external/imgui/imgui_internal.h"
@@ -39,6 +40,11 @@ namespace editor::panels
 					InstantiateFile(file.path().string());
 				}
 			}
+		}
+
+		if (std::filesystem::exists(std::filesystem::path(Statics::GetProjectDirectory()) / "Assets"))
+		{
+			Statics::SetSelectedDirectories({std::filesystem::path(Statics::GetProjectDirectory()) / "Assets"});
 		}
 
 	}

@@ -5,7 +5,7 @@
 
 #include "../EditorComponents.h"
 #include "../editorstatics.h"
-#include "../external/imguizmo/ImGuizmo.h"
+#include "../engineoperations.h"
 #include "../Widgets/ImGuiCustomWidgets.h"
 #include "based/graphics/mesh.h"
 #include "based/input/keyboard.h"
@@ -30,14 +30,14 @@ namespace editor::panels
 			bool isActive = entity->IsActive();
 			bool previouslyActive = isActive;
 			ImGui::Checkbox("##nolabel", &isActive);
-			if (isActive != previouslyActive) Statics::EngineOperations.EditorSetEntityActive(entity, isActive);
+			if (isActive != previouslyActive) g_EngineOperations.EditorSetEntityActive(entity, isActive);
 
 			std::string name = entity->GetEntityName();
 
 			ImGui::SameLine();
 			if (ImGui::InputText("", &name))
 			{
-				if (!name.empty()) Statics::EngineOperations.EditorSetEntityName(entity, name);
+				if (!name.empty()) g_EngineOperations.EditorSetEntityName(entity, name);
 			}
 
 			ImGui::Text("UUID: %" PRIu64, entity->GetUUID());
@@ -66,7 +66,7 @@ namespace editor::panels
 				ImGui::SetCursorScreenPos(ImVec2(guiPos.x + (ImGui::GetItemRectSize().x - 50), guiPos.y));
 				if (ImGui::Button("Reset", ImVec2(50, ImGui::GetItemRectSize().y)))
 				{
-					Statics::EngineOperations.EditorSetEntityTransform(entity,
+					g_EngineOperations.EditorSetEntityTransform(entity,
 						{
 							{ 0, 0, 0 },
 							{ 0, 0, 0 },
@@ -101,7 +101,7 @@ namespace editor::panels
 					glm::value_ptr(savedScale),
 					0.01f))
 				{
-					Statics::EngineOperations.EditorSetEntityTransform(entity,
+					g_EngineOperations.EditorSetEntityTransform(entity,
 						entity->GetTransform(), 
 						savedTransform, isChild);
 					Statics::GetSavedTransforms()[entity->GetUUID()] = scene::Transform(pos, rot, scale);
@@ -156,50 +156,18 @@ namespace editor::panels
 						{
 							if (type == "Mesh Renderer")
 							{
-								auto meta_type = entt::resolve(entt::type_hash<scene::MeshRenderer>());
-								if (!meta_type)
-								{
-									BASED_ERROR("Mesh Renderer has not been reflected!");
-								}
-								else
-								{
-									Statics::EngineOperations.EditorAddComponent(meta_type, entity);
-								}
+								g_EngineOperations.EditorAddComponent<scene::MeshRenderer>(entity);
 							}
 							else if (type == "Point Light")
 							{
-								auto meta_type = entt::resolve(entt::type_hash<scene::PointLight>());
-								if (!meta_type)
-								{
-									BASED_ERROR("Mesh Renderer has not been reflected!");
-								}
-								else
-								{
-									Statics::EngineOperations.EditorAddComponent(meta_type, entity);
-								}
+								g_EngineOperations.EditorAddComponent<scene::PointLight>(entity);
 							}
 							else if (type == "Directional Light")
 							{
-								auto meta_type = entt::resolve(entt::type_hash<scene::DirectionalLight>());
-								if (!meta_type)
-								{
-									BASED_ERROR("Directional Light has not been reflected!");
-								}
-								else
-								{
-									Statics::EngineOperations.EditorAddComponent(meta_type, entity);
-								}
+								g_EngineOperations.EditorAddComponent<scene::DirectionalLight>(entity);
 							} else if (type == "Camera Component")
 							{
-								auto meta_type = entt::resolve(entt::type_hash<scene::CameraComponent>());
-								if (!meta_type)
-								{
-									BASED_ERROR("Camera Component has not been reflected!");
-								}
-								else
-								{
-									Statics::EngineOperations.EditorAddComponent(meta_type, entity);
-								}
+								g_EngineOperations.EditorAddComponent<scene::CameraComponent>(entity);
 							}
 							ImGui::CloseCurrentPopup();
 						}
@@ -223,15 +191,7 @@ namespace editor::panels
 			auto& renderer = entity->GetComponent<based::scene::MeshRenderer>();
 			if (!hasMeshRenderer)
 			{
-				auto meta_type = entt::resolve(entt::type_hash<based::scene::MeshRenderer>());
-				if (!meta_type)
-				{
-					BASED_ERROR("Mesh Renderer has not been reflected!");
-				}
-				else
-				{
-					Statics::EngineOperations.EditorRemoveComponent(meta_type, entity);
-				}
+				g_EngineOperations.EditorRemoveComponent<based::scene::MeshRenderer>(entity);
 			}
 
 			auto mesh = renderer.mesh.lock();
@@ -240,7 +200,7 @@ namespace editor::panels
 			if (auto pickedMesh =
 				ImGui::ObjectPicker<based::graphics::Mesh>("Mesh", mesh))
 			{
-				Statics::EngineOperations.EditorSetMeshRendererMesh(entity, pickedMesh);
+				g_EngineOperations.EditorSetMeshRendererMesh(entity, pickedMesh);
 			}
 			ImGui::Spacing();
 
@@ -249,7 +209,7 @@ namespace editor::panels
 				if (auto pickedMat =
 					ImGui::ObjectPicker<based::graphics::Material>("Material", material))
 				{
-					Statics::EngineOperations.EditorSetMeshMaterial(entity, pickedMat);
+					g_EngineOperations.EditorSetMeshMaterial(entity, pickedMat);
 				}
 				ImGui::Spacing();
 
@@ -290,16 +250,7 @@ namespace editor::panels
 			static auto savedLightData = light;
 			if (!hasPointLight)
 			{
-				auto meta_type = entt::resolve(entt::type_hash<scene::PointLight>());
-				if (!meta_type)
-				{
-					BASED_ERROR("Point Light has not been reflected!");
-				}
-				else
-				{
-					Statics::EngineOperations.EditorRemoveComponent(meta_type, entity);
-					return;
-				}
+				g_EngineOperations.EditorRemoveComponent<scene::PointLight>(entity);
 			}
 
 			static auto madeAnyChange = false;
@@ -338,7 +289,7 @@ namespace editor::panels
 
 			if (madeAnyChange && ImGui::IsMouseReleased(0))
 			{
-				Statics::EngineOperations.EditorSetPointLightData(entity, savedLightData, light);
+				g_EngineOperations.EditorSetPointLightData(entity, savedLightData, light);
 				madeAnyChange = false;
 				lightSaved = false;
 			}
@@ -366,7 +317,7 @@ namespace editor::panels
 				}
 				else
 				{
-					Statics::EngineOperations.EditorRemoveComponent(meta_type, entity);
+					g_EngineOperations.EditorRemoveComponent<scene::DirectionalLight>(entity);
 					return;
 				}
 			}
@@ -398,7 +349,7 @@ namespace editor::panels
 
 			if (madeAnyChange && ImGui::IsMouseReleased(0))
 			{
-				Statics::EngineOperations.EditorSetDirectionalLightData(entity, savedLightData, light);
+				g_EngineOperations.EditorSetDirectionalLightData(entity, savedLightData, light);
 				madeAnyChange = false;
 				lightSaved = false;
 			}
@@ -425,7 +376,7 @@ namespace editor::panels
 				}
 				else
 				{
-					Statics::EngineOperations.EditorRemoveComponent(meta_type, entity);
+					g_EngineOperations.EditorRemoveComponent<scene::CameraComponent>(entity);
 					return;
 				}
 			}
@@ -532,7 +483,7 @@ namespace editor::panels
 						isMain
 					};
 
-					Statics::EngineOperations.EditorSetCameraData(entity, oldCameraData, newCameraData);
+					g_EngineOperations.EditorSetCameraData(entity, oldCameraData, newCameraData);
 					madeAnyChange = false;
 					cameraSaved = false;
 				}
