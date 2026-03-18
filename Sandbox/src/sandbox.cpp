@@ -76,11 +76,6 @@ public:
 		return settings;
 	}
 
-	struct TestStruct
-	{
-		int testData = 0;
-	};
-
 	void Initialize() override
 	{
 		App::Initialize();
@@ -102,10 +97,6 @@ public:
 				.data<&MyComponent::myFloat>("myFloat"_hs, "myFloat")
 				.func<&scene::SceneSerializer::AddMetaComponent<MyComponent>, entt::as_void_t>("AddMetaComponent"_hs,
 					"AddMetaComponent");
-				/*.func<&scene::SceneSerializer::SerializeScriptComponent<MyComponent>, entt::as_void_t>("SerializeScriptComponent"_hs,
-					"SerializeScriptComponent");*/
-			/*entt::meta_any any{ std::string("") };
-			any.allow_cast<float>();*/
 		}
 
 		scene::Scene::LoadScene(ASSET_PATH("Scenes/Default3DMinimal.bscn"));
@@ -408,6 +399,7 @@ public:
 					model = glm::rotate(model, glm::radians(direction.z), glm::vec3(0.f, 0.f, 1.f));
 
 					glm::vec3 toPos = trans.Position() + glm::mat3(model) * glm::vec3(0.f, 0.f, -1.f);
+					// TODO: Add a proper debug renderer that no-ops everything in release
 					Engine::Instance().GetPhysicsManager().GetDebugRenderer()->DrawArrow(
 							JPH::Vec3(trans.Position().x, trans.Position().y, trans.Position().z),
 							JPH::Vec3(toPos.x, toPos.y, toPos.z),

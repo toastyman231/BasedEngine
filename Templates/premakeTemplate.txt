@@ -61,10 +61,10 @@ group "Projects"
             "FatalWarnings"
         }
 
-	defines
-	{
-		"_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING"
-	}
+        defines
+        {
+            "_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING"
+        }
 
         postbuildcommands
         {

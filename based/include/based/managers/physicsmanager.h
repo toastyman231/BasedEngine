@@ -28,7 +28,9 @@ namespace based::managers
 		void Shutdown();
 
 		JPH::PhysicsSystem& GetPhysicsSystem() const { return *mPhysicsSystem; }
+		#ifdef BASED_CONFIG_DEBUG
 		JPH::DebugRenderer* GetDebugRenderer() const { return (JPH::DebugRenderer*)mDebugRenderer; }
+		#endif
 		JPH::TempAllocator* GetTempAllocator() const { return mTempAllocator; }
 		bool ShouldRenderDebug() const { return mRenderDebug; }
 

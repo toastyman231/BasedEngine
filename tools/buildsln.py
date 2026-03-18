@@ -1,21 +1,32 @@
-import globals, os, subprocess, sys
+import globals, os, subprocess, sys, argparse
 
-args = globals.ProcessArguments(sys.argv)
-CONFIG = globals.GetArgumentValue(args, "config", "debug")
+# TODO: Make this work on a per-project basis, and make sure it executes pre/post build scripts
 
-print("Building config: " + CONFIG)
-print("\n")
-ret = 0
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Based CLI action for building projects",
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
 
-if globals.IsWindows():
-    MS_BUILD_PATH = "C:\\\\" + os.environ["MS_BUILD_PATH"][8:-1].replace("/", "\\\\")
+    parser.add_argument("-c", "--config", default="debug",
+                        help="Configuration to build (release or debug)")
 
-    ret = subprocess.call(["cmd.exe", "/c", MS_BUILD_PATH, "{}.sln".format(globals.ENGINE_NAME), "/property:Configuration={}".format(CONFIG)])
+    args = parser.parse_args()
+    CONFIG = args.config
 
-if globals.IsLinux():
-    ret = subprocess.call(["make", "config={}".format(CONFIG)])
+    print("Building config: " + CONFIG)
+    print("\n")
+    ret = 0
 
-if globals.IsMac():
-    ret = subprocess.call(["make", "config={}".format(CONFIG)])
+    if globals.IsWindows():
+        MS_BUILD_PATH = "C:\\\\" + os.environ["MS_BUILD_PATH"][8:-1].replace("/", "\\\\")
 
-sys.exit(ret)
+        ret = subprocess.call(["cmd.exe", "/c", MS_BUILD_PATH, "{}.sln".format(globals.ENGINE_NAME), "/property:Configuration={}".format(CONFIG)])
+
+    if globals.IsLinux():
+        ret = subprocess.call(["make", "config={}".format(CONFIG)])
+
+    if globals.IsMac():
+        ret = subprocess.call(["make", "config={}".format(CONFIG)])
+
+    sys.exit(ret)

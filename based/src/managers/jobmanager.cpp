@@ -84,7 +84,8 @@ namespace based::managers
 
 		if (mMainThreadJobPool.Size() >= mMaxMainThreadJobs)
 		{
-			mMainThreadWaitingQueue.push(jobWithID);
+			if (job)
+				mMainThreadWaitingQueue.push(jobWithID);
 		} else
 		{
 			mMainThreadJobPool.PushBack(jobWithID);
@@ -163,8 +164,10 @@ namespace based::managers
 
 		while (!mMainThreadWaitingQueue.empty() && mMainThreadJobPool.Size() < mMaxMainThreadJobs)
 		{
-			mMainThreadJobPool.PushBackUnsafe(mMainThreadWaitingQueue.front());
+			BasedJob job = mMainThreadWaitingQueue.front(); // Intentional Copy
 			mMainThreadWaitingQueue.pop();
+			if (job.func)
+				mMainThreadJobPool.PushBackUnsafe(job);
 		}
 		mMainThreadJobPool.GetLock().unlock();
 		mMainThreadJobPool.NotifyAll();
