@@ -17,7 +17,7 @@ project "jolt"
         "include"
     }
     
-    flags "NoPCH"
+    enablepch "off"
     
     filter "system:windows"
 		systemversion "latest"

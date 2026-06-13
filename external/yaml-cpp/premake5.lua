@@ -18,7 +18,7 @@ project "yaml-cpp"
         "include"
     }
 
-    flags "NoPCH"
+    enablepch "Off"
 
     defines 
     {

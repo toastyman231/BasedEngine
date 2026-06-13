@@ -98,7 +98,7 @@ project "based"
 
     filter "configurations:Release"
         defines "BASED_CONFIG_RELEASE"
-        flags "FatalWarnings"
+        fatalwarnings "All"
         runtime "Release"
         symbols "off"
         optimize "on"

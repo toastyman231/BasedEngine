@@ -54,9 +54,7 @@ public:
 		input::Mouse::SetCursorVisible(true);
 		input::Mouse::SetCursorMode(input::CursorMode::Free);
 		core::Time::SetTimeScale(0);
-		
-		
-		
+
 		editor::Statics::InitializeEditorStatics();
 		editor::Statics::InitializeImGui();
 		std::string startupScenePath;

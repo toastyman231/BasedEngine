@@ -1,3 +1,8 @@
+engineLocation = os.getenv("BASED_ENGINE_HOME")
+if not engineLocation then
+    error("BASED_ENGINE_HOME environment variable is not set. Please try restarting your terminal, or configure it to point to the engine directory.")
+end
+
 project "BasedEditor"
     kind "ConsoleApp"
     language "C++"
@@ -61,14 +66,9 @@ project "BasedEditor"
         }
     ))
 
-    flags
-    {
-        "FatalWarnings"
-    }
-
     postbuildcommands
     {
-        "python3 " .. path.getabsolute("../%{prj.name}") .. "/postbuild.py config=%{cfg.buildcfg} prj=%{prj.name}"
+        "python3 " .. engineLocation .. "/tools/basedbuildtool.py -i " .. path.getabsolute("../%{prj.name}") .. " -c %{cfg.buildcfg} -q 1.0 --ci" 
     }
 
     filter {"system:windows", "configurations:*"}

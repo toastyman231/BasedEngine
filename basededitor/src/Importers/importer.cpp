@@ -73,7 +73,9 @@ namespace editor
 			|| path.find(".tga") != std::string::npos
 			|| path.find(".TGA") != std::string::npos
 			|| path.find(".ico") != std::string::npos
-			|| path.find(".ICO") != std::string::npos)
+			|| path.find(".ICO") != std::string::npos
+			|| path.find(".ktx2") != std::string::npos
+			|| path.find(".KTX2") != std::string::npos)
 			return true;
 		else return false;
 	}

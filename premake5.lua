@@ -12,10 +12,7 @@ workspace "based"
         "Release"
     }
 
-    flags
-    {
-        "MultiProcessorCompile"
-    }
+    multiprocessorcompile "On"
 
 tdir = "bin/%{cfg.buildcfg}/%{prj.name}"
 odir = "bin-obj/%{cfg.buildcfg}/%{prj.name}"

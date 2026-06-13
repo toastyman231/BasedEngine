@@ -48,10 +48,7 @@ project "Sandbox"
         "%{libraries.ktx_software}"
     }
 
-    flags
-    {
-        "FatalWarnings"
-    }
+    fatalwarnings "All"
 
     postbuildcommands
     {
