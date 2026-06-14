@@ -1,0 +1,1 @@
+If you update SDL3 to a newer git commit, or want to change some config options, you'll need to clone the original repository and run cmake CMakeLists.txt to generate SDL_revision.h and SDL_build_config.h, as premake doesn't have any way to generate these like CMake does. Then just recopy the include and build folders and you should be good.

@@ -1,0 +1,15 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.31/Modules/CMakePushCheckState.cmake
+C:/Program Files/CMake/share/cmake-3.31/Modules/CheckIncludeFile.cmake
+C:/Program Files/CMake/share/cmake-3.31/Modules/CheckStructHasMember.cmake
+C:/Program Files/CMake/share/cmake-3.31/Modules/FindOpenGL.cmake
+C:/Program Files/CMake/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-3.31/Modules/FindPackageMessage.cmake
+C:/Program Files/CMake/share/cmake-3.31/Modules/FindPkgConfig.cmake
+C:/Program Files/CMake/share/cmake-3.31/Modules/FindPython/Support.cmake
+C:/Program Files/CMake/share/cmake-3.31/Modules/FindPython3.cmake
+D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs
+D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/cmake/FindFFmpeg.cmake
+D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/cmake/PkgConfigHelper.cmake
+D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/cmake/sdlcompilers.cmake
+D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/test/CMakeLists.txt

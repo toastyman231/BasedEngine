@@ -1,0 +1,1 @@
+If you update Assimp to a newer git commit, or want to change some config options, you'll need to clone the original repository and run cmake CMakeLists.txt to generate revision.h and config.h, as premake doesn't have any way to generate these like CMake does. Then just copy them into include/assimp and you should be good.

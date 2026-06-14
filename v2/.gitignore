@@ -1,0 +1,27 @@
+# Directories
+.vs/
+.vscode/
+bin*/
+logs/
+
+# Ignore the entire .idea folder except for shared configurations
+.idea/
+!.idea/runConfigurations/
+!.idea/codeStyles/
+!.idea/vcs.xml
+
+# Files
+*.user
+*.DS_STORE
+*.xcworkspace/
+*.xcodeproj/
+*.vcxproj*
+*.sln
+*Makefile
+*.pyc
+
+# Allow list
+!premake5.exe
+!*.dll
+!*.lib
+!tools/bin
