@@ -2,7 +2,6 @@ project "tracy"
     kind "StaticLib"
     language "C++"
     cppdialect "C++11"
-    staticruntime "on"
     location "Intermediate"
     targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
     objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
@@ -23,6 +22,7 @@ project "tracy"
 
     filter "system:windows"
         systemversion "latest"
+        staticruntime "off" -- MUST BE OFF FOR MIMALLOC-REDIRECT TO WORK!
         links { "ws2_32", "dbghelp" }
         linkoptions { "/ignore:4006" }
 

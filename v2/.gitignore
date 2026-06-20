@@ -19,9 +19,13 @@ logs/
 *.sln
 *Makefile
 *.pyc
+*.dll
+*.lib
+*.pdb
+*.exp
 
 # Allow list
 !premake5.exe
-!*.dll
-!*.lib
+!PostBuildCopy/Windows/mimalloc-redirect.dll
+!external/Private/mimalloc/lib/Windows/mimalloc-redirect.lib
 !tools/bin

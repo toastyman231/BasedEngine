@@ -2,7 +2,6 @@ project "based"
     kind "StaticLib"
     language "C++"
     cppdialect "C++20"
-    staticruntime "on"
     location "../Intermediate"
     targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
     objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
@@ -30,6 +29,7 @@ project "based"
         EXTERNALS_DIR_PRIVATE .. "freetype/include",
         EXTERNALS_DIR_PRIVATE .. "jolt/include",
         EXTERNALS_DIR_PRIVATE .. "ktx-software/include",
+        EXTERNALS_DIR_PRIVATE .. "mimalloc/include",
         EXTERNALS_DIR_PRIVATE .. "rmlui/include",
         EXTERNALS_DIR_PRIVATE .. "sdl3/include",
         EXTERNALS_DIR_PRIVATE .. "spdlog/include",
@@ -44,6 +44,7 @@ project "based"
         "RMLUI_STATIC_LIB",
         "KHRONOS_STATIC",
         "GLM_ENABLE_EXPERIMENTAL",
+        "MI_SHARED_LIB"
     }
 
     links
@@ -52,6 +53,7 @@ project "based"
         "freetype",
         "jolt",
         "ktx-software",
+        "mimalloc",
         "rmlui",
         "sdl3",
         "spdlog",
@@ -59,9 +61,15 @@ project "based"
         "yaml-cpp"
     }  
 
+    libdirs
+    {
+        EXTERNALS_DIR_PRIVATE .. "mimalloc/lib/%{cfg.system}"
+    }
+
     filter {"system:windows", "configurations:*"}
         systemversion "latest"
-        defines "BASED_PLATFORM_WINDOWS"
+        staticruntime "off" -- MUST BE OFF FOR MIMALLOC-REDIRECT TO WORK!
+        defines { "BASED_PLATFORM_WINDOWS" }
         buildoptions "/bigobj"
 
     filter {"system:macosx", "configurations:*"}

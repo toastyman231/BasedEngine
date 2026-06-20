@@ -73,7 +73,7 @@ project "assimp"
 
     filter "system:windows"
         systemversion "latest"
-        staticruntime "on"
+        staticruntime "off" -- MUST BE OFF FOR MIMALLOC-REDIRECT TO WORK!
         linkoptions { "/ignore:4006" }
         defines
         {

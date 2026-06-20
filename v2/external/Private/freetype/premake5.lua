@@ -67,7 +67,7 @@ project "freetype"
 
     filter "system:windows"
         systemversion "latest"
-        staticruntime "on"
+        staticruntime "off" -- MUST BE OFF FOR MIMALLOC-REDIRECT TO WORK!
         files
         {
             "builds/windows/ftsystem.c",

@@ -1,0 +1,4 @@
+﻿#pragma once
+#define ENGINE_VERSION_MAJOR 2
+#define ENGINE_VERSION_MINOR 0
+#define ENGINE_VERSION_PATCH 1

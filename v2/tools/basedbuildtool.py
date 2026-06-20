@@ -74,8 +74,9 @@ from colorama import init as colorama_init
 from colorama import Fore
 from colorama import Style
 
-COMPRESSONATOR_CLI  = os.getcwd() / "tools" / "bin" / globals.GetOSDir() / "compressonator" / "compressonatorcli{}".format(globals.GetOSExtension())
-KTX_CLI             = os.getcwd() / "tools" / "bin" / globals.GetOSDir() / "ktx" / "ktx{}".format(globals.GetOSExtension())
+ENGINE_DIR          = Path(__file__).resolve().parent.parent
+COMPRESSONATOR_CLI  = ENGINE_DIR / "tools" / "bin" / globals.GetOSDir() / "compressonator" / "compressonatorcli{}".format(globals.GetOSExtension())
+KTX_CLI             = ENGINE_DIR / "tools" / "bin" / globals.GetOSDir() / "ktx" / "ktx{}".format(globals.GetOSExtension())
 
 BULLET      = "•"
 CHECK       = "✓"
@@ -97,7 +98,12 @@ def get_project_name(path, override_name):
     return path.name
 
 def make_output_path(input_path, project_root, destination_root, extension_override=""):
-    relative = input_path.relative_to(project_root)
+    # If the file is inside PostBuildCopy, calculate relativity from ENGINE_DIR instead
+    if "PostBuildCopy" in input_path.parts:
+        # ENGINE_DIR is already globally defined at the top of your script
+        relative = input_path.relative_to(ENGINE_DIR)
+    else:
+        relative = input_path.relative_to(project_root)
 
     output_path = destination_root / relative
 
@@ -346,7 +352,7 @@ def main():
     )
     
     parser.add_argument("-i", "--input", required=True, help="Root directory of the project to build")
-    parser.add_argument("-c", "--config", default="Debug", choices=["Debug", "Release"], 
+    parser.add_argument("-c", "--config", default="DevelopmentEditor", choices=["DebugEditor", "DebugGame", "DevelopmentEditor", "DevelopmentGame", "ReleaseEditor", "ReleaseGame"], 
                        help="Debug or Release configuration")
     parser.add_argument("-q", "--quality", type=float, default=0, 
                        help="Compression quality. Value between 0 and 1 where 0 = Fastest, 1 = Slowest")
@@ -431,14 +437,18 @@ def main():
     
     # Register interrupt handler
     signal.signal(signal.SIGINT, handle_interrupt)
-    
+
     # Build queue of paths to search
     paths_to_search = []
     if sys.platform == "win32":
-        paths_to_search.append(source_path / "PostBuildCopy_windows")
-    else:
-        paths_to_search.append(source_path / "PostBuildCopy")
+        paths_to_search.append(ENGINE_DIR / "PostBuildCopy" / "Windows")
+    elif sys.platform == "linux":
+        paths_to_search.append(ENGINE_DIR / "PostBuildCopy" / "Linux")
+    elif sys.platform == "darwin":
+        paths_to_search.append(ENGINE_DIR / "PostBuildCopy" / "MacOS")
+
     paths_to_search.append(source_path / "Assets")
+    paths_to_search.append(ENGINE_DIR / "Assets")
     
     start_time = time.time()
     files_processed = 0

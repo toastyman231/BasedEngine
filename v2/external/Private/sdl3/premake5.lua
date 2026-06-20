@@ -1,7 +1,6 @@
 project "sdl3"
     kind "StaticLib"
     language "C"
-    staticruntime "on"
     location "Intermediate"
     targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
     objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
@@ -127,6 +126,7 @@ project "sdl3"
     -- Windows
     filter "system:windows"
         systemversion "latest"
+        staticruntime "off" -- MUST BE OFF FOR MIMALLOC-REDIRECT TO WORK!
         linkoptions { "/ignore:4006" }
         defines
         {

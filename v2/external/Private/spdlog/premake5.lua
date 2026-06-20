@@ -2,7 +2,6 @@ project "spdlog"
     kind "StaticLib"
     language "C++"
     cppdialect "C++11"
-    staticruntime "on"
     location "Intermediate"
     targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
     objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
@@ -27,6 +26,7 @@ project "spdlog"
 
     filter "system:windows"
         systemversion "latest"
+        staticruntime "off" -- MUST BE OFF FOR MIMALLOC-REDIRECT TO WORK!
         defines
         {
             "_CRT_SECURE_NO_WARNINGS",

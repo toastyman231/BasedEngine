@@ -2,7 +2,6 @@ project "yaml-cpp"
     kind "StaticLib"
     language "C++"
     cppdialect "C++17"
-    staticruntime "on"
     location "Intermediate"
     targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
     objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
@@ -28,6 +27,7 @@ project "yaml-cpp"
 
     filter "system:windows"
         systemversion "latest"
+        staticruntime "off" -- MUST BE OFF FOR MIMALLOC-REDIRECT TO WORK!
         links { "ws2_32", "dbghelp" }
 
     filter "system:linux"

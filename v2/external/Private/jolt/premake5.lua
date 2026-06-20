@@ -21,7 +21,7 @@ project "jolt"
     filter "system:windows"
 		systemversion "latest"
 		cppdialect "C++17"
-        staticruntime "on"
+        staticruntime "off" -- MUST BE OFF FOR MIMALLOC-REDIRECT TO WORK!
 
 	filter "system:linux"
 		pic "On"

@@ -36,7 +36,7 @@ project "rmlui"
 
     filter "system:windows"
         systemversion "latest"
-        staticruntime "on"
+        staticruntime "off" -- MUST BE OFF FOR MIMALLOC-REDIRECT TO WORK!
         defines
         {
             "_CRT_SECURE_NO_WARNINGS",
