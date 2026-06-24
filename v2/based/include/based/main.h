@@ -1,6 +1,17 @@
-#include <cstdio>
+#pragma once
 
-#include "../../external/Private/mimalloc/include/mimalloc.h"
+#include "core/NewDelete.h"
+
+#include <chrono>
+#include <cstdio>
+#include <format>
+#include <random>
+#include <thread>
+
+#include "core/BasedLog.h"
+#include "core/LogManager.h"
+#include "memory/MemoryPoolHeader.h"
+#include "memory/PlatformMemUtils.h"
 
 #ifdef PROFILE_MEMORY_LEAKS
 #ifdef BASED_CONFIG_DEBUG
@@ -20,11 +31,6 @@
 // based::App* CreateApp() { return new ClientApp(); }
 //based::App* CreateApp();
 
-// IMPORTANT!! NEEDED FOR MIMALLOC_REDIRECT ON WINDOWS!
-#if defined(_WIN32) && defined(MI_SHARED_LIB)
-#pragma comment(linker, "/INCLUDE:mi_allocator_init")
-#endif
-
 #ifdef BASED_CONFIG_RELEASE
 #ifdef BASED_PLATFORM_WINDOWS
 #include <windows.h>
@@ -40,13 +46,47 @@ int main(int argc, char* argv[])
     char** argv = __argv;
 #endif
 #endif
-    
-    mi_version();
 
-    void* p = malloc(1024);
-    printf("0x%p\n", p);
-    free(p);
-    printf("Hello World!");
+    based::LogManager logMan;
+    logMan.Initialize();
+    based::BootstrapAllocator::DisableBootstrap();
+    
+    based::SetupMemoryPools();
+    based::AllocatorScope ac(based::ePoolIdentifier::kPersistentPool);
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> distrib(16, 100000000);
+    size_t totalAllocated = 0;
+
+    while (true) {
+        auto startTime = std::chrono::steady_clock::now();
+
+        size_t amount = distrib(gen);
+
+        // Allocate out of your custom wrapper instance
+        void* pTemp = new uint8[amount];
+
+        if (!pTemp) {
+            BASED_ERROR("Pool allocation failed or reached absolute limit trying to allocate {}! Total: {}",
+                MemSize{amount}, MemSize{totalAllocated});
+            break;
+        }
+
+        // CRITICAL: Overwrite the entirety of the 100MB block to register it on the terminal telemetry
+        std::memset(pTemp, 0xCC, amount);
+
+        totalAllocated += amount;
+        BASED_TRACE("Allocated {:2.1} at {}. Total: {:2.1}", MemSize{amount}, pTemp, MemSize{totalAllocated});
+
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        auto sleepTime = std::chrono::milliseconds(10) - elapsed;
+
+        if (sleepTime.count() > 0) {
+            std::this_thread::sleep_for(sleepTime);
+        }
+    }
     
     /*based::App* app = CreateApp();
     based::Engine::Instance().SetArgs(argc, argv);

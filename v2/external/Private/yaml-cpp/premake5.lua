@@ -27,7 +27,6 @@ project "yaml-cpp"
 
     filter "system:windows"
         systemversion "latest"
-        staticruntime "off" -- MUST BE OFF FOR MIMALLOC-REDIRECT TO WORK!
         links { "ws2_32", "dbghelp" }
 
     filter "system:linux"

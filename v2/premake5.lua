@@ -1,6 +1,7 @@
 workspace "based"
     startproject "BasedEditor"
     architecture "x64"
+    staticruntime "off"
 
     configurations
     {
@@ -51,10 +52,10 @@ workspace "based"
         include "external/Private/freetype"
         include "external/Private/jolt"
         include "external/Private/ktx-software"
-        include "external/Private/mimalloc"
         include "external/Private/rmlui"
         include "external/Private/sdl3"
         include "external/Private/spdlog"
+        include "external/Private/tlsf"
         include "external/Private/tracy"
         include "external/Private/yaml-cpp"
     group ""

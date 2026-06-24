@@ -18,7 +18,37 @@ project "based"
         "include/**.hpp",
         "src/**.h",
         "src/**.cpp",
-        "**.natvis"
+        "**.natvis",
+    }
+
+    -- Not all of these are actually supported
+    local systems = {
+        "Windows",
+        "Linux",
+        "MacOSX",
+        "PS5",
+        "Xbox",
+        "Android",
+        "iOS"
+    }
+
+    -- Remove any platform specific files, we will add back just the ones for this platform later
+    for _, sys in ipairs(systems) do
+        removefiles 
+        { 
+            "include/**/" .. sys .. "/**.h",
+            "include/**/" .. sys .. "/**.hpp",
+            "src/**/" .. sys .. "/**.c",
+            "src/**/" .. sys .. "/**.cpp",
+        }
+    end
+
+    files
+    {
+        "include/**/%{cfg.system}/**.h",
+        "include/**/%{cfg.system}/**.hpp",
+        "src/**/%{cfg.system}/**.c",
+        "src/**/%{cfg.system}/**.cpp",
     }
 
     includedirs
@@ -29,10 +59,10 @@ project "based"
         EXTERNALS_DIR_PRIVATE .. "freetype/include",
         EXTERNALS_DIR_PRIVATE .. "jolt/include",
         EXTERNALS_DIR_PRIVATE .. "ktx-software/include",
-        EXTERNALS_DIR_PRIVATE .. "mimalloc/include",
         EXTERNALS_DIR_PRIVATE .. "rmlui/include",
         EXTERNALS_DIR_PRIVATE .. "sdl3/include",
         EXTERNALS_DIR_PRIVATE .. "spdlog/include",
+        EXTERNALS_DIR_PRIVATE .. "tlsf/include",
         EXTERNALS_DIR_PRIVATE .. "tracy/public",
         EXTERNALS_DIR_PRIVATE .. "yaml-cpp/include",
     }
@@ -44,7 +74,6 @@ project "based"
         "RMLUI_STATIC_LIB",
         "KHRONOS_STATIC",
         "GLM_ENABLE_EXPERIMENTAL",
-        "MI_SHARED_LIB"
     }
 
     links
@@ -53,22 +82,16 @@ project "based"
         "freetype",
         "jolt",
         "ktx-software",
-        "mimalloc",
         "rmlui",
         "sdl3",
         "spdlog",
+        "tlsf",
         "tracy",
         "yaml-cpp"
     }  
 
-    libdirs
-    {
-        EXTERNALS_DIR_PRIVATE .. "mimalloc/lib/%{cfg.system}"
-    }
-
     filter {"system:windows", "configurations:*"}
         systemversion "latest"
-        staticruntime "off" -- MUST BE OFF FOR MIMALLOC-REDIRECT TO WORK!
         defines { "BASED_PLATFORM_WINDOWS" }
         buildoptions "/bigobj"
 
@@ -98,6 +121,7 @@ project "based"
     filter "configurations:Development*"
         defines 
         {
+            "BASED_CONFIG_DEBUG",
             "BASED_CONFIG_DEVELOPMENT",
             "JPH_DEBUG_RENDERER"
         }

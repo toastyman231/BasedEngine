@@ -126,7 +126,6 @@ project "sdl3"
     -- Windows
     filter "system:windows"
         systemversion "latest"
-        staticruntime "off" -- MUST BE OFF FOR MIMALLOC-REDIRECT TO WORK!
         linkoptions { "/ignore:4006" }
         defines
         {

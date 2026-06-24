@@ -20,6 +20,8 @@
 #include <random>
 #include <filesystem>
 #include <cstdio>
+#include <format>
+#include <concepts>
 
 // GLM stuff
 #include <glm/fwd.hpp>
@@ -59,3 +61,8 @@
 #include "based/graphics/glmhelpers.h"
 #include "based/graphics/helpers.h"
 #include "based/memory/memoryhelpers.h"*/
+
+// Platform stuff
+#ifdef BASED_PLATFORM_WINDOWS
+#include <Windows.h>
+#endif

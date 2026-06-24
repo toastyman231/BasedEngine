@@ -64,7 +64,6 @@ project "ktx-software"
 
     filter "system:windows"
         systemversion "latest"
-        staticruntime "off" -- MUST BE OFF FOR MIMALLOC-REDIRECT TO WORK!
         defines
         {
             "_SCL_SECURE_NO_WARNINGS",

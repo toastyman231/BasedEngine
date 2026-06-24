@@ -1,6 +1,6 @@
-project "jolt"
+project "tlsf"
     kind "StaticLib"
-    language "C++"
+    language "C"
     location "Intermediate"
     targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
     objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
@@ -8,43 +8,33 @@ project "jolt"
     files 
     {
         "include/**.h",
-        "include/**.cpp"
+        "src/**.c"
     }
 
     includedirs
     {
-        "include"
+        "include",
     }
     
     enablepch "off"
     
     filter "system:windows"
 		systemversion "latest"
-		cppdialect "C++17"
 
 	filter "system:linux"
 		pic "On"
 		systemversion "latest"
-		cppdialect "C++17"
 
 	filter "configurations:Debug*"
 		runtime "Debug"
 		symbols "on"
         targetsuffix "_d"
-        defines
-        {
-            "JPH_DEBUG_RENDERER"
-        }
 
     filter "configurations:Development*"
 		runtime "Release"
 		symbols "on"
         optimize "on"
         targetsuffix "_dev"
-        defines
-        {
-            "JPH_DEBUG_RENDERER"
-        }
 
 	filter "configurations:Release*"
 		runtime "Release"
