@@ -83,13 +83,26 @@ tlsf_decl int tlsf_fls(unsigned int word)
 tlsf_decl int tlsf_fls(unsigned int word)
 {
 	unsigned long index;
-	return _BitScanReverse(&index, word) ? index : -1;
+	return _BitScanReverse(&index, word) ? (int)index : -1;
 }
 
 tlsf_decl int tlsf_ffs(unsigned int word)
 {
 	unsigned long index;
-	return _BitScanForward(&index, word) ? index : -1;
+	return _BitScanForward(&index, word) ? (int)index : -1;
+}
+
+/* Add the explicit 64-bit versions for large pool handling */
+tlsf_decl int tlsf_fls_64(unsigned __int64 word)
+{
+	unsigned long index;
+	return _BitScanReverse64(&index, word) ? (int)index : -1;
+}
+
+tlsf_decl int tlsf_ffs_64(unsigned __int64 word)
+{
+	unsigned long index;
+	return _BitScanForward64(&index, word) ? (int)index : -1;
 }
 
 #elif defined (_MSC_VER) && defined (_M_PPC)
@@ -176,21 +189,7 @@ tlsf_decl int tlsf_fls(unsigned int word)
 
 /* Possibly 64-bit version of tlsf_fls. */
 #if defined (TLSF_64BIT)
-tlsf_decl int tlsf_fls_sizet(size_t size)
-{
-	int high = (int)(size >> 32);
-	int bits = 0;
-	if (high)
-	{
-		bits = 32 + tlsf_fls(high);
-	}
-	else
-	{
-		bits = tlsf_fls((int)size & 0xffffffff);
-
-	}
-	return bits;
-}
+#define tlsf_fls_sizet tlsf_fls_64
 #else
 #define tlsf_fls_sizet tlsf_fls
 #endif
@@ -235,11 +234,8 @@ enum tlsf_private
 	*/
 
 #if defined (TLSF_64BIT)
-	/*
-	** TODO: We can increase this to support larger sizes, at the expense
-	** of more overhead in the TLSF structure.
-	*/
-	FL_INDEX_MAX = 32,
+	// This should allow up to 256GB pools, which is probably more than enough
+	FL_INDEX_MAX = 38,
 #else
 	FL_INDEX_MAX = 30,
 #endif

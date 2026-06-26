@@ -10,6 +10,6 @@ namespace based
         ~MemoryManager() = delete;
         
         [[nodiscard]] static void* MemAlign(size_t size, size_t alignment);
-        static void MemFree(void* pPtr);
+        static void MemFree(void* ptr);
     };
 }

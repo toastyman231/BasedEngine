@@ -44,15 +44,15 @@ namespace based
         return tlsf_memalign(m_pBackingHeap, alignment, size);
     }
 
-    void MemPoolTLSFAllocator::Deallocate(void* pPtr)
+    void MemPoolTLSFAllocator::Deallocate(void* ptr)
     {
         // The mem pool will check if the pointer belongs to this pool
-        tlsf_free(m_pBackingHeap, pPtr);
+        tlsf_free(m_pBackingHeap, ptr);
     }
 
-    bool MemPoolTLSFAllocator::IsPointerFromAllocator(void* pPtr) const
+    bool MemPoolTLSFAllocator::IsPointerFromAllocator(void* ptr) const
     {
-        uint8* p = static_cast<uint8*>(pPtr);
+        uint8* p = static_cast<uint8*>(ptr);
         uint8* pBaseAddress = static_cast<uint8*>(m_pBackingHeap) + tlsf_size(); // Skip the tlsf control block
         return p >= pBaseAddress && p < pBaseAddress + m_poolSize;
     }
@@ -102,15 +102,15 @@ namespace based
         return ptr;
     }
     
-    void BootstrapAllocator::Deallocate(void* pPtr)
+    void BootstrapAllocator::Deallocate(void* ptr)
     {
         // We never free anything from the bootstrap pool
     }
     
-    bool BootstrapAllocator::IsPointerFromAllocator(void* pPtr) const
+    bool BootstrapAllocator::IsPointerFromAllocator(void* ptr) const
     {
         const void* pStart = m_pBuffer;
         const void* pEnd   = m_pBuffer + std::size(m_pBuffer);
-        return pPtr >= pStart && pPtr < pEnd;
+        return ptr >= pStart && ptr < pEnd;
     }
 }

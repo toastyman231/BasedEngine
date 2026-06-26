@@ -31,6 +31,8 @@ namespace based
     {
         static bool bDoOnce = false;
         if (bDoOnce) return;
+
+        MemoryPoolHeader::CreateRootPool();
         
         size_t persistentPoolSize = gib_to_bytes(3);
         void* pPersistentPool = AllocateSystemMemory(
@@ -40,6 +42,20 @@ namespace based
         void* pCreatedPool = MemoryPoolHeader::CreatePool("Persistent", ePoolIdentifier::kPersistentPool,
             persistentPoolSize, pPersistentPool);
         BASED_ASSERT(pCreatedPool, "Pool creation failed for persistent pool!");
+
+        // TODO: Make these actual values
+        AllocatorScope ac(ePoolIdentifier::kPersistentPool);
+        size_t scratchPoolSize = gib_to_bytes(1);
+        void* pScratchPool = new uint8[scratchPoolSize + sizeof(MemoryPoolHeader) + sizeof(MemPoolTLSFAllocator)];
+        pCreatedPool = MemoryPoolHeader::CreatePool("Scratch", ePoolIdentifier::kScratchCPUPool,
+            scratchPoolSize, pScratchPool);
+        BASED_ASSERT(pCreatedPool, "Pool creation failed for scratch pool!");
+
+        size_t stagingPoolSize = gib_to_bytes(5);
+        void* pStagingPool = AllocateSystemMemory(stagingPoolSize + sizeof(MemoryPoolHeader) + sizeof(MemPoolTLSFAllocator));
+        pCreatedPool = MemoryPoolHeader::CreatePool("Staging", ePoolIdentifier::kStagingPool,
+            stagingPoolSize, pStagingPool);
+        BASED_ASSERT(pCreatedPool, "Pool creation failed for staging pool!");
         
         bDoOnce = true;
     }

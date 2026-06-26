@@ -87,6 +87,8 @@ int main(int argc, char* argv[])
             std::this_thread::sleep_for(sleepTime);
         }
     }
+
+    based::MemoryPoolHeader::PrintPoolsLayout();
     
     /*based::App* app = CreateApp();
     based::Engine::Instance().SetArgs(argc, argv);

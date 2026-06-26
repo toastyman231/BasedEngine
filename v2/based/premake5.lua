@@ -116,6 +116,7 @@ project "based"
         runtime "Debug"
         editandcontinue "off"
         symbols "on"
+        optimize "debug"
         targetsuffix "_d"
 
     filter "configurations:Development*"

@@ -5,18 +5,22 @@
 
 namespace based
 {
+    struct MemoryPoolListElement;
+    
     constexpr size_t kMaxPools = 255;
     enum class ePoolIdentifier : uint8
     {
         kInvalid = 0,
+        kRootPool,
         kPersistentPool,
         kPersistentGraphicsPool,
         kTextureCPUPool,
         kTextureGPUPool,
         kTextureSmallGPUPool,
         kScratchCPUPool,
+        kStagingPool,
         // Any future engine pools go here
-        kEnginePoolCount = kScratchCPUPool,
+        kEnginePoolsCount = kStagingPool,
         kMaxEnginePools = 30,
         // Values after kMaxEnginePools are reserved for user pools
         kMaxPools = static_cast<uint8>(kMaxPools)
@@ -33,10 +37,11 @@ namespace based
         template <typename T> requires EnumClassWithUnderlying<T, uint8>
         static MemoryPoolHeader* CreatePool(const char* pPoolName, T ePoolId, size_t stPool, void* pBackingMemory)
         {
+            BASED_ASSERT(ms_bCreatedRootPool, "Must create root pool first!");
             BASED_ASSERT(pBackingMemory, "Invalid backing memory!");
             BASED_ASSERT(to_underlying(ePoolId) > 0, "Must pass a valid pool ID!");
             // TODO: Add proper enum printing w/ reflect-cpp
-            BASED_ASSERT_FMT(s_PoolList[to_underlying(ePoolId)] == nullptr, "Already created a pool with ID {}!", to_underlying(ePoolId));
+            BASED_ASSERT_FMT(ms_poolList[to_underlying(ePoolId)] == nullptr, "Already created a pool with ID {}!", to_underlying(ePoolId));
         
             uint8_t* pByteBase = static_cast<uint8_t*>(pBackingMemory);
 
@@ -56,7 +61,7 @@ namespace based
             pHeader->m_pPoolAllocator = pAllocator;
             pHeader->m_pBackingMemory = pTrueBackingMemory;
 
-            s_PoolList[to_underlying(ePoolId)] = pHeader;
+            AddAndSplitPoolList(pHeader);
 
             return pHeader;
         }
@@ -65,9 +70,10 @@ namespace based
         static MemoryPoolHeader* CreatePool(const char* pPoolName, T ePoolId, size_t stPool,
             IMemoryPoolAllocator* pAllocator, void* pBackingMemory)
         {
+            BASED_ASSERT(ms_bCreatedRootPool, "Must create root pool first!");
             BASED_ASSERT(pAllocator, "Invalid allocator pointer!");
             BASED_ASSERT(to_underlying(ePoolId) > 0, "Must pass a valid pool ID!");
-            BASED_ASSERT_FMT(s_PoolList[to_underlying(ePoolId)] == nullptr, "Already created a pool with ID {}!", to_underlying(ePoolId));
+            BASED_ASSERT_FMT(ms_poolList[to_underlying(ePoolId)] == nullptr, "Already created a pool with ID {}!", to_underlying(ePoolId));
         
             MemoryPoolHeader* pHeader = static_cast<MemoryPoolHeader*>(pBackingMemory);
             void* pTrueBackingMemory = pHeader + 1;
@@ -82,16 +88,25 @@ namespace based
             pHeader->m_pPoolAllocator = pAllocator;
             pHeader->m_pBackingMemory = pTrueBackingMemory;
 
-            s_PoolList[to_underlying(ePoolId)] = pHeader;
+            AddAndSplitPoolList(pHeader);
 
             return pHeader;
         }
 
+        // We don't actually want people to use this pool, it's just for tracking stuff, so we hide it from the user
+        static void CreateRootPool();
+        static void AddAndSplitPoolList(MemoryPoolHeader* pHeader);
+        static size_t GetPoolIndexForPointer(void* ptr);
+        static MemoryPoolHeader* GetPoolForPointer(void* ptr);
+        static bool DoesPoolContainPointer(void* ptr, const MemoryPoolHeader* pPool);
+        static void PrintPoolsLayout();
+        
         template <typename T> requires EnumClassWithUnderlying<T, uint8>
         static MemoryPoolHeader* GetPoolByID(T nID)
         {
             BASED_ASSERT(to_underlying(nID) > static_cast<uint8>(ePoolIdentifier::kInvalid), "Invalid pool ID!");
-            return s_PoolList[to_underlying(nID)];
+            BASED_ASSERT(to_underlying(nID) != static_cast<uint8>(ePoolIdentifier::kRootPool), "You cannot access the root pool!");
+            return ms_poolList[to_underlying(nID)];
         }
 
         [[nodiscard]] size_t GetPoolSize() const { return m_stPoolSizeBytes; }
@@ -112,7 +127,9 @@ namespace based
         MemoryPoolHeader() = default;
         ~MemoryPoolHeader() = default;
 
-        static MemoryPoolHeader* s_PoolList[kMaxPools];
+        static bool ms_bCreatedRootPool;
+        static MemoryPoolHeader* ms_poolList[kMaxPools];
+        static MemoryPoolListElement ms_poolListSorted[kMaxPools]; // This will only be a problem if we cut our pools up like a lot
 
         static constexpr size_t MAX_NAME_LEN = 64;
         char   m_pName[MAX_NAME_LEN];
@@ -126,6 +143,16 @@ namespace based
         * the allocations there. This also has the benefit of allowing us to check which pool GPU allocations belong
         * to and if they're valid when deallocating. 
         **/
+    };
+
+    // We're never going to be creating these ourselves, just using the ones already in the static list
+    struct MemoryPoolListElement final 
+    {
+        MemoryPoolHeader* m_pPool;
+        MemoryPoolHeader* m_pParentPool;
+        uint8* m_pStartAddress;
+        uint8* m_pEndAddress;
+        size_t m_poolSize;
     };
 
     class AllocatorScope final : public NonMoveable

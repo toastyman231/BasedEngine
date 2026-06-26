@@ -12,9 +12,8 @@ namespace based
         [[nodiscard]] virtual void* Allocate(size_t bytes) = 0;
         [[nodiscard]] virtual void* Allocate(size_t size, size_t alignment) = 0;
 
-        virtual void Deallocate(void* pPtr) = 0;
-        // TODO: Probably remove this and check this at the MemPool level
-        [[nodiscard]] virtual bool IsPointerFromAllocator(void* pPtr) const = 0;
+        virtual void Deallocate(void* ptr) = 0;
+        [[nodiscard]] virtual bool IsPointerFromAllocator(void* ptr) const = 0;
     };
 
     class MemPoolTLSFAllocator final : public IMemoryPoolAllocator
@@ -25,8 +24,8 @@ namespace based
         
         [[nodiscard]] void* Allocate(size_t bytes) override;
         [[nodiscard]] void* Allocate(size_t size, size_t alignment) override;
-                      void  Deallocate(void* pPtr) override;
-        [[nodiscard]] bool  IsPointerFromAllocator(void* pPtr) const override;
+                      void  Deallocate(void* ptr) override;
+        [[nodiscard]] bool  IsPointerFromAllocator(void* ptr) const override;
         
     private:
         MemPoolTLSFAllocator() = default;
@@ -45,15 +44,15 @@ namespace based
         
         [[nodiscard]] void* Allocate(size_t bytes) override;
         [[nodiscard]] void* Allocate(size_t size, size_t alignment) override;
-        void Deallocate(void* pPtr) override;
-        [[nodiscard]] bool IsPointerFromAllocator(void* pPtr) const override;
+        void Deallocate(void* ptr) override;
+        [[nodiscard]] bool IsPointerFromAllocator(void* ptr) const override;
 
         static bool ShouldUseBootstrap() { return m_bUseBootstrap; }
         static void DisableBootstrap() { m_bUseBootstrap = false;}
 
     private:
         BootstrapAllocator();
-        ~BootstrapAllocator() = default;
+        ~BootstrapAllocator() override = default;
         
         static uint8 m_pBuffer[65536]; // 64kb of bootstrap memory should be fine
         static size_t m_Offset;

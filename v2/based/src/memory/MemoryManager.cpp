@@ -34,26 +34,32 @@ namespace based
         return nullptr;
     }
 
-    void MemoryManager::MemFree(void* pPtr)
+    void MemoryManager::MemFree(void* ptr)
     {
-        if (!pPtr) return;
+        if (!ptr) return;
 
-        if (g_pBootstrapAllocator->IsPointerFromAllocator(pPtr))
+        if (g_pBootstrapAllocator->IsPointerFromAllocator(ptr))
             return; // bootstrap allocs are never individually freed
 
+        // In many cases this is a simple pointer bounds check, very quick and easy way to tell if we have the
+        // right pool. If we definitely don't, then we spend the slightly extra effort to search for the correct one.
         const bool bIsInCurrentPool = g_pCurrentMemoryPool->m_pPoolAllocator
-            && g_pCurrentMemoryPool->m_pPoolAllocator->IsPointerFromAllocator(pPtr);
+            && g_pCurrentMemoryPool->m_pPoolAllocator->IsPointerFromAllocator(ptr);
         
         if (g_pCurrentMemoryPool && g_pCurrentMemoryPool->m_pPoolAllocator && bIsInCurrentPool)
         {
-            return g_pCurrentMemoryPool->m_pPoolAllocator->Deallocate(pPtr);
+            return g_pCurrentMemoryPool->m_pPoolAllocator->Deallocate(ptr);
         }
+        
         if (g_pCurrentMemoryPool && !bIsInCurrentPool)
         {
-            BASED_ASSERT_FMT(false, "Trying to de-allocate from pool {} but ptr was from pool TBA!",
-                g_pCurrentMemoryPool->GetPoolName());
+            MemoryPoolHeader* pActualPool = MemoryPoolHeader::GetPoolForPointer(ptr);
+            BASED_ASSERT_FMT(false, "Trying to de-allocate from pool {} but ptr was from pool {}!",
+                g_pCurrentMemoryPool->GetPoolName(), pActualPool ? pActualPool->GetPoolName() : "INVALID POOL");
+            if (pActualPool && pActualPool->m_pPoolAllocator)
+                return pActualPool->m_pPoolAllocator->Deallocate(ptr); // In case we want to continue past the assert
         }
 
-        BASED_FATAL("Unable to de-allocate {}", pPtr);
+        BASED_FATAL("Unable to de-allocate {}", ptr);
     }
 }
