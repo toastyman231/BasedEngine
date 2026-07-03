@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 
+#include "BasedDefines.h"
 #include "memory/PlatformMemUtils.h"
 #include "core/BasedLog.h"
 #include "core/NewDelete.h"
@@ -28,36 +29,56 @@ namespace based
             bAllowAccess ? PAGE_READWRITE : PAGE_NOACCESS);
     }
 
-    void SetupMemoryPools()
+    size_t GetAvailableSystemMemoryBytes()
     {
-        static bool bDoOnce = false;
-        if (bDoOnce) return;
+        MEMORYSTATUSEX status;
+        status.dwLength = sizeof(status);
+        if (GlobalMemoryStatusEx(&status)) {
+            return status.ullAvailPhys; // Returns actual free physical RAM bytes
+        }
+        return 0;
+    }
 
-        MemoryPoolHeader::CreateRootPool();
-        
-        size_t persistentPoolSize = gib_to_bytes(3);
-        void* pPersistentPool = AllocateSystemMemory(
-             persistentPoolSize + sizeof(MemoryPoolHeader) + sizeof(MemPoolTLSFAllocator));
-        BASED_ASSERT(pPersistentPool, "Invalid system memory allocated!");
+    BASED_WEAK const EngineMemoryPoolDescriptorList& GetMemoryPoolDescriptors()
+    {
+        static constexpr EngineMemoryPoolDescriptorList DefaultPoolDescriptors = {
+            .pools = {{
+                { 
+                    ePoolIdentifier::kPersistentPool, 
+                    PoolDescriptor
+                    {
+                        .m_strPoolName = "Persistent",
+                        .m_stPoolSize = gib_to_bytes(3),
+                        .m_ePoolID = to_underlying(ePoolIdentifier::kPersistentPool),
+                        .m_eParentPoolID = to_underlying(ePoolIdentifier::kInvalid),
+                        .m_bIsGPUPool = false
+                    }
+                },
+                { 
+                    ePoolIdentifier::kScratchCPUPool, 
+                    PoolDescriptor
+                    {
+                        .m_strPoolName = "Scratch",
+                        .m_stPoolSize = gib_to_bytes(1),
+                        .m_ePoolID = to_underlying(ePoolIdentifier::kScratchCPUPool),
+                        .m_eParentPoolID = to_underlying(ePoolIdentifier::kPersistentPool),
+                        .m_bIsGPUPool = false
+                    }
+                },
+                { 
+                    ePoolIdentifier::kStagingPool, 
+                    PoolDescriptor
+                    {
+                        .m_strPoolName = "Staging",
+                        .m_stPoolSize = gib_to_bytes(5),
+                        .m_ePoolID = to_underlying(ePoolIdentifier::kStagingPool),
+                        .m_eParentPoolID = to_underlying(ePoolIdentifier::kInvalid),
+                        .m_bIsGPUPool = false
+                    }
+                },
+            }}
+        };
 
-        void* pCreatedPool = MemoryPoolHeader::CreatePool("Persistent", ePoolIdentifier::kPersistentPool,
-            persistentPoolSize, pPersistentPool);
-        BASED_ASSERT(pCreatedPool, "Pool creation failed for persistent pool!");
-
-        // TODO: Make these actual values
-        AllocatorScope ac(ePoolIdentifier::kPersistentPool);
-        size_t scratchPoolSize = gib_to_bytes(1);
-        void* pScratchPool = new uint8[scratchPoolSize + sizeof(MemoryPoolHeader) + sizeof(MemPoolTLSFAllocator)];
-        pCreatedPool = MemoryPoolHeader::CreatePool("Scratch", ePoolIdentifier::kScratchCPUPool,
-            scratchPoolSize, pScratchPool);
-        BASED_ASSERT(pCreatedPool, "Pool creation failed for scratch pool!");
-
-        size_t stagingPoolSize = gib_to_bytes(5);
-        void* pStagingPool = AllocateSystemMemory(stagingPoolSize + sizeof(MemoryPoolHeader) + sizeof(MemPoolTLSFAllocator));
-        pCreatedPool = MemoryPoolHeader::CreatePool("Staging", ePoolIdentifier::kStagingPool,
-            stagingPoolSize, pStagingPool);
-        BASED_ASSERT(pCreatedPool, "Pool creation failed for staging pool!");
-        
-        bDoOnce = true;
+        return DefaultPoolDescriptors;
     }
 }

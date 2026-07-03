@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING
+#define _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING
+#endif
+
 #include "core/NewDelete.h"
 
 #include <chrono>
@@ -9,6 +13,7 @@
 #include <thread>
 
 #include "core/BasedLog.h"
+#include "core/FileSystem.h"
 #include "core/LogManager.h"
 #include "memory/MemoryPoolHeader.h"
 #include "memory/PlatformMemUtils.h"
@@ -54,6 +59,10 @@ int main(int argc, char* argv[])
     based::SetupMemoryPools();
     based::SetupThirdPartyMemoryCallbacks();
     based::AllocatorScope ac(based::ePoolIdentifier::kPersistentPool);
+
+    const bool bSuccess = based::InitializeRootFileSystem();
+    BASED_ASSERT_FMT(bSuccess, "Couldn't set up root filesystem, is root path '{}' valid?",
+        based::GetExecutableDirectory());
 
     std::random_device rd;
     std::mt19937 gen(rd());

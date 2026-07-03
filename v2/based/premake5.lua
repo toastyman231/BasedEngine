@@ -19,6 +19,7 @@ project "based"
         "src/**.h",
         "src/**.cpp",
         "**.natvis",
+        EXTERNALS_DIR_PUBLIC
     }
 
     -- Not all of these are actually supported
@@ -69,8 +70,6 @@ project "based"
 
     defines
     {
-        "_CRT_SECURE_NO_WARNINGS",
-        "_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING",
         "RMLUI_STATIC_LIB",
         "KHRONOS_STATIC",
         "GLM_ENABLE_EXPERIMENTAL",

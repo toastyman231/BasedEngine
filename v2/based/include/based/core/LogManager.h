@@ -43,7 +43,7 @@ struct fmt::formatter<MemSize> {
                 if (it != ctx.end() && *it >= '0' && *it <= '9')
                     precision = *it++ - '0';
             } else {
-                // No dot — single number is just precision, same as before
+                // No dot - single number is just precision, same as before
                 precision = first;
             }
         }
@@ -84,7 +84,7 @@ struct fmt::formatter<MemSize> {
             }
         }
 
-        // Plain bytes — apply pad width if requested
+        // Plain bytes - apply pad width if requested
         if (padWidth > 0)
             return fmt::format_to(ctx.out(), "{:{}} B", m.bytes, padWidth);
 

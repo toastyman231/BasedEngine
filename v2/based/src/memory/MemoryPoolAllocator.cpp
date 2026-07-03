@@ -157,9 +157,8 @@ namespace based
     {
         size_t alignedOffset = AlignUp(m_Offset, alignment);
         size_t end = alignedOffset + size;
-
-        BASED_SIMPLE_ASSERT(end <= sizeof(m_pBuffer),
-            "Bootstrap allocator exhausted trying to allocate %llu bytes!", size);
+        
+        if (end > sizeof(m_pBuffer)) return nullptr;
 
         void* ptr = m_pBuffer + alignedOffset;
         m_Offset = end;

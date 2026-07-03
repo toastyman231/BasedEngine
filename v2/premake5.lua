@@ -23,6 +23,12 @@ workspace "based"
         "Web"
     }
 
+    defines
+    {
+        "_CRT_SECURE_NO_WARNINGS",
+        "_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING",
+    }
+
     defaultplatform "Win64"
 
     multiprocessorcompile "On"
@@ -30,10 +36,12 @@ workspace "based"
     filter "platforms:Win64"
         system "windows"
         toolset "clang"
+        defines { "_CXX20_DEPRECATE_OLD_SHARED_PTR_ATOMIC_SUPPORT" }
 
     filter "platforms:Win64-MSVC"
         system "windows"
         toolset "msc"
+        buildoptions { "/utf-8" }
 
     filter "platforms:Linux"
         system "linux"

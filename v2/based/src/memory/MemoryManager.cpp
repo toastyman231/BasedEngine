@@ -22,7 +22,12 @@ namespace based
                 if (!g_pBootstrapAllocator) return nullptr;
             }
 
-            return g_pBootstrapAllocator->Allocate(size, alignment);
+            void* ptr = g_pBootstrapAllocator->Allocate(size, alignment);
+            if (!ptr)
+            {
+                BASED_SIMPLE_ASSERT(false, "Couldn't allocate %llu bytes from bootstrap pool!", size);
+            }
+            return ptr;
         }
 
         if (g_pCurrentMemoryPool && g_pCurrentMemoryPool->m_pPoolAllocator)
@@ -34,7 +39,7 @@ namespace based
                 g_pCurrentMemoryPool->m_pPoolAllocator->TrackUsageForPool(g_pCurrentMemoryPool, ptr);
             } else
             {
-                g_pCurrentMemoryPool->PrintPoolsLayout();
+                MemoryPoolHeader::PrintPoolsLayout();
                 g_pCurrentMemoryPool->PrintPoolInfo();
                 BASED_ASSERT_FMT(false, "Couldn't allocate {} from pool {}!", MemSize{size},
                     to_underlying(g_pCurrentMemoryPool->GetPoolID()));
@@ -66,7 +71,7 @@ namespace based
             {
                 MemoryPoolHeader::PrintPoolsLayout();
                 g_pCurrentMemoryPool->PrintPoolInfo();
-                BASED_ASSERT_FMT(false, "Couldn't allocate {} from pool {}!", MemSize{size},
+                BASED_ASSERT_FMT(false, "Couldn't reallocate {} from pool {}!", MemSize{size},
                     to_underlying(g_pCurrentMemoryPool->GetPoolID()));
             }
 #endif

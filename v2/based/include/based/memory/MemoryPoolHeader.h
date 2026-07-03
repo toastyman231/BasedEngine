@@ -26,6 +26,7 @@ namespace based
         // Values after kMaxEnginePools are reserved for user pools
         kMaxPools = static_cast<uint8>(kMaxPools)
     };
+    constexpr size_t kNumEnginePools = to_underlying(ePoolIdentifier::kEnginePoolsCount);
     
     // We really want the backing memory to immediately follow this header (for CPU pools anyway)
     // so we make it NonMoveable (which includes NonCopyable) just to drive this home.
@@ -136,6 +137,8 @@ namespace based
                 m_stCurrentUsed += usage;
             m_stPeakUsed = std::max(m_stPeakUsed, m_stCurrentUsed);
         }
+
+        static constexpr size_t MAX_NAME_LEN = 64;
         
     private:
         MemoryPoolHeader() = default;
@@ -144,8 +147,7 @@ namespace based
         static bool ms_bCreatedRootPool;
         static MemoryPoolHeader* ms_poolList[kMaxPools];
         static MemoryPoolListElement ms_poolListSorted[kMaxPools]; // This will only be a problem if we cut our pools up like a lot
-
-        static constexpr size_t MAX_NAME_LEN = 64;
+        
         char   m_pName[MAX_NAME_LEN];
         uint8  m_nPoolID;
         size_t m_stPoolSizeBytes;
@@ -183,6 +185,26 @@ namespace based
 
     private:
         MemoryPoolHeader* m_pPreviousPool, *m_pPreviousGraphicsPool;
+    };
+
+    struct PoolDescriptor final
+    {
+        const char* m_strPoolName;
+        size_t m_stPoolSize;
+        uint8 m_ePoolID;
+        uint8 m_eParentPoolID;
+        bool m_bIsGPUPool;
+    };
+
+    struct EngineMemoryPoolDescriptorList {
+        std::array<std::pair<ePoolIdentifier, PoolDescriptor>, kNumEnginePools> pools;
+
+        constexpr const PoolDescriptor* Find(ePoolIdentifier id) const {
+            for (const auto& [key, value] : pools) {
+                if (key == id) return &value;
+            }
+            return nullptr;
+        }
     };
 
     // Prefer not setting these directly, use AllocatorScope instead

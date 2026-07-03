@@ -7,7 +7,7 @@ namespace based
     class MemoryPoolHeader;
 
     // Intended for the TLSF allocator, but probably general enough to derive stats from any allocator
-    struct PoolStats
+    struct PoolStats final
     {
         size_t stTotalSize;         // Total pool size
         size_t stUsedBytes;         // Bytes in live allocations

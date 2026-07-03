@@ -2,6 +2,14 @@
 
 The goal with this file is to keep an ongoing log of my thoughts and to chronicle the engine's development, in case I need to come up with cool stuff to say in an interview or on my portfolio (I'm happily employed at the time of writing, but you never know). Oldest notes are at the bottom.
 
+### [7/3/2026]
+Made some more progress on setting up the memory pools, so they can print out their info now. The big thing that happened tho is that I switched SDL3 to build with cmake as a prebuildcommand inside my premake project, since SDL3 has such a complicated build process it can't be easily replicated with premake. I'm not super happy about it but whatever, it works. Hopefully none of the other dependencies end up requiring a similar thing, but we'll see.
+
+I also added vfspp to the project to prepare for filesystem operations, since I wanted to load mem pool descriptions from disk. However, it would need to happen before mem pools are initialized, and I had issues getting it to work with the bootstrap pool. Also, I don't think it makes much sense to ship mem pool configs with the game, even if they were in an asset bundle. So I think I'll make the pool setup function overrideable by the user, so they can do it at compile time.
+I think I'm going to have a function that returns this descriptor object, and I'll declare it as a weak symbol, so the user can declare a strong version in their app. This way they only have control over the descriptor, not the actual creation process.
+
+Okay, I've done that. Went pretty much as expected. I also capped log files to 10 max, because I realized my logs folder had like 150 log files in it lmao.
+
 ### [6/24/2026]
 While researching Vulkan Memory Allocator, I learned about Two-Level Segregated Fit allocators (TLSF), and found a nice implementation by Matt Conte. It's already pretty close to my stack + free block cache plan from before, so I decided to just use it as-is for now. If that proves insufficient I can always extend it later. So I've completely removed mimalloc from the project as I won't be needing it. I also removed all the global mem pool pointers, as I realized I can get them quickly from the pool list using the pool id. Pool IDs are interesting because I left space in the enum for user values, but those values are defined in separate enums. But the pool functions use C++20 concepts to require that the provided enum be of the right underlying type, and then a quick assert checks that the value is in the right range for user IDs. Very cool stuff that allows me to give names to user IDs while the engine code doesn't need to know anything about them. I got the AllocatorScope system set up and working as well.
 

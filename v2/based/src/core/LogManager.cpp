@@ -28,9 +28,19 @@ namespace based
                 end(dirIter),
                 [](auto& entry) { return entry.is_regular_file(); }
             );
-
-            std::string newName = "Logs/log_" + std::to_string(fileCount) + ".txt";
-            std::filesystem::rename(pRecentLogPath, newName);
+            
+            constexpr ptrdiff_t MAX_ALLOWED_LOGS = 10;
+            if (fileCount >= MAX_ALLOWED_LOGS)
+            {
+                for (const auto& entry : std::filesystem::directory_iterator("Logs"))
+                {
+                    std::filesystem::remove_all(entry.path()); 
+                }
+            } else
+            {
+                std::string newName = "Logs/log_" + std::to_string(fileCount) + ".txt";
+                std::filesystem::rename(pRecentLogPath, newName);
+            }
         }
 
         sinks[1] = std::make_shared<spdlog::sinks::basic_file_sink_mt>(pRecentLogPath);

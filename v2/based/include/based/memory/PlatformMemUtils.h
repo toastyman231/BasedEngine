@@ -3,6 +3,7 @@
 #include <concepts>
 
 #include "MemoryManager.h"
+#include "MemoryPoolHeader.h"
 
 #define bytes_to_kb(x) ((x##ULL) / 1000ULL)
 #define bytes_to_mb(x) ((x##ULL) / 1000ULL / 1000ULL)
@@ -45,6 +46,16 @@ namespace based
     }
 
     constexpr size_t GetPlatformDefaultAlignment() { return 2 * sizeof(void*); }
+
+    size_t GetAvailableSystemMemoryBytes();
+    size_t GetTotalSystemMemoryBytes();
+
+    bool ValidateMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList);
+
+    // This is weak so that users can override this and provide their own descriptors of the
+    // engine pools. Then when linking with the engine, their descriptors will be used instead of
+    // the default. The returned list must be a static constexpr reference to avoid allocations.
+    const EngineMemoryPoolDescriptorList& GetMemoryPoolDescriptors();
 
     inline void* JoltRealloc(void* ptr, size_t oldSize, size_t newSize)
     {
