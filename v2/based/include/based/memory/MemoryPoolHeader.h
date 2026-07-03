@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include "MemoryPoolAllocator.h"
 #include "../core/BasedTypes.h"
 #include "../core/BasedLog.h"
@@ -100,6 +101,9 @@ namespace based
         static MemoryPoolHeader* GetPoolForPointer(void* ptr);
         static bool DoesPoolContainPointer(void* ptr, const MemoryPoolHeader* pPool);
         static void PrintPoolsLayout();
+
+        PoolStats GetStats();
+        void PrintPoolInfo();
         
         template <typename T> requires EnumClassWithUnderlying<T, uint8>
         static MemoryPoolHeader* GetPoolByID(T nID)
@@ -112,6 +116,7 @@ namespace based
         [[nodiscard]] size_t GetPoolSize() const { return m_stPoolSizeBytes; }
         [[nodiscard]] std::string_view GetPoolName() const { return {m_pName}; }
         [[nodiscard]] ePoolIdentifier GetPoolID() const { return static_cast<ePoolIdentifier>(m_nPoolID); }
+        [[nodiscard]] size_t GetPeakUsage() const { return m_stPeakUsed; }
 
         // Users declaring custom pools should prefer this version of GetPoolID, since it will nicely return their
         // custom pool ID type
@@ -121,6 +126,15 @@ namespace based
             BASED_ASSERT(m_nPoolID > to_underlying(ePoolIdentifier::kMaxEnginePools),
                 "User pool ID out of valid range, use GetPoolID() instead!");
             return static_cast<T>(m_nPoolID);
+        }
+
+        void AddUsage(size_t usage, bool bFree = false)
+        {
+            if (bFree)
+                m_stCurrentUsed -= usage;
+            else
+                m_stCurrentUsed += usage;
+            m_stPeakUsed = std::max(m_stPeakUsed, m_stCurrentUsed);
         }
         
     private:
@@ -135,6 +149,8 @@ namespace based
         char   m_pName[MAX_NAME_LEN];
         uint8  m_nPoolID;
         size_t m_stPoolSizeBytes;
+        size_t m_stCurrentUsed;
+        size_t m_stPeakUsed;
         IMemoryPoolAllocator* m_pPoolAllocator;
         void* m_pBackingMemory;
         /**

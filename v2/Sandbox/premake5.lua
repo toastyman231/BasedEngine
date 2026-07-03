@@ -16,12 +16,15 @@ project "Sandbox"
     links
     {
         "based",
-        --[[ "SDL2",
+        "jolt",
+        "tlsf",
+        "assimp",
         "freetype",
-        "assimp-vc143-mt",
+        "ktx-software",
         "rmlui",
-        "rmlui_debugger",
-        "ktx", ]]
+        "spdlog",
+        "tracy",
+        "yaml-cpp"
     }
 
     files 
@@ -34,7 +37,7 @@ project "Sandbox"
     {
         "../based/include",
         ENGINE_DIR .. "/external/Public",
-        ENGINE_DIR .. "/external/Private/spdlog/include"
+        ENGINE_DIR .. "/external/Private/spdlog/include",
         --[[
         "%{externals.rmlui}",
         "%{externals.tracy}",
@@ -69,6 +72,14 @@ project "Sandbox"
             "BASED_PLATFORM_WINDOWS",
             "_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING",
             "JPH_DEBUG_RENDERER"
+        }
+
+        links
+        {
+            "Winmm",     -- Fixes timeBeginPeriod / timeEndPeriod
+            "Setupapi",  -- Fixes SetupDiGetClassDevsA / SetupDiGetDeviceInstanceIdA
+            "Version",   -- Required for SDL Windows version checks
+            "Imm32"      -- Required for SDL Input Method Editor (IME) support
         }
 
     filter {"system:windows", "configurations:Release*"}
@@ -111,3 +122,27 @@ project "Sandbox"
 
     filter "configurations:*Editor"
         defines "BASED_CONFIG_EDITOR"
+
+    filter { "system:windows", "configurations:Debug*" }
+        libdirs { ENGINE_DIR .. "/external/Private/sdl3/build/Debug" }
+        links { "SDL3-static" }
+
+    filter { "system:windows", "configurations:Development*" }
+        libdirs { ENGINE_DIR .. "/external/Private/sdl3/build/RelWithDebInfo" }
+        links { "SDL3-static" }
+
+    filter { "system:windows", "configurations:Release*" }
+        libdirs { ENGINE_DIR .. "/external/Private/sdl3/build/Release" }
+        links { "SDL3-static" }
+
+    filter { "system:linux", "configurations:Debug*" }
+        libdirs { ENGINE_DIR .. "/external/Private/sdl3/build/Debug" }
+        links { "SDL3" }
+
+    filter { "system:linux", "configurations:Development*" }
+        libdirs { ENGINE_DIR .. "/external/Private/sdl3/build/RelWithDebInfo" }
+        links { "SDL3" }
+
+    filter { "system:linux", "configurations:Release*" }
+        libdirs { ENGINE_DIR .. "/external/Private/sdl3/build/Release" }
+        links { "SDL3" }

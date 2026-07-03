@@ -5,101 +5,11 @@ project "sdl3"
     targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
     objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
 
+    -- Include all source files for IDE navigation and code completion
+    -- The actual build is handled by CMake via the prebuild command
     files
     {
         "include/**.h",
-        "src/*.c",
-        "src/*.h",
-        "src/atomic/*.c",
-        "src/atomic/*.h",
-        "src/audio/*.c",
-        "src/audio/*.h",
-        "src/audio/dummy/*.c",
-        "src/audio/dummy/*.h",
-        "src/camera/*.c",
-        "src/camera/*.h",
-        "src/camera/dummy/*.c",
-        "src/camera/dummy/*.h",
-        "src/core/*.c",
-        "src/core/*.h",
-        "src/cpuinfo/*.c",
-        "src/cpuinfo/*.h",
-        "src/dialog/*.c",
-        "src/dialog/*.h",
-        "src/dynapi/*.c",
-        "src/dynapi/*.h",
-        "src/events/*.c",
-        "src/events/*.h",
-        "src/filesystem/*.c",
-        "src/filesystem/*.h",
-        "src/gpu/*.c",
-        "src/gpu/*.h",
-        "src/haptic/*.c",
-        "src/haptic/*.h",
-        "src/haptic/dummy/*.c",
-        "src/haptic/dummy/*.h",
-        "src/hidapi/*.c",
-        "src/hidapi/*.h",
-        "src/io/*.c",
-        "src/io/*.h",
-        "src/io/generic/*.c",
-        "src/io/generic/*.h",
-        "src/joystick/*.c",
-        "src/joystick/*.h",
-        "src/joystick/dummy/*.c",
-        "src/joystick/dummy/*.h",
-        "src/joystick/virtual/*.c",
-        "src/joystick/virtual/*.h",
-        "src/libm/*.c",
-        "src/libm/*.h",
-        "src/loadso/dummy/*.c",
-        "src/locale/*.c",
-        "src/locale/*.h",
-        "src/locale/dummy/*.c",
-        "src/main/*.c",
-        "src/main/*.h",
-        "src/main/generic/*.c",
-        "src/main/generic/*.h",
-        "src/misc/*.c",
-        "src/misc/*.h",
-        "src/misc/dummy/*.c",
-        "src/power/*.c",
-        "src/power/*.h",
-        "src/process/*.c",
-        "src/process/*.h",
-        "src/process/dummy/*.c",
-        "src/render/*.c",
-        "src/render/*.h",
-        "src/render/software/*.c",
-        "src/render/software/*.h",
-        "src/sensor/*.c",
-        "src/sensor/*.h",
-        "src/sensor/dummy/*.c",
-        "src/sensor/dummy/*.h",
-        "src/stdlib/*.c",
-        "src/stdlib/*.h",
-        "src/storage/*.c",
-        "src/storage/*.h",
-        "src/storage/generic/*.c",
-        "src/storage/generic/*.h",
-        "src/thread/*.c",
-        "src/thread/*.h",
-        "src/time/*.c",
-        "src/time/*.h",
-        "src/timer/*.c",
-        "src/timer/*.h",
-        "src/tray/*.c",
-        "src/tray/*.h",
-        "src/tray/dummy/*.c",
-        "src/video/*.c",
-        "src/video/*.h",
-        "src/video/dummy/*.c",
-        "src/video/dummy/*.h",
-        "src/video/offscreen/*.c",
-        "src/video/offscreen/*.h",
-        "src/video/yuv2rgb/*.c",
-        "src/video/yuv2rgb/*.h",
-        "src/video/khronos/**.h",
     }
 
     includedirs
@@ -107,8 +17,9 @@ project "sdl3"
         "include",
         "src",
         "src/video/khronos",
-        -- Generated headers - run CMake once to produce these
         "build/include-config-debug/build_config",
+        "build/include-config-release/build_config",
+        "build/include-config-relwithdebinfo/build_config",
         "build/include-revision",
     }
 
@@ -118,15 +29,17 @@ project "sdl3"
         "USING_GENERATED_CONFIG_H",
         "SDL_BUILD_MAJOR_VERSION=3",
         "SDL_BUILD_MINOR_VERSION=4",
-        "SDL_BUILD_MICRO_VERSION=10",
+        "SDL_BUILD_MICRO_VERSION=12",
     }
+
+    -- Disable premake's actual compilation of these files —
+    -- CMake will produce the real lib via the prebuild command
+    buildaction "None"
 
     enablepch "off"
 
-    -- Windows
     filter "system:windows"
         systemversion "latest"
-        linkoptions { "/ignore:4006" }
         defines
         {
             "_CRT_SECURE_NO_DEPRECATE",
@@ -134,184 +47,108 @@ project "sdl3"
             "_CRT_SECURE_NO_WARNINGS",
             "WIN32_LEAN_AND_MEAN",
         }
-        files
-        {
-            "src/core/windows/*.c",
-            "src/core/windows/*.cpp",
-            "src/core/windows/*.h",
-            "src/audio/directsound/*.c",
-            "src/audio/directsound/*.h",
-            "src/audio/wasapi/*.c",
-            "src/audio/wasapi/*.h",
-            "src/dialog/windows/*.c",
-            "src/filesystem/windows/*.c",
-            "src/gpu/d3d12/*.c",
-            "src/gpu/d3d12/*.h",
-            "src/haptic/windows/*.c",
-            "src/haptic/windows/*.h",
-            "src/joystick/windows/*.c",
-            "src/joystick/windows/*.h",
-            "src/joystick/gdk/*.cpp",
-            "src/loadso/windows/*.c",
-            "src/locale/windows/*.c",
-            "src/main/windows/*.c",
-            "src/misc/windows/*.c",
-            "src/power/windows/*.c",
-            "src/process/windows/*.c",
-            "src/process/windows/*.h",
-            "src/render/direct3d/*.c",
-            "src/render/direct3d/*.h",
-            "src/render/direct3d11/*.c",
-            "src/render/direct3d11/*.h",
-            "src/render/direct3d12/*.c",
-            "src/render/direct3d12/*.h",
-            "src/render/vulkan/*.c",
-            "src/render/vulkan/*.h",
-            "src/sensor/windows/*.c",
-            "src/sensor/windows/*.h",
-            "src/storage/steam/*.c",
-            "src/storage/steam/*.h",
-            "src/thread/generic/SDL_syscond.c",
-            "src/thread/generic/SDL_syscond_c.h",
-            "src/thread/generic/SDL_sysrwlock.c",
-            "src/thread/generic/SDL_sysrwlock_c.h",
-            "src/thread/windows/*.c",
-            "src/thread/windows/*.h",
-            "src/time/windows/*.c",
-            "src/timer/windows/*.c",
-            "src/tray/windows/*.c",
-            "src/video/windows/*.c",
-            "src/video/windows/*.h",
-            "src/io/windows/*.c",
-            "src/filesystem/posix/SDL_sysfsops.c",
-        }
-        links
-        {
-            "kernel32", "user32", "gdi32", "winmm",
-            "imm32", "ole32", "oleaut32", "version",
-            "uuid", "advapi32", "setupapi", "shell32",
-            "dinput8", "dxguid",
-        }
 
-    -- Linux
     filter "system:linux"
         pic "On"
-        systemversion "latest"
-        files
-        {
-            "src/core/unix/*.c",
-            "src/core/unix/*.h",
-            "src/core/linux/*.c",
-            "src/core/linux/*.h",
-            "src/audio/alsa/*.c",
-            "src/audio/alsa/*.h",
-            "src/audio/pulseaudio/*.c",
-            "src/audio/pulseaudio/*.h",
-            "src/audio/pipewire/*.c",
-            "src/audio/pipewire/*.h",
-            "src/camera/v4l2/*.c",
-            "src/camera/v4l2/*.h",
-            "src/dialog/unix/*.c",
-            "src/dialog/unix/*.h",
-            "src/filesystem/unix/*.c",
-            "src/filesystem/posix/SDL_sysfsops.c",
-            "src/gpu/vulkan/*.c",
-            "src/gpu/vulkan/*.h",
-            "src/haptic/linux/*.c",
-            "src/haptic/linux/*.h",
-            "src/joystick/linux/*.c",
-            "src/joystick/linux/*.h",
-            "src/joystick/steam/*.c",
-            "src/joystick/steam/*.h",
-            "src/loadso/dlopen/*.c",
-            "src/locale/unix/*.c",
-            "src/misc/unix/*.c",
-            "src/power/linux/*.c",
-            "src/process/posix/*.c",
-            "src/process/posix/*.h",
-            "src/render/vulkan/*.c",
-            "src/render/vulkan/*.h",
-            "src/sensor/dummy/*.c",
-            "src/storage/steam/*.c",
-            "src/storage/steam/*.h",
-            "src/thread/pthread/*.c",
-            "src/thread/pthread/*.h",
-            "src/time/unix/*.c",
-            "src/timer/unix/*.c",
-            "src/tray/unix/*.c",
-            "src/video/x11/*.c",
-            "src/video/x11/*.h",
-            "src/video/wayland/*.c",
-            "src/video/wayland/*.h",
-        }
-        links { "dl", "pthread", "m" }
 
-    -- macOS
     filter "system:macosx"
         pic "On"
-        systemversion "latest"
-        files
+
+    -- Helper function to map Premake's _ACTION to CMake's -G flag
+    local function get_cmake_generator()
+        local action = _ACTION or ""
+        
+        if action:find("vs") then
+            -- Matches vs2022, vs2019, etc.
+            -- We escape the quotes with \" so the shell handles the spacing correctly
+            if action == "vs2022" then return 'Visual Studio 17 2022' end
+            if action == "vs2019" then return 'Visual Studio 16 2019' end
+            return 'Visual Studio 17 2022' -- fallback default for VS
+        elseif action:find("gmake") then
+            -- Matches gmake, gmake2, etc. (No spaces, no quotes strictly required)
+            return 'Unix Makefiles'
+        elseif action == "xcode" then
+            return 'Xcode'
+        else
+            return 'Unix Makefiles'
+        end
+    end
+
+    local cmake_gen = get_cmake_generator()
+
+    -- Debug configurations
+    filter { "configurations:Debug*", "system:windows" }
+        prebuildcommands
         {
-            "src/core/unix/*.c",
-            "src/core/unix/*.h",
-            "src/audio/coreaudio/*.m",
-            "src/audio/coreaudio/*.h",
-            "src/camera/coremedia/*.m",
-            "src/dialog/cocoa/*.m",
-            "src/filesystem/cocoa/*.m",
-            "src/filesystem/posix/SDL_sysfsops.c",
-            "src/gpu/metal/*.m",
-            "src/gpu/metal/*.h",
-            "src/gpu/vulkan/*.c",
-            "src/gpu/vulkan/*.h",
-            "src/haptic/darwin/*.c",
-            "src/haptic/darwin/*.h",
-            "src/joystick/apple/*.m",
-            "src/joystick/apple/*.h",
-            "src/joystick/darwin/*.c",
-            "src/joystick/darwin/*.h",
-            "src/loadso/dlopen/*.c",
-            "src/locale/macos/*.m",
-            "src/misc/macos/*.m",
-            "src/power/macos/*.c",
-            "src/process/posix/*.c",
-            "src/process/posix/*.h",
-            "src/render/metal/*.m",
-            "src/render/metal/*.h",
-            "src/render/vulkan/*.c",
-            "src/render/vulkan/*.h",
-            "src/storage/steam/*.c",
-            "src/storage/steam/*.h",
-            "src/thread/pthread/*.c",
-            "src/thread/pthread/*.h",
-            "src/time/unix/*.c",
-            "src/timer/unix/*.c",
-            "src/tray/cocoa/*.m",
-            "src/video/cocoa/*.m",
-            "src/video/cocoa/*.h",
+            "cd ..",
+            'cmake -S . -B build -G "' .. cmake_gen .. '" -DCMAKE_BUILD_TYPE=Debug -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_GPU=ON -DSDL_RENDER=OFF -DSDL_AUDIO=OFF -DSDL_CAMERA=OFF -DSDL_DISKAUDIO=OFF -DSDL_DUMMYAUDIO=OFF',
+            "cmake --build build --config Debug",
         }
-        links
+
+    filter { "configurations:Debug*", "system:linux" }
+        prebuildcommands
         {
-            "dl", "pthread", "m",
+            "cd ..",
+            'cmake -S . -B build -G "' .. cmake_gen .. '" -DCMAKE_BUILD_TYPE=Debug -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_GPU=ON -DSDL_RENDER=OFF -DSDL_AUDIO=OFF -DSDL_CAMERA=OFF -DSDL_DISKAUDIO=OFF -DSDL_DUMMYAUDIO=OFF',
+            "cmake --build build --config Debug",
         }
-        linkoptions
+
+    filter { "configurations:Debug*", "system:macosx" }
+        prebuildcommands
         {
-            "-framework Cocoa",
-            "-framework Carbon",
-            "-framework IOKit",
-            "-framework CoreAudio",
-            "-framework AudioToolbox",
-            "-framework AVFoundation",
-            "-framework CoreVideo",
-            "-framework CoreMedia",
-            "-framework Metal",
-            "-framework QuartzCore",
-            "-framework GameController",
-            "-framework CoreHaptics",
-            "-framework Foundation",
-            "-framework ForceFeedback",
-            "-weak_framework UniformTypeIdentifiers",
-            "-weak_framework CoreHaptics",
+            "cd ..",
+            'cmake -S . -B build -G "' .. cmake_gen .. '" -DCMAKE_BUILD_TYPE=Debug -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_GPU=ON -DSDL_RENDER=OFF -DSDL_AUDIO=OFF -DSDL_CAMERA=OFF -DSDL_DISKAUDIO=OFF -DSDL_DUMMYAUDIO=OFF',
+            "cmake --build build --config Debug",
+        }
+
+    -- Development configurations
+    filter { "configurations:Development*", "system:windows" }
+        prebuildcommands
+        {
+            "cd ..",
+            'cmake -S . -B build -G "' .. cmake_gen .. '" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_GPU=ON -DSDL_RENDER=OFF -DSDL_AUDIO=OFF -DSDL_CAMERA=OFF -DSDL_DISKAUDIO=OFF -DSDL_DUMMYAUDIO=OFF',
+            "cmake --build build --config RelWithDebInfo",
+        }
+
+    filter { "configurations:Development*", "system:linux" }
+        prebuildcommands
+        {
+            "cd ..",
+            'cmake -S . -B build -G "' .. cmake_gen .. '" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_GPU=ON -DSDL_RENDER=OFF -DSDL_AUDIO=OFF -DSDL_CAMERA=OFF -DSDL_DISKAUDIO=OFF -DSDL_DUMMYAUDIO=OFF',
+            "cmake --build build --config RelWithDebInfo",
+        }
+
+    filter { "configurations:Development*", "system:macosx" }
+        prebuildcommands
+        {
+            "cd ..",
+            'cmake -S . -B build -G "' .. cmake_gen .. '" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_GPU=ON -DSDL_RENDER=OFF -DSDL_AUDIO=OFF -DSDL_CAMERA=OFF -DSDL_DISKAUDIO=OFF -DSDL_DUMMYAUDIO=OFF',
+            "cmake --build build --config RelWithDebInfo",
+        }
+
+    -- Release configurations
+    filter { "configurations:Release*", "system:windows" }
+        prebuildcommands
+        {
+            "cd ..",
+            'cmake -S . -B build -G "' .. cmake_gen .. '" -DCMAKE_BUILD_TYPE=Release -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_GPU=ON -DSDL_RENDER=OFF -DSDL_AUDIO=OFF -DSDL_CAMERA=OFF -DSDL_DISKAUDIO=OFF -DSDL_DUMMYAUDIO=OFF',
+            "cmake --build build --config Release",
+        }
+
+    filter { "configurations:Release*", "system:linux" }
+        prebuildcommands
+        {
+            "cd ..",
+            'cmake -S . -B build -G "' .. cmake_gen .. '" -DCMAKE_BUILD_TYPE=Release -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_GPU=ON -DSDL_RENDER=OFF -DSDL_AUDIO=OFF -DSDL_CAMERA=OFF -DSDL_DISKAUDIO=OFF -DSDL_DUMMYAUDIO=OFF',
+            "cmake --build build --config Release",
+        }
+
+    filter { "configurations:Release*", "system:macosx" }
+        prebuildcommands
+        {
+            "cd ..",
+            'cmake -S . -B build -G "' .. cmake_gen .. '" -DCMAKE_BUILD_TYPE=Release -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_GPU=ON -DSDL_RENDER=OFF -DSDL_AUDIO=OFF -DSDL_CAMERA=OFF -DSDL_DISKAUDIO=OFF -DSDL_DUMMYAUDIO=OFF',
+            "cmake --build build --config Release",
         }
 
     filter "configurations:Debug*"

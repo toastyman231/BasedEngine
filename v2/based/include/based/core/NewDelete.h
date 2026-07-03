@@ -1,62 +1,42 @@
 ﻿#pragma once
 
+#include <cassert>
 #include <new>
-#include <cstdlib>
 
-#include "../memory/MemoryManager.h"
-#include "../memory/PlatformMemUtils.h"
+#if defined(_WIN32)
+    #define BASED_C_ALLOC_OVERRIDE __declspec(dllexport)
+#else
+    #define BASED_C_ALLOC_OVERRIDE
+#endif
 
-void* operator new(std::size_t size)
-{
-    return based::MemoryManager::MemAlign(size, based::GetPlatformDefaultAlignment());
-}
+// operator new/delete
+void* operator new(std::size_t size);
+void* operator new[](std::size_t size);
+void* operator new(std::size_t size, const std::nothrow_t&) noexcept;
+void* operator new[](std::size_t size, const std::nothrow_t&) noexcept;
+void* operator new(std::size_t size, std::align_val_t al);
+void* operator new[](std::size_t size, std::align_val_t al);
+void* operator new(std::size_t size, std::align_val_t al, const std::nothrow_t&) noexcept;
+void* operator new[](std::size_t size, std::align_val_t al, const std::nothrow_t&) noexcept;
+void  operator delete(void* ptr) noexcept;
 
-void* operator new[](std::size_t size)
-{
-    return based::MemoryManager::MemAlign(size, based::GetPlatformDefaultAlignment());
-}
+// Core C heap
+// Overriding these is a huge ass pain on Windows, so we just hope that the libraries we use
+// give us a mechanism to supply them ourselves
+void* my_malloc(size_t size);
+void  my_free(void* ptr);
+void* my_realloc(void* ptr, size_t size);
+void* my_calloc(size_t num, size_t size);
 
-void* operator new(std::size_t size, const std::nothrow_t&) noexcept
-{
-    return operator new(size);
-}
+// C11 aligned allocation
+BASED_C_ALLOC_OVERRIDE void* aligned_alloc(size_t alignment, size_t size);
 
-void* operator new[](std::size_t size, const std::nothrow_t&) noexcept
-{
-    return operator new[](size);
-}
+// POSIX aligned allocation
+#ifdef BASED_PLATFORM_LINUX
+void* malloc(size_t size);
+void  free(void* ptr);
+void* realloc(void* ptr, size_t size);
+void* calloc(size_t num, size_t size);
 
-inline std::size_t EnsureValidSize(std::size_t size) {
-    return (size == 0) ? 1 : size;
-}
-
-void* operator new(std::size_t size, std::align_val_t al)
-{
-    size = EnsureValidSize(size);
-    std::size_t alignment = static_cast<std::size_t>(al);
-    
-    return based::MemoryManager::MemAlign(size, alignment);
-}
-
-void* operator new[](std::size_t size, std::align_val_t al)
-{
-    size = EnsureValidSize(size);
-    std::size_t alignment = static_cast<std::size_t>(al);
-    
-    return based::MemoryManager::MemAlign(size, alignment);
-}
-
-void* operator new(std::size_t size, std::align_val_t al, const std::nothrow_t&) noexcept
-{
-    return operator new(size, al);
-}
-
-void* operator new[](std::size_t size, std::align_val_t al, const std::nothrow_t&) noexcept
-{
-    return operator new[](size, al);
-}
-
-void operator delete(void* ptr) noexcept
-{
-    based::MemoryManager::MemFree(ptr);
-}
+int posix_memalign(void** ptr, size_t alignment, size_t size);
+#endif

@@ -1,8 +1,8 @@
-if (NOT EXISTS "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/install_manifest.txt")
-    message(FATAL_ERROR "Cannot find install manifest: \"D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/install_manifest.txt\"")
+if (NOT EXISTS "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/install_manifest.txt")
+    message(FATAL_ERROR "Cannot find install manifest: \"D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/install_manifest.txt\"")
 endif()
 
-file(READ "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/install_manifest.txt" files)
+file(READ "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/install_manifest.txt" files)
 string(REGEX REPLACE "\n" ";" files "${files}")
 foreach(file ${files})
     message(STATUS "Uninstalling \"$ENV{DESTDIR}${file}\"")

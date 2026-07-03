@@ -2,6 +2,8 @@
 
 #include <concepts>
 
+#include "MemoryManager.h"
+
 #define bytes_to_kb(x) ((x##ULL) / 1000ULL)
 #define bytes_to_mb(x) ((x##ULL) / 1000ULL / 1000ULL)
 #define bytes_to_gb(x) ((x##ULL) / 1000ULL / 1000ULL / 1000ULL)
@@ -43,4 +45,11 @@ namespace based
     }
 
     constexpr size_t GetPlatformDefaultAlignment() { return 2 * sizeof(void*); }
+
+    inline void* JoltRealloc(void* ptr, size_t oldSize, size_t newSize)
+    {
+        return MemoryManager::MemRealloc(ptr, newSize);
+    }
+
+    void SetupThirdPartyMemoryCallbacks();
 }

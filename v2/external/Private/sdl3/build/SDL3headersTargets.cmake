@@ -50,7 +50,7 @@ unset(_cmake_expected_targets)
 add_library(SDL3::Headers INTERFACE IMPORTED)
 
 set_target_properties(SDL3::Headers PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/include-revision;D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/include"
+  INTERFACE_INCLUDE_DIRECTORIES "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/include-revision;D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/include"
 )
 
 # This file does not depend on other imported targets which have

@@ -3,1459 +3,1391 @@
 cmake_policy(SET CMP0009 NEW)
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_assert.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_error.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_guid.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_hashtable.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_hints.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_list.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_log.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_properties.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_utils.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_assert.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_error.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_guid.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_hashtable.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_hints.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_list.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_log.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_properties.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_utils.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_assert_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_error_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_hashtable.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_hints_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_internal.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_list.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_log_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_properties_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/SDL_utils_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_assert_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_error_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_hashtable.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_hints_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_internal.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_list.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_log_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_properties_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/SDL_utils_c.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/atomic/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/atomic/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/atomic/SDL_atomic.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/atomic/SDL_spinlock.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/atomic/SDL_atomic.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/atomic/SDL_spinlock.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/atomic/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/atomic/*.h")
 set(OLD_GLOB
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_audio.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_audiocvt.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_audiodev.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_audioqueue.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_audioresample.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_audiotypecvt.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_mixer.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_wave.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_audio.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_audiocvt.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_audiodev.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_audioqueue.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_audioresample.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_audiotypecvt.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_mixer.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_wave.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_audio_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_audio_channel_converters.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_audiodev_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_audioqueue.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_audioresample.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_sysaudio.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/SDL_wave.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_audio_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_audio_channel_converters.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_audiodev_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_audioqueue.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_audioresample.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_sysaudio.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/SDL_wave.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/directsound/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/dummy/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/directsound/SDL_directsound.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/dummy/SDL_dummyaudio.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/directsound/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/dummy/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/directsound/SDL_directsound.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/audio/dummy/SDL_dummyaudio.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/disk/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/camera/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/disk/SDL_diskaudio.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/camera/SDL_camera.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/disk/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/camera/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/disk/SDL_diskaudio.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/camera/SDL_camera_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/camera/SDL_syscamera.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/dummy/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/camera/dummy/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/dummy/SDL_dummyaudio.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/camera/dummy/SDL_camera_dummy.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/dummy/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/camera/dummy/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/dummy/SDL_dummyaudio.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/wasapi/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/wasapi/SDL_wasapi.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/SDL_core_unsupported.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/wasapi/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/audio/wasapi/SDL_wasapi.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/SDL_core_unsupported.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
-endif()
-
-# both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/camera/*.c")
-set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/camera/SDL_camera.c"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
-endif()
-
-# both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/camera/*.h")
-set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/camera/SDL_camera_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/camera/SDL_syscamera.h"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
-endif()
-
-# both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/camera/dummy/*.c")
-set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/camera/dummy/SDL_camera_dummy.c"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
-endif()
-
-# both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/camera/dummy/*.h")
-set(OLD_GLOB
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
-endif()
-
-# both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/camera/mediafoundation/*.c")
-set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/camera/mediafoundation/SDL_camera_mediafoundation.c"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
-endif()
-
-# both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/*.c")
-set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/SDL_core_unsupported.c"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
-endif()
-
-# both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/*.h")
-set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/SDL_core_unsupported.h"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/SDL_hid.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/SDL_immdevice.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/SDL_windows.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/SDL_xinput.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/pch.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/SDL_hid.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/SDL_immdevice.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/SDL_windows.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/SDL_xinput.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/pch.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/*.cpp")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/*.cpp")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/SDL_gameinput.cpp"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/pch_cpp.cpp"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/SDL_gameinput.cpp"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/pch_cpp.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/SDL_directx.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/SDL_gameinput.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/SDL_hid.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/SDL_immdevice.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/SDL_windows.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/SDL_xinput.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/SDL_directx.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/SDL_gameinput.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/SDL_hid.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/SDL_immdevice.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/SDL_windows.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/SDL_xinput.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # shared_sources at cmake/sdlcommands.cmake:23 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/*.rc")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/*.rc")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/core/windows/version.rc"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/core/windows/version.rc"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/cpuinfo/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/cpuinfo/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/cpuinfo/SDL_cpuinfo.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/cpuinfo/SDL_cpuinfo.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/cpuinfo/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/cpuinfo/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/cpuinfo/SDL_cpuinfo_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/cpuinfo/SDL_cpuinfo_c.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/dynapi/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/dynapi/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/dynapi/SDL_dynapi.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/dynapi/SDL_dynapi.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/dynapi/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/dynapi/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/dynapi/SDL_dynapi.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/dynapi/SDL_dynapi_overrides.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/dynapi/SDL_dynapi_procs.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/dynapi/SDL_dynapi_unsupported.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/dynapi/SDL_dynapi.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/dynapi/SDL_dynapi_overrides.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/dynapi/SDL_dynapi_procs.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/dynapi/SDL_dynapi_unsupported.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_categories.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_clipboardevents.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_displayevents.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_dropevents.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_events.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_eventwatch.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_keyboard.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_keymap.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_keysym_to_keycode.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_keysym_to_scancode.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_mouse.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_pen.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_quit.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_scancode_tables.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_touch.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_windowevents.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/imKStoUCS.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_categories.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_clipboardevents.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_displayevents.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_dropevents.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_events.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_eventwatch.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_keyboard.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_keymap.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_keysym_to_keycode.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_keysym_to_scancode.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_mouse.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_pen.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_quit.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_scancode_tables.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_touch.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_windowevents.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/imKStoUCS.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_categories_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_clipboardevents_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_displayevents_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_dropevents_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_events_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_eventwatch_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_keyboard_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_keymap_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_keysym_to_keycode_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_keysym_to_scancode_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_mouse_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_pen_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_scancode_tables_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_touch_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/SDL_windowevents_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/blank_cursor.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/default_cursor.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/imKStoUCS.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/scancodes_darwin.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/scancodes_linux.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/scancodes_windows.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/events/scancodes_xfree86.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_categories_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_clipboardevents_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_displayevents_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_dropevents_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_events_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_eventwatch_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_keyboard_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_keymap_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_keysym_to_keycode_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_keysym_to_scancode_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_mouse_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_pen_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_scancode_tables_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_touch_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/SDL_windowevents_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/blank_cursor.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/default_cursor.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/imKStoUCS.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/scancodes_darwin.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/scancodes_linux.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/scancodes_windows.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/events/scancodes_xfree86.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/filesystem/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/filesystem/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/filesystem/SDL_filesystem.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/filesystem/SDL_filesystem.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/filesystem/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/filesystem/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/filesystem/SDL_filesystem_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/filesystem/SDL_sysfilesystem.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/filesystem/SDL_filesystem_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/filesystem/SDL_sysfilesystem.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/filesystem/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/filesystem/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/filesystem/windows/SDL_sysfilesystem.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/filesystem/windows/SDL_sysfsops.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/filesystem/windows/SDL_sysfilesystem.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/filesystem/windows/SDL_sysfsops.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/gpu/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/gpu/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/gpu/SDL_gpu.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/gpu/SDL_gpu.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/gpu/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/gpu/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/gpu/SDL_sysgpu.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/gpu/SDL_sysgpu.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/gpu/d3d12/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/gpu/d3d12/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/gpu/d3d12/SDL_gpu_d3d12.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/gpu/d3d12/SDL_gpu_d3d12.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/gpu/d3d12/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/gpu/d3d12/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/gpu/d3d12/D3D12_Blit.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/gpu/d3d12/D3D12_Blit.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/gpu/vulkan/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/gpu/vulkan/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/gpu/vulkan/SDL_gpu_vulkan.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/gpu/vulkan/SDL_gpu_vulkan.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/gpu/vulkan/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/gpu/vulkan/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/gpu/vulkan/SDL_gpu_vulkan_vkfuncs.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/gpu/vulkan/SDL_gpu_vulkan_vkfuncs.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/SDL_haptic.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/SDL_haptic.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/SDL_haptic_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/SDL_syshaptic.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/SDL_haptic_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/SDL_syshaptic.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/hidapi/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/hidapi/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/hidapi/SDL_hidapihaptic.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/hidapi/SDL_hidapihaptic_lg4ff.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/hidapi/SDL_hidapihaptic.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/hidapi/SDL_hidapihaptic_lg4ff.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/windows/SDL_dinputhaptic.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/windows/SDL_windowshaptic.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/windows/SDL_dinputhaptic.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/windows/SDL_windowshaptic.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/windows/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/windows/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/windows/SDL_dinputhaptic_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/haptic/windows/SDL_windowshaptic_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/windows/SDL_dinputhaptic_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/haptic/windows/SDL_windowshaptic_c.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/hidapi/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/hidapi/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/hidapi/SDL_hidapi.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/hidapi/SDL_hidapi.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/hidapi/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/hidapi/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/hidapi/SDL_hidapi_android.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/hidapi/SDL_hidapi_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/hidapi/SDL_hidapi_ios.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/hidapi/SDL_hidapi_libusb.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/hidapi/SDL_hidapi_linux.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/hidapi/SDL_hidapi_mac.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/hidapi/SDL_hidapi_netbsd.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/hidapi/SDL_hidapi_steamxbox.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/hidapi/SDL_hidapi_windows.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/hidapi/SDL_hidapi_android.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/hidapi/SDL_hidapi_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/hidapi/SDL_hidapi_ios.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/hidapi/SDL_hidapi_libusb.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/hidapi/SDL_hidapi_linux.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/hidapi/SDL_hidapi_mac.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/hidapi/SDL_hidapi_netbsd.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/hidapi/SDL_hidapi_steamxbox.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/hidapi/SDL_hidapi_windows.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/io/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/io/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/io/SDL_asyncio.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/io/SDL_iostream.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/io/SDL_asyncio.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/io/SDL_iostream.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/io/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/io/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/io/SDL_asyncio_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/io/SDL_iostream_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/io/SDL_sysasyncio.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/io/SDL_asyncio_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/io/SDL_iostream_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/io/SDL_sysasyncio.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/io/generic/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/io/generic/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/io/generic/SDL_asyncio_generic.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/io/generic/SDL_asyncio_generic.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/io/generic/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/io/generic/*.h")
 set(OLD_GLOB
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/io/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/io/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/io/windows/SDL_asyncio_windows_ioring.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/io/windows/SDL_asyncio_windows_ioring.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/SDL_gamepad.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/SDL_joystick.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/SDL_steam_virtual_gamepad.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/controller_type.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/SDL_gamepad.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/SDL_joystick.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/SDL_steam_virtual_gamepad.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/controller_type.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/SDL_gamepad_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/SDL_gamepad_db.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/SDL_joystick_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/SDL_steam_virtual_gamepad.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/SDL_sysjoystick.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/controller_list.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/controller_type.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/usb_ids.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/SDL_gamepad_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/SDL_gamepad_db.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/SDL_joystick_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/SDL_steam_virtual_gamepad.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/SDL_sysjoystick.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/controller_list.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/controller_type.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/usb_ids.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/gdk/*.cpp")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/gdk/*.cpp")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/gdk/SDL_gameinputjoystick.cpp"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/gdk/SDL_gameinputjoystick.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_8bitdo.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_combined.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_flydigi.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_gamecube.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_gip.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_lg4ff.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_luna.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_ps3.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_ps4.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_ps5.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_rumble.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_shield.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_sinput.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_stadia.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_steam.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_steam_hori.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_steam_triton.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_steamdeck.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_switch.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_switch2.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_wii.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_xbox360.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_xbox360w.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_xboxone.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapi_zuiki.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_hidapijoystick.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/hidapi/SDL_report_descriptor.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_8bitdo.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_combined.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_flydigi.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_gamecube.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_gip.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_lg4ff.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_luna.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_ps3.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_ps4.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_ps5.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_rumble.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_shield.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_sinput.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_stadia.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_steam.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_steam_hori.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_steam_triton.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_steamdeck.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_switch.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_switch2.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_wii.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_xbox360.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_xbox360w.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_xboxone.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapi_zuiki.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_hidapijoystick.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/hidapi/SDL_report_descriptor.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/virtual/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/virtual/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/virtual/SDL_virtualjoystick.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/virtual/SDL_virtualjoystick.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/virtual/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/virtual/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/virtual/SDL_virtualjoystick_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/virtual/SDL_virtualjoystick_c.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/windows/SDL_dinputjoystick.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/windows/SDL_rawinputjoystick.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/windows/SDL_windows_gaming_input.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/windows/SDL_windowsjoystick.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/windows/SDL_xinputjoystick.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/windows/SDL_dinputjoystick.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/windows/SDL_rawinputjoystick.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/windows/SDL_windows_gaming_input.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/windows/SDL_windowsjoystick.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/windows/SDL_xinputjoystick.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/windows/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/windows/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/windows/SDL_dinputjoystick_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/windows/SDL_rawinputjoystick_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/windows/SDL_windowsjoystick_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/joystick/windows/SDL_xinputjoystick_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/windows/SDL_dinputjoystick_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/windows/SDL_rawinputjoystick_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/windows/SDL_windowsjoystick_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/joystick/windows/SDL_xinputjoystick_c.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/loadso/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/loadso/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/loadso/windows/SDL_sysloadso.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/loadso/windows/SDL_sysloadso.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/locale/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/locale/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/locale/SDL_locale.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/locale/SDL_locale.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/locale/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/locale/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/locale/SDL_syslocale.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/locale/SDL_syslocale.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/locale/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/locale/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/locale/windows/SDL_syslocale.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/locale/windows/SDL_syslocale.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/main/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/main/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/main/SDL_main_callbacks.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/main/SDL_runapp.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/main/SDL_main_callbacks.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/main/SDL_runapp.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/main/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/main/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/main/SDL_main_callbacks.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/main/SDL_main_callbacks.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/main/generic/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/main/generic/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/main/generic/SDL_sysmain_callbacks.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/main/generic/SDL_sysmain_callbacks.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/main/generic/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/main/generic/*.h")
 set(OLD_GLOB
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/main/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/main/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/main/windows/SDL_sysmain_runapp.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/main/windows/SDL_sysmain_runapp.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/misc/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/misc/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/misc/SDL_libusb.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/misc/SDL_url.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/misc/SDL_libusb.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/misc/SDL_url.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/misc/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/misc/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/misc/SDL_libusb.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/misc/SDL_sysurl.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/misc/SDL_libusb.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/misc/SDL_sysurl.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/misc/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/misc/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/misc/windows/SDL_sysurl.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/misc/windows/SDL_sysurl.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/power/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/power/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/power/SDL_power.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/power/SDL_power.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/power/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/power/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/power/SDL_syspower.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/power/SDL_syspower.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/process/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/process/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/process/windows/SDL_windowsprocess.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/process/windows/SDL_windowsprocess.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/process/windows/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/process/windows/*.h")
 set(OLD_GLOB
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/SDL_render.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/SDL_render_unsupported.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/SDL_yuv_sw.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/SDL_render.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/SDL_render_unsupported.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/SDL_yuv_sw.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/SDL_d3dmath.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/SDL_render_debug_font.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/SDL_sysrender.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/SDL_yuv_sw_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/SDL_d3dmath.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/SDL_render_debug_font.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/SDL_sysrender.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/SDL_yuv_sw_c.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/*/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/*/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d/SDL_render_d3d.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d/SDL_shaders_d3d.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d11/SDL_render_d3d11.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d11/SDL_shaders_d3d11.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d12/SDL_render_d3d12.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d12/SDL_shaders_d3d12.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/gpu/SDL_pipeline_gpu.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/gpu/SDL_render_gpu.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/gpu/SDL_shaders_gpu.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/ngage/SDL_render_ngage.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/opengl/SDL_render_gl.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/opengl/SDL_shaders_gl.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/opengles2/SDL_render_gles2.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/opengles2/SDL_shaders_gles2.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/ps2/SDL_render_ps2.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/psp/SDL_render_psp.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_blendfillrect.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_blendline.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_blendpoint.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_drawline.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_drawpoint.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_render_sw.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_triangle.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vitagxm/SDL_render_vita_gxm.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vitagxm/SDL_render_vita_gxm_memory.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vitagxm/SDL_render_vita_gxm_tools.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vulkan/SDL_render_vulkan.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vulkan/SDL_shaders_vulkan.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d/SDL_render_d3d.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d/SDL_shaders_d3d.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d11/SDL_render_d3d11.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d11/SDL_shaders_d3d11.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d12/SDL_render_d3d12.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d12/SDL_shaders_d3d12.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/gpu/SDL_pipeline_gpu.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/gpu/SDL_render_gpu.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/gpu/SDL_shaders_gpu.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/ngage/SDL_render_ngage.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/opengl/SDL_render_gl.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/opengl/SDL_shaders_gl.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/opengles2/SDL_render_gles2.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/opengles2/SDL_shaders_gles2.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/ps2/SDL_render_ps2.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/psp/SDL_render_psp.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_blendfillrect.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_blendline.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_blendpoint.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_drawline.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_drawpoint.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_render_sw.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_triangle.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vitagxm/SDL_render_vita_gxm.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vitagxm/SDL_render_vita_gxm_memory.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vitagxm/SDL_render_vita_gxm_tools.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vulkan/SDL_render_vulkan.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vulkan/SDL_shaders_vulkan.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/*/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/*/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d/D3D9_PixelShader_Palette.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d/D3D9_PixelShader_Palette_Linear.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d/D3D9_PixelShader_Palette_Nearest.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d/D3D9_PixelShader_YUV.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d/SDL_shaders_d3d.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d11/D3D11_PixelShader_Advanced.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d11/D3D11_PixelShader_Colors.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d11/D3D11_PixelShader_Textures.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d11/D3D11_VertexShader.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d11/SDL_shaders_d3d11.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d12/D3D12_PixelShader_Advanced.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d12/D3D12_PixelShader_Colors.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d12/D3D12_PixelShader_Textures.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d12/D3D12_RootSig_Advanced.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d12/D3D12_RootSig_Color.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d12/D3D12_RootSig_Texture.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d12/D3D12_VertexShader_Advanced.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d12/D3D12_VertexShader_Color.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d12/D3D12_VertexShader_Texture.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d12/SDL_render_d3d12_xbox.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/direct3d12/SDL_shaders_d3d12.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/gpu/SDL_gpu_util.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/gpu/SDL_pipeline_gpu.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/gpu/SDL_shaders_gpu.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/metal/SDL_shaders_metal_ios.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/metal/SDL_shaders_metal_iphonesimulator.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/metal/SDL_shaders_metal_macos.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/metal/SDL_shaders_metal_tvos.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/metal/SDL_shaders_metal_tvsimulator.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/ngage/SDL_render_ngage_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/opengl/SDL_glfuncs.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/opengl/SDL_shaders_gl.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/opengles2/SDL_gles2funcs.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/opengles2/SDL_shaders_gles2.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/psp/SDL_render_psp_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_blendfillrect.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_blendline.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_blendpoint.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_draw.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_drawline.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_drawpoint.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_render_sw_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/software/SDL_triangle.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vitagxm/SDL_render_vita_gxm_memory.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vitagxm/SDL_render_vita_gxm_shaders.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vitagxm/SDL_render_vita_gxm_tools.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vitagxm/SDL_render_vita_gxm_types.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vulkan/SDL_shaders_vulkan.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vulkan/VULKAN_PixelShader_Advanced.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vulkan/VULKAN_PixelShader_Colors.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vulkan/VULKAN_PixelShader_Textures.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/render/vulkan/VULKAN_VertexShader.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d/D3D9_PixelShader_Palette.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d/D3D9_PixelShader_Palette_Linear.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d/D3D9_PixelShader_Palette_Nearest.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d/D3D9_PixelShader_YUV.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d/SDL_shaders_d3d.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d11/D3D11_PixelShader_Advanced.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d11/D3D11_PixelShader_Colors.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d11/D3D11_PixelShader_Textures.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d11/D3D11_VertexShader.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d11/SDL_shaders_d3d11.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d12/D3D12_PixelShader_Advanced.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d12/D3D12_PixelShader_Colors.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d12/D3D12_PixelShader_Textures.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d12/D3D12_RootSig_Advanced.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d12/D3D12_RootSig_Color.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d12/D3D12_RootSig_Texture.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d12/D3D12_VertexShader_Advanced.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d12/D3D12_VertexShader_Color.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d12/D3D12_VertexShader_Texture.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d12/SDL_render_d3d12_xbox.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/direct3d12/SDL_shaders_d3d12.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/gpu/SDL_gpu_util.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/gpu/SDL_pipeline_gpu.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/gpu/SDL_shaders_gpu.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/metal/SDL_shaders_metal_ios.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/metal/SDL_shaders_metal_iphonesimulator.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/metal/SDL_shaders_metal_macos.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/metal/SDL_shaders_metal_tvos.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/metal/SDL_shaders_metal_tvsimulator.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/ngage/SDL_render_ngage_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/opengl/SDL_glfuncs.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/opengl/SDL_shaders_gl.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/opengles2/SDL_gles2funcs.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/opengles2/SDL_shaders_gles2.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/psp/SDL_render_psp_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_blendfillrect.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_blendline.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_blendpoint.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_draw.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_drawline.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_drawpoint.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_render_sw_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/software/SDL_triangle.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vitagxm/SDL_render_vita_gxm_memory.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vitagxm/SDL_render_vita_gxm_shaders.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vitagxm/SDL_render_vita_gxm_tools.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vitagxm/SDL_render_vita_gxm_types.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vulkan/SDL_shaders_vulkan.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vulkan/VULKAN_PixelShader_Advanced.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vulkan/VULKAN_PixelShader_Advanced_YUV.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vulkan/VULKAN_PixelShader_Colors.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vulkan/VULKAN_PixelShader_Textures.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vulkan/VULKAN_PixelShader_Textures_YUV.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/render/vulkan/VULKAN_VertexShader.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/sensor/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/sensor/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/sensor/SDL_sensor.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/sensor/SDL_sensor.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/sensor/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/sensor/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/sensor/SDL_sensor_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/sensor/SDL_syssensor.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/sensor/SDL_sensor_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/sensor/SDL_syssensor.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/sensor/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/sensor/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/sensor/windows/SDL_windowssensor.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/sensor/windows/SDL_windowssensor.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/sensor/windows/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/sensor/windows/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/sensor/windows/SDL_windowssensor.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/sensor/windows/SDL_windowssensor.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_crc16.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_crc32.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_getenv.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_iconv.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_malloc.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_memcpy.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_memmove.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_memset.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_mslibc.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_murmur3.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_qsort.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_random.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_stdlib.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_string.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_strtokr.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_crc16.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_crc32.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_getenv.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_iconv.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_malloc.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_memcpy.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_memmove.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_memset.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_mslibc.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_murmur3.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_qsort.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_random.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_stdlib.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_string.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_strtokr.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_casefolding.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_getenv_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_sysstdlib.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/stdlib/SDL_vacopy.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_casefolding.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_getenv_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_sysstdlib.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/stdlib/SDL_vacopy.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/storage/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/storage/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/storage/SDL_storage.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/storage/SDL_storage.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/storage/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/storage/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/storage/SDL_sysstorage.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/storage/SDL_sysstorage.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/storage/generic/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/storage/generic/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/storage/generic/SDL_genericstorage.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/storage/generic/SDL_genericstorage.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/storage/steam/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/storage/steam/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/storage/steam/SDL_steamstorage.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/storage/steam/SDL_steamstorage.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/storage/steam/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/storage/steam/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/storage/steam/SDL_steamstorage_proc.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/storage/steam/SDL_steamstorage_proc.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/thread/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/thread/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/thread/SDL_thread.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/thread/SDL_thread.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/thread/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/thread/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/thread/SDL_systhread.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/thread/SDL_thread_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/thread/SDL_systhread.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/thread/SDL_thread_c.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/time/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/time/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/time/SDL_time.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/time/SDL_time.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/time/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/time/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/time/SDL_time_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/time/SDL_time_c.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/time/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/time/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/time/windows/SDL_systime.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/time/windows/SDL_systime.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/timer/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/timer/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/timer/SDL_timer.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/timer/SDL_timer.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/timer/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/timer/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/timer/SDL_timer_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/timer/SDL_timer_c.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/timer/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/timer/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/timer/windows/SDL_systimer.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/timer/windows/SDL_systimer.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/tray/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/tray/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/tray/SDL_tray_utils.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/tray/SDL_tray_utils.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/tray/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/tray/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/tray/windows/SDL_tray.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/tray/windows/SDL_tray.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_RLEaccel.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_blit.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_blit_0.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_blit_1.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_blit_A.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_blit_N.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_blit_auto.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_blit_copy.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_blit_slow.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_bmp.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_clipboard.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_egl.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_fillrect.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_pixels.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_rect.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_rotate.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_stb.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_stretch.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_surface.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_video.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_video_unsupported.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_vulkan_utils.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_yuv.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_RLEaccel.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_blit.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_blit_0.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_blit_1.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_blit_A.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_blit_N.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_blit_auto.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_blit_copy.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_blit_slow.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_bmp.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_clipboard.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_egl.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_fillrect.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_pixels.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_rect.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_rotate.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_stb.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_stretch.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_surface.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_video.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_video_unsupported.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_vulkan_utils.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_yuv.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_RLEaccel_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_blit.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_blit_auto.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_blit_copy.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_blit_slow.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_clipboard_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_egl_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_pixels_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_rect_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_rect_impl.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_rotate.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_stb_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_surface_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_sysvideo.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_video_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_video_unsupported.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_vulkan_internal.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/SDL_yuv_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/miniz.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/stb_image.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_RLEaccel_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_blit.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_blit_auto.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_blit_copy.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_blit_slow.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_clipboard_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_egl_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_pixels_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_rect_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_rect_impl.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_rotate.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_stb_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_surface_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_sysvideo.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_video_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_video_unsupported.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_vulkan_internal.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/SDL_yuv_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/miniz.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/stb_image.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/dummy/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/dummy/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/dummy/SDL_nullevents.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/dummy/SDL_nullframebuffer.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/dummy/SDL_nullvideo.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/dummy/SDL_nullevents.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/dummy/SDL_nullframebuffer.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/dummy/SDL_nullvideo.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/dummy/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/dummy/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/dummy/SDL_nullevents_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/dummy/SDL_nullframebuffer_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/dummy/SDL_nullvideo.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/dummy/SDL_nullevents_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/dummy/SDL_nullframebuffer_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/dummy/SDL_nullvideo.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/SDL_offscreenevents.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/SDL_offscreenframebuffer.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/SDL_offscreenopengles.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/SDL_offscreenvideo.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/SDL_offscreenvulkan.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/SDL_offscreenwindow.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/SDL_offscreenevents.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/SDL_offscreenframebuffer.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/SDL_offscreenopengles.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/SDL_offscreenvideo.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/SDL_offscreenvulkan.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/SDL_offscreenwindow.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/SDL_offscreenevents_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/SDL_offscreenframebuffer_c.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/SDL_offscreenopengles.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/SDL_offscreenvideo.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/SDL_offscreenvulkan.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/offscreen/SDL_offscreenwindow.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/SDL_offscreenevents_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/SDL_offscreenframebuffer_c.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/SDL_offscreenopengles.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/SDL_offscreenvideo.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/SDL_offscreenvulkan.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/offscreen/SDL_offscreenwindow.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsclipboard.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsevents.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsframebuffer.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowskeyboard.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsmessagebox.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsmodes.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsmouse.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsopengl.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsopengles.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsrawinput.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsshape.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsvideo.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsvulkan.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowswindow.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsclipboard.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsevents.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsframebuffer.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowskeyboard.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsmessagebox.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsmodes.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsmouse.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsopengl.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsopengles.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsrawinput.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsshape.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsvideo.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsvulkan.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowswindow.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/*.cpp")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/*.cpp")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsgameinput.cpp"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsgameinput.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_msctf.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsclipboard.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsevents.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsframebuffer.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsgameinput.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowskeyboard.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsmessagebox.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsmodes.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsmouse.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsopengl.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsopengles.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsrawinput.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsshape.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsvideo.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowsvulkan.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/SDL_windowswindow.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/windows/wmmsg.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_msctf.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsclipboard.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsevents.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsframebuffer.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsgameinput.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowskeyboard.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsmessagebox.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsmodes.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsmouse.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsopengl.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsopengles.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsrawinput.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsshape.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsvideo.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowsvulkan.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/SDL_windowswindow.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/windows/wmmsg.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/*.c")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/*.c")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/yuv_rgb_lsx.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/yuv_rgb_sse.c"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/yuv_rgb_std.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/yuv_rgb_lsx.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/yuv_rgb_sse.c"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/yuv_rgb_std.c"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()
 
 # both_sources at cmake/sdlcommands.cmake:29 (file)
-file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/*.h")
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/*.h")
 set(OLD_GLOB
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/yuv_rgb.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/yuv_rgb_common.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/yuv_rgb_internal.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/yuv_rgb_lsx.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/yuv_rgb_lsx_func.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/yuv_rgb_sse.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/yuv_rgb_sse_func.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/yuv_rgb_std.h"
-  "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/src/video/yuv2rgb/yuv_rgb_std_func.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/yuv_rgb.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/yuv_rgb_common.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/yuv_rgb_internal.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/yuv_rgb_lsx.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/yuv_rgb_lsx_func.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/yuv_rgb_sse.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/yuv_rgb_sse_func.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/yuv_rgb_std.h"
+  "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/src/video/yuv2rgb/yuv_rgb_std_func.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/CMakeFiles/cmake.verify_globs")
 endif()

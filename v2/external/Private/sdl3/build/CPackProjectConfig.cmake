@@ -1,8 +1,8 @@
 if(CPACK_PACKAGE_FILE_NAME MATCHES ".*-src$")
-    message(FATAL_ERROR "Creating source archives for SDL 3.4.10 is not supported.")
+    message(FATAL_ERROR "Creating source archives for SDL 3.4.12 is not supported.")
 endif()
 
-set(PROJECT_SOURCE_DIR "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10")
+set(PROJECT_SOURCE_DIR "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3")
 set(SDL_CMAKE_PLATFORM "Windows")
 set(SDL_CPU_NAMES "")
 list(SORT SDL_CPU_NAMES)
@@ -27,10 +27,10 @@ elseif(MINGW)
 endif()
 
 
-set(CPACK_PACKAGE_FILE_NAME "SDL3-3.4.10-${SDL_CMAKE_PLATFORM}${SDL_CPU_NAMES_WITH_DASHES}")
+set(CPACK_PACKAGE_FILE_NAME "SDL3-3.4.12-${SDL_CMAKE_PLATFORM}${SDL_CPU_NAMES_WITH_DASHES}")
 
 if(CPACK_GENERATOR STREQUAL "DragNDrop")
-    set(CPACK_DMG_VOLUME_NAME "SDL3 3.4.10")
+    set(CPACK_DMG_VOLUME_NAME "SDL3 3.4.12")
     # FIXME: use pre-built/create .DS_Store through AppleScript (CPACK_DMG_DS_STORE/CPACK_DMG_DS_STORE_SETUP_SCRIPT)
     set(CPACK_DMG_DS_STORE "${PROJECT_SOURCE_DIR}/Xcode/SDL/pkg-support/resources/SDL_DS_Store")
 endif()

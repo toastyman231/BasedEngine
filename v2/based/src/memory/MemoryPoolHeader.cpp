@@ -1,9 +1,10 @@
-﻿#include <algorithm>
-
-#include "pch.h"
+﻿#include "pch.h"
 #include "memory/MemoryPoolHeader.h"
 
+#include <algorithm>
+
 #include "core/BasedLog.h"
+#include "memory/MemoryPoolAllocator.h"
 
 namespace based
 {
@@ -315,11 +316,11 @@ namespace based
                 uintptr_t clampStart = poolStart;
                 uintptr_t clampEnd = poolEnd;
 
-                clampStart = max(clampStart, globalMin);
-                clampStart = min(clampStart, globalMax);
+                clampStart = std::max(clampStart, globalMin);
+                clampStart = std::min(clampStart, globalMax);
 
-                clampEnd = max(clampEnd, globalMin);
-                clampEnd = min(clampEnd, globalMax);
+                clampEnd = std::max(clampEnd, globalMin);
+                clampEnd = std::min(clampEnd, globalMax);
 
                 const size_t kBarWidth = 30;
                 double scale = static_cast<double>(kBarWidth) / static_cast<double>(dynamicRange);
@@ -327,9 +328,9 @@ namespace based
                 size_t startPos = static_cast<size_t>(static_cast<double>(clampStart - globalMin) * scale);
                 size_t endPos = static_cast<size_t>(static_cast<double>(clampEnd - globalMin) * scale);
 
-                startPos = min(startPos, kBarWidth);
-                endPos   = min(endPos, kBarWidth);
-                endPos   = max(endPos, startPos);
+                startPos = std::min(startPos, kBarWidth);
+                endPos   = std::min(endPos, kBarWidth);
+                endPos   = std::max(endPos, startPos);
 
                 // Maintain 1-cell visibility for pools that legitimately intersect our window bounds
                 if (endPos == startPos && poolEnd > poolStart)
@@ -354,6 +355,42 @@ namespace based
         }
         
         BASED_INFO(std::string(110, '=').c_str());
+    }
+
+    PoolStats MemoryPoolHeader::GetStats()
+    {
+        return m_pPoolAllocator->GetPoolStats(this);
+    }
+
+    void MemoryPoolHeader::PrintPoolInfo()
+    {
+        std::stringstream headerStream;
+        headerStream << std::left
+                     << std::string(6, '=') << " "
+                     << std::setw(20) << "Pool Name"
+                     << std::setw(20) << "Free (Bytes)"
+                     << std::setw(20) << "Used (Bytes)"
+                     << std::setw(20) << "Total Size (Bytes)"
+                     << std::setw(20) << "Peak Used (Bytes)"
+                     << std::setw(20) << "Fragmentation"
+                     << std::setw(20) << "Largest Free"
+                     << std::string(6, '=');
+        BASED_INFO(headerStream.str().c_str());
+
+        PoolStats stats = GetStats();
+        float fFrag = stats.FragmentationRatio();
+
+        std::stringstream poolInfoStream;
+        poolInfoStream  << std::left
+                        << std::setw(7) << " "
+                        << std::setw(20) << m_pName
+                        << std::setw(20) << stats.stFreeBytes
+                        << std::setw(20) << stats.stUsedBytes
+                        << std::setw(20) << stats.stTotalSize
+                        << std::setw(20) << stats.stPeakUsed
+                        << std::setw(20) << (std::to_string(static_cast<int>(fFrag * 100.f)) + "%")
+                        << std::setw(20) << stats.stLargestFreeBlock;
+        BASED_INFO(poolInfoStream.str().c_str());
     }
 
     AllocatorScope::AllocatorScope(MemoryPoolHeader* pMemoryPool)

@@ -1,9 +1,10 @@
 ﻿#include "pch.h"
 
+#include "memory/PlatformMemUtils.h"
 #include "core/BasedLog.h"
+#include "core/NewDelete.h"
 #include "memory/MemoryPoolAllocator.h"
 #include "memory/MemoryPoolHeader.h"
-#include "memory/PlatformMemUtils.h"
 
 namespace based
 {

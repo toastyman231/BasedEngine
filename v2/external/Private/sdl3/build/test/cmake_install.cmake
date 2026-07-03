@@ -1,4 +1,4 @@
-# Install script for directory: D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/test
+# Install script for directory: D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/test
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -35,6 +35,6 @@ endif()
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "D:/Jake/Downloads/SDL3-3.4.10/SDL3-3.4.10/build/test/install_local_manifest.txt"
+  file(WRITE "D:/Jake/Documents/Github_Repos/BasedEngine/v2/external/Private/sdl3/build/test/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

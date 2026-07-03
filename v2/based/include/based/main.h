@@ -52,6 +52,7 @@ int main(int argc, char* argv[])
     based::BootstrapAllocator::DisableBootstrap();
     
     based::SetupMemoryPools();
+    based::SetupThirdPartyMemoryCallbacks();
     based::AllocatorScope ac(based::ePoolIdentifier::kPersistentPool);
 
     std::random_device rd;
@@ -87,8 +88,6 @@ int main(int argc, char* argv[])
             std::this_thread::sleep_for(sleepTime);
         }
     }
-
-    based::MemoryPoolHeader::PrintPoolsLayout();
     
     /*based::App* app = CreateApp();
     based::Engine::Instance().SetArgs(argc, argv);

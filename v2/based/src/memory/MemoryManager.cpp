@@ -27,10 +27,53 @@ namespace based
 
         if (g_pCurrentMemoryPool && g_pCurrentMemoryPool->m_pPoolAllocator)
         {
-            return g_pCurrentMemoryPool->m_pPoolAllocator->Allocate(size, alignment);
+            void* ptr = g_pCurrentMemoryPool->m_pPoolAllocator->Allocate(size, alignment);
+#if BASED_CONFIG_DEBUG
+            if (ptr)
+            {
+                g_pCurrentMemoryPool->m_pPoolAllocator->TrackUsageForPool(g_pCurrentMemoryPool, ptr);
+            } else
+            {
+                g_pCurrentMemoryPool->PrintPoolsLayout();
+                g_pCurrentMemoryPool->PrintPoolInfo();
+                BASED_ASSERT_FMT(false, "Couldn't allocate {} from pool {}!", MemSize{size},
+                    to_underlying(g_pCurrentMemoryPool->GetPoolID()));
+            }
+#endif
+            return ptr;
         }
 
         BASED_FATAL("Trying to allocate when there is no valid pool! This could cause an OS allocation!");
+        return nullptr;
+    }
+
+    void* MemoryManager::MemRealloc(void* ptr, size_t size)
+    {
+        BASED_ASSERT(ptr, "Can't reallocate a null pointer!");
+        if (!ptr) return nullptr;
+
+        if (g_pCurrentMemoryPool && g_pCurrentMemoryPool->m_pPoolAllocator)
+        {
+#if BASED_CONFIG_DEBUG
+            size_t stOldSize = g_pCurrentMemoryPool->m_pPoolAllocator->GetSizeForAllocation(ptr);
+#endif
+            void* ptr_out = g_pCurrentMemoryPool->m_pPoolAllocator->Reallocate(ptr, size);
+#if BASED_CONFIG_DEBUG
+            if (ptr_out)
+            {
+                g_pCurrentMemoryPool->m_pPoolAllocator->TrackUsageForPool(g_pCurrentMemoryPool, ptr_out, stOldSize);
+            } else
+            {
+                MemoryPoolHeader::PrintPoolsLayout();
+                g_pCurrentMemoryPool->PrintPoolInfo();
+                BASED_ASSERT_FMT(false, "Couldn't allocate {} from pool {}!", MemSize{size},
+                    to_underlying(g_pCurrentMemoryPool->GetPoolID()));
+            }
+#endif
+            return ptr_out;
+        }
+
+        BASED_FATAL("Trying to reallocate when there is no valid pool! This could cause an OS allocation!");
         return nullptr;
     }
 

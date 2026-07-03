@@ -64,5 +64,6 @@
 
 // Platform stuff
 #ifdef BASED_PLATFORM_WINDOWS
+#define NOMINMAX
 #include <Windows.h>
 #endif

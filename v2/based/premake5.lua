@@ -76,19 +76,7 @@ project "based"
         "GLM_ENABLE_EXPERIMENTAL",
     }
 
-    links
-    {
-        "assimp",
-        "freetype",
-        "jolt",
-        "ktx-software",
-        "rmlui",
-        "sdl3",
-        "spdlog",
-        "tlsf",
-        "tracy",
-        "yaml-cpp"
-    }  
+    dependson { "sdl3" }
 
     filter {"system:windows", "configurations:*"}
         systemversion "latest"
