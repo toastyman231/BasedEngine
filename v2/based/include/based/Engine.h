@@ -1,5 +1,9 @@
 ﻿#pragma once
 
+namespace based {
+    class IWindow;
+}
+
 namespace based
 {
     class App;
@@ -9,8 +13,24 @@ namespace based
         static Engine& Instance();
         static const Engine& ConstInstance();
 
+        App& GetApp() const
+        {
+            BASED_ASSERT(m_pApp, "Trying to access the app before it's been created!");
+            return *m_pApp;
+        }
+
+        const App& GetConstApp() const
+        {
+            return GetApp();
+        }
+
+        IWindow* GetWindow() const
+        {
+            return m_pWindow;
+        }
+
         void Run(App* app);
-        void Quit() { m_bIsRunning = true; }
+        void Quit() { m_bIsRunning = false; }
 
         void SetArgs(int argc_in, char** argv_in)
         {
@@ -44,6 +64,7 @@ namespace based
         static void* GetGlobalFlagContext();
 
         App* m_pApp = nullptr;
+        IWindow* m_pWindow = nullptr;
         int argc;
         char** argv;
 

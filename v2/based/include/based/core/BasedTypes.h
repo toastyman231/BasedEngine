@@ -3,6 +3,8 @@
 #include <concepts>
 #include <type_traits>
 
+#include <glm/glm.hpp>
+
 using uint8 = uint8_t;
 using uint16 = uint16_t;
 using uint32 = uint32_t;
@@ -54,6 +56,14 @@ namespace based
         ExplicitlyCopyable(ExplicitlyCopyable&& other) = default;
         ExplicitlyCopyable& operator=(ExplicitlyCopyable&& other) = default;
     };
+
+    using Color = glm::vec4;
+    using Vec2 = glm::vec2;
+    using IVec2 = glm::ivec2;
+    using Vec3 = glm::vec3;
+    using IVec3 = glm::ivec3;
+    using Vec4 = glm::vec4;
+    using IVec4 = glm::ivec4;
 
     // C++23 Type Traits back-ported to C++20
 

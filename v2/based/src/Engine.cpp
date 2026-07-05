@@ -9,6 +9,7 @@
 #include "VERSION.h"
 #include "core/App.h"
 #include "core/BasedTime.h"
+#include "core/Window.h"
 #include "tsoding/flag.h"
 
 namespace based
@@ -48,6 +49,10 @@ namespace based
 
             Shutdown();
 #endif
+        } else
+        {
+            BASED_ASSERT(false, "A fatal error occurred during engine initialization! Check previous logs for more info.");
+            Shutdown();
         }
     }
 
@@ -102,24 +107,20 @@ namespace based
         BASED_ASSERT(!m_bIsInitialized, "Attempting to call Engine::Initialize() more than once!");
         if (m_bIsInitialized) return false;
 
-        bool ret = false;
+        bool bSuccess = false;
         GetInfo();
 
         DeclareAndParseFlags();
 
-        // Setup window and stuff
+        WindowProperties props = m_pApp->GetWindowProperties();
+        m_pWindow = WindowFactory::Create(props);
+        
         m_pApp->Initialize();
-        ret = true; // For now
-
-        if (!ret)
-        {
-            BASED_ERROR("Engine initialization failed! Look at previous logs to see what failed.");
-            Shutdown();
-        }
+        bSuccess = true; // For now
 
         m_bIsInitialized = true;
         m_bIsRunning = true;
-        return ret;
+        return bSuccess;
     }
     
     bool Engine::DeclareAndParseFlags()
@@ -141,6 +142,7 @@ namespace based
     
     void Engine::Update(float fDeltaTime)
     {
+        m_pWindow->PumpEvents();
         if (m_pApp) m_pApp->Update(fDeltaTime);
     }
     

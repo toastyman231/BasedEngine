@@ -10,8 +10,6 @@ namespace based
 {
     void SetupThirdPartyMemoryCallbacks()
     {
-        SDL_SetMemoryFunctions(my_malloc, my_calloc, my_realloc, my_free);
-
         JPH::Allocate = my_malloc;
         JPH::Free = my_free;
         JPH::Reallocate = JoltRealloc;

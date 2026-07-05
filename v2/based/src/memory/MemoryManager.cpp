@@ -53,6 +53,27 @@ namespace based
             return ptr;
         }
 
+        if (auto pPersistentPool = MemoryPoolHeader::GetPoolByID(ePoolIdentifier::kPersistentPool))
+        {
+            // Try to use the persistent pool as a fallback
+            // TODO: Should I really be doing this? Seems like this is a code smell.
+
+            void* ptr = pPersistentPool->m_pPoolAllocator->Allocate(size, alignment);
+#if BASED_CONFIG_DEBUG
+            if (ptr)
+            {
+                pPersistentPool->m_pPoolAllocator->TrackUsageForPool(pPersistentPool, ptr);
+            } else
+            {
+                MemoryPoolHeader::PrintPoolsLayout();
+                MemoryPoolHeader::PrintPoolInfo();
+                BASED_ASSERT_FMT(false, "Couldn't allocate {} from pool {}!", MemSize{size},
+                    to_underlying(pPersistentPool->GetPoolID()));
+            }
+#endif
+            return ptr;
+        }
+
         BASED_FATAL("Trying to allocate when there is no valid pool! This could cause an OS allocation!");
         return nullptr;
     }
@@ -88,6 +109,32 @@ namespace based
             return ptr_out;
         }
 
+        if (auto pPersistentPool = MemoryPoolHeader::GetPoolByID(ePoolIdentifier::kPersistentPool))
+        {
+            std::scoped_lock lock(reallocMutex);
+
+            // Try to use the persistent pool as a fallback
+            // TODO: Should I really be doing this? Seems like this is a code smell.
+            
+#if BASED_CONFIG_DEBUG
+            size_t stOldSize = pPersistentPool->m_pPoolAllocator->GetSizeForAllocation(ptr);
+#endif
+            void* ptr_out = pPersistentPool->m_pPoolAllocator->Reallocate(ptr, size);
+#if BASED_CONFIG_DEBUG
+            if (ptr_out)
+            {
+                pPersistentPool->m_pPoolAllocator->TrackUsageForPool(pPersistentPool, ptr_out, stOldSize);
+            } else
+            {
+                MemoryPoolHeader::PrintPoolsLayout();
+                MemoryPoolHeader::PrintPoolInfo();
+                BASED_ASSERT_FMT(false, "Couldn't reallocate {} from pool {}!", MemSize{size},
+                    to_underlying(pPersistentPool->GetPoolID()));
+            }
+#endif
+            return ptr_out;
+        }
+
         BASED_FATAL("Trying to reallocate when there is no valid pool! This could cause an OS allocation!");
         return nullptr;
     }
@@ -103,7 +150,7 @@ namespace based
 
         // In many cases this is a simple pointer bounds check, very quick and easy way to tell if we have the
         // right pool. If we definitely don't, then we spend the slightly extra effort to search for the correct one.
-        const bool bIsInCurrentPool = g_pCurrentMemoryPool->m_pPoolAllocator
+        const bool bIsInCurrentPool = g_pCurrentMemoryPool && g_pCurrentMemoryPool->m_pPoolAllocator
             && g_pCurrentMemoryPool->m_pPoolAllocator->IsPointerFromAllocator(ptr);
         
         if (g_pCurrentMemoryPool && g_pCurrentMemoryPool->m_pPoolAllocator && bIsInCurrentPool)
@@ -116,6 +163,13 @@ namespace based
             MemoryPoolHeader* pActualPool = MemoryPoolHeader::GetPoolForPointer(ptr);
             BASED_ASSERT_FMT(false, "Trying to de-allocate from pool {} but ptr was from pool {}!",
                 g_pCurrentMemoryPool->GetPoolName(), pActualPool ? pActualPool->GetPoolName() : "INVALID POOL");
+            if (pActualPool && pActualPool->m_pPoolAllocator)
+                return pActualPool->m_pPoolAllocator->Deallocate(ptr); // In case we want to continue past the assert
+        } else if (!bIsInCurrentPool)
+        {
+            MemoryPoolHeader* pActualPool = MemoryPoolHeader::GetPoolForPointer(ptr);
+            BASED_ASSERT_FMT(false, "Trying to de-allocate from INVALID POOL but ptr was from pool {}!",
+                pActualPool ? pActualPool->GetPoolName() : "INVALID POOL");
             if (pActualPool && pActualPool->m_pPoolAllocator)
                 return pActualPool->m_pPoolAllocator->Deallocate(ptr); // In case we want to continue past the assert
         }

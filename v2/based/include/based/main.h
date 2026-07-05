@@ -49,6 +49,8 @@ namespace based
 
 #ifdef BASED_CONFIG_RELEASE
 #ifdef BASED_PLATFORM_WINDOWS
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <windows.h>
 int WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow)
 #endif

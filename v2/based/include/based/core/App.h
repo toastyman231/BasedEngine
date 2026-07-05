@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Window.h"
+
 namespace based
 {
     class App : public NonMoveable
@@ -16,6 +18,8 @@ namespace based
 
         virtual bool ValidateShutdown() { return true; }
         virtual void HandleFileDrop(const std::string& path) {}
+
+        virtual WindowProperties GetWindowProperties() { return {}; }
 
     private:
         // Only intended to be called by Engine::DeclareFlags()

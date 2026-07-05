@@ -24,6 +24,16 @@ namespace based
         {
             BASED_INFO("======================= SHUTTING DOWN SANDBOX =======================");
         }
+
+        WindowProperties GetWindowProperties() override
+        {
+            WindowProperties props;
+            props.title = "Sandbox";
+            props.w = 1280;
+            props.h = 720;
+
+            return props;
+        }
     };
 
     App* CreateApp()
