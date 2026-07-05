@@ -20,5 +20,6 @@ namespace based
     private:
         // Only intended to be called by Engine::DeclareFlags()
         virtual void DeclareFlags() {}
+        virtual void PrintFlagUsage() {}
     };
 }

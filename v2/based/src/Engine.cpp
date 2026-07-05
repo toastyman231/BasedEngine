@@ -105,7 +105,7 @@ namespace based
         bool ret = false;
         GetInfo();
 
-        DeclareFlags();
+        DeclareAndParseFlags();
 
         // Setup window and stuff
         m_pApp->Initialize();
@@ -122,10 +122,21 @@ namespace based
         return ret;
     }
     
-    void Engine::DeclareFlags()
+    bool Engine::DeclareAndParseFlags()
     {
         // Declare engine flags here, before user app flags
         if (m_pApp) m_pApp->DeclareFlags();
+
+        if (!flag_parse(argc, argv))
+        {
+            if (m_pApp) m_pApp->PrintFlagUsage();
+            flag_print_error(stderr);
+            return false;
+        }
+
+        argc = flag_rest_argc();
+        argv = flag_rest_argv();
+        return true;
     }
     
     void Engine::Update(float fDeltaTime)

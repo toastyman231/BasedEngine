@@ -12,6 +12,12 @@ namespace based
         void Run(App* app);
         void Quit() { m_bIsRunning = true; }
 
+        void SetArgs(int argc_in, char** argv_in)
+        {
+            argc = argc_in;
+            argv = argv_in;
+        }
+
         template <typename T>
         static T GetFlag(const char* name, T fallback)
         {
@@ -24,7 +30,7 @@ namespace based
         ~Engine() = default;
 
         void GetInfo();
-        void DeclareFlags();
+        bool DeclareAndParseFlags();
 
         void Run_Internal();
 
@@ -38,6 +44,8 @@ namespace based
         static void* GetGlobalFlagContext();
 
         App* m_pApp = nullptr;
+        int argc;
+        char** argv;
 
         bool m_bIsRunning = false;
         bool m_bIsInitialized = false;

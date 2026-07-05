@@ -76,12 +76,11 @@ int main(int argc, char* argv[])
     
     based::App* app = based::CreateApp();
     BASED_ASSERT(app, "Invalid app was returned!");
-    
-    //based::Engine::Instance().SetArgs(argc, argv);
+
+    based::Engine::Instance().SetArgs(argc, argv);
     based::Engine::Instance().Run(app);
 
     delete app;
-    //delete based::Engine::GetRawEngineInstance();
 
     return 0;
 }
