@@ -4,19 +4,13 @@
 #define _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING
 #endif
 
-#include "core/NewDelete.h"
-
-#include <chrono>
-#include <cstdio>
-#include <format>
-#include <random>
-#include <thread>
-
-#include "core/BasedLog.h"
-#include "core/FileSystem.h"
-#include "core/LogManager.h"
 #include "memory/MemoryPoolHeader.h"
 #include "memory/PlatformMemUtils.h"
+#include "core/LogManager.h"
+#include "core/FileSystem.h"
+#include "core/App.h"
+#include "tsoding/flag.h"
+#include "Engine.h"
 
 #ifdef PROFILE_MEMORY_LEAKS
 #ifdef BASED_CONFIG_DEBUG
@@ -24,8 +18,22 @@
 #endif
 #endif
 
-//#include "engine.h"
-//#include "app.h"
+void usage(FILE *stream)
+{
+    fprintf(stream, "Usage: ./example [OPTIONS] [--] [ARGS]\n");
+    fprintf(stream, "OPTIONS:\n");
+    flag_print_options(stream);
+}
+
+void print_list(const char **items, size_t count)
+{
+    printf("[");
+    for (size_t i = 0; i < count; ++i) {
+        if (i > 0) printf(", ");
+        printf("%s", items[i]);
+    }
+    printf("]\n");
+}
 
 // To be implemented in client app
 // The client returns a pointer to an instance of a class derived from based::App
@@ -34,7 +42,10 @@
 // Example:
 // class ClientApp : public based::App {};
 // based::App* CreateApp() { return new ClientApp(); }
-//based::App* CreateApp();
+namespace based
+{
+    App* CreateApp();
+}
 
 #ifdef BASED_CONFIG_RELEASE
 #ifdef BASED_PLATFORM_WINDOWS
@@ -51,9 +62,8 @@ int main(int argc, char* argv[])
     char** argv = __argv;
 #endif
 #endif
-
-    based::LogManager logMan;
-    logMan.Initialize();
+    
+    based::LogManager::Initialize();
     based::BootstrapAllocator::DisableBootstrap();
     
     based::SetupMemoryPools();
@@ -63,47 +73,15 @@ int main(int argc, char* argv[])
     const bool bSuccess = based::InitializeRootFileSystem();
     BASED_ASSERT_FMT(bSuccess, "Couldn't set up root filesystem, is root path '{}' valid?",
         based::GetExecutableDirectory());
-
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> distrib(16, 100000000);
-    size_t totalAllocated = 0;
-
-    while (true) {
-        auto startTime = std::chrono::steady_clock::now();
-
-        size_t amount = distrib(gen);
-
-        // Allocate out of your custom wrapper instance
-        void* pTemp = new uint8[amount];
-
-        if (!pTemp) {
-            BASED_ERROR("Pool allocation failed or reached absolute limit trying to allocate {}! Total: {}",
-                MemSize{amount}, MemSize{totalAllocated});
-            break;
-        }
-
-        // CRITICAL: Overwrite the entirety of the 100MB block to register it on the terminal telemetry
-        std::memset(pTemp, 0xCC, amount);
-
-        totalAllocated += amount;
-        BASED_TRACE("Allocated {:2.1} at {}. Total: {:2.1}", MemSize{amount}, pTemp, MemSize{totalAllocated});
-
-        auto endTime = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-        auto sleepTime = std::chrono::milliseconds(10) - elapsed;
-
-        if (sleepTime.count() > 0) {
-            std::this_thread::sleep_for(sleepTime);
-        }
-    }
     
-    /*based::App* app = CreateApp();
-    based::Engine::Instance().SetArgs(argc, argv);
+    based::App* app = based::CreateApp();
+    BASED_ASSERT(app, "Invalid app was returned!");
+    
+    //based::Engine::Instance().SetArgs(argc, argv);
     based::Engine::Instance().Run(app);
 
     delete app;
-    delete based::Engine::GetRawEngineInstance();*/
+    //delete based::Engine::GetRawEngineInstance();
 
     return 0;
 }

@@ -3,6 +3,34 @@
 namespace based
 {
 
+    class Sandbox final : public App
+    {
+    public:
+        void Initialize() override
+        {
+            BASED_INFO("=======================   INITIALIZING SANDBOX    =======================");
+            BASED_INFO("======================= DONE INITIALIZING SANDBOX =======================");
+        }
+        
+        void Update(float fDeltaTime) override
+        {
+        }
+        
+        void Render() override
+        {
+        }
+        
+        void Shutdown() override
+        {
+            BASED_INFO("======================= SHUTTING DOWN SANDBOX =======================");
+        }
+    };
+
+    App* CreateApp()
+    {
+        return new Sandbox();
+    }
+
     // Don't actually need all that much memory for testing right now.
     const EngineMemoryPoolDescriptorList& GetMemoryPoolDescriptors()
     {

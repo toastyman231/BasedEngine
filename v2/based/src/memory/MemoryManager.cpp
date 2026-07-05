@@ -59,9 +59,6 @@ namespace based
 
     void* MemoryManager::MemRealloc(void* ptr, size_t size) noexcept
     {
-        BASED_ASSERT(ptr, "Can't reallocate a null pointer!");
-        if (!ptr) return nullptr;
-
         if (BootstrapAllocator::ShouldUseBootstrap())
         {
             BASED_ASSERT(false, "Shouldn't be reallocating things from the bootstrap allocator!");

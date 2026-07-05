@@ -56,8 +56,9 @@
 
 // Based stuff
 // TODO: Add this stuff back in
-/*#include "based/log.h"
-#include "based/core/profiler.h"
+#include "core/NewDelete.h"
+#include "core/BasedLog.h"
+/*#include "based/core/profiler.h"
 #include "based/graphics/glmhelpers.h"
 #include "based/graphics/helpers.h"
 #include "based/memory/memoryhelpers.h"*/

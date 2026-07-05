@@ -37,11 +37,13 @@ workspace "based"
         system "windows"
         toolset "clang"
         defines { "_CXX20_DEPRECATE_OLD_SHARED_PTR_ATOMIC_SUPPORT" }
+        forceincludes { "%{wks.location}/based/include/based/core/NewDelete.h" }
 
     filter "platforms:Win64-MSVC"
         system "windows"
         toolset "msc"
         buildoptions { "/utf-8" }
+        forceincludes { "%{wks.location}/based/include/based/core/NewDelete.h" }
 
     filter "platforms:Linux"
         system "linux"
@@ -66,6 +68,14 @@ workspace "based"
         include "external/Private/tlsf"
         include "external/Private/tracy"
         include "external/Private/yaml-cpp"
+
+        project "Public"
+            buildaction "None"
+            kind "None"
+            location "../Intermediate"
+            files {
+                "external/Public/**.*"
+            }
     group ""
 
     group "Tools"

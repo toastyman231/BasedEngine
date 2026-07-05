@@ -19,7 +19,6 @@ project "based"
         "src/**.h",
         "src/**.cpp",
         "**.natvis",
-        EXTERNALS_DIR_PUBLIC
     }
 
     -- Not all of these are actually supported

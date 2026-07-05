@@ -60,22 +60,22 @@ void operator delete(void* ptr) noexcept
 }
 // Don't need a delete[] overload because it wouldn't do anything delete doesn't already do
 
-void*  my_malloc(size_t size)
+void* my_malloc(size_t size)
 {
     return based::MemoryManager::MemAlign(size, based::GetPlatformDefaultAlignment());
 }
 
-void   my_free(void* ptr)
+void my_free(void* ptr)
 {
     return based::MemoryManager::MemFree(ptr);
 }
 
-void*  my_realloc(void* ptr, size_t size)
+void* my_realloc(void* ptr, size_t size)
 {
     return based::MemoryManager::MemRealloc(ptr, size);
 }
 
-void*  my_calloc(size_t num, size_t size)
+void* my_calloc(size_t num, size_t size)
 {
     void* ptr = based::MemoryManager::MemAlign(num * size, based::GetPlatformDefaultAlignment());
     if (ptr)
@@ -84,33 +84,31 @@ void*  my_calloc(size_t num, size_t size)
 }
 
 // C11 aligned allocation
-BASED_C_ALLOC_OVERRIDE void*  aligned_alloc(size_t alignment, size_t size)
+void* aligned_alloc(size_t alignment, size_t size)
 {
     return based::MemoryManager::MemAlign(size, alignment);
 }
 
-// POSIX aligned allocation
-#ifdef BASED_PLATFORM_LINUX
-void*  malloc(size_t size)
+// MSVC aligned allocation
+#if defined(BASED_PLATFORM_WINDOWS) && defined(_MSC_VER)
+void* my_aligned_malloc(size_t size, size_t alignment)
 {
-    return my_malloc(size);
+    return based::MemoryManager::MemAlign(size, alignment);
 }
 
-void   free(void* ptr)
+void* my_aligned_realloc(void* ptr, size_t size, size_t alignment)
+{
+    return my_realloc(ptr, size);
+}
+
+void  my_aligned_free(void* ptr)
 {
     return my_free(ptr);
 }
+#endif
 
-void*  realloc(void* ptr, size_t size)
-{
-    return return my_realloc(ptr, size);
-}
-
-void*  calloc(size_t num, size_t size)
-{
-    return my_calloc(num, size);
-}
-
+// POSIX aligned allocation
+#ifdef BASED_PLATFORM_LINUX
 int    posix_memalign(void** ptr, size_t alignment, size_t size)
 {
     if (stAlignment < sizeof(void*) || (stAlignment & (stAlignment - 1)) != 0)

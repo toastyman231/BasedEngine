@@ -13,8 +13,8 @@ namespace based
         LogManager() = default;
         ~LogManager() = default;
 
-        void Initialize();
-        void Shutdown();
+        static void Initialize();
+        static void Shutdown();
     };
 }
 
