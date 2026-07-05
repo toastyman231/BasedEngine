@@ -104,7 +104,7 @@ namespace based
         static void PrintPoolsLayout();
 
         PoolStats GetStats();
-        void PrintPoolInfo();
+        static void PrintPoolInfo();
         
         template <typename T> requires EnumClassWithUnderlying<T, uint8>
         static MemoryPoolHeader* GetPoolByID(T nID)
@@ -117,6 +117,8 @@ namespace based
         [[nodiscard]] size_t GetPoolSize() const { return m_stPoolSizeBytes; }
         [[nodiscard]] std::string_view GetPoolName() const { return {m_pName}; }
         [[nodiscard]] ePoolIdentifier GetPoolID() const { return static_cast<ePoolIdentifier>(m_nPoolID); }
+
+        // This is just used to build PoolStats in GetStats, you should prefer that function
         [[nodiscard]] size_t GetPeakUsage() const { return m_stPeakUsed; }
 
         // Users declaring custom pools should prefer this version of GetPoolID, since it will nicely return their
@@ -143,6 +145,8 @@ namespace based
     private:
         MemoryPoolHeader() = default;
         ~MemoryPoolHeader() = default;
+
+        static std::vector<MemoryPoolHeader*> CollectSortedPools();
 
         static bool ms_bCreatedRootPool;
         static MemoryPoolHeader* ms_poolList[kMaxPools];

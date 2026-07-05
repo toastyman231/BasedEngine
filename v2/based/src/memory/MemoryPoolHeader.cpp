@@ -219,21 +219,8 @@ namespace based
         return pHeader == pPool;
     }
 
-    void MemoryPoolHeader::PrintPoolsLayout()
+    std::vector<MemoryPoolHeader*> MemoryPoolHeader::CollectSortedPools()
     {
-        BASED_INFO("=================== MEMORY POOL LAYOUT DESCRIPTOR ===================");
-    
-        std::stringstream headerStream;
-        headerStream << std::left 
-                     << std::setw(20) << "Pool Name"
-                     << std::setw(20) << "Start Addr"
-                     << std::setw(20) << "End Addr"
-                     << std::setw(21) << "Total Size (Bytes)"
-                     << "Visual Span (Zoomed Linear)";
-        BASED_INFO(headerStream.str().c_str());
-        BASED_INFO(std::string(110, '-').c_str());
-
-        // 1. Collect and sort all valid unique pools by memory address
         std::vector<MemoryPoolHeader*> sortedPools;
         for (size_t i = 0; i <= to_underlying(ePoolIdentifier::kEnginePoolsCount); ++i)
         {
@@ -248,6 +235,26 @@ namespace based
         });
         sortedPools.insert(sortedPools.begin(), s_pRootPool);
 
+        return sortedPools;
+    }
+
+    void MemoryPoolHeader::PrintPoolsLayout()
+    {
+        BASED_INFO("=================== MEMORY POOL LAYOUT DESCRIPTOR ===================");
+
+        std::stringstream headerStream;
+        headerStream << std::left 
+                     << std::setw(20) << "Pool Name"
+                     << std::setw(20) << "Start Addr"
+                     << std::setw(20) << "End Addr"
+                     << std::setw(21) << "Total Size (Bytes)"
+                     << "Visual Span (Zoomed Linear)";
+        BASED_INFO(headerStream.str().c_str());
+        BASED_INFO(std::string(110, '-').c_str());
+
+        // 1. Collect and sort all valid unique pools by memory address
+        std::vector<MemoryPoolHeader*> sortedPools = CollectSortedPools();
+
         // 2. Scan for the absolute minimum and maximum boundaries of active sub-allocations
         uintptr_t globalMin = 0xFFFFFFFFFFFFFFFFULL;
         uintptr_t globalMax = 0;
@@ -258,13 +265,11 @@ namespace based
             uintptr_t checkEnd = (pPool->m_stPoolSizeBytes == 0xFFFFFFFFFFFFFFFFULL)
                                 ? 0
                                 : (checkStart + pPool->m_stPoolSizeBytes);
-            
-            // Filter out extreme root bounds to prevent our zoom scale from breaking
+
             if (checkStart < globalMin && checkStart > 0) globalMin = checkStart;
             if (checkEnd > globalMax && checkEnd < 0xFFFFFFFFFFFFFFFFULL) globalMax = checkEnd;
         }
 
-        // Fallback: If only the Root pool exists, capture its natural limits safely
         if (globalMin == 0xFFFFFFFFFFFFFFFFULL) globalMin = 0;
         if (globalMax == 0) globalMax = 0xFFFFFFFFFFFFFFFFULL;
 
@@ -312,7 +317,6 @@ namespace based
             // 6. Generate the Zoomed Linear Span Bar
             if (dynamicRange > 0)
             {
-                // Clamp pointers to the active window to insulate against overflow/underflow
                 uintptr_t clampStart = poolStart;
                 uintptr_t clampEnd = poolEnd;
 
@@ -324,7 +328,7 @@ namespace based
 
                 const size_t kBarWidth = 30;
                 double scale = static_cast<double>(kBarWidth) / static_cast<double>(dynamicRange);
-                
+
                 size_t startPos = static_cast<size_t>(static_cast<double>(clampStart - globalMin) * scale);
                 size_t endPos = static_cast<size_t>(static_cast<double>(clampEnd - globalMin) * scale);
 
@@ -332,7 +336,6 @@ namespace based
                 endPos   = std::min(endPos, kBarWidth);
                 endPos   = std::max(endPos, startPos);
 
-                // Maintain 1-cell visibility for pools that legitimately intersect our window bounds
                 if (endPos == startPos && poolEnd > poolStart)
                 {
                     if (endPos < kBarWidth) endPos++;
@@ -353,7 +356,7 @@ namespace based
 
             BASED_INFO(rowStream.str().c_str());
         }
-        
+
         BASED_INFO(std::string(110, '=').c_str());
     }
 
@@ -364,6 +367,8 @@ namespace based
 
     void MemoryPoolHeader::PrintPoolInfo()
     {
+        BASED_INFO("======================== MEMORY POOL STATS ========================");
+
         std::stringstream headerStream;
         headerStream << std::left
                      << std::string(6, '=') << " "
@@ -377,20 +382,35 @@ namespace based
                      << std::string(6, '=');
         BASED_INFO(headerStream.str().c_str());
 
-        PoolStats stats = GetStats();
-        float fFrag = stats.FragmentationRatio();
+        std::vector<MemoryPoolHeader*> sortedPools = CollectSortedPools();
 
-        std::stringstream poolInfoStream;
-        poolInfoStream  << std::left
-                        << std::setw(7) << " "
-                        << std::setw(20) << m_pName
-                        << std::setw(20) << stats.stFreeBytes
-                        << std::setw(20) << stats.stUsedBytes
-                        << std::setw(20) << stats.stTotalSize
-                        << std::setw(20) << stats.stPeakUsed
-                        << std::setw(20) << (std::to_string(static_cast<int>(fFrag * 100.f)) + "%")
-                        << std::setw(20) << stats.stLargestFreeBlock;
-        BASED_INFO(poolInfoStream.str().c_str());
+        for (size_t i = 0; MemoryPoolHeader* pPool : sortedPools)
+        {
+            if (i == 0)
+            {
+                ++i;
+                continue;
+            }
+            
+            PoolStats stats = pPool->GetStats();
+            float fFrag = stats.FragmentationRatio();
+
+            std::stringstream poolInfoStream;
+            poolInfoStream << std::left
+                           << std::setw(7) << " "
+                           << std::setw(20) << pPool->m_pName
+                           << std::setw(20) << stats.stFreeBytes
+                           << std::setw(20) << stats.stUsedBytes
+                           << std::setw(20) << stats.stTotalSize
+                           << std::setw(20) << stats.stPeakUsed
+                           << std::setw(20) << (std::to_string(static_cast<int>(fFrag * 100.f)) + "%")
+                           << std::setw(20) << stats.stLargestFreeBlock;
+            BASED_INFO(poolInfoStream.str().c_str());
+
+            ++i;
+        }
+
+        BASED_INFO(std::string(110, '=').c_str());
     }
 
     AllocatorScope::AllocatorScope(MemoryPoolHeader* pMemoryPool)

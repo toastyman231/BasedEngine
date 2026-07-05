@@ -8,9 +8,14 @@
 namespace based
 {
     static BootstrapAllocator* g_pBootstrapAllocator = nullptr;
+    static std::recursive_mutex allocMutex;
+    static std::recursive_mutex reallocMutex;
+    static std::recursive_mutex freeMutex;
     
-    void* MemoryManager::MemAlign(size_t size, size_t alignment)
+    void* MemoryManager::MemAlign(size_t size, size_t alignment) noexcept
     {
+        std::scoped_lock lock(allocMutex);
+        
         if (BootstrapAllocator::ShouldUseBootstrap())
         {
             if (!g_pBootstrapAllocator)
@@ -40,7 +45,7 @@ namespace based
             } else
             {
                 MemoryPoolHeader::PrintPoolsLayout();
-                g_pCurrentMemoryPool->PrintPoolInfo();
+                MemoryPoolHeader::PrintPoolInfo();
                 BASED_ASSERT_FMT(false, "Couldn't allocate {} from pool {}!", MemSize{size},
                     to_underlying(g_pCurrentMemoryPool->GetPoolID()));
             }
@@ -52,13 +57,21 @@ namespace based
         return nullptr;
     }
 
-    void* MemoryManager::MemRealloc(void* ptr, size_t size)
+    void* MemoryManager::MemRealloc(void* ptr, size_t size) noexcept
     {
         BASED_ASSERT(ptr, "Can't reallocate a null pointer!");
         if (!ptr) return nullptr;
 
+        if (BootstrapAllocator::ShouldUseBootstrap())
+        {
+            BASED_ASSERT(false, "Shouldn't be reallocating things from the bootstrap allocator!");
+            return nullptr;
+        }
+
         if (g_pCurrentMemoryPool && g_pCurrentMemoryPool->m_pPoolAllocator)
         {
+            std::scoped_lock lock(reallocMutex);
+            
 #if BASED_CONFIG_DEBUG
             size_t stOldSize = g_pCurrentMemoryPool->m_pPoolAllocator->GetSizeForAllocation(ptr);
 #endif
@@ -70,7 +83,7 @@ namespace based
             } else
             {
                 MemoryPoolHeader::PrintPoolsLayout();
-                g_pCurrentMemoryPool->PrintPoolInfo();
+                MemoryPoolHeader::PrintPoolInfo();
                 BASED_ASSERT_FMT(false, "Couldn't reallocate {} from pool {}!", MemSize{size},
                     to_underlying(g_pCurrentMemoryPool->GetPoolID()));
             }
@@ -82,12 +95,14 @@ namespace based
         return nullptr;
     }
 
-    void MemoryManager::MemFree(void* ptr)
+    void MemoryManager::MemFree(void* ptr) noexcept
     {
         if (!ptr) return;
 
         if (g_pBootstrapAllocator->IsPointerFromAllocator(ptr))
             return; // bootstrap allocs are never individually freed
+
+        std::scoped_lock lock(freeMutex);
 
         // In many cases this is a simple pointer bounds check, very quick and easy way to tell if we have the
         // right pool. If we definitely don't, then we spend the slightly extra effort to search for the correct one.
