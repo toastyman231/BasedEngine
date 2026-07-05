@@ -158,6 +158,8 @@ namespace based
 
         if (m_pApp) m_pApp->Shutdown();
 
+        if (m_pWindow) m_pWindow->Shutdown();
+
         LogManager::Shutdown();
     }
 }

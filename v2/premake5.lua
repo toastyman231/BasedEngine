@@ -63,17 +63,21 @@ workspace "based"
         include "external/Private/jolt"
         include "external/Private/ktx-software"
         include "external/Private/rmlui"
-        include "external/Private/sdl3"
         include "external/Private/spdlog"
         include "external/Private/tlsf"
         include "external/Private/tracy"
         include "external/Private/yaml-cpp"
 
+        filter { "platforms:Linux", "platforms:Win64*" }
+            include "external/Private/sdl3"
+        filter {}
+
         project "Public"
             buildaction "None"
             kind "None"
             location "../Intermediate"
-            files {
+            files 
+            {
                 "external/Public/**.*"
             }
     group ""

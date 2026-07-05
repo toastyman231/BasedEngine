@@ -19,7 +19,10 @@ namespace based
     {
         SDL_SetMemoryFunctions(my_malloc, my_calloc, my_realloc, my_free);
         AllocatorScope ac(ePoolIdentifier::kPersistentPool);
-        
+
+        // Currently this and Shutdown assume only one window, so we init and shutdown SDL itself alongside that
+        // one window. If/when we want more than one window, we can add a Destroy function that only destroys the
+        // window without shutting down SDL, and only init SDL on the first window creation. 
         const bool bSuccess = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_EVENTS);
         if (!bSuccess)
         {
@@ -63,6 +66,8 @@ namespace based
         
         SDL_DestroyWindow(m_pSystemWindow);
         m_pSystemWindow = nullptr;
+
+        SDL_Quit();
     }
     
     void WindowsWindow::PumpEvents()
