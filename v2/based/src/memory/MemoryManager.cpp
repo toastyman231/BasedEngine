@@ -35,6 +35,9 @@ namespace based
             return ptr;
         }
 
+        // This does mean background threads can thrash the persistent pool, so we should keep an eye on this
+        if (!g_pCurrentMemoryPool) g_pCurrentMemoryPool = MemoryPoolHeader::GetPoolByID(ePoolIdentifier::kPersistentPool);
+
         if (g_pCurrentMemoryPool && g_pCurrentMemoryPool->m_pPoolAllocator)
         {
             void* ptr = g_pCurrentMemoryPool->m_pPoolAllocator->Allocate(size, alignment);
@@ -53,27 +56,6 @@ namespace based
             return ptr;
         }
 
-        if (auto pPersistentPool = MemoryPoolHeader::GetPoolByID(ePoolIdentifier::kPersistentPool))
-        {
-            // Try to use the persistent pool as a fallback
-            // TODO: Should I really be doing this? Seems like this is a code smell.
-
-            void* ptr = pPersistentPool->m_pPoolAllocator->Allocate(size, alignment);
-#if BASED_CONFIG_DEBUG
-            if (ptr)
-            {
-                pPersistentPool->m_pPoolAllocator->TrackUsageForPool(pPersistentPool, ptr);
-            } else
-            {
-                MemoryPoolHeader::PrintPoolsLayout();
-                MemoryPoolHeader::PrintPoolInfo();
-                BASED_ASSERT_FMT(false, "Couldn't allocate {} from pool {}!", MemSize{size},
-                    to_underlying(pPersistentPool->GetPoolID()));
-            }
-#endif
-            return ptr;
-        }
-
         BASED_FATAL("Trying to allocate when there is no valid pool! This could cause an OS allocation!");
         return nullptr;
     }
@@ -85,6 +67,8 @@ namespace based
             BASED_ASSERT(false, "Shouldn't be reallocating things from the bootstrap allocator!");
             return nullptr;
         }
+
+        if (!g_pCurrentMemoryPool) g_pCurrentMemoryPool = MemoryPoolHeader::GetPoolByID(ePoolIdentifier::kPersistentPool);
 
         if (g_pCurrentMemoryPool && g_pCurrentMemoryPool->m_pPoolAllocator)
         {
@@ -104,32 +88,6 @@ namespace based
                 MemoryPoolHeader::PrintPoolInfo();
                 BASED_ASSERT_FMT(false, "Couldn't reallocate {} from pool {}!", MemSize{size},
                     to_underlying(g_pCurrentMemoryPool->GetPoolID()));
-            }
-#endif
-            return ptr_out;
-        }
-
-        if (auto pPersistentPool = MemoryPoolHeader::GetPoolByID(ePoolIdentifier::kPersistentPool))
-        {
-            std::scoped_lock lock(reallocMutex);
-
-            // Try to use the persistent pool as a fallback
-            // TODO: Should I really be doing this? Seems like this is a code smell.
-            
-#if BASED_CONFIG_DEBUG
-            size_t stOldSize = pPersistentPool->m_pPoolAllocator->GetSizeForAllocation(ptr);
-#endif
-            void* ptr_out = pPersistentPool->m_pPoolAllocator->Reallocate(ptr, size);
-#if BASED_CONFIG_DEBUG
-            if (ptr_out)
-            {
-                pPersistentPool->m_pPoolAllocator->TrackUsageForPool(pPersistentPool, ptr_out, stOldSize);
-            } else
-            {
-                MemoryPoolHeader::PrintPoolsLayout();
-                MemoryPoolHeader::PrintPoolInfo();
-                BASED_ASSERT_FMT(false, "Couldn't reallocate {} from pool {}!", MemSize{size},
-                    to_underlying(pPersistentPool->GetPoolID()));
             }
 #endif
             return ptr_out;
