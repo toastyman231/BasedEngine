@@ -3,6 +3,7 @@
 .vscode/
 bin*/
 logs/
+**/Intermediate/**
 
 # Ignore the entire .idea folder except for shared configurations
 .idea/

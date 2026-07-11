@@ -34,7 +34,7 @@ namespace based
         MEMORYSTATUSEX status;
         status.dwLength = sizeof(status);
         if (GlobalMemoryStatusEx(&status)) {
-            return status.ullAvailPhys; // Returns actual free physical RAM bytes
+            return status.ullAvailPageFile; // Free physical RAM + pagefile
         }
         return 0;
     }
