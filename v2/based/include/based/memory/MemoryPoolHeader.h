@@ -56,7 +56,7 @@ namespace based
             BASED_ASSERT(pAllocator, "Allocator registration failed!");
 
             new (pHeader) MemoryPoolHeader();
-            strncpy_s(pHeader->m_pName, pPoolName, MAX_NAME_LEN - 1);
+            strncpy(pHeader->m_pName, pPoolName, MAX_NAME_LEN - 1);
             pHeader->m_pName[MAX_NAME_LEN - 1] = '\0';
             pHeader->m_nPoolID = to_underlying(ePoolId);
             pHeader->m_stPoolSizeBytes = stPool;
@@ -83,7 +83,7 @@ namespace based
             BASED_ASSERT(pTrueBackingMemory, "Memory after the header is invalid! Did your allocation get corrupted?");
         
             new (pHeader) MemoryPoolHeader();
-            strncpy_s(pHeader->m_pName, pPoolName, MAX_NAME_LEN - 1);
+            strncpy(pHeader->m_pName, pPoolName, MAX_NAME_LEN - 1);
             pHeader->m_pName[MAX_NAME_LEN - 1] = '\0';
             pHeader->m_nPoolID = to_underlying(ePoolId);
             pHeader->m_stPoolSizeBytes = stPool;

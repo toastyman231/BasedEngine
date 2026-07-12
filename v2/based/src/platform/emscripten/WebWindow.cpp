@@ -2,7 +2,7 @@
 #include "core/Window.h"
 #define BASED_PREVENT_ACCIDENTAL_WINDOW_INCLUDES
 #define BASED_USE_NAMESPACE
-#include "platform/windows/WindowsWindow.h"
+#include "platform/emscripten/WebWindow.h"
 
 #include "Engine.h"
 #include "core/App.h"
@@ -15,14 +15,14 @@
 
 namespace based
 {
-    bool WindowsWindow::Create_Internal()
+    bool WebWindow::Create_Internal()
     {
         SDL_SetMemoryFunctions(my_malloc, my_calloc, my_realloc, my_free);
         AllocatorScope ac(ePoolIdentifier::kPersistentPool);
 
         // Currently this and Shutdown assume only one window, so we init and shutdown SDL itself alongside that
         // one window. If/when we want more than one window, we can add a Destroy function that only destroys the
-        // window without shutting down SDL, and only init SDL on the first window creation.
+        // window without shutting down SDL, and only init SDL on the first window creation. 
         const bool bSuccess = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_EVENTS);
         if (!bSuccess)
         {
@@ -35,7 +35,7 @@ namespace based
         m_pSystemWindow = SDL_CreateWindow(
             m_WindowProps.title.data(),
             m_WindowProps.w, m_WindowProps.h,
-            m_WindowProps.flags | SDL_WINDOW_VULKAN);
+            m_WindowProps.flags);
         if (!m_pSystemWindow)
         {
             BASED_ERROR("Error creating window: {}", SDL_GetError());
@@ -55,7 +55,7 @@ namespace based
         return true;
     }
     
-    void WindowsWindow::Shutdown()
+    void WebWindow::Shutdown()
     {
         AllocatorScope ac(ePoolIdentifier::kPersistentPool);
         
@@ -70,7 +70,7 @@ namespace based
         SDL_Quit();
     }
     
-    void WindowsWindow::PumpEvents()
+    void WebWindow::PumpEvents()
     {
         AllocatorScope ac(ePoolIdentifier::kPersistentPool);
         
@@ -90,20 +90,20 @@ namespace based
         }
     }
     
-    IVec2 WindowsWindow::GetSize()
+    IVec2 WebWindow::GetSize()
     {
         int w, h;
         SDL_GetWindowSize(m_pSystemWindow, &w, &h);
         return {w, h};
     }
     
-    void WindowsWindow::SetWindowTitle(const std::string& pStrTitle)
+    void WebWindow::SetWindowTitle(const std::string& pStrTitle)
     {
         SDL_SetWindowTitle(m_pSystemWindow, pStrTitle.c_str());
         m_WindowProps.title = pStrTitle;
     }
     
-    void WindowsWindow::SetWindowFullscreen(eFullscreenMode mode)
+    void WebWindow::SetWindowFullscreen(eFullscreenMode mode)
     {
         AllocatorScope ac(ePoolIdentifier::kPersistentPool);
         
@@ -142,7 +142,7 @@ namespace based
         }
     }
     
-    void WindowsWindow::SetCursor(eCursorMode mode) const
+    void WebWindow::SetCursor(eCursorMode mode) const
     {
         SDL_SetCursor(m_pCursors[to_underlying(mode)]);
     }

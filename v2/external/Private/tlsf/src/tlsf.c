@@ -72,6 +72,19 @@ tlsf_decl int tlsf_fls(unsigned int word)
 	return bit - 1;
 }
 
+#if defined (__x86_64__) || defined (__aarch64__) || defined(__wasm64__) || (defined(__SIZEOF_LONG_LONG__) && __SIZEOF_LONG_LONG__ == 8)
+tlsf_decl int tlsf_fls_64(unsigned long long word)
+{
+	const int bit = word ? 64 - __builtin_clzll(word) : 0;
+	return bit - 1;
+}
+
+tlsf_decl int tlsf_ffs_64(unsigned long long word)
+{
+	return __builtin_ffsll(word) - 1;
+}
+#endif
+
 #elif defined (_MSC_VER) && (_MSC_VER >= 1400) && (defined (_M_IX86) || defined (_M_X64))
 /* Microsoft Visual C++ support on x86/X64 architectures. */
 

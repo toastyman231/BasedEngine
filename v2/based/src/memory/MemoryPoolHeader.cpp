@@ -25,7 +25,7 @@ namespace based
         MemoryPoolHeader* pHeader = reinterpret_cast<MemoryPoolHeader*>(&s_rootPoolHeaderMem[0]);
         
         new (pHeader) MemoryPoolHeader();
-        strncpy_s(pHeader->m_pName, "Root", MAX_NAME_LEN - 1);
+        strncpy(pHeader->m_pName, "Root", MAX_NAME_LEN - 1);
         pHeader->m_pName[MAX_NAME_LEN - 1] = '\0';
         pHeader->m_nPoolID = to_underlying(ePoolIdentifier::kRootPool);
         pHeader->m_stPoolSizeBytes = 0xFFFFFFFFFFFFFFFF;

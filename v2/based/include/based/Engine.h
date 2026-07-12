@@ -75,6 +75,8 @@ namespace based
 
 #ifdef BASED_PLATFORM_WINDOWS
 #include "platform/windows/WindowsPlatformEngine.h"
+#elif defined(BASED_PLATFORM_WEB)
+#include "platform/emscripten/WebPlatformEngine.h"
 #else
 #error "You need to implement PlatformEngine for this platform!"
 #endif

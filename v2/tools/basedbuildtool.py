@@ -405,7 +405,7 @@ def main():
         sys.exit(1)
     
     project_name = get_project_name(source_path, args.override_name)
-    destination_path = source_path / "bin" / args.config / project_name
+    destination_path = source_path / "bin" / globals.GetOSDir() / args.config / project_name
     
     if not destination_path.exists():
         print(f"Output directory {destination_path} does not exist! Creating it now.")

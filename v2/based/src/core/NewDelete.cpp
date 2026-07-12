@@ -58,6 +58,10 @@ void operator delete(void* ptr) noexcept
 {
     based::MemoryManager::MemFree(ptr);
 }
+void operator delete(void* ptr, std::align_val_t al) noexcept
+{
+    based::MemoryManager::MemFree(ptr);
+}
 // Don't need a delete[] overload because it wouldn't do anything delete doesn't already do
 
 void* my_malloc(size_t size)

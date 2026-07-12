@@ -1,9 +1,10 @@
 project "jolt"
     kind "StaticLib"
     language "C++"
+    cppdialect "C++17"
     location "Intermediate"
-    targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
-    objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
+    targetdir(tdir)
+    objdir(odir)
 
     files 
     {
@@ -20,12 +21,12 @@ project "jolt"
     
     filter "system:windows"
 		systemversion "latest"
-		cppdialect "C++17"
+    filter {}
 
-	filter "system:linux"
+	filter "system:linux or macosx or emscripten"
 		pic "On"
-		systemversion "latest"
-		cppdialect "C++17"
+        systemversion "latest"
+    filter {}
 
 	filter "configurations:Debug*"
 		runtime "Debug"
@@ -35,6 +36,7 @@ project "jolt"
         {
             "JPH_DEBUG_RENDERER"
         }
+    filter {}
 
     filter "configurations:Development*"
 		runtime "Release"
@@ -45,7 +47,9 @@ project "jolt"
         {
             "JPH_DEBUG_RENDERER"
         }
+    filter {}
 
 	filter "configurations:Release*"
 		runtime "Release"
 		optimize "on"
+    filter {}

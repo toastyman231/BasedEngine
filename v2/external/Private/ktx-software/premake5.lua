@@ -3,8 +3,8 @@ project "ktx-software"
     language "C++"
     cppdialect "C++11"
     location "Intermediate"
-    targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
-    objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
+    targetdir(tdir)
+    objdir(odir)
 
     files
     {
@@ -68,21 +68,31 @@ project "ktx-software"
         {
             "_SCL_SECURE_NO_WARNINGS",
         }
+    filter {}
 
     filter "system:linux"
         pic "On"
         systemversion "latest"
         links { "dl", "pthread" }
+    filter {}
 
     filter "system:macosx"
         pic "On"
         systemversion "latest"
+    filter {}
+
+    filter "system:emscripten"
+        removefiles
+        {
+            "lib/vk_funcs.c"
+        }
 
     filter "configurations:Debug*"
         runtime "Debug"
         symbols "on"
         defines { "_DEBUG", "DEBUG" }
         targetsuffix "_d"
+    filter {}
 
     filter "configurations:Development*"
         runtime "Release"
@@ -90,7 +100,9 @@ project "ktx-software"
         optimize "on"
         defines { "_DEBUG", "DEBUG" }
         targetsuffix "_dev"
+    filter {}
 
     filter "configurations:Release*"
         runtime "Release"
         optimize "on"
+    filter {}

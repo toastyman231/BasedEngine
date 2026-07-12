@@ -24,6 +24,7 @@ namespace based
             return true;
         }
 
+        BASED_ERROR("Error creating native filesystem!");
         return false;
     }
 
@@ -45,6 +46,9 @@ namespace based
             return std::filesystem::canonical(buffer.data()).parent_path().string();
         }
         return "";
+#elif defined(__EMSCRIPTEN__)
+        mkdir("/GameDir", 0777);
+        return "/GameDir";
 #else
 #error "Unsupported platform! Implement this function for the current platform!"
         return ""; // Unsupported platform

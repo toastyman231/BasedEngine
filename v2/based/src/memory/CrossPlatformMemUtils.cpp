@@ -54,11 +54,18 @@ namespace based
             }
         }
 
+#ifndef SKIP_AVAILABLE_MEMORY_CHECK
         size_t totalRAM = GetTotalSystemMemoryBytes();
         size_t availRAM = GetAvailableSystemMemoryBytes();
         BASED_ASSERT_FMT(totalSize <= totalRAM && totalSize <= availRAM,
             "System does not have enough memory! Want: {}, Have: {}, Available: {}", totalSize, totalRAM, availRAM);
         if (totalSize > totalRAM || totalSize > availRAM) return false;
+#else
+        size_t totalRAM = GetTotalSystemMemoryBytes();
+        BASED_ASSERT_FMT(totalSize <= totalRAM,
+            "System does not have enough memory! Want: {}, Have: {}", totalSize, totalRAM);
+        if (totalSize > totalRAM) return false;
+#endif
 
         return true;
     }
@@ -108,6 +115,8 @@ namespace based
                 static_cast<ePoolIdentifier>(poolDescriptor.m_ePoolID),
                 stPoolSize, pBackingMem);
         }
+
+        BASED_INFO("Finished setting up memory pools!");
         
         bDoOnce = true;
     }

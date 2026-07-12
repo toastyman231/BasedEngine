@@ -3,8 +3,8 @@ project "freetype"
     language "C"
 
     location "Intermediate"
-    targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
-    objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
+    targetdir(tdir)
+    objdir(odir)
 
     files
     {
@@ -78,6 +78,7 @@ project "freetype"
             "_CRT_SECURE_NO_WARNINGS",
             "_CRT_NONSTDC_NO_WARNINGS"
         }
+    filter {}
 
     filter "system:linux"
         pic "On"
@@ -87,6 +88,7 @@ project "freetype"
             "builds/unix/ftsystem.c",
             "src/base/ftdebug.c"
         }
+    filter {}
 
     filter "system:macosx"
         pic "On"
@@ -96,18 +98,22 @@ project "freetype"
             "builds/unix/ftsystem.c",
             "src/base/ftdebug.c"
         }
+    filter {}
 
     filter "configurations:Debug*"
         runtime "Debug"
         symbols "on"
         targetsuffix "_d"
+    filter {}
 
     filter "configurations:Development*"
         runtime "Release"
         symbols "on"
         optimize "on"
         targetsuffix "_dev"
+    filter {}
 
     filter "configurations:Release*"
         runtime "Release"
         optimize "on"
+    filter {}

@@ -3,8 +3,8 @@ project "spdlog"
     language "C++"
     cppdialect "C++11"
     location "Intermediate"
-    targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
-    objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
+    targetdir(tdir)
+    objdir(odir)
 
     files
     {
@@ -22,6 +22,10 @@ project "spdlog"
         "SPDLOG_COMPILED_LIB",
     }
 
+    --[[ if os.host() == "windows" then
+        buildoptions { "/utf-8", "/Zc:__cplusplus" }
+    end ]]
+
     enablepch "off"
 
     filter "system:windows"
@@ -32,29 +36,35 @@ project "spdlog"
             "WIN32_LEAN_AND_MEAN",
             "NOMINMAX",
         }
-        buildoptions { "/utf-8", "/Zc:__cplusplus" }
+    filter {}
 
-    filter "system:linux"
+    filter "system:linux or macosx"
         pic "On"
         systemversion "latest"
         links { "pthread" }
+    filter {}
 
-    filter "system:macosx"
+    filter "system:emscripten"
         pic "On"
         systemversion "latest"
-        links { "pthread" }
+        linkoptions  { "-pthread" }
+        buildoptions { "-pthread" }
+    filter {}
 
     filter "configurations:Debug*"
         runtime "Debug"
         symbols "on"
         targetsuffix "_d"
+    filter {}
 
     filter "configurations:Development*"
         runtime "Release"
         symbols "on"
         optimize "on"
         targetsuffix "_dev"
+    filter {}
 
     filter "configurations:Release*"
         runtime "Release"
         optimize "on"
+    filter {}

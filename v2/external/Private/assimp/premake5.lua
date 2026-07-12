@@ -3,8 +3,8 @@ project "assimp"
     language "C++"
     cppdialect "C++17"
     location "Intermediate"
-    targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
-    objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
+    targetdir(tdir)
+    objdir(odir)
 
     files
     {
@@ -14,10 +14,8 @@ project "assimp"
         "code/**.hpp",
         "code/**.cpp",
         "contrib/pugixml/src/pugixml.cpp",
-        "contrib/unzip/**.c",
-        "contrib/unzip/**.h",
-        "contrib/zlib/**.c",
-        "contrib/zlib/**.h",
+        "contrib/zlib/*.c",
+        "contrib/zlib/*.h",
     }
 
     removefiles
@@ -43,6 +41,13 @@ project "assimp"
         "contrib/zlib/contrib/inflate86/inffas86.c",
     }
 
+    filter "system:not windows"
+        removefiles
+        {
+            "contrib/zlib/contrib/**",
+        }
+    filter {}
+
     includedirs
     {
         ".",
@@ -66,7 +71,8 @@ project "assimp"
         "ASSIMP_BUILD_NO_VRML_IMPORTER",
         "ASSIMP_BUILD_NO_C4D_IMPORTER",
         "ASSIMP_BUILD_NO_USD_IMPORTER",
-        "WIN32_LEAN_AND_MEAN",
+        "RAPIDJSON_HAS_STDSTRING=1",
+        "RAPIDJSON_NOMEMBERITERATORCLASS",
     }
 
     enablepch "off"
@@ -78,11 +84,11 @@ project "assimp"
         {
             "_CRT_SECURE_NO_WARNINGS",
             "_SCL_SECURE_NO_WARNINGS",
+            "WIN32_LEAN_AND_MEAN",
             "UNICODE",
             "_UNICODE",
-            "RAPIDJSON_HAS_STDSTRING=1",
-            "RAPIDJSON_NOMEMBERITERATORCLASS",
         }
+    filter {}
 
     filter "system:linux"
         pic "On"
@@ -91,22 +97,37 @@ project "assimp"
         {
             "_FILE_OFFSET_BITS=64",
         }
+    filter {}
+
+    filter "system:emscripten"
+        pic "On"
+        defines
+        {
+            "_FILE_OFFSET_BITS=64",
+            "ASSIMP_BUILD_NO_EXPORT",
+            "HAVE_UNISTD_H",
+        }
+    filter {}
 
     filter "system:macosx"
         pic "On"
         systemversion "latest"
+    filter {}
 
     filter "configurations:Debug*"
         runtime "Debug"
         symbols "on"
         targetsuffix "_d"
+    filter {}
 
     filter "configurations:Development*"
         runtime "Release"
         symbols "on"
         optimize "on"
         targetsuffix "_dev"
+    filter {}
 
     filter "configurations:Release*"
         runtime "Release"
         optimize "on"
+    filter {}

@@ -3,11 +3,17 @@ project "based"
     language "C++"
     cppdialect "C++20"
     location "../Intermediate"
-    targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
-    objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
+
+    targetdir(tdir)
+    objdir(odir)
 
     pchheader "pch.h"
     pchsource "src/pch.cpp"
+
+    filter "action:ninja"
+        enablepch "off"
+        forceincludes { "pch.h" }
+    filter {}
 
     EXTERNALS_DIR_PRIVATE = "../external/Private/"
     EXTERNALS_DIR_PUBLIC = "../external/Public/"
@@ -29,15 +35,16 @@ project "based"
         "PS5",
         "Xbox",
         "Android",
-        "iOS"
+        "iOS",
+        "emscripten"
     }
 
     -- Remove any platform specific files, we will add back just the ones for this platform later
     for _, sys in ipairs(systems) do
         removefiles 
         { 
-            "include/**/" .. sys .. "/**.h",
-            "include/**/" .. sys .. "/**.hpp",
+            "include/based/**/" .. sys .. "/**.h",
+            "include/based/**/" .. sys .. "/**.hpp",
             "src/**/" .. sys .. "/**.c",
             "src/**/" .. sys .. "/**.cpp",
         }
@@ -74,12 +81,10 @@ project "based"
         "GLM_ENABLE_EXPERIMENTAL",
     }
 
-    dependson { "sdl3" }
-
     filter {"system:windows", "configurations:*"}
         systemversion "latest"
-        defines { "BASED_PLATFORM_WINDOWS" }
         buildoptions "/bigobj"
+    filter {}
 
     filter {"system:macosx", "configurations:*"}
         xcodebuildsettings
@@ -87,43 +92,33 @@ project "based"
             ["MACOSX_DEPLOYMENT_TARGET"] = "10.15",
             ["UseModernBuildSystem"] = "NO"
         }
+    filter {}
 
-        defines "BASED_PLATFORM_MAC"
-
-    filter {"system:linux", "configurations:*"}
-        defines "BASED_PLATFORM_LINUX"
+    filter {"system:windows or linux or macosx or emscripten", "configurations:*"}
+        dependson { "sdl3_build" }
+    filter {}
 
     filter "configurations:Debug*"
-        defines 
-        {
-            "BASED_CONFIG_DEBUG",
-            "JPH_DEBUG_RENDERER"
-        }
+        defines { "JPH_DEBUG_RENDERER" }
         runtime "Debug"
         editandcontinue "off"
         symbols "on"
         optimize "debug"
         targetsuffix "_d"
+    filter {}
 
     filter "configurations:Development*"
-        defines 
-        {
-            "BASED_CONFIG_DEBUG",
-            "BASED_CONFIG_DEVELOPMENT",
-            "JPH_DEBUG_RENDERER"
-        }
+        defines { "JPH_DEBUG_RENDERER" }
         runtime "Release"
         editandcontinue "off"
         optimize "on"
         symbols "on"
         targetsuffix "_dev"
+    filter {}
 
     filter "configurations:Release*"
-        defines "BASED_CONFIG_RELEASE"
         fatalwarnings "All"
         runtime "Release"
         symbols "off"
         optimize "on"
-
-    filter "configurations:*Editor"
-        defines "BASED_CONFIG_EDITOR"
+    filter {}

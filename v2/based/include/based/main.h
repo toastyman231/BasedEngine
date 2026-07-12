@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     char** argv = __argv;
 #endif
 #endif
-    
+
     based::LogManager::Initialize();
     based::BootstrapAllocator::DisableBootstrap();
     

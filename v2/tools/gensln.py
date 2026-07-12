@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     if args.action == "DEFAULT":
         if globals.IsWindows(): args.action = "vs2022"
-        if globals.IsLinux() or globals.IsMac(): args.action = "gmake2"
+        if globals.IsLinux() or globals.IsMac(): args.action = "gmake"
 
     if (globals.IsWindows()):
         globals.CheckForPremakeScript(args.location, args.project)

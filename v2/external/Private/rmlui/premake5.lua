@@ -3,8 +3,8 @@ project "rmlui"
     language "C++"
     cppdialect "C++17"
     location "Intermediate"
-    targetdir "bin/%{cfg.buildcfg}/%{prj.name}"
-    objdir "bin-obj/%{cfg.buildcfg}/%{prj.name}"
+    targetdir(tdir)
+    objdir(odir)
 
     files
     {
@@ -42,26 +42,27 @@ project "rmlui"
             "WIN32_LEAN_AND_MEAN",
             "NOMINMAX",
         }
+    filter {}
 
-    filter "system:linux"
+    filter "system:linux or macosx"
         pic "On"
         systemversion "latest"
-
-    filter "system:macosx"
-        pic "On"
-        systemversion "latest"
+    filter {}
 
     filter "configurations:Debug*"
         runtime "Debug"
         symbols "on"
         targetsuffix "_d"
+    filter {}
 
     filter "configurations:Development*"
         runtime "Release"
         symbols "on"
         optimize "on"
         targetsuffix "_dev"
+    filter {}
 
     filter "configurations:Release*"
         runtime "Release"
         optimize "on"
+    filter {}

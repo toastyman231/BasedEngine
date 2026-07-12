@@ -69,3 +69,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #endif
+
+#ifdef BASED_PLATFORM_WEB
+#include <emscripten.h>
+#include <emscripten/heap.h>
+#endif

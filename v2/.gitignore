@@ -4,6 +4,7 @@
 bin*/
 logs/
 **/Intermediate/**
+**/build*/
 
 # Ignore the entire .idea folder except for shared configurations
 .idea/
@@ -24,6 +25,7 @@ logs/
 *.lib
 *.pdb
 *.exp
+*.ninja*
 
 # Allow list
 !premake5.exe
