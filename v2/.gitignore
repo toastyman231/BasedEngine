@@ -27,6 +27,11 @@ logs/
 *.exp
 *.ninja*
 
+# Build artifacts in third-party dependencies
+external/**/build/
+external/**/.gradle/
+external/**/out/
+
 # Allow list
 !premake5.exe
 !PostBuildCopy/Windows/mimalloc-redirect.dll
