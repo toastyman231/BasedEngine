@@ -31,4 +31,12 @@ namespace based
         BASED_ASSERT(bSuccess, "Failed to create window!");
         return pWindow;
     }
+
+    void* WindowFactory::CreateAndGetWindowSurface(IWindow* pWindow)
+    {
+        AllocatorScope ac(ePoolIdentifier::kPersistentPool);
+        pWindow->CreateSurface();
+        BASED_ASSERT(pWindow->GetSurface(), "Failed to create surface!");
+        return pWindow->GetSurface();
+    }
 }

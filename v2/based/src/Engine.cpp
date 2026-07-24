@@ -10,6 +10,7 @@
 #include "core/App.h"
 #include "core/BasedTime.h"
 #include "core/Window.h"
+#include "graphics/RenderManager.h"
 #include "tsoding/flag.h"
 
 namespace based
@@ -88,7 +89,13 @@ namespace based
     {
         return &flag_global_context;
     }
-    
+
+    IGraphicsEngine& Engine::GetGraphicsEngine() const
+    {
+        BASED_ASSERT(m_pRenderManager, "Trying to get render manager when one doesn't exist!");
+        return m_pRenderManager->GetGraphicsEngine();
+    }
+
     void Engine::GetInfo()
     {
         BASED_INFO("BasedEngine v{}.{}.{}", ENGINE_VERSION_MAJOR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
@@ -114,6 +121,10 @@ namespace based
 
         WindowProperties props = m_pApp->GetWindowProperties();
         m_pWindow = WindowFactory::Create(props);
+
+        // Initialize managers
+        m_pRenderManager = RenderManager::Create();
+        m_pRenderManager->Initialize();
         
         m_pApp->Initialize();
         bSuccess = true; // For now
@@ -157,6 +168,9 @@ namespace based
         m_bIsInitialized = false;
 
         if (m_pApp) m_pApp->Shutdown();
+
+        // Shutdown managers in reverse order
+        m_pRenderManager->Shutdown();
 
         if (m_pWindow) m_pWindow->Shutdown();
 

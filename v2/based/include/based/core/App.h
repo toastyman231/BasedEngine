@@ -4,6 +4,15 @@
 
 namespace based
 {
+    struct AppInfo final
+    {
+        std::string_view appName;
+
+        AppInfo()
+            : appName("Based App")
+        {}
+    };
+    
     class App : public NonMoveable
     {
         friend class Engine;
@@ -20,6 +29,7 @@ namespace based
         virtual void HandleFileDrop(const std::string& path) {}
 
         virtual WindowProperties GetWindowProperties() { return {}; }
+        virtual AppInfo GetAppInfo() { return {}; }
 
     private:
         // Only intended to be called by Engine::DeclareFlags()

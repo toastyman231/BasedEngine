@@ -29,6 +29,8 @@ namespace based
         bool bAllowAccess = true, void* pBaseAddress = nullptr);
 
     void SetupMemoryPools();
+    // Define this in the graphics backend, since one platform can have multiple backends
+    void SetupGraphicsPools();
 
     template <typename T> requires std::integral<T>
     constexpr T AlignUp(T value, T alignment) noexcept
@@ -51,6 +53,7 @@ namespace based
     size_t GetTotalSystemMemoryBytes();
 
     bool ValidateMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList);
+    bool ValidateGraphicsMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList);
 
     // This is weak so that users can override this and provide their own descriptors of the
     // engine pools. Then when linking with the engine, their descriptors will be used instead of

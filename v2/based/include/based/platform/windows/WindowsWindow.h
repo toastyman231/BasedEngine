@@ -20,6 +20,8 @@ namespace based
         void Shutdown() override;
         void PumpEvents() override;
         IVec2 GetSize() override;
+        void* GetNativeHandle() override;
+        void* GetSurface() const override;
         void SetWindowTitle(const std::string& pStrTitle) override;
         void SetWindowFullscreen(eFullscreenMode mode) override;
         void SetCursor(eCursorMode mode) const;
@@ -28,8 +30,10 @@ namespace based
         ~WindowsWindow() override {}
 
         bool Create_Internal() override;
+        void* CreateSurface() override;
 
         SDL_Window* m_pSystemWindow = nullptr;
+        void* m_pSurface = nullptr;
 
         std::array<SDL_Cursor*, kCursorCount> m_pCursors = {};
     };

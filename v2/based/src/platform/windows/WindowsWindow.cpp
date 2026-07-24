@@ -4,20 +4,29 @@
 #define BASED_USE_NAMESPACE
 #include "platform/windows/WindowsWindow.h"
 
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_init.h>
+#include <SDL3/SDL_mouse.h>
+#include <SDL3/SDL_version.h>
+#include <SDL3/SDL_video.h>
+#ifdef BASED_USE_VULKAN
+#include <Volk/volk.h>
+#include <vulkan/vulkan.hpp>
+#include <SDL3/SDL_vulkan.h>
+#endif
+
 #include "Engine.h"
 #include "core/App.h"
+#include "graphics/GraphicsEngine.h"
+#include "graphics/Helpers.h"
 #include "memory/MemoryPoolHeader.h"
-#include "SDL3/SDL_events.h"
-#include "SDL3/SDL_init.h"
-#include "SDL3/SDL_mouse.h"
-#include "SDL3/SDL_version.h"
-#include "SDL3/SDL_video.h"
 
 namespace based
 {
     bool WindowsWindow::Create_Internal()
     {
         SDL_SetMemoryFunctions(my_malloc, my_calloc, my_realloc, my_free);
+        
         AllocatorScope ac(ePoolIdentifier::kPersistentPool);
 
         // Currently this and Shutdown assume only one window, so we init and shutdown SDL itself alongside that
@@ -42,6 +51,13 @@ namespace based
             return false;
         }
 
+#ifdef BASED_USE_VULKAN
+        check(SDL_Vulkan_LoadLibrary(nullptr));
+        PFN_vkGetInstanceProcAddr sdlGetInstanceProcAddr =
+            reinterpret_cast<PFN_vkGetInstanceProcAddr>(SDL_Vulkan_GetVkGetInstanceProcAddr());
+        volkInitializeCustom(sdlGetInstanceProcAddr);
+#endif
+
         SDL_SetWindowMinimumSize(m_pSystemWindow, m_WindowProps.wMin, m_WindowProps.hMin);
 
         m_pCursors[to_underlying(eCursorMode::kDefault)] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
@@ -54,7 +70,25 @@ namespace based
 
         return true;
     }
-    
+
+    void* WindowsWindow::CreateSurface()
+    {
+        auto& GE = Engine::Instance().GetGraphicsEngine();
+        void* pInstance = GE.GetGlobalInstance();
+        
+#if BASED_USE_VULKAN
+        VkSurfaceKHR rawSurface = VK_NULL_HANDLE;
+        check(SDL_Vulkan_CreateSurface(m_pSystemWindow, static_cast<VkInstance>(pInstance),
+            *VulkanGraphicsEngine::GetAllocationCallbacks(),
+            &rawSurface));
+        m_pSurface = static_cast<void*>(rawSurface);
+#else
+#error "You need to implement CreateSurface for this platform!"
+#endif
+
+        return m_pSurface;
+    }
+
     void WindowsWindow::Shutdown()
     {
         AllocatorScope ac(ePoolIdentifier::kPersistentPool);
@@ -96,7 +130,17 @@ namespace based
         SDL_GetWindowSize(m_pSystemWindow, &w, &h);
         return {w, h};
     }
-    
+
+    void* WindowsWindow::GetNativeHandle()
+    {
+        return m_pSystemWindow;
+    }
+
+    void* WindowsWindow::GetSurface() const
+    {
+        return m_pSurface;
+    }
+
     void WindowsWindow::SetWindowTitle(const std::string& pStrTitle)
     {
         SDL_SetWindowTitle(m_pSystemWindow, pStrTitle.c_str());

@@ -11,15 +11,18 @@ namespace based
     constexpr size_t kMaxPools = 255;
     enum class ePoolIdentifier : uint8
     {
-        kInvalid = 0,
+        kInvalid,
         kRootPool,
         kPersistentPool,
-        kPersistentGraphicsPool,
+        kPersistentGraphicsPool, // Host visible, coherent memory (decent GPU read, fast CPU write, slow CPU read)
+        kPersistentDeviceGraphicsPool, // Device local memory, optionally host visible if ReBAR can fit it all
         kTextureCPUPool,
-        kTextureGPUPool,
-        kTextureSmallGPUPool,
+        kTextureGPUPool, // Device local, but not host visible (even w/ ReBAR) because of GPU tiling
+        kTextureSmallGPUPool, // Same as TextureGPU
         kScratchCPUPool,
-        kStagingPool,
+        kScratchGPUPool, // Also host visible, coherent, meant for per-frame allocations
+        //kReadbackGPUPool, // I don't really need this right now, so I'm just not gonna implement it, but it's host visible, coherent, cached memory
+        kStagingPool, // Host visible, coherent, but not cached because we don't need to read back from it on the CPU
         // Any future engine pools go here
         kEnginePoolsCount = kStagingPool,
         kMaxEnginePools = 30,

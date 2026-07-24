@@ -1,7 +1,9 @@
 ﻿#pragma once
 
 namespace based {
+    class RenderManager;
     class IWindow;
+    class IGraphicsEngine;
 }
 
 namespace based
@@ -44,6 +46,14 @@ namespace based
             T* v = static_cast<T*>(flag_c_get(GetGlobalFlagContext(), name));
             return v ? *v : fallback;
         }
+
+        RenderManager& GetRenderManager() const
+        {
+            BASED_ASSERT(m_pRenderManager, "Trying to get render manager when one doesn't exist!");
+            return *m_pRenderManager;
+        }
+
+        IGraphicsEngine& GetGraphicsEngine() const;
         
     private:
         Engine() = default;
@@ -67,6 +77,9 @@ namespace based
         IWindow* m_pWindow = nullptr;
         int argc;
         char** argv;
+
+        // Managers
+        RenderManager* m_pRenderManager;
 
         bool m_bIsRunning = false;
         bool m_bIsInitialized = false;

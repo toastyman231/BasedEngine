@@ -28,9 +28,10 @@ namespace based
         size_t totalSize = 0;
         for (const auto& poolDescriptor : poolList.pools | std::views::values)
         {
-            // Skip the invalid and root pool identifiers
+            // Skip the invalid and root pool identifiers, and GPU pools since we set those up separately
             if (poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kInvalid)
-                || poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kRootPool)) continue;
+                || poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kRootPool)
+                || poolDescriptor.m_bIsGPUPool) continue;
             
             size_t stPoolSize = poolDescriptor.m_stPoolSize;
             const std::string_view strPoolName = poolDescriptor.m_strPoolName;
@@ -70,6 +71,11 @@ namespace based
         return true;
     }
 
+    bool ValidateGraphicsMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList)
+    {
+        
+    }
+
     void SetupMemoryPools()
     {
         static bool bDoOnce = false;
@@ -94,22 +100,19 @@ namespace based
             ePoolIdentifier eParentPoolID = static_cast<ePoolIdentifier>(poolDescriptor.m_eParentPoolID);
 
             void* pBackingMem = nullptr;
-            if (poolDescriptor.m_bIsGPUPool)
+
+            // Since VMA requires Vulkan to be set up, we're forced to setup GPU mem pools separately on that
+            // platform. Therefore, all platforms set up GPU mempools separately. 
+            if (eParentPoolID != ePoolIdentifier::kInvalid)
             {
-                // TODO: Set up GPU pools!
+                AllocatorScope ac(eParentPoolID);
+                pBackingMem = new uint8[stPoolSize + sizeof(MemoryPoolHeader) + sizeof(MemPoolTLSFAllocator)];
             } else
             {
-                if (eParentPoolID != ePoolIdentifier::kInvalid)
-                {
-                    AllocatorScope ac(eParentPoolID);
-                    pBackingMem = new uint8[stPoolSize + sizeof(MemoryPoolHeader) + sizeof(MemPoolTLSFAllocator)];
-                } else
-                {
-                    pBackingMem = AllocateSystemMemory(
-                        stPoolSize + sizeof(MemoryPoolHeader) + sizeof(MemPoolTLSFAllocator));
-                }
+                pBackingMem = AllocateSystemMemory(
+                    stPoolSize + sizeof(MemoryPoolHeader) + sizeof(MemPoolTLSFAllocator));
             }
-
+            
             BASED_ASSERT(pBackingMem, "Invalid memory allocated!");
             MemoryPoolHeader::CreatePool(poolDescriptor.m_strPoolName,
                 static_cast<ePoolIdentifier>(poolDescriptor.m_ePoolID),

@@ -50,6 +50,15 @@ project "based"
         }
     end
 
+    -- Remove graphics API specific files, we will add back just the ones for this platform's graphics API
+    removefiles
+    {
+        "include/based/**/vulkan/**.h",
+        "include/based/**/vulkan/**.hpp",
+        "src/**/vulkan/**.c",
+        "src/**/vulkan/**.cpp",
+    }
+
     files
     {
         "include/**/%{cfg.system}/**.h",
@@ -80,6 +89,12 @@ project "based"
         "KHRONOS_STATIC",
         "GLM_ENABLE_EXPERIMENTAL",
     }
+
+    -- Graphics API
+    filter "system:windows or linux or android"
+        VULKAN_PRIOR_PROJECT = "based"
+        include("" .. EXTERNALS_DIR_PRIVATE .. "VulkanSDK")
+    filter {}
 
     filter {"system:windows", "configurations:*"}
         systemversion "latest"
