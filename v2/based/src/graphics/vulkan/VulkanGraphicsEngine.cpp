@@ -82,8 +82,12 @@ namespace based
             vk::MemoryPropertyFlagBits::eHostVisible,
             vk::MemoryPropertyFlagBits::eHostCoherent);
 
-        s_nDeviceLocalIndex = VulkanPoolAllocator::FindMemoryTypeIndex(
+        s_nDeviceLocalOnlyIndex = VulkanPoolAllocator::FindMemoryTypeIndex(
             vk::MemoryPropertyFlagBits::eDeviceLocal, vk::MemoryPropertyFlagBits::eDeviceLocal);
+
+        s_nDeviceLocalOrHostVisibleIndex = VulkanPoolAllocator::FindMemoryTypeIndex(
+                    vk::MemoryPropertyFlagBits::eDeviceLocal,
+                    vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);   
 
         // TODO: Do the following, but for graphics pools.
         // We'll also need to check for available memory for each type index, and we might need to retry certain ones

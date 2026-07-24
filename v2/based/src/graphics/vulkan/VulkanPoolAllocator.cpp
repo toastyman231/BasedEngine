@@ -62,7 +62,7 @@ namespace based
         reqs.memoryTypeBits = 1u << nMemoryTypeIndex;
         VmaAllocationCreateInfo allocCI{};
         allocCI.pool = m_Pool;
-        allocCI.flags = nMemoryTypeIndex != s_nDeviceLocalIndex ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
+        allocCI.flags = nMemoryTypeIndex != s_nDeviceLocalOnlyIndex ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
         
         VmaAllocationInfo blockInfo;
         check(vmaAllocateMemory(GE.m_Allocator, &reqs, &allocCI, &m_BaseAllocation, &blockInfo));
