@@ -73,7 +73,7 @@ namespace based
 
     bool ValidateGraphicsMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList)
     {
-        
+        return false;
     }
 
     void SetupMemoryPools()

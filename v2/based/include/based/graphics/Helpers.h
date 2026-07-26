@@ -14,13 +14,14 @@ namespace based
 
     inline void check(VkResult result)
     {
-        BASED_ASSERT_FMT(vk::Result(result) == vk::Result::eSuccess, "Vulkan call returned an error: {}", vk::to_string(vk::Result(result)));
+        BASED_ASSERT_FMT(static_cast<vk::Result>(result) == vk::Result::eSuccess, "Vulkan call returned an error: {}", 
+            vk::to_string(static_cast<vk::Result>(result)));
     }
     
 #endif
 
     inline void check(bool result)
     {
-        BASED_ASSERT_FMT(result, "Call returned an error!");
+        BASED_ASSERT(result, "Call returned an error!");
     }
 }

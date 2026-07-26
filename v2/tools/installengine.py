@@ -12,6 +12,7 @@ _VERSION_DEFINE_RE = re.compile(
 
 def UpdateEnginePath(version: str, engine_path: str):
     path = GetInstallLocation()
+    print(f"Installing at {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     config = configparser.ConfigParser()
 
@@ -30,6 +31,7 @@ def UpdateEnginePath(version: str, engine_path: str):
             config.write(file)
         temp_path.replace(path)
     except Exception as e:
+        print(f"Error updating engine path! Exception: {e}")
         if temp_path.exists():
             temp_path.unlink()
         raise e
@@ -77,6 +79,7 @@ if __name__ == "__main__":
     ret = 0
     version = GetEngineVersion(VERSION_HEADER_PATH)
     if version != INVALID_VERSION:
+        print(f"Got engine version {version}")
         UpdateEnginePath(version, os.getcwd())
     else:
         print(

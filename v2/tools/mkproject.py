@@ -23,7 +23,7 @@ if __name__ == "__main__":
         os.mkdir(dest)
         ret = globals.SafeCopyDir(TEMPLATE_DIR, dest)
         globals.CopyBuildFiles(dest, args.project)
-        cmd = ["python3", "../based.py", "gensln", "-p", args.project, "-l", dest]
+        cmd = [globals.GetPythonCommand(), "../based.py", "gensln", "-p", args.project, "-l", dest]
         if globals.IsWindows(): 
             cmd.insert(0, "cmd.exe")
             cmd.insert(1, "/c")

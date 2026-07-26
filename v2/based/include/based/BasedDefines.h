@@ -1,13 +1,18 @@
 ﻿#pragma once
 
 #if defined(_MSC_VER) && !defined(__clang__)
-    // Native Microsoft Visual C++ compiler
-    #define BASED_WEAK // MSVC looks in the user application first, so we don't need anything special
+    #define BASED_WEAK(ReturnType, Name) \
+        extern "C" ReturnType Name##_BasedWeakDefault(); \
+        __pragma(comment(linker, "/alternatename:" #Name "=" #Name "_BasedWeakDefault")) \
+        __pragma(comment(linker, "/include:" #Name "_BasedWeakDefault")) \
+        extern "C" ReturnType Name##_BasedWeakDefault()
+
 #elif defined(__GNUC__) || defined(__clang__)
-    // GCC, Standard Clang, or Clang-cl
-    #define BASED_WEAK __attribute__((weak))
+    #define BASED_WEAK(ReturnType, Name) \
+        __attribute__((weak)) ReturnType Name()
+
 #else
-    #define BASED_WEAK
+    #define BASED_WEAK(ReturnType, Name) ReturnType Name()
 #endif
 
 // Courtesy of https://voithos.io/articles/enum-class-bitmasks/

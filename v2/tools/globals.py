@@ -67,3 +67,36 @@ def CheckForPremakeScript(loc, project):
 
         if choice in ("", "y", "yes"):
             CopyBuildFiles(loc, project)
+
+def GetPythonCommand() -> str:
+    """
+    Tests if 'python3' is available and valid.
+    Returns 'python3' if successful, otherwise falls back to 'python'.
+    """
+    # Windows specific fix to prevent a console window from briefly flashing
+    startupinfo = None
+    if IsWindows():
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
+    try:
+        # Run 'python3 --version' safely in the background
+        result = subprocess.run(
+            ["python3", "--version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=3, # Prevent hanging if a broken alias blocks the thread
+            startupinfo=startupinfo
+        )
+        
+        # Check if it returned a success code (0) and contains "Python" in the output
+        # (This protects against Microsoft Store shortcuts that return empty or error stubs)
+        if result.returncode == 0 and "Python" in (result.stdout + result.stderr):
+            return "python3"
+            
+    except (FileNotFoundError, subprocess.SubprocessError):
+        # Catching FileNotFoundError handles systems where 'python3' doesn't exist at all
+        pass
+
+    return "python"

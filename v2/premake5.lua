@@ -1,3 +1,5 @@
+include "helpers"
+
 workspace "based"
     startproject "BasedEditor"
     architecture "x64"
@@ -52,18 +54,24 @@ workspace "based"
 
     multiprocessorcompile "On"
 
+    local engine_path = 
+
     filter "platforms:Win64"
         system "windows"
         toolset "clang"
         defines { "_CXX20_DEPRECATE_OLD_SHARED_PTR_ATOMIC_SUPPORT" }
-        forceincludes { "%{wks.location}/based/include/based/core/NewDelete.h" }
+        forceincludes { _MAIN_SCRIPT_DIR  .. "/based/include/based/core/NewDelete.h" }
     filter {}
 
     filter "platforms:Win64-MSVC"
         system "windows"
         toolset "msc"
-        buildoptions { "/utf-8" }
-        forceincludes { "%{wks.location}/based/include/based/core/NewDelete.h" }
+        buildoptions 
+        { 
+            "/utf-8", 
+            "/FI\"" .. path.translate(_MAIN_SCRIPT_DIR .. "/based/include/based/core/NewDelete.h") .. "\"" 
+        }
+
     filter {}
 
     filter "platforms:Web"

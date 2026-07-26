@@ -148,7 +148,7 @@ namespace based
 
         void* result = static_cast<char*>(m_pCPUBaseAddress) + offset;
         auto [it, bSuccess] = m_AllocationMap.try_emplace(result, vAlloc, size, this);
-        BASED_ASSERT(bSuccess, "Error putting allocation at offset {} into header map!", vk::to_string(offset));
+        BASED_ASSERT_FMT(bSuccess, "Error putting allocation at offset {} into header map!", std::to_string(offset));
 
         return result;
     }
@@ -164,7 +164,7 @@ namespace based
         AllocatorScope ac(ePoolIdentifier::kPersistentPool);
         
         auto maybeHeader = FindHeader(ptr);
-        BASED_ASSERT(maybeHeader.has_value(), "Header could not be found for pointer {}!", ptr);
+        BASED_ASSERT_FMT(maybeHeader.has_value(), "Header could not be found for pointer {}!", ptr);
 
         const Header* pHeader = maybeHeader.value();
         vmaVirtualFree(m_VirtualBlock, pHeader->m_Alloc);

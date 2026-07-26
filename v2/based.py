@@ -1,6 +1,7 @@
 import os, sys, argparse
 import subprocess
 from pathlib import Path
+import tools.globals as globals
 
 TOOLS_DIR = "tools"
 
@@ -9,7 +10,7 @@ def RunCommand(cmds):
     cmds[0] = str(Path("{}/{}/{}.py".format(os.getcwd(), TOOLS_DIR, cmds[0])).resolve())
 
     if (os.path.exists(cmds[0])):
-        cmds.insert(0, "python3")
+        cmds.insert(0, globals.GetPythonCommand())
         print("Command: ", cmds)
         ret = subprocess.call(cmds)
     else:

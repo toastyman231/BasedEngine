@@ -60,9 +60,11 @@ project "Sandbox"
     local build_tool = path.getabsolute(ENGINE_DIR .. "/tools/basedbuildtool.py")
     build_tool = build_tool:gsub("\\", "/")
 
+    local python_cmd = GetPythonCommand() .. " "
+
     postbuildcommands
     {
-        "python3 " .. build_tool .. " -i " .. path.getabsolute(".") .. " -c %{cfg.buildcfg} -q 0.05 --ci",
+        python_cmd .. build_tool .. " -i " .. path.getabsolute(".") .. " -c %{cfg.buildcfg} -q 0.05 --ci",
     }
 
     filter "system:emscripten"
@@ -85,8 +87,8 @@ project "Sandbox"
 
         postbuildcommands
         {
-            "python3 " .. launch_tool .. " " .. output_dir,
-            "python3 " .. patch_tool .. " " .. js_output
+            python_cmd .. launch_tool .. " " .. output_dir,
+            python_cmd .. patch_tool .. " " .. js_output
         }
     filter{}
 

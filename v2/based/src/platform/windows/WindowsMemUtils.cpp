@@ -39,11 +39,10 @@ namespace based
         return 0;
     }
 
-    BASED_WEAK const EngineMemoryPoolDescriptorList& GetMemoryPoolDescriptors()
+    BASED_WEAK(const EngineMemoryPoolDescriptorList&, GetMemoryPoolDescriptors)
     {
         /**
-         * TODO: These are just random test values, realistically windows will probably have to
-         * read the size as a percent and partition whatever memory the user has available.
+         * TODO: These are just random test values, users should set their own per-app anyway
          **/
         static constexpr EngineMemoryPoolDescriptorList DefaultPoolDescriptors = {
             .pools = {{

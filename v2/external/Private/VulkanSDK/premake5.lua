@@ -34,6 +34,9 @@ project "VulkanLibs"
     language "C"
     location "Intermediate"
 
+    enablepch "off"
+    forceincludes ""
+
     files
     {
         VULKAN_SDK_VER .. "/Source/**.c",

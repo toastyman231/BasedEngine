@@ -17,20 +17,22 @@ project "sdl3_build"
     local script = path.getabsolute("../sdl3_dummy/build_sdl3.py")
     script = script:gsub("\\", "/")
 
+    local python_cmd = GetPythonCommand()
+
     filter "configurations:Debug*"
         prebuildcommands {
-            "python3 " .. script .. " Debug %{cfg.system} && if not exist " .. dummy_stamp_dir .. " mkdir " .. dummy_stamp_dir .. " && type nul > " .. dummy_stamp
+            python_cmd .. " " .. script .. " Debug %{cfg.system} && if not exist " .. dummy_stamp_dir .. " mkdir " .. dummy_stamp_dir .. " && type nul > " .. dummy_stamp
         }
     filter {}
 
     filter "configurations:Development*"
         prebuildcommands {
-            "python3 " .. script .. " RelWithDebInfo %{cfg.system} && if not exist " .. dummy_stamp_dir .. " mkdir " .. dummy_stamp_dir .. " && type nul > " .. dummy_stamp
+            python_cmd .. " " .. script .. " RelWithDebInfo %{cfg.system} && if not exist " .. dummy_stamp_dir .. " mkdir " .. dummy_stamp_dir .. " && type nul > " .. dummy_stamp
         }
     filter {}
 
     filter "configurations:Release*"
         prebuildcommands {
-            "python3 " .. script .. " Release %{cfg.system} && if not exist " .. dummy_stamp_dir .. " mkdir " .. dummy_stamp_dir .. " && type nul > " .. dummy_stamp
+            python_cmd .. " " .. script .. " Release %{cfg.system} && if not exist " .. dummy_stamp_dir .. " mkdir " .. dummy_stamp_dir .. " && type nul > " .. dummy_stamp
         }
     filter {}
