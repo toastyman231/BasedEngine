@@ -1,6 +1,5 @@
 ﻿#include "pch.h"
 #include "graphics/vulkan/VulkanPoolAllocator.h"
-#include "graphics/vulkan/VulkanPoolAllocator.h"
 
 #include <vma/vk_mem_alloc.h>
 
@@ -25,9 +24,13 @@ namespace based
         ci.requiredFlags = static_cast<VkMemoryPropertyFlags>(required);
         ci.preferredFlags = static_cast<VkMemoryPropertyFlags>(preferred);
         uint32 index;
-        check(vmaFindMemoryTypeIndex(GE.m_Allocator, ~0u, &ci, &index));
-
-        return index;
+        if (vmaFindMemoryTypeIndex(GE.m_Allocator, ~0u, &ci, &index) == VK_SUCCESS)
+        {
+            return index;
+        } else
+        {
+            return kInvalidMemoryTypeIndex;
+        }
     }
 
     std::optional<const VulkanPoolAllocator::Header*> VulkanPoolAllocator::FindHeader(void* ptr) const
@@ -62,7 +65,7 @@ namespace based
         reqs.memoryTypeBits = 1u << nMemoryTypeIndex;
         VmaAllocationCreateInfo allocCI{};
         allocCI.pool = m_Pool;
-        allocCI.flags = nMemoryTypeIndex != s_nDeviceLocalOnlyIndex ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
+        allocCI.flags = 0; //nMemoryTypeIndex != s_nDeviceLocalOnlyIndex ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
         
         VmaAllocationInfo blockInfo;
         check(vmaAllocateMemory(GE.m_Allocator, &reqs, &allocCI, &m_BaseAllocation, &blockInfo));

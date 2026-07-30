@@ -95,4 +95,11 @@ namespace based
         is_scoped_enum_v<E> && 
         std::same_as<std::underlying_type_t<E>, Underlying>;
     
+    // This has the benefit of type safety where a macro has none. Woo C++20!
+    template <typename Enum> requires std::is_enum_v<Enum>
+    constexpr bool HasBit(Enum value, Enum bit)
+    {
+        return (to_underlying(value) & to_underlying(bit)) != 0;
+    }
+    
 }

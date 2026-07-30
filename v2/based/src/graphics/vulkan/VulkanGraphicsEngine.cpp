@@ -66,40 +66,16 @@ namespace based
         BASED_ASSERT(pInstance, "Invalid Vulkan instance! Did you initialize the graphics engine?");
         BASED_ASSERT(device, "Invalid Vulkan device! Did you initialize the graphics engine?");
 
-        s_nHostCachedOrDeviceIndex = VulkanPoolAllocator::FindMemoryTypeIndex(
-        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-        vk::MemoryPropertyFlagBits::eHostCached | vk::MemoryPropertyFlagBits::eDeviceLocal);
-
-        s_nHostCachedOnlyIndex = VulkanPoolAllocator::FindMemoryTypeIndex(
-            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-            vk::MemoryPropertyFlagBits::eHostCached);
-
-        s_nHostCoherentOrDeviceIndex = VulkanPoolAllocator::FindMemoryTypeIndex(
-            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-            vk::MemoryPropertyFlagBits::eDeviceLocal);
-
-        s_nHostCoherentOnlyIndex = VulkanPoolAllocator::FindMemoryTypeIndex(
-            vk::MemoryPropertyFlagBits::eHostVisible,
-            vk::MemoryPropertyFlagBits::eHostCoherent);
-
-        s_nDeviceLocalOnlyIndex = VulkanPoolAllocator::FindMemoryTypeIndex(
-            vk::MemoryPropertyFlagBits::eDeviceLocal, vk::MemoryPropertyFlagBits::eDeviceLocal);
-
-        s_nDeviceLocalOrHostVisibleIndex = VulkanPoolAllocator::FindMemoryTypeIndex(
-                    vk::MemoryPropertyFlagBits::eDeviceLocal,
-                    vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);   
-
         // TODO: Do the following, but for graphics pools.
         // We'll also need to check for available memory for each type index, and we might need to retry certain ones
         // if e.g. the user is on an older device without ReBAR support.
         
-        /*const EngineMemoryPoolDescriptorList& poolList = GetMemoryPoolDescriptors();
-#ifdef BASED_CONFIG_DEBUG
-        const bool bSuccess = ValidateMemoryPoolSettings(poolList);
-        BASED_ASSERT(bSuccess, "Invalid pool settings!");
-#endif
+        const EngineMemoryPoolDescriptorList& poolList = GetMemoryPoolDescriptors();
+        std::unordered_map<const PoolDescriptor*, std::vector<uint32>> poolMemoryTypeMap;
+        const bool bSuccess = ValidateGraphicsMemoryPoolSettings(poolList, poolMemoryTypeMap);
+        BASED_ASSERT(bSuccess, "Invalid graphics pool settings!");
         
-        for (const auto& poolDescriptor : poolList.pools | std::views::values)
+        /*for (const auto& poolDescriptor : poolList.pools | std::views::values)
         {
             // Skip the invalid and root pool identifiers, and any pools that haven't been defined (for now)
             if (poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kInvalid)
@@ -175,54 +151,145 @@ namespace based
         
         return nAvailableMemory;
     }
-    
-    bool ValidateGraphicsMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList)
+
+    std::vector<uint32> GetAcceptableGPUMemoryTypes(eGPUMemoryRequirements eRequirements)
     {
-        return false;
-        /*size_t stRequestedDeviceLocal = 0;
+        constexpr uint32 kMaxAcceptableMemTypes = 3;
+        BASED_ASSERT(
+            !HasBit(eRequirements, eGPUMemoryRequirements::kCPUVisibleRequired & eGPUMemoryRequirements::kCPUVisiblePreferred), 
+                "Memory requirements cannot both require and prefer CPU visibility, pick one!");
+        BASED_ASSERT(
+            !HasBit(eRequirements, eGPUMemoryRequirements::kDeviceLocalRequired & eGPUMemoryRequirements::kDeviceLocalPreferred),
+                "Memory requirements cannot both require and prefer device local, pick one!");
+        BASED_ASSERT(
+            !HasBit(eRequirements, eGPUMemoryRequirements::kCPUReadbackRequired & eGPUMemoryRequirements::kCPUReadbackPreferred),
+                "Memory requirements cannot both require and prefer CPU readback, pick one!");
+        
+        std::array<vk::MemoryPropertyFlags, kMaxAcceptableMemTypes> vAcceptableMemTypeFlags{};
+        std::vector<uint32> vAcceptableMemTypes;
+        
+        // If we require host visibility, try to get it to be coherent, otherwise fallback to visible only
+        // If host visibility is only preferred, then we do the same, except we allow the final fallback slot to not have that requirement
+        if (HasBit(eRequirements, eGPUMemoryRequirements::kCPUVisibleRequired))
+        {
+            BASED_ASSERT(!HasBit(eRequirements, eGPUMemoryRequirements::kNoCPU), "If CPU Visibility is required, you cannot have the NoCPU flag!");
+            vAcceptableMemTypeFlags[0] |= vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+            vAcceptableMemTypeFlags[1] |= vk::MemoryPropertyFlagBits::eHostVisible;
+            vAcceptableMemTypeFlags[2] |= vk::MemoryPropertyFlagBits::eHostVisible;
+        } else if (HasBit(eRequirements, eGPUMemoryRequirements::kCPUVisiblePreferred))
+        {
+            BASED_ASSERT(!HasBit(eRequirements, eGPUMemoryRequirements::kNoCPU), "If CPU Visibility is preferred, you shouldn't have the NoCPU flag!");
+            vAcceptableMemTypeFlags[0] |= vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+            vAcceptableMemTypeFlags[1] |= vk::MemoryPropertyFlagBits::eHostVisible;
+        }
+        
+        // Mostly the same as above, except there's only one flag we care about here
+        if (HasBit(eRequirements, eGPUMemoryRequirements::kDeviceLocalRequired))
+        {
+            BASED_ASSERT(!HasBit(eRequirements, eGPUMemoryRequirements::kNoGPU), "If Device Local is required, you cannot have the NoGPU flag!");
+            vAcceptableMemTypeFlags[0] |= vk::MemoryPropertyFlagBits::eDeviceLocal;
+            vAcceptableMemTypeFlags[1] |= vk::MemoryPropertyFlagBits::eDeviceLocal;
+            vAcceptableMemTypeFlags[2] |= vk::MemoryPropertyFlagBits::eDeviceLocal;
+        } else if (HasBit(eRequirements, eGPUMemoryRequirements::kDeviceLocalPreferred))
+        {
+            BASED_ASSERT(!HasBit(eRequirements, eGPUMemoryRequirements::kNoGPU), "If Device Local is required, you shouldn't have the NoGPU flag!");
+            vAcceptableMemTypeFlags[0] |= vk::MemoryPropertyFlagBits::eDeviceLocal;
+            vAcceptableMemTypeFlags[1] |= vk::MemoryPropertyFlagBits::eDeviceLocal;
+        }
+        
+        // Tier 0 will evaluate to VISIBLE | COHERENT | CACHED, which I don't think most modern desktop GPUs support
+        // This is okay because the index evaluation will simply fail and be skipped, and we'll fall back to tier 1, which
+        // will only be VISIBLE | CACHED, which should be supported
+        if (HasBit(eRequirements, eGPUMemoryRequirements::kCPUReadbackRequired))
+        {
+            BASED_ASSERT(!HasBit(eRequirements, eGPUMemoryRequirements::kNoCPU), "If CPU Visibility is required, you cannot have the NoCPU flag!");
+            vAcceptableMemTypeFlags[0] |= vk::MemoryPropertyFlagBits::eHostCached;
+            vAcceptableMemTypeFlags[1] |= vk::MemoryPropertyFlagBits::eHostCached;
+            vAcceptableMemTypeFlags[2] |= vk::MemoryPropertyFlagBits::eHostCached;
+        } else if (HasBit(eRequirements, eGPUMemoryRequirements::kCPUReadbackPreferred))
+        {
+            BASED_ASSERT(!HasBit(eRequirements, eGPUMemoryRequirements::kNoCPU), "If CPU Visibility is preferred, you shouldn't have the NoCPU flag!");
+            vAcceptableMemTypeFlags[0] |= vk::MemoryPropertyFlagBits::eHostCached;
+            vAcceptableMemTypeFlags[1] |= vk::MemoryPropertyFlagBits::eHostCached;
+        }
+        
+        for (uint32 i = 0; i < kMaxAcceptableMemTypes; ++i)
+        {
+            if (vAcceptableMemTypeFlags[i] != static_cast<vk::MemoryPropertyFlags>(0))
+            {
+                uint32 index = VulkanPoolAllocator::FindMemoryTypeIndex(vAcceptableMemTypeFlags[i]);
+                if (index != kInvalidMemoryTypeIndex 
+                    && std::ranges::find(vAcceptableMemTypes, index) == vAcceptableMemTypes.end())
+                {
+                    vAcceptableMemTypes.emplace_back(index);
+                }
+            }
+        }
+        
+        return vAcceptableMemTypes;
+    }
+
+    bool ValidateGraphicsMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList, 
+        std::unordered_map<const PoolDescriptor*, std::vector<uint32>>& outPoolMemoryTypeMap)
+    {
+        // Resolve pool memory type map
         for (const auto& poolDescriptor : poolList.pools | std::views::values)
         {
-            // Skip the invalid and root pool identifiers, and GPU pools since we set those up separately
-            if (poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kInvalid)
-                || poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kRootPool)
-                || poolDescriptor.m_bIsGPUPool) continue;
+            if (poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kRootPool)
+                || !poolDescriptor.m_bIsGPUPool) continue;
+            
+            BASED_ASSERT(poolDescriptor.m_ePoolID != to_underlying(ePoolIdentifier::kInvalid),
+                "Pool descriptor has invalid ID, did you define all the engine pools?");
+            if (poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kInvalid)) return false;
+            
+            outPoolMemoryTypeMap.emplace(&poolDescriptor, GetAcceptableGPUMemoryTypes(poolDescriptor.m_eGPUMemRequirements));
             
             size_t stPoolSize = poolDescriptor.m_stPoolSize;
             const std::string_view strPoolName = poolDescriptor.m_strPoolName;
-            BASED_ASSERT_FMT(stPoolSize > 0, "Invalid size {} for pool {}!", stPoolSize, poolDescriptor.m_ePoolID);
-            if (stPoolSize <= 0) continue; // TODO: Once I have all the pools sorted, this should return failure
-
-            ePoolIdentifier eParentPoolID = static_cast<ePoolIdentifier>(poolDescriptor.m_eParentPoolID);
-            if (eParentPoolID != ePoolIdentifier::kInvalid)
+            BASED_ASSERT_FMT(stPoolSize > 0, "Invalid size {} for pool {}, {}!", stPoolSize, poolDescriptor.m_ePoolID, strPoolName);
+            if (stPoolSize <= 0) return false;
+        }
+        
+        // Multiple memory type indices can use the same heap, so we group our pools by the heap they fall into when
+        // checking if there's enough memory for our pools
+        std::unordered_map<uint32, size_t> sizesByHeapMap;
+        auto& GE = dynamic_cast<VulkanGraphicsEngine&>(Engine::Instance().GetGraphicsEngine());
+        auto device = GE.GetPhysicalDevice();
+        
+        vk::PhysicalDeviceMemoryProperties memProps;
+        device.getMemoryProperties(&memProps);
+        
+        // Group pools by tier 0 (ideal memory type index) and sum pool totals
+        for (const auto& poolDescriptor : poolList.pools | std::views::values)
+        {
+            if (poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kRootPool)
+                || !poolDescriptor.m_bIsGPUPool) continue;
+            
+            uint32 nIdealMemTypeIndex = outPoolMemoryTypeMap[&poolDescriptor][0];
+            uint32 nHeapIndex = memProps.memoryTypes[nIdealMemTypeIndex].heapIndex;
+            
+            if (sizesByHeapMap.contains(nHeapIndex))
             {
-                const auto pParentDescriptor = poolList.Find(eParentPoolID);
-                BASED_ASSERT_FMT(pParentDescriptor, "No pool descriptor found for pool {}!", poolDescriptor.m_eParentPoolID);
-                if (!pParentDescriptor) return false;
-                
-                BASED_ASSERT_FMT(stPoolSize < pParentDescriptor->m_stPoolSize,
-                        "Child pool {} ({}) is bigger than parent {} ({})!", strPoolName, MemSize{stPoolSize},
-                            pParentDescriptor->m_strPoolName, MemSize{pParentDescriptor->m_stPoolSize});
-                if (stPoolSize >= pParentDescriptor->m_stPoolSize) return false;
+                sizesByHeapMap[nHeapIndex] += poolDescriptor.m_stPoolSize;
             } else
             {
-                totalSize += stPoolSize;
+                sizesByHeapMap.emplace(nHeapIndex, poolDescriptor.m_stPoolSize);
             }
         }
+        
+        // Get device properties again here, in case they've changed
+        device.getMemoryProperties(&memProps);
+        
+        // Ensure heaps have enough memory for the ideal config
+        for (const auto& [nHeapIndex, size] : sizesByHeapMap)
+        {
+            vk::DeviceSize nHeapSize = memProps.memoryHeaps[nHeapIndex].size;
+            BASED_ASSERT_FMT(nHeapSize > size, "Not enough memory in heap {}! Want: {}, have: {}",
+                nHeapIndex, MemSize{size}, MemSize{nHeapSize});
+            if (nHeapSize <= size) return false;
+        }
 
-#ifndef SKIP_AVAILABLE_MEMORY_CHECK
-        size_t totalRAM = GetTotalSystemMemoryBytes();
-        size_t availRAM = GetAvailableSystemMemoryBytes();
-        BASED_ASSERT_FMT(totalSize <= totalRAM && totalSize <= availRAM,
-            "System does not have enough memory! Want: {}, Have: {}, Available: {}", totalSize, totalRAM, availRAM);
-        if (totalSize > totalRAM || totalSize > availRAM) return false;
-#else
-        size_t totalRAM = GetTotalSystemMemoryBytes();
-        BASED_ASSERT_FMT(totalSize <= totalRAM,
-            "System does not have enough memory! Want: {}, Have: {}", totalSize, totalRAM);
-        if (totalSize > totalRAM) return false;
-#endif
-
-        return true;*/
+        return true;
     }
     
     const vk::AllocationCallbacks* VulkanGraphicsEngine::GetAllocationCallbacks()

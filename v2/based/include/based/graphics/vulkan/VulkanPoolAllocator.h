@@ -42,7 +42,8 @@ namespace based
         [[nodiscard]] bool IsPointerFromAllocator(void* ptr) const override;
         PoolStats GetPoolStats(MemoryPoolHeader* pHeader) override;
 
-        static uint32 FindMemoryTypeIndex(vk::MemoryPropertyFlags required, vk::MemoryPropertyFlags preferred);
+        static uint32 FindMemoryTypeIndex(vk::MemoryPropertyFlags required, 
+            vk::MemoryPropertyFlags preferred = static_cast<vk::MemoryPropertyFlags>(0));
         std::optional<const VulkanPoolAllocator::Header*> FindHeader(void* ptr) const;
 
     private:
@@ -57,15 +58,6 @@ namespace based
 
         std::unordered_map<void*, Header> m_AllocationMap;
     };
-
-    static uint32 s_nHostCachedOrDeviceIndex = 0;
-    static uint32 s_nHostCachedOnlyIndex = 0;
-    static uint32 s_nHostCoherentOrDeviceIndex = 0;
-    static uint32 s_nHostCoherentOnlyIndex = 0;
-    static uint32 s_nDeviceLocalOnlyIndex = 0;
-    static uint32 s_nDeviceLocalOrHostVisibleIndex = 0;
-    
-    // 
 
     DEFINE_ENUM_CLASS_BITWISE_OPERATORS(VulkanPoolAllocator::eVulkanPoolUsage)
 }

@@ -8,6 +8,8 @@
 
 namespace based
 {
+    constexpr uint32 kInvalidMemoryTypeIndex = std::numeric_limits<uint32>::max();
+    
     class VulkanGraphicsEngine final : public IGraphicsEngine
     {
         friend class RenderManager;

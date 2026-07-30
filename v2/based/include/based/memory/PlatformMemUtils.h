@@ -51,12 +51,17 @@ namespace based
 
     size_t GetAvailableSystemMemoryBytes();
     size_t GetTotalSystemMemoryBytes();
+    
     // Implement these in the graphics engine!
     size_t GetTotalGraphicsMemoryBytes();
     size_t GetAvailableGraphicsMemoryBytes();
-
+    std::vector<uint32> GetAcceptableGPUMemoryTypes(eGPUMemoryRequirements eRequirements);
     bool ValidateMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList);
-    bool ValidateGraphicsMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList);
+    
+    // Memory availability may change after validation, so outPoolMemoryTypeMap can be used to
+    // associate a pool with a series of alternate memory types that can be used in the case of failure
+    bool ValidateGraphicsMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList, 
+        std::unordered_map<const PoolDescriptor*, std::vector<uint32>>& outPoolMemoryTypeMap);
 
     // This is weak so that users can override this and provide their own descriptors of the
     // engine pools. Then when linking with the engine, their descriptors will be used instead of

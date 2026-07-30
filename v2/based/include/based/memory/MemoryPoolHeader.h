@@ -200,18 +200,20 @@ namespace based
     enum class eGPUMemoryRequirements : uint8 
     {
         kNone,
-        kCPUVisibleRequired = 1u << 0,
-        kCPUVisiblePreferred = 1u << 1,
-        kDeviceLocalRequired = 1u << 2,
-        kDeviceLocalPreferred = 1u << 3,
-        kCPUReadbackRequired = 1u << 4,
-        kCPUReadbackPreferred = 1u << 5,
+        kCPUVisibleRequired     = 1u << 0,
+        kCPUVisiblePreferred    = 1u << 1,
+        kNoCPU                  = 1u << 2,
+        kDeviceLocalRequired    = 1u << 3,
+        kDeviceLocalPreferred   = 1u << 4,
+        kNoGPU                  = 1u << 5,
+        kCPUReadbackRequired    = kCPUVisibleRequired  | 1u << 6,
+        kCPUReadbackPreferred   = kCPUVisiblePreferred | 1u << 7,
         
-        kBARRequired = kCPUVisibleRequired | kDeviceLocalRequired,
-        kCPUBARPreferred = kCPUVisibleRequired | kDeviceLocalPreferred,
+        kBARRequired     = kCPUVisibleRequired  | kDeviceLocalRequired,
+        kCPUBARPreferred = kCPUVisibleRequired  | kDeviceLocalPreferred,
         kGPUBARPreferred = kCPUVisiblePreferred | kDeviceLocalRequired,
-        kCPUOnly = kCPUVisibleRequired,
-        kGPUOnly = kDeviceLocalRequired
+        kCPUOnly         = kCPUVisibleRequired  | kNoGPU,
+        kGPUOnly         = kDeviceLocalRequired | kNoCPU
     };
     DEFINE_ENUM_CLASS_BITWISE_OPERATORS(eGPUMemoryRequirements);
     

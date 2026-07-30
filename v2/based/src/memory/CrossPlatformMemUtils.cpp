@@ -96,7 +96,8 @@ namespace based
             // Skip the invalid and root pool identifiers, and any pools that haven't been defined (for now)
             if (poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kInvalid)
                 || poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kRootPool)
-                || poolDescriptor.m_stPoolSize == 0) continue;
+                || poolDescriptor.m_stPoolSize == 0
+                || poolDescriptor.m_bIsGPUPool) continue;
             
             size_t stPoolSize = poolDescriptor.m_stPoolSize;
             ePoolIdentifier eParentPoolID = static_cast<ePoolIdentifier>(poolDescriptor.m_eParentPoolID);
