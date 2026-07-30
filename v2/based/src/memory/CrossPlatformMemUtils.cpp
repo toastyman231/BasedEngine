@@ -26,17 +26,24 @@ namespace based
     bool ValidateMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList)
     {
         size_t totalSize = 0;
-        for (const auto& poolDescriptor : poolList.pools | std::views::values)
+        for (const auto& [ePoolID, poolDescriptor] : poolList.pools | std::views::all)
         {
-            // Skip the invalid and root pool identifiers, and GPU pools since we set those up separately
-            if (poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kInvalid)
-                || poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kRootPool)
-                || poolDescriptor.m_bIsGPUPool) continue;
+            BASED_ASSERT_FMT(poolDescriptor.m_ePoolID == to_underlying(ePoolID),
+                "Pool {} does not have a matching ID in the descriptor! (Has {})", 
+                to_underlying(ePoolID), poolDescriptor.m_ePoolID);
+            
+            // Skip the root pool and GPU pools since we set those up separately
+            if (poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kRootPool) || poolDescriptor.m_bIsGPUPool) 
+                continue;
+            
+            BASED_ASSERT(poolDescriptor.m_ePoolID != to_underlying(ePoolIdentifier::kInvalid),
+                "Pool descriptor has invalid ID, did you define all the engine pools?");
+            if (poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kInvalid)) return false;
             
             size_t stPoolSize = poolDescriptor.m_stPoolSize;
             const std::string_view strPoolName = poolDescriptor.m_strPoolName;
             BASED_ASSERT_FMT(stPoolSize > 0, "Invalid size {} for pool {}!", stPoolSize, poolDescriptor.m_ePoolID);
-            if (stPoolSize <= 0) continue; // TODO: Once I have all the pools sorted, this should return failure
+            if (stPoolSize <= 0) return false;
 
             ePoolIdentifier eParentPoolID = static_cast<ePoolIdentifier>(poolDescriptor.m_eParentPoolID);
             if (eParentPoolID != ePoolIdentifier::kInvalid)
@@ -69,11 +76,6 @@ namespace based
 #endif
 
         return true;
-    }
-
-    bool ValidateGraphicsMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList)
-    {
-        return false;
     }
 
     void SetupMemoryPools()

@@ -51,3 +51,9 @@
                    static_cast<std::underlying_type_t<Enum>>(Lhs) ^ \
                    static_cast<std::underlying_type_t<Enum>>(Lhs)); \
     }
+
+#ifdef BASED_CONFIG_DEBUG
+#define BASED_STATIC_ASSERT(x, msg) static_assert((x) && msg)
+#else
+#define BASED_STATIC_ASSERT(x, msg) (void)0
+#endif

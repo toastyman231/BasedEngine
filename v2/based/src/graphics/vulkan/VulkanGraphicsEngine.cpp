@@ -130,6 +130,101 @@ namespace based
         }*/
     }
     
+    size_t GetTotalGraphicsMemoryBytes()
+    {
+        vk::PhysicalDeviceMemoryBudgetPropertiesEXT budgetProperties{};
+
+        vk::PhysicalDeviceMemoryProperties2 memProperties2{};
+        memProperties2.pNext = &budgetProperties;
+        
+        auto& GE = dynamic_cast<VulkanGraphicsEngine&>(Engine::Instance().GetGraphicsEngine());
+        GE.GetPhysicalDevice().getMemoryProperties2(&memProperties2);
+
+        vk::DeviceSize nTotalMemory = 0;
+        for (uint32_t i = 0; i < memProperties2.memoryProperties.memoryHeapCount; ++i) 
+        {
+            if (memProperties2.memoryProperties.memoryHeaps[i].flags & vk::MemoryHeapFlagBits::eDeviceLocal) 
+            {
+                nTotalMemory += memProperties2.memoryProperties.memoryHeaps[i].size;
+            }
+        }
+
+        return nTotalMemory;
+    }
+    
+    size_t GetAvailableGraphicsMemoryBytes()
+    {
+        vk::PhysicalDeviceMemoryBudgetPropertiesEXT budgetProperties{};
+
+        vk::PhysicalDeviceMemoryProperties2 memProperties2{};
+        memProperties2.pNext = &budgetProperties;
+        
+        auto& GE = dynamic_cast<VulkanGraphicsEngine&>(Engine::Instance().GetGraphicsEngine());
+        GE.GetPhysicalDevice().getMemoryProperties2(&memProperties2);
+
+        vk::DeviceSize nAvailableMemory = 0;
+        for (uint32_t i = 0; i < memProperties2.memoryProperties.memoryHeapCount; ++i) 
+        {
+            if (memProperties2.memoryProperties.memoryHeaps[i].flags & vk::MemoryHeapFlagBits::eDeviceLocal) 
+            {
+                vk::DeviceSize osBudget = budgetProperties.heapBudget[i];
+                vk::DeviceSize currentUsage = budgetProperties.heapUsage[i];
+                nAvailableMemory += osBudget - currentUsage;
+            }
+        }
+        
+        return nAvailableMemory;
+    }
+    
+    bool ValidateGraphicsMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList)
+    {
+        return false;
+        /*size_t stRequestedDeviceLocal = 0;
+        for (const auto& poolDescriptor : poolList.pools | std::views::values)
+        {
+            // Skip the invalid and root pool identifiers, and GPU pools since we set those up separately
+            if (poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kInvalid)
+                || poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kRootPool)
+                || poolDescriptor.m_bIsGPUPool) continue;
+            
+            size_t stPoolSize = poolDescriptor.m_stPoolSize;
+            const std::string_view strPoolName = poolDescriptor.m_strPoolName;
+            BASED_ASSERT_FMT(stPoolSize > 0, "Invalid size {} for pool {}!", stPoolSize, poolDescriptor.m_ePoolID);
+            if (stPoolSize <= 0) continue; // TODO: Once I have all the pools sorted, this should return failure
+
+            ePoolIdentifier eParentPoolID = static_cast<ePoolIdentifier>(poolDescriptor.m_eParentPoolID);
+            if (eParentPoolID != ePoolIdentifier::kInvalid)
+            {
+                const auto pParentDescriptor = poolList.Find(eParentPoolID);
+                BASED_ASSERT_FMT(pParentDescriptor, "No pool descriptor found for pool {}!", poolDescriptor.m_eParentPoolID);
+                if (!pParentDescriptor) return false;
+                
+                BASED_ASSERT_FMT(stPoolSize < pParentDescriptor->m_stPoolSize,
+                        "Child pool {} ({}) is bigger than parent {} ({})!", strPoolName, MemSize{stPoolSize},
+                            pParentDescriptor->m_strPoolName, MemSize{pParentDescriptor->m_stPoolSize});
+                if (stPoolSize >= pParentDescriptor->m_stPoolSize) return false;
+            } else
+            {
+                totalSize += stPoolSize;
+            }
+        }
+
+#ifndef SKIP_AVAILABLE_MEMORY_CHECK
+        size_t totalRAM = GetTotalSystemMemoryBytes();
+        size_t availRAM = GetAvailableSystemMemoryBytes();
+        BASED_ASSERT_FMT(totalSize <= totalRAM && totalSize <= availRAM,
+            "System does not have enough memory! Want: {}, Have: {}, Available: {}", totalSize, totalRAM, availRAM);
+        if (totalSize > totalRAM || totalSize > availRAM) return false;
+#else
+        size_t totalRAM = GetTotalSystemMemoryBytes();
+        BASED_ASSERT_FMT(totalSize <= totalRAM,
+            "System does not have enough memory! Want: {}, Have: {}", totalSize, totalRAM);
+        if (totalSize > totalRAM) return false;
+#endif
+
+        return true;*/
+    }
+    
     const vk::AllocationCallbacks* VulkanGraphicsEngine::GetAllocationCallbacks()
     {
         static vk::AllocationCallbacks allocCallbacks;
@@ -214,6 +309,16 @@ namespace based
         check(m_Instance.enumeratePhysicalDevices(&nDeviceCount, vDevices.data()));
         
         uint32 nDeviceIndex = 0;
+        for (uint i = 0; i < nDeviceCount; ++i)
+        {
+            vk::PhysicalDeviceProperties2 deviceProperties{};
+            vDevices[i].getProperties2(&deviceProperties);
+            if (deviceProperties.properties.deviceType == vk::PhysicalDeviceType::eDiscreteGpu)
+            {
+                nDeviceIndex = i;
+                break;
+            }
+        }
         m_PhysicalDevice = vDevices[nDeviceIndex];
         
         vk::PhysicalDeviceProperties2 deviceProperties{};
@@ -227,7 +332,7 @@ namespace based
         m_PhysicalDevice.getQueueFamilyProperties(&nQueueFamilyCount, vQueueFamProperties.data());
 
         uint32 nQueueFamily = 0;
-        for (size_t i = 0; i < vQueueFamProperties.size(); ++i)
+        for (uint i = 0; i < vQueueFamProperties.size(); ++i)
         {
             if (vQueueFamProperties[i].queueFlags & vk::QueueFlagBits::eGraphics
                 && vQueueFamProperties[i].queueFlags & vk::QueueFlagBits::eCompute)
@@ -245,7 +350,7 @@ namespace based
                 .setQueueCount(1)
                 .setPQueuePriorities(&fQueuePriorities);
 
-        const std::vector<const char*> vDeviceExtensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+        const std::vector<const char*> vDeviceExtensions{ vk::KHRSwapchainExtensionName, vk::EXTMemoryBudgetExtensionName };
         vk::PhysicalDeviceVulkan12Features enabledVk12Features;
         enabledVk12Features.setDescriptorIndexing(true)
                             .setShaderSampledImageArrayNonUniformIndexing(true)

@@ -64,6 +64,8 @@ namespace based
     static uint32 s_nHostCoherentOnlyIndex = 0;
     static uint32 s_nDeviceLocalOnlyIndex = 0;
     static uint32 s_nDeviceLocalOrHostVisibleIndex = 0;
+    
+    // 
 
     DEFINE_ENUM_CLASS_BITWISE_OPERATORS(VulkanPoolAllocator::eVulkanPoolUsage)
 }

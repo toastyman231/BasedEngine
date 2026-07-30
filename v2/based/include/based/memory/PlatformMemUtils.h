@@ -51,6 +51,9 @@ namespace based
 
     size_t GetAvailableSystemMemoryBytes();
     size_t GetTotalSystemMemoryBytes();
+    // Implement these in the graphics engine!
+    size_t GetTotalGraphicsMemoryBytes();
+    size_t GetAvailableGraphicsMemoryBytes();
 
     bool ValidateMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList);
     bool ValidateGraphicsMemoryPoolSettings(const EngineMemoryPoolDescriptorList& poolList);

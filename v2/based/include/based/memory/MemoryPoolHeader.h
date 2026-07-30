@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "BasedDefines.h"
 #include "MemoryPoolAllocator.h"
 #include "../core/BasedTypes.h"
 #include "../core/BasedLog.h"
@@ -29,7 +30,7 @@ namespace based
         // Values after kMaxEnginePools are reserved for user pools
         kMaxPools = static_cast<uint8>(kMaxPools)
     };
-    constexpr size_t kNumEnginePools = to_underlying(ePoolIdentifier::kEnginePoolsCount);
+    constexpr size_t kNumEnginePools = to_underlying(ePoolIdentifier::kEnginePoolsCount) - 1; // Don't count the root pool
     
     // We really want the backing memory to immediately follow this header (for CPU pools anyway)
     // so we make it NonMoveable (which includes NonCopyable) just to drive this home.
@@ -194,12 +195,33 @@ namespace based
         MemoryPoolHeader* m_pPreviousPool, *m_pPreviousGraphicsPool;
     };
 
+    // Used to map to API specific memory types (Vulkan Memory Type Bits/D3D12 Heap Type/etc)
+    // CPU visible pools will always try to be coherent if possible, but may fall back to just being host visible
+    enum class eGPUMemoryRequirements : uint8 
+    {
+        kNone,
+        kCPUVisibleRequired = 1u << 0,
+        kCPUVisiblePreferred = 1u << 1,
+        kDeviceLocalRequired = 1u << 2,
+        kDeviceLocalPreferred = 1u << 3,
+        kCPUReadbackRequired = 1u << 4,
+        kCPUReadbackPreferred = 1u << 5,
+        
+        kBARRequired = kCPUVisibleRequired | kDeviceLocalRequired,
+        kCPUBARPreferred = kCPUVisibleRequired | kDeviceLocalPreferred,
+        kGPUBARPreferred = kCPUVisiblePreferred | kDeviceLocalRequired,
+        kCPUOnly = kCPUVisibleRequired,
+        kGPUOnly = kDeviceLocalRequired
+    };
+    DEFINE_ENUM_CLASS_BITWISE_OPERATORS(eGPUMemoryRequirements);
+    
     struct PoolDescriptor final
     {
         const char* m_strPoolName;
         size_t m_stPoolSize;
         uint8 m_ePoolID;
         uint8 m_eParentPoolID;
+        eGPUMemoryRequirements m_eGPUMemRequirements;
         bool m_bIsGPUPool;
     };
 

@@ -35,7 +35,7 @@ namespace based
         std::vector<const char*> vExtensions;
 
 #ifdef BASED_CONFIG_DEBUG
-        vExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        vExtensions.push_back(vk::EXTDebugUtilsExtensionName);
 #endif
 
         uint nSDLExtensionCount = 0;
