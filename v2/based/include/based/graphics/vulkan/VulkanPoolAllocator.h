@@ -32,7 +32,7 @@ namespace based
         };
         
         // nMemoryTypeIndex should be one of the values defined below
-        void Initialize(const PoolDescriptor& poolDescriptor, uint32 nMemoryTypeIndex, eVulkanPoolUsage flags);
+        bool Initialize(const PoolDescriptor& poolDescriptor, uint32 nMemoryTypeIndex, eVulkanPoolUsage flags);
         void Shutdown();
         
         [[nodiscard]] void* Allocate(size_t bytes) override;
@@ -44,7 +44,9 @@ namespace based
 
         static uint32 FindMemoryTypeIndex(vk::MemoryPropertyFlags required, 
             vk::MemoryPropertyFlags preferred = static_cast<vk::MemoryPropertyFlags>(0));
-        std::optional<const VulkanPoolAllocator::Header*> FindHeader(void* ptr) const;
+        std::optional<const Header*> FindHeader(void* ptr) const;
+
+        void* GetBaseCPUAddress() const { return m_pCPUBaseAddress; }
 
     private:
         VmaPool m_Pool = nullptr;

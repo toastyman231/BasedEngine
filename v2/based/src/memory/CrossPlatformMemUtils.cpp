@@ -104,7 +104,7 @@ namespace based
 
             void* pBackingMem = nullptr;
 
-            // Since VMA requires Vulkan to be set up, we're forced to setup GPU mem pools separately on that
+            // Since VMA requires Vulkan to be set up, we're forced to set up GPU mem pools separately on that
             // platform. Therefore, all platforms set up GPU mempools separately. 
             if (eParentPoolID != ePoolIdentifier::kInvalid)
             {

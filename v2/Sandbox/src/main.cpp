@@ -55,6 +55,7 @@ namespace based
                         .m_ePoolID = to_underlying(ePoolIdentifier::kPersistentPool),
                         .m_eParentPoolID = to_underlying(ePoolIdentifier::kInvalid),
                         .m_eGPUMemRequirements = eGPUMemoryRequirements::kNone,
+                        .m_ePoolUsageIntent = ePoolUsageIntent::kNone,
                         .m_bIsGPUPool = false
                     }
                 },
@@ -67,6 +68,7 @@ namespace based
                         .m_ePoolID = to_underlying(ePoolIdentifier::kPersistentGraphicsPool),
                         .m_eParentPoolID = to_underlying(ePoolIdentifier::kInvalid),
                         .m_eGPUMemRequirements = eGPUMemoryRequirements::kCPUBARPreferred,
+                        .m_ePoolUsageIntent = ePoolUsageIntent::kBuffers,
                         .m_bIsGPUPool = true
                     }
                 },
@@ -79,6 +81,7 @@ namespace based
                         .m_ePoolID = to_underlying(ePoolIdentifier::kPersistentDeviceGraphicsPool),
                         .m_eParentPoolID = to_underlying(ePoolIdentifier::kInvalid),
                         .m_eGPUMemRequirements = eGPUMemoryRequirements::kGPUBARPreferred,
+                        .m_ePoolUsageIntent = ePoolUsageIntent::kNone,
                         .m_bIsGPUPool = true
                     }
                 },
@@ -86,11 +89,12 @@ namespace based
                     ePoolIdentifier::kTextureCPUPool, 
                     PoolDescriptor
                     {
-                        .m_strPoolName = "Persistent",
+                        .m_strPoolName = "Texture CPU",
                         .m_stPoolSize = mib_to_bytes(50),
                         .m_ePoolID = to_underlying(ePoolIdentifier::kTextureCPUPool),
                         .m_eParentPoolID = to_underlying(ePoolIdentifier::kPersistentPool),
                         .m_eGPUMemRequirements = eGPUMemoryRequirements::kNone,
+                        .m_ePoolUsageIntent = ePoolUsageIntent::kNone,
                         .m_bIsGPUPool = false
                     }
                 },
@@ -103,6 +107,7 @@ namespace based
                         .m_ePoolID = to_underlying(ePoolIdentifier::kTextureGPUPool),
                         .m_eParentPoolID = to_underlying(ePoolIdentifier::kInvalid),
                         .m_eGPUMemRequirements = eGPUMemoryRequirements::kGPUOnly,
+                        .m_ePoolUsageIntent = ePoolUsageIntent::kNone,
                         .m_bIsGPUPool = true
                     }
                 },
@@ -115,6 +120,7 @@ namespace based
                         .m_ePoolID = to_underlying(ePoolIdentifier::kTextureSmallGPUPool),
                         .m_eParentPoolID = to_underlying(ePoolIdentifier::kInvalid),
                         .m_eGPUMemRequirements = eGPUMemoryRequirements::kGPUOnly,
+                        .m_ePoolUsageIntent = ePoolUsageIntent::kNone,
                         .m_bIsGPUPool = true
                     }
                 },
@@ -122,11 +128,12 @@ namespace based
                     ePoolIdentifier::kScratchCPUPool, 
                     PoolDescriptor
                     {
-                        .m_strPoolName = "Scratch",
+                        .m_strPoolName = "Scratch CPU",
                         .m_stPoolSize = gib_to_bytes(1),
                         .m_ePoolID = to_underlying(ePoolIdentifier::kScratchCPUPool),
                         .m_eParentPoolID = to_underlying(ePoolIdentifier::kPersistentPool),
                         .m_eGPUMemRequirements = eGPUMemoryRequirements::kNone,
+                        .m_ePoolUsageIntent = ePoolUsageIntent::kScratch,
                         .m_bIsGPUPool = false
                     }
                 },
@@ -139,6 +146,7 @@ namespace based
                         .m_ePoolID = to_underlying(ePoolIdentifier::kScratchGPUPool),
                         .m_eParentPoolID = to_underlying(ePoolIdentifier::kInvalid),
                         .m_eGPUMemRequirements = eGPUMemoryRequirements::kCPUBARPreferred,
+                        .m_ePoolUsageIntent = ePoolUsageIntent::kScratch | ePoolUsageIntent::kBuffers,
                         .m_bIsGPUPool = true
                     }
                 },
@@ -151,6 +159,7 @@ namespace based
                         .m_ePoolID = to_underlying(ePoolIdentifier::kStagingPool),
                         .m_eParentPoolID = to_underlying(ePoolIdentifier::kInvalid),
                         .m_eGPUMemRequirements = eGPUMemoryRequirements::kCPUOnly,
+                        .m_ePoolUsageIntent = ePoolUsageIntent::kScratch | ePoolUsageIntent::kBuffers,
                         .m_bIsGPUPool = true
                     }
                 },

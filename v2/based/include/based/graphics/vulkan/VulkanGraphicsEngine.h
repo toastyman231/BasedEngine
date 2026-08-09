@@ -22,6 +22,9 @@ namespace based
         vk::PhysicalDevice GetPhysicalDevice() const { return m_PhysicalDevice; }
         
         static const vk::AllocationCallbacks* GetAllocationCallbacks();
+        static vk::DeviceSize GetMaxHeapSizeForMemoryType(uint32 nMemoryTypeIndex);
+        static vk::DeviceSize GetCurrentHeapSizeForMemoryType(uint32 nMemoryTypeIndex);
+        static void LogAllHeaps();
 
     private:
         VulkanGraphicsEngine() = default;
@@ -36,6 +39,10 @@ namespace based
         vk::Queue m_Queue = nullptr;
         vk::SurfaceKHR m_Surface = nullptr;
         vk::SwapchainKHR m_Swapchain = nullptr;
+
+#ifdef BASED_CONFIG_DEBUG
+        vk::DebugUtilsMessengerEXT m_Messenger = nullptr;
+#endif
 
         std::vector<vk::Image> m_vSwapchainImages;
         std::vector<vk::ImageView> m_vSwapchainImageViews;

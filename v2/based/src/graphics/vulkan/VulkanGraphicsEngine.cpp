@@ -22,6 +22,10 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 #include "memory/MemoryManager.h"
 #include "memory/MemoryPoolHeader.h"
 
+#if defined(BASED_CONFIG_DEBUG) && !defined(BASED_CONFIG_DEVELOPMENT)
+#define BASED_USE_VULKAN_VALIDATION_LAYERS
+#endif
+
 namespace based
 {
 
@@ -56,6 +60,100 @@ namespace based
             vk::to_string(allocScope));
     }
 
+    static VKAPI_ATTR vk::Bool32 VkDebugCallback(
+        vk::DebugUtilsMessageSeverityFlagBitsEXT eMessageSeverity,
+        vk::DebugUtilsMessageTypeFlagsEXT eMessageType,
+        const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData,
+        void* pUserData)
+    {
+        static constexpr std::string_view kSuppressedIds[] = {
+            "UNASSIGNED-vkAllocateMemory-maxMemoryAllocationSize"
+        };
+
+        if (pCallbackData->pMessageIdName)
+        {
+            for (auto id : kSuppressedIds)
+            {
+                if (id == pCallbackData->pMessageIdName)
+                    return vk::False;
+            }
+            BASED_DEBUG("Message ID: {}", pCallbackData->pMessageIdName);
+        }
+        
+        switch (eMessageSeverity)
+        {
+        case vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose:
+            BASED_DEBUG(pCallbackData->pMessage);
+            break;
+        case vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo:
+            BASED_INFO(pCallbackData->pMessage);
+            break;
+        case vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning:
+            BASED_WARN(pCallbackData->pMessage);
+            break;
+        case vk::DebugUtilsMessageSeverityFlagBitsEXT::eError:
+            BASED_ERROR(pCallbackData->pMessage);
+            break;
+        }
+
+        return vk::False;
+    }
+
+#ifdef BASED_USE_VULKAN_VALIDATION_LAYERS
+    static const std::vector<const char*> vValidationLayers = {
+        "VK_LAYER_KHRONOS_validation"
+    };
+    
+    static bool CheckValidationLayers()
+    {
+        uint32 nLayerCount;
+        check(vk::enumerateInstanceLayerProperties(&nLayerCount, nullptr));
+
+        std::vector<vk::LayerProperties> vAvailableLayers(nLayerCount);
+        check(vk::enumerateInstanceLayerProperties(&nLayerCount, vAvailableLayers.data()));
+
+        for (const char* pLayerName : vValidationLayers)
+        {
+            bool bLayerFound = false;
+
+            for (const auto& layerProperties : vAvailableLayers)
+            {
+                if (strcmp(pLayerName, layerProperties.layerName) == 0)
+                {
+                    bLayerFound = true;
+                    break;
+                }
+            }
+
+            if (!bLayerFound)
+            {
+                BASED_ERROR("Could not find validation layer {}!", pLayerName);
+                return false;
+            }
+        }
+
+        return true;
+    }
+#endif
+
+    // Get the pools sorted by how flexible it is to fall back to other memory types
+    // I.e. least flexible (least number of fallback options) allocate first so they take their best fit before
+    // some other pool that might be more flexible takes it
+    static std::vector<const PoolDescriptor*> GetSortedPoolList(
+        std::unordered_map<const PoolDescriptor*, std::vector<uint32>>& poolMemoryTypeMap)
+    {
+        auto keys = std::views::keys(poolMemoryTypeMap);
+        std::vector<const PoolDescriptor*> vOutList(keys.begin(), keys.end());
+
+        std::ranges::sort(vOutList, std::ranges::less{},
+            [poolMemoryTypeMap](const PoolDescriptor* a)
+            {
+               return poolMemoryTypeMap.at(a).size();
+            });
+
+        return vOutList;
+    }
+
     static VmaAllocator s_pAllocatorTemp = nullptr; // We store the allocator here so that the Graphics Engine can grab it later
     void SetupGraphicsPools()
     {
@@ -66,44 +164,79 @@ namespace based
         BASED_ASSERT(pInstance, "Invalid Vulkan instance! Did you initialize the graphics engine?");
         BASED_ASSERT(device, "Invalid Vulkan device! Did you initialize the graphics engine?");
 
-        // TODO: Do the following, but for graphics pools.
-        // We'll also need to check for available memory for each type index, and we might need to retry certain ones
-        // if e.g. the user is on an older device without ReBAR support.
+#ifdef BASED_CONFIG_DEBUG
+        VulkanGraphicsEngine::LogAllHeaps();
+#endif
         
         const EngineMemoryPoolDescriptorList& poolList = GetMemoryPoolDescriptors();
         std::unordered_map<const PoolDescriptor*, std::vector<uint32>> poolMemoryTypeMap;
         const bool bSuccess = ValidateGraphicsMemoryPoolSettings(poolList, poolMemoryTypeMap);
+        // This assert is skippable, since the pools will attempt to fall back to less-than-ideal configs.
+        // It's just to alert you that you might need to reconfigure your pools, or close some other apps.
         BASED_ASSERT(bSuccess, "Invalid graphics pool settings!");
-        
-        /*for (const auto& poolDescriptor : poolList.pools | std::views::values)
+
+        const std::vector<const PoolDescriptor*> vSortedPoolList = GetSortedPoolList(poolMemoryTypeMap);
+
+        for (const auto pPoolDescriptor : vSortedPoolList)
         {
-            // Skip the invalid and root pool identifiers, and any pools that haven't been defined (for now)
+            BASED_ASSERT(pPoolDescriptor, "Invalid pool descriptor!");
+            if (!pPoolDescriptor) continue;
+            
+            const PoolDescriptor& poolDescriptor = *pPoolDescriptor;
+            
+            // Skip the invalid and root pool identifiers, and CPU pools
             if (poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kInvalid)
                 || poolDescriptor.m_ePoolID == to_underlying(ePoolIdentifier::kRootPool)
-                || poolDescriptor.m_stPoolSize == 0) continue;
+                || poolDescriptor.m_stPoolSize == 0
+                || !poolDescriptor.m_bIsGPUPool) continue;
+
+            AllocatorScope ac(ePoolIdentifier::kPersistentPool);
             
-            size_t stPoolSize = poolDescriptor.m_stPoolSize;
-            ePoolIdentifier eParentPoolID = static_cast<ePoolIdentifier>(poolDescriptor.m_eParentPoolID);
+            BASED_ASSERT_FMT(poolMemoryTypeMap.contains(&poolDescriptor),
+                "No valid memory types found for pool {}!", poolDescriptor.m_strPoolName);
+            if (!poolMemoryTypeMap.contains(&poolDescriptor)) continue;
+            std::vector<uint32>& vValidMemoryTypes = poolMemoryTypeMap[&poolDescriptor];
 
-            void* pBackingMem = nullptr;
+            VulkanPoolAllocator* pAllocator = new VulkanPoolAllocator();
+            VulkanPoolAllocator::eVulkanPoolUsage nFlags = VulkanPoolAllocator::eVulkanPoolUsage::kNone;
+            if (HasBit(poolDescriptor.m_ePoolUsageIntent, ePoolUsageIntent::kScratch))
+                nFlags |= VulkanPoolAllocator::eVulkanPoolUsage::kUseLinearAlgorithm;
+            if (HasBit(poolDescriptor.m_ePoolUsageIntent, ePoolUsageIntent::kBuffers))
+                nFlags |= VulkanPoolAllocator::eVulkanPoolUsage::kAllBufferUsage;
 
-            // Since VMA requires Vulkan to be set up, we're forced to setup GPU mem pools separately on that
-            // platform. Therefore, all platforms set up GPU mempools separately. 
-            if (eParentPoolID != ePoolIdentifier::kInvalid)
+            bool bAnySuccess = false;
+
+            for (uint32 nMemoryTypeIndex : vValidMemoryTypes)
             {
-                AllocatorScope ac(eParentPoolID);
-                pBackingMem = new uint8[stPoolSize + sizeof(MemoryPoolHeader) + sizeof(MemPoolTLSFAllocator)];
-            } else
-            {
-                pBackingMem = AllocateSystemMemory(
-                    stPoolSize + sizeof(MemoryPoolHeader) + sizeof(MemPoolTLSFAllocator));
+                if (pAllocator->Initialize(poolDescriptor, nMemoryTypeIndex, nFlags))
+                {
+                    MemoryPoolHeader::CreatePool(poolDescriptor.m_strPoolName,
+                        static_cast<ePoolIdentifier>(poolDescriptor.m_ePoolID),
+                        poolDescriptor.m_stPoolSize, pAllocator,
+                        pAllocator->GetBaseCPUAddress());
+                    bAnySuccess = true;
+                    break;
+                } else
+                {
+                    BASED_WARN(
+                    "Error initializing pool {} with memory type index {}!\n"
+                    "                          Heap has: {} / {}, need {}.\n"
+                    "                          Attempting to fall back...",
+                    poolDescriptor.m_strPoolName, nMemoryTypeIndex,
+                    MemSize{GE.GetCurrentHeapSizeForMemoryType(nMemoryTypeIndex)},
+                    MemSize{GE.GetMaxHeapSizeForMemoryType(nMemoryTypeIndex)},
+                    MemSize{poolDescriptor.m_stPoolSize});
+                }
             }
-            
-            BASED_ASSERT(pBackingMem, "Invalid memory allocated!");
-            MemoryPoolHeader::CreatePool(poolDescriptor.m_strPoolName,
-                static_cast<ePoolIdentifier>(poolDescriptor.m_ePoolID),
-                stPoolSize, pBackingMem);
-        }*/
+
+            if (!bAnySuccess)
+            {
+                VulkanGraphicsEngine::LogAllHeaps();
+            }
+            BASED_ASSERT_FMT(bAnySuccess, "Could not find any valid memory type index to fall back to!");
+        }
+
+        BASED_INFO("Finished setting up graphics memory pools!");
     }
     
     size_t GetTotalGraphicsMemoryBytes()
@@ -156,13 +289,13 @@ namespace based
     {
         constexpr uint32 kMaxAcceptableMemTypes = 3;
         BASED_ASSERT(
-            !HasBit(eRequirements, eGPUMemoryRequirements::kCPUVisibleRequired & eGPUMemoryRequirements::kCPUVisiblePreferred), 
+            !HasBit(eRequirements, eGPUMemoryRequirements::kCPUVisibleRequired | eGPUMemoryRequirements::kCPUVisiblePreferred), 
                 "Memory requirements cannot both require and prefer CPU visibility, pick one!");
         BASED_ASSERT(
-            !HasBit(eRequirements, eGPUMemoryRequirements::kDeviceLocalRequired & eGPUMemoryRequirements::kDeviceLocalPreferred),
+            !HasBit(eRequirements, eGPUMemoryRequirements::kDeviceLocalRequired | eGPUMemoryRequirements::kDeviceLocalPreferred),
                 "Memory requirements cannot both require and prefer device local, pick one!");
         BASED_ASSERT(
-            !HasBit(eRequirements, eGPUMemoryRequirements::kCPUReadbackRequired & eGPUMemoryRequirements::kCPUReadbackPreferred),
+            !HasBit(eRequirements, eGPUMemoryRequirements::kCPUReadbackRequired | eGPUMemoryRequirements::kCPUReadbackPreferred),
                 "Memory requirements cannot both require and prefer CPU readback, pick one!");
         
         std::array<vk::MemoryPropertyFlags, kMaxAcceptableMemTypes> vAcceptableMemTypeFlags{};
@@ -309,6 +442,61 @@ namespace based
         return &allocCallbacks;
     }
 
+    vk::DeviceSize VulkanGraphicsEngine::GetMaxHeapSizeForMemoryType(uint32 nMemoryTypeIndex)
+    {
+        auto& GE = dynamic_cast<VulkanGraphicsEngine&>(Engine::Instance().GetGraphicsEngine());
+        
+        vk::PhysicalDeviceMemoryProperties memProperties = GE.GetPhysicalDevice().getMemoryProperties();
+
+        uint32_t heapIndex = memProperties.memoryTypes[nMemoryTypeIndex].heapIndex;
+
+        return memProperties.memoryHeaps[heapIndex].size;
+    }
+
+    vk::DeviceSize VulkanGraphicsEngine::GetCurrentHeapSizeForMemoryType(uint32 nMemoryTypeIndex)
+    {
+        auto& GE = dynamic_cast<VulkanGraphicsEngine&>(Engine::Instance().GetGraphicsEngine());
+        
+        vk::PhysicalDeviceMemoryProperties memProperties = GE.GetPhysicalDevice().getMemoryProperties();
+
+        uint32_t heapIndex = memProperties.memoryTypes[nMemoryTypeIndex].heapIndex;
+
+        std::array<VmaBudget, VK_MAX_MEMORY_HEAPS> budgets{};
+        vmaGetHeapBudgets(GE.m_Allocator, budgets.data());
+
+        const VmaBudget& budget = budgets[heapIndex];
+
+        double fBudgetGiB = static_cast<double>(budget.budget) / (1024.0 * 1024.0 * 1024.0);
+        double fUsageGiB  = static_cast<double>(budget.usage)  / (1024.0 * 1024.0 * 1024.0);
+        double fAvailGiB  = fBudgetGiB - fUsageGiB;
+
+        return fAvailGiB;
+    }
+
+    void VulkanGraphicsEngine::LogAllHeaps()
+    {
+        auto& GE = dynamic_cast<VulkanGraphicsEngine&>(Engine::Instance().GetGraphicsEngine());
+        
+        vk::PhysicalDeviceMemoryProperties memProperties = GE.GetPhysicalDevice().getMemoryProperties();
+        
+        std::array<VmaBudget, VK_MAX_MEMORY_HEAPS> budgets{};
+        vmaGetHeapBudgets(GE.m_Allocator, budgets.data());
+
+        for (uint32_t i = 0; i < memProperties.memoryHeapCount; ++i)
+        {
+            auto& b = budgets[i];
+            BASED_INFO("Heap {} [{}{}]: size={} budget={}, usage={}, blockBytes={}, allocationBytes={}",
+                i,
+                (memProperties.memoryHeaps[i].flags & vk::MemoryHeapFlagBits::eDeviceLocal) ? "DEVICE_LOCAL" : "",
+                "",
+                MemSize{memProperties.memoryHeaps[i].size},
+                MemSize{b.budget},
+                MemSize{b.usage},
+                MemSize{b.statistics.blockBytes},
+                MemSize{b.statistics.allocationBytes});
+        }
+    }
+
     static void SetupVMA()
     {
         auto& GE = dynamic_cast<VulkanGraphicsEngine&>(Engine::Instance().GetGraphicsEngine());
@@ -322,7 +510,7 @@ namespace based
         vkFunctions.vkGetInstanceProcAddr = vkGetInstanceProcAddr;
         vkFunctions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
         VmaAllocatorCreateInfo allocatorCI{
-            .flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT,
+            .flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT | VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT,
             .physicalDevice = GE.GetPhysicalDevice(),
             .device = device,
             .pAllocationCallbacks = *VulkanGraphicsEngine::GetAllocationCallbacks(),
@@ -361,13 +549,38 @@ namespace based
 
         std::vector<const char*> vExtensions = PlatformEngine::GetVulkanInstanceExtensions();
 
+#ifdef BASED_USE_VULKAN_VALIDATION_LAYERS
+        BASED_ASSERT(CheckValidationLayers(), "Couldn't find all validation layers! Check log for details.");
+#endif
+
         vk::InstanceCreateInfo instanceCI;
         instanceCI.setPApplicationInfo(&appInfo)
-                    .setEnabledExtensionCount(vExtensions.size())
+#ifdef BASED_USE_VULKAN_VALIDATION_LAYERS
+                    .setEnabledLayerCount(static_cast<uint32>(vValidationLayers.size()))
+                    .setPpEnabledLayerNames(vValidationLayers.data())
+#endif
+                    .setEnabledExtensionCount(static_cast<uint32>(vExtensions.size()))
                     .setPpEnabledExtensionNames(vExtensions.data());
         check(vk::createInstance(&instanceCI, GetAllocationCallbacks(), &m_Instance));
         volkLoadInstance(m_Instance);
         VULKAN_HPP_DEFAULT_DISPATCHER.init(m_Instance);
+
+#ifdef BASED_CONFIG_DEBUG
+        vk::DebugUtilsMessengerCreateInfoEXT createInfo{};
+        createInfo
+            .setMessageSeverity(
+                vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
+                | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
+                | vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose)
+            .setMessageType(
+                vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
+                | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
+                | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance)
+            .setPfnUserCallback(VkDebugCallback)
+            .setPUserData(nullptr);
+
+        check(m_Instance.createDebugUtilsMessengerEXT(&createInfo, GetAllocationCallbacks(), &m_Messenger));
+#endif
 
         // Physical device setup
         uint32 nDeviceCount = 0;
@@ -488,5 +701,10 @@ namespace based
         m_vSwapchainImageViews.resize(nImageCount);
     }
     
-    void VulkanGraphicsEngine::Shutdown() {}
+    void VulkanGraphicsEngine::Shutdown()
+    {
+#ifdef BASED_CONFIG_DEBUG
+        m_Instance.destroyDebugUtilsMessengerEXT(m_Messenger, GetAllocationCallbacks());
+#endif
+    }
 }

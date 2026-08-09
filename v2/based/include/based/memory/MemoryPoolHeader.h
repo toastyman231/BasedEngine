@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "BasedDefines.h"
 #include "MemoryPoolAllocator.h"
-#include "../core/BasedTypes.h"
+#include "../BasedDefines.h"
 #include "../core/BasedLog.h"
+#include "../core/BasedTypes.h"
 
 namespace based
 {
@@ -31,6 +31,20 @@ namespace based
         kMaxPools = static_cast<uint8>(kMaxPools)
     };
     constexpr size_t kNumEnginePools = to_underlying(ePoolIdentifier::kEnginePoolsCount) - 1; // Don't count the root pool
+
+    class AllocatorScope final : public NonMoveable
+    {
+    public:
+        AllocatorScope() = delete;
+        AllocatorScope(MemoryPoolHeader* pMemoryPool);
+        AllocatorScope(MemoryPoolHeader* pMemoryPool, MemoryPoolHeader* pGraphicsPool);
+        AllocatorScope(ePoolIdentifier poolID);
+        AllocatorScope(ePoolIdentifier poolID, ePoolIdentifier graphicsPoolID);
+        ~AllocatorScope();
+
+    private:
+        MemoryPoolHeader* m_pPreviousPool, *m_pPreviousGraphicsPool;
+    };
     
     // We really want the backing memory to immediately follow this header (for CPU pools anyway)
     // so we make it NonMoveable (which includes NonCopyable) just to drive this home.
@@ -71,28 +85,29 @@ namespace based
 
             return pHeader;
         }
+        
         // Create a pool using an existing allocator and chunk of memory (usually a GPU pool)
         template <typename T> requires EnumClassWithUnderlying<T, uint8>
         static MemoryPoolHeader* CreatePool(const char* pPoolName, T ePoolId, size_t stPool,
-            IMemoryPoolAllocator* pAllocator, void* pBackingMemory)
+            IMemoryPoolAllocator* pAllocator, void* pBackingMemory,
+            ePoolIdentifier ePoolForHeader = ePoolIdentifier::kPersistentPool)
         {
             BASED_ASSERT(ms_bCreatedRootPool, "Must create root pool first!");
             BASED_ASSERT(pAllocator, "Invalid allocator pointer!");
             BASED_ASSERT(to_underlying(ePoolId) > 0, "Must pass a valid pool ID!");
             BASED_ASSERT_FMT(ms_poolList[to_underlying(ePoolId)] == nullptr, "Already created a pool with ID {}!", to_underlying(ePoolId));
+
+            AllocatorScope ac(ePoolForHeader);
         
-            MemoryPoolHeader* pHeader = static_cast<MemoryPoolHeader*>(pBackingMemory);
-            void* pTrueBackingMemory = pHeader + 1;
+            MemoryPoolHeader* pHeader = new MemoryPoolHeader();
             BASED_ASSERT(pHeader, "Header pointer is not valid! Check where you got the backing memory from!");
-            BASED_ASSERT(pTrueBackingMemory, "Memory after the header is invalid! Did your allocation get corrupted?");
-        
-            new (pHeader) MemoryPoolHeader();
+
             strncpy(pHeader->m_pName, pPoolName, MAX_NAME_LEN - 1);
             pHeader->m_pName[MAX_NAME_LEN - 1] = '\0';
             pHeader->m_nPoolID = to_underlying(ePoolId);
             pHeader->m_stPoolSizeBytes = stPool;
             pHeader->m_pPoolAllocator = pAllocator;
-            pHeader->m_pBackingMemory = pTrueBackingMemory;
+            pHeader->m_pBackingMemory = pBackingMemory;
 
             AddAndSplitPoolList(pHeader);
 
@@ -164,10 +179,8 @@ namespace based
         IMemoryPoolAllocator* m_pPoolAllocator;
         void* m_pBackingMemory;
         /**
-        * For a GPU pool, this backing memory is actually CPU memory, even if the pool is CPU-visible. 
-        * This is because we can't store allocation info in GPU info, so we mirror the pool on the CPU and store
-        * the allocations there. This also has the benefit of allowing us to check which pool GPU allocations belong
-        * to and if they're valid when deallocating. 
+        * For a GPU pool, this backing memory may be host visible, but it could also be a phantom range
+        * for tracking offsets into a device local pool. You can't assume that it's actual accessible memory.
         **/
     };
 
@@ -179,20 +192,6 @@ namespace based
         uint8* m_pStartAddress;
         uint8* m_pEndAddress;
         size_t m_poolSize;
-    };
-
-    class AllocatorScope final : public NonMoveable
-    {
-    public:
-        AllocatorScope() = delete;
-        AllocatorScope(MemoryPoolHeader* pMemoryPool);
-        AllocatorScope(MemoryPoolHeader* pMemoryPool, MemoryPoolHeader* pGraphicsPool);
-        AllocatorScope(ePoolIdentifier poolID);
-        AllocatorScope(ePoolIdentifier poolID, ePoolIdentifier graphicsPoolID);
-        ~AllocatorScope();
-
-    private:
-        MemoryPoolHeader* m_pPreviousPool, *m_pPreviousGraphicsPool;
     };
 
     // Used to map to API specific memory types (Vulkan Memory Type Bits/D3D12 Heap Type/etc)
@@ -216,6 +215,15 @@ namespace based
         kGPUOnly         = kDeviceLocalRequired | kNoCPU
     };
     DEFINE_ENUM_CLASS_BITWISE_OPERATORS(eGPUMemoryRequirements);
+
+    // Currently these only matter for Vulkan, time will tell if the other graphics APIs need them
+    enum class ePoolUsageIntent : uint8
+    {
+        kNone,
+        kScratch    = 1u << 0,
+        kBuffers    = 1u << 1,
+    };
+    DEFINE_ENUM_CLASS_BITWISE_OPERATORS(ePoolUsageIntent);
     
     struct PoolDescriptor final
     {
@@ -224,6 +232,7 @@ namespace based
         uint8 m_ePoolID;
         uint8 m_eParentPoolID;
         eGPUMemoryRequirements m_eGPUMemRequirements;
+        ePoolUsageIntent m_ePoolUsageIntent;
         bool m_bIsGPUPool;
     };
 

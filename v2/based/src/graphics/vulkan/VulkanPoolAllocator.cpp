@@ -41,13 +41,13 @@ namespace based
         return &it->second;
     }
 
-    void VulkanPoolAllocator::Initialize(const PoolDescriptor& poolDescriptor, uint32 nMemoryTypeIndex, eVulkanPoolUsage flags)
+    bool VulkanPoolAllocator::Initialize(const PoolDescriptor& poolDescriptor, uint32 nMemoryTypeIndex, eVulkanPoolUsage flags)
     {
         AllocatorScope ac(ePoolIdentifier::kPersistentPool);
         
         static VulkanGraphicsEngine& GE = dynamic_cast<VulkanGraphicsEngine&>(Engine::Instance().GetGraphicsEngine());
         m_CreationFlags = flags;
-        
+
         VmaPoolCreateInfo poolCI{
             .memoryTypeIndex = nMemoryTypeIndex,
             .blockSize = poolDescriptor.m_stPoolSize,
@@ -55,20 +55,25 @@ namespace based
             .maxBlockCount = 1
         };
 
-        check(vmaCreatePool(GE.m_Allocator, &poolCI, &m_Pool));
+        if (vmaCreatePool(GE.m_Allocator, &poolCI, &m_Pool) != VK_SUCCESS) return false;
 
         VkMemoryRequirements reqs;
         reqs.size = poolDescriptor.m_stPoolSize,
-        reqs.alignment = (flags & eVulkanPoolUsage::kAllBufferUsage) != eVulkanPoolUsage::kNone
+        reqs.alignment = HasBit(flags, eVulkanPoolUsage::kAllBufferUsage)
                     ? kVulkanMaxBufferAlignment
                     : kVulkanMaxImageAlignment;
         reqs.memoryTypeBits = 1u << nMemoryTypeIndex;
         VmaAllocationCreateInfo allocCI{};
         allocCI.pool = m_Pool;
-        allocCI.flags = 0; //nMemoryTypeIndex != s_nDeviceLocalOnlyIndex ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
+        allocCI.flags = 0;
+        // Even if CPU visibility is preferred, but couldn't be acquired, this flag will just fail, which is okay
+        // since a CPU-visibility-preferred pool doesn't require it anyway
+        if (HasBit(poolDescriptor.m_eGPUMemRequirements, eGPUMemoryRequirements::kCPUVisibleRequired)
+            || HasBit(poolDescriptor.m_eGPUMemRequirements, eGPUMemoryRequirements::kCPUVisiblePreferred))
+            allocCI.flags |= VMA_ALLOCATION_CREATE_MAPPED_BIT;
         
         VmaAllocationInfo blockInfo;
-        check(vmaAllocateMemory(GE.m_Allocator, &reqs, &allocCI, &m_BaseAllocation, &blockInfo));
+        if (vmaAllocateMemory(GE.m_Allocator, &reqs, &allocCI, &m_BaseAllocation, &blockInfo) != VK_SUCCESS) return false;
 
         m_GPUBaseAddress = blockInfo.deviceMemory;
         m_GPUOffset = blockInfo.offset;
@@ -82,7 +87,7 @@ namespace based
         
         // If this pool can be used for buffers, then bind a megabuffer with every kind of usage,
         // which we will parcel out offsets into for our individual buffers
-        if ((flags & eVulkanPoolUsage::kAllBufferUsage) != eVulkanPoolUsage::kNone)
+        if (HasBit(flags, eVulkanPoolUsage::kAllBufferUsage))
         {
             vk::BufferUsageFlags allUsages =
                   vk::BufferUsageFlagBits::eVertexBuffer
@@ -102,8 +107,9 @@ namespace based
             bufferCI.sharingMode = vk::SharingMode::eExclusive;
 
             vk::Buffer buffer;
-            check(GE.GetDevice().createBuffer(&bufferCI,
-                VulkanGraphicsEngine::GetAllocationCallbacks(), &buffer));
+            if (GE.GetDevice().createBuffer(&bufferCI,
+                VulkanGraphicsEngine::GetAllocationCallbacks(), &buffer) != vk::Result::eSuccess)
+                return false;
 
             GE.GetDevice().bindBufferMemory(buffer, m_GPUBaseAddress, blockInfo.offset);
         }
@@ -112,10 +118,12 @@ namespace based
         VmaVirtualBlockCreateInfo virtualBlockCI{
             .size = poolDescriptor.m_stPoolSize
         };
-        virtualBlockCI.flags = (flags & eVulkanPoolUsage::kUseLinearAlgorithm) != eVulkanPoolUsage::kNone
+        virtualBlockCI.flags = HasBit(flags, eVulkanPoolUsage::kUseLinearAlgorithm)
                                     ? VMA_POOL_CREATE_LINEAR_ALGORITHM_BIT
                                     : 0;
-        check(vmaCreateVirtualBlock(&virtualBlockCI, &m_VirtualBlock));
+        if (vmaCreateVirtualBlock(&virtualBlockCI, &m_VirtualBlock) != VK_SUCCESS) return false;
+
+        return true;
     }
     
     void VulkanPoolAllocator::Shutdown()
@@ -131,7 +139,7 @@ namespace based
     
     void* VulkanPoolAllocator::Allocate(size_t bytes)
     {
-        BASED_ASSERT((m_CreationFlags & eVulkanPoolUsage::kAllBufferUsage) == eVulkanPoolUsage::kNone,
+        BASED_ASSERT(!HasBit(m_CreationFlags, eVulkanPoolUsage::kAllBufferUsage),
             "You must specify an alignment if you're allocating something other than a buffer!");
 
         return Allocate(bytes, kVulkanDefaultBufferAlignment);
