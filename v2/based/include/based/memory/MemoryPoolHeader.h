@@ -52,6 +52,7 @@ namespace based
     class MemoryPoolHeader final : public NonMoveable
     {
         friend class MemoryManager;
+        friend class VulkanSystemTexture;
     public:
         // Create a CPU pool using a pre-allocated chunk of memory
         template <typename T> requires EnumClassWithUnderlying<T, uint8>

@@ -2,6 +2,8 @@
 
 namespace based
 {
+    enum class eTextureFormat : uint8;
+    
     class IGraphicsEngine : public NonCopyable
     {
         friend class RenderManager;
@@ -9,6 +11,7 @@ namespace based
         virtual ~IGraphicsEngine() = default;
 
         virtual void* GetGlobalInstance() const = 0;
+        virtual eTextureFormat GetDepthFormat() const = 0;
         
         // TODO: Everything
     protected:

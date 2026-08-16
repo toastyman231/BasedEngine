@@ -2,6 +2,7 @@
 #include "graphics/vulkan/VulkanGraphicsEngine.h"
 
 #include "graphics/vulkan/VulkanPoolAllocator.h"
+#include "graphics/vulkan/VulkanSystemTexture.h"
 #include "memory/PlatformMemUtils.h"
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
@@ -495,6 +496,42 @@ namespace based
                 MemSize{b.statistics.blockBytes},
                 MemSize{b.statistics.allocationBytes});
         }
+    }
+
+    eTextureFormat VulkanGraphicsEngine::GetDepthFormat() const
+    {
+        static eTextureFormat nTextureFormat = eTextureFormat::kNone;
+        
+        if (nTextureFormat == eTextureFormat::kNone)
+        {
+            vk::Format nDepthFormat = vk::Format::eUndefined;
+            auto& GE = static_cast<VulkanGraphicsEngine&>(Engine::Instance().GetGraphicsEngine());
+
+            // Yes, we're iterating the entire format list. This is only done once and then cached, so it's probably fine.
+            // The reason is so that I don't have to maintain two lists of formats
+            using EnumType = std::underlying_type_t<eTextureFormat>;
+            for (size_t i = std::numeric_limits<EnumType>::min();
+                i < to_underlying(eTextureFormat::kCount); ++i)
+            {
+                vk::FormatProperties2 formatProperties{};
+                eTextureFormat nEngineFormat = static_cast<eTextureFormat>(i);
+                if (nEngineFormat == eTextureFormat::kNone || nEngineFormat == eTextureFormat::kCount)
+                    continue;
+                
+                vk::Format nFormat = VulkanTextureFormatMap.map(nEngineFormat);
+                
+                GE.GetPhysicalDevice().getFormatProperties2(nFormat, &formatProperties);
+                if (formatProperties.formatProperties.optimalTilingFeatures
+                    & vk::FormatFeatureFlagBits::eDepthStencilAttachment)
+                {
+                    nDepthFormat = nFormat;
+                    break;
+                }
+            }
+            nTextureFormat = VulkanTextureFormatMap.map(nDepthFormat);
+        }
+
+        return nTextureFormat;
     }
 
     static void SetupVMA()

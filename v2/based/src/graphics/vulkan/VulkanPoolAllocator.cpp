@@ -41,6 +41,11 @@ namespace based
         return &it->second;
     }
 
+    void VulkanPoolAllocator::GetAllocationInfo(VmaVirtualAllocation pAlloc, VmaVirtualAllocationInfo* pAllocInfo) const
+    {
+        vmaGetVirtualAllocationInfo(m_VirtualBlock, pAlloc, pAllocInfo);
+    }
+
     bool VulkanPoolAllocator::Initialize(const PoolDescriptor& poolDescriptor, uint32 nMemoryTypeIndex, eVulkanPoolUsage flags)
     {
         AllocatorScope ac(ePoolIdentifier::kPersistentPool);

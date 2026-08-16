@@ -11,6 +11,7 @@ namespace based
     static std::recursive_mutex allocMutex;
     static std::recursive_mutex reallocMutex;
     static std::recursive_mutex freeMutex;
+    static std::recursive_mutex graphicsMutex;
     
     void* MemoryManager::MemAlign(size_t size, size_t alignment) noexcept
     {
@@ -133,5 +134,31 @@ namespace based
         }
 
         BASED_FATAL("Unable to de-allocate {}", ptr);
+    }
+
+    void* MemoryManager::GraphicsMemAlign(size_t size, size_t alignment) noexcept
+    {
+        std::scoped_lock lock(graphicsMutex);
+        
+        if (g_pCurrentGraphicsPool && g_pCurrentGraphicsPool->m_pPoolAllocator)
+        {
+            void* ptr = g_pCurrentGraphicsPool->m_pPoolAllocator->Allocate(size, alignment);
+#if BASED_CONFIG_DEBUG
+            if (ptr)
+            {
+                g_pCurrentGraphicsPool->m_pPoolAllocator->TrackUsageForPool(g_pCurrentGraphicsPool, ptr);
+            } else
+            {
+                MemoryPoolHeader::PrintPoolsLayout();
+                MemoryPoolHeader::PrintPoolInfo();
+                BASED_ASSERT_FMT(false, "Couldn't allocate {} from pool {}!", MemSize{size},
+                    to_underlying(g_pCurrentGraphicsPool->GetPoolID()));
+            }
+#endif
+            return ptr;
+        }
+
+        BASED_FATAL("Trying to allocate when there is no valid pool!");
+        return nullptr;
     }
 }

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 namespace based {
+    class ResourceManager;
     class RenderManager;
     class IWindow;
     class IGraphicsEngine;
@@ -53,6 +54,12 @@ namespace based
             return *m_pRenderManager;
         }
 
+        ResourceManager& GetResourceManager() const
+        {
+            BASED_ASSERT(m_pResourceManager, "Trying to get resource manager when one doesn't exist!");
+            return *m_pResourceManager;
+        }
+
         IGraphicsEngine& GetGraphicsEngine() const;
         
     private:
@@ -80,6 +87,7 @@ namespace based
 
         // Managers
         RenderManager* m_pRenderManager;
+        ResourceManager* m_pResourceManager;
 
         bool m_bIsRunning = false;
         bool m_bIsInitialized = false;

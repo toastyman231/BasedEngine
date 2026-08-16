@@ -16,21 +16,22 @@ namespace based
         if (pRenderManager)
         {
             bDoOnce = true;
+            pRenderManager->m_pGraphicsEngine = dynamic_cast<IGraphicsEngine*>(new PlatformGraphicsEngine());
+            BASED_ASSERT(pRenderManager->m_pGraphicsEngine, "Error creating platform graphics engine!");
+            if (pRenderManager->m_pGraphicsEngine)
+            {
+                pRenderManager->m_pGraphicsEngine->Initialize();
+            }
             return pRenderManager;
         }
 
         return nullptr;
     }
-    
-    void RenderManager::Initialize()
+
+    eAntiAliasingMode RenderManager::GetAntiAliasingMode() const
     {
-        AllocatorScope ac(ePoolIdentifier::kPersistentPool);
-        m_pGraphicsEngine = dynamic_cast<IGraphicsEngine*>(new PlatformGraphicsEngine());
-        BASED_ASSERT(m_pGraphicsEngine, "Error creating platform graphics engine!");
-        if (m_pGraphicsEngine)
-        {
-            m_pGraphicsEngine->Initialize();
-        }
+        // TODO: Enable MSAA. For now this will just statically return kNone
+        return eAntiAliasingMode::kNone;
     }
     
     void RenderManager::Shutdown()

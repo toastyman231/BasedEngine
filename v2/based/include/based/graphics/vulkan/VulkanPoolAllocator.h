@@ -46,6 +46,10 @@ namespace based
             vk::MemoryPropertyFlags preferred = static_cast<vk::MemoryPropertyFlags>(0));
         std::optional<const Header*> FindHeader(void* ptr) const;
 
+        void GetAllocationInfo(VmaVirtualAllocation pAlloc, VmaVirtualAllocationInfo* pAllocInfo) const;
+
+        vk::DeviceMemory GetBaseGPUAddress() const { return m_GPUBaseAddress; }
+        vk::DeviceSize GetGPUBaseOffset() const { return m_GPUOffset; }
         void* GetBaseCPUAddress() const { return m_pCPUBaseAddress; }
 
     private:

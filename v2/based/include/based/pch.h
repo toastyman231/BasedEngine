@@ -22,6 +22,8 @@
 #include <cstdio>
 #include <format>
 #include <concepts>
+#include <mutex>
+#include <shared_mutex>
 
 // GLM stuff
 #include <glm/fwd.hpp>
@@ -58,6 +60,7 @@
 // TODO: Add this stuff back in
 #include "core/NewDelete.h"
 #include "core/BasedLog.h"
+#include "core/UUID.h"
 /*#include "based/core/profiler.h"
 #include "based/graphics/glmhelpers.h"
 #include "based/graphics/helpers.h"

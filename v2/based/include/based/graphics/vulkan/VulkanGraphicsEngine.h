@@ -26,6 +26,8 @@ namespace based
         static vk::DeviceSize GetCurrentHeapSizeForMemoryType(uint32 nMemoryTypeIndex);
         static void LogAllHeaps();
 
+        eTextureFormat GetDepthFormat() const override;
+
     private:
         VulkanGraphicsEngine() = default;
         void Initialize() override;

@@ -11,6 +11,7 @@
 #include "core/BasedTime.h"
 #include "core/Window.h"
 #include "graphics/RenderManager.h"
+#include "memory/ResourceManager.h"
 #include "tsoding/flag.h"
 
 namespace based
@@ -124,7 +125,7 @@ namespace based
 
         // Initialize managers
         m_pRenderManager = RenderManager::Create();
-        m_pRenderManager->Initialize();
+        m_pResourceManager = ResourceManager::Create();
         
         m_pApp->Initialize();
         bSuccess = true; // For now
@@ -170,6 +171,7 @@ namespace based
         if (m_pApp) m_pApp->Shutdown();
 
         // Shutdown managers in reverse order
+        m_pResourceManager->Shutdown();
         m_pRenderManager->Shutdown();
 
         if (m_pWindow) m_pWindow->Shutdown();

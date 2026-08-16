@@ -2,6 +2,16 @@
 
 namespace based
 {
+    enum class eTextureFormat : uint8;
+    
+    enum class eAntiAliasingMode : uint8
+    {
+        kNone,
+        kMSAA2x,
+        kMSAA4x,
+        kMSAA8x
+    };
+    
     // The RenderManager is really just for handling ordering and executing render Systems, presentation,
     // and maybe compute dispatches
     class RenderManager final : public NonMoveable
@@ -15,13 +25,14 @@ namespace based
             return *m_pGraphicsEngine;
         }
 
+        eAntiAliasingMode GetAntiAliasingMode() const;
+
     private:
         RenderManager() = default;
         ~RenderManager() = default;
 
         static RenderManager* Create();
 
-        void Initialize();
         void Shutdown();
 
         IGraphicsEngine* m_pGraphicsEngine = nullptr;
