@@ -1,12 +1,13 @@
 ﻿#pragma once
 #include "BasedTypeTraits.h"
-#include "core/Handle.h"
 #include "core/stdx.h"
 
 namespace based
 {
     class Texture;
     class TextureBuilder;
+    template <typename T>
+    class Handle;
 
     template <typename T> requires Resource<T>
     struct ResourceSlot final
@@ -28,6 +29,7 @@ namespace based
     class ResourceTable final : public IResourceTable
     {
         friend class ResourceManager;
+        friend class Handle<T>;
 
         ResourceTable();
 
@@ -86,7 +88,8 @@ namespace based
             }
             if (!m_vResourceTables[stTypeID])
             {
-                m_vResourceTables[stTypeID] = std::make_unique<ResourceTable<T>>();
+                // make_unique can't call ResourceTable's private constructor, but ResourceManager can
+                m_vResourceTables[stTypeID] = std::unique_ptr<ResourceTable<T>>(new ResourceTable<T>());
             }
 
             return static_cast<ResourceTable<T>&>(*m_vResourceTables[stTypeID]);

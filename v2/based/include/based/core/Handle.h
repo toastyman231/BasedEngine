@@ -1,16 +1,16 @@
 ﻿#pragma once
+#include "BasedTypeTraits.h"
 #include "Engine.h"
 #include "memory/ResourceManager.h"
 
 namespace based
 {
-    template <typename T>
-    struct ResourceSlot;
-    
     template <typename ResourceType>
     class Handle final : public ExplicitlyCopyable
     {
         friend class ResourceManager;
+        template <typename T> requires Resource<T>
+        friend class ResourceTable;
     public:
         ResourceType* operator ->() noexcept
         {
@@ -28,8 +28,8 @@ namespace based
             if (bNotNull && bValidIndex)
             {
                 ResourceSlot<ResourceType>& slot = Engine::Instance().GetResourceManager()
-                                                    .GetResourceTableFor<ResourceType>()
-                                                    .m_vResourceSlots[m_nIndex];
+                                                                     .GetResourceTableFor<ResourceType>()
+                                                                     .m_vResourceSlots[m_nIndex];
                 bOccupied = slot.m_bOccupied;
                 bValidGeneration = slot.m_nGeneration == m_nGeneration;
                 bValidPointer = slot.m_pResource;
@@ -56,6 +56,8 @@ namespace based
     private:
         static constexpr uint32 kInvalidIndex = std::numeric_limits<uint32>::max();
 
+        Handle() = default;
+
         Handle(uint32 nIndex, uint32 nGeneration)
             : m_nIndex(nIndex), m_nGeneration(nGeneration)
         {
@@ -71,14 +73,14 @@ namespace based
         {
             ++Engine::Instance().GetResourceManager()
                                 .GetResourceTableFor<ResourceType>()
-                                    .m_vResourceSlots[m_nIndex].nReferences;
+                                    .m_vResourceSlots[m_nIndex].m_nReferences;
         }
-
+        
         void UnRef()
         {
             --Engine::Instance().GetResourceManager()
                                 .GetResourceTableFor<ResourceType>()
-                                    .m_vResourceSlots[m_nIndex].nReferences;
+                                    .m_vResourceSlots[m_nIndex].m_nReferences;
         }
         
         uint32 m_nIndex = kInvalidIndex;

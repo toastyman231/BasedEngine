@@ -1,9 +1,13 @@
 ﻿#pragma once
-#include "graphics/Texture.h"
 #include <vulkan/vulkan.hpp>
+
+#include "core/EnumMap.h"
+#include "graphics/TextureEnums.h"
 
 namespace based
 {
+    class TextureBuilder;
+    
     using FilterMap = EnumMap<eTextureFilter, vk::Filter>;
     constexpr FilterMap VulkanFilterMap{
         std::array{
@@ -51,6 +55,7 @@ namespace based
     using TextureFormatMap = EnumMap<eTextureFormat, vk::Format>;
     constexpr TextureFormatMap VulkanTextureFormatMap{
         std::array{
+            TextureFormatMap::Mapping{eTextureFormat::kNone,     vk::Format::eUndefined},
             // Color
             TextureFormatMap::Mapping{eTextureFormat::kRGBA8_UNORM,     vk::Format::eR8G8B8A8Unorm},
             TextureFormatMap::Mapping{eTextureFormat::kRGBA8_SRGB,      vk::Format::eR8G8B8A8Srgb},

@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "memory/MemoryManager.h"
 #include "memory/MemoryPoolHeader.h"
+#include "memory/PlatformMemUtils.h"
 
 // Standard Library extensions
 
@@ -31,7 +32,7 @@ namespace based
         {
             AllocatorScope ac(Pool);
 
-            return new T();
+            return static_cast<pointer>(MemoryManager::MemAlign(size, GetPlatformDefaultAlignment()));
         }
 
         void deallocate(T* ptr, size_t size)
@@ -65,8 +66,8 @@ namespace std_p
     using vector = std::vector<T, based::PersistentPoolAllocator<T>>;
 
     template <typename K, typename V>
-    using map = std::map<K, V, based::PersistentPoolAllocator<std::pair<const K, V>>>;
+    using map = std::map<K, V, std::less<K>, based::PersistentPoolAllocator<std::pair<const K, V>>>;
 
     template <typename K, typename V>
-    using unordered_map = std::unordered_map<K, V, based::PersistentPoolAllocator<std::pair<const K, V>>>;
+    using unordered_map = std::unordered_map<K, V, std::hash<K>, std::less<K>, based::PersistentPoolAllocator<std::pair<const K, V>>>;
 }

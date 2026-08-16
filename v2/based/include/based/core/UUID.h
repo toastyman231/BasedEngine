@@ -14,3 +14,15 @@ namespace based
         uint64 m_nUUID;
     };
 }
+
+namespace std
+{
+    template <>
+    struct hash<based::UUID>
+    {
+        size_t operator()(const based::UUID& uuid) const noexcept
+        {
+            return std::hash<uint64>{}(uuid);
+        }
+    };
+}

@@ -24,6 +24,7 @@
 #include <concepts>
 #include <mutex>
 #include <shared_mutex>
+#include <iterator>
 
 // GLM stuff
 #include <glm/fwd.hpp>

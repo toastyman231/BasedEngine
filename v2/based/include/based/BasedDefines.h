@@ -57,3 +57,9 @@
 #else
 #define BASED_STATIC_ASSERT(x, msg) (void)0
 #endif
+
+// Call this function to immediately throw a compile-time error
+namespace detail
+{
+    [[noreturn]] void InvalidCompileTimeOperation();
+}

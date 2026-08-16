@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "memory/ResourceManager.h"
 
+#include "core/Handle.h"
 #include "graphics/SystemTexture.h"
 #include "graphics/Texture.h"
 #include "memory/MemoryPoolHeader.h"

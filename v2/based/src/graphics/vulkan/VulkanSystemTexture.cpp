@@ -2,6 +2,7 @@
 #include "graphics/vulkan/VulkanSystemTexture.h"
 
 #include "Engine.h"
+#include "graphics/Texture.h"
 #include "graphics/RenderManager.h"
 #include "graphics/vulkan/VulkanPoolAllocator.h"
 
@@ -13,7 +14,7 @@
 
 namespace based
 {
-    static std_p::map<UUID, vk::Image> s_imageAllocationMap;
+    static std_p::unordered_map<UUID, vk::Image> s_imageAllocationMap;
     static std::mutex s_imageAllocationMutex;
     
     VulkanSystemTexture* VulkanSystemTexture::AllocateSystemTexture(const TextureBuilder& textureBuilder)
@@ -44,10 +45,12 @@ namespace based
             .setImage(*pSysTex->m_pImage)
             .setViewType(VulkanTextureTypeMap.map(textureBuilder.m_eTextureType))
             .setFormat(VulkanTextureFormatMap.map(textureBuilder.m_eFormat))
-            .setSubresourceRange({
-                .aspectMask = nImageAspect,
-                .levelCount = vk::RemainingMipLevels,
-                .layerCount = vk::RemainingArrayLayers
+            .setSubresourceRange(vk::ImageSubresourceRange{
+                nImageAspect,
+                0,
+                vk::RemainingMipLevels,
+                0,
+                vk::RemainingArrayLayers
             });
         check(GE.GetDevice().createImageView(&viewCI, GE.GetAllocationCallbacks(), &pSysTex->m_View));
 
@@ -102,10 +105,10 @@ namespace based
         imageCI
             .setImageType(VulkanAltTextureTypeMap.map(textureBuilder.m_eTextureType))
             .setFormat(VulkanTextureFormatMap.map(textureBuilder.m_eFormat))
-            .setExtent({
-                .width = textureBuilder.m_nWidth,
-                .height = textureBuilder.m_nHeight,
-                .depth = textureBuilder.m_nDepth})
+            .setExtent(vk::Extent3D{
+                textureBuilder.m_nWidth,
+                textureBuilder.m_nHeight,
+                textureBuilder.m_nDepth})
             .setMipLevels(textureBuilder.m_nNumMips)
             .setArrayLayers(textureBuilder.m_nLayers)
             .setSamples(nSampleCount)

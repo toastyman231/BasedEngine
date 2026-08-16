@@ -5,6 +5,8 @@
 
 #include <glm/glm.hpp>
 
+#include "../BasedDefines.h"
+
 using uint = uint32_t;
 using uint8 = uint8_t;
 using uint16 = uint16_t;
@@ -56,57 +58,6 @@ namespace based
 
         ExplicitlyCopyable(ExplicitlyCopyable&& other) = default;
         ExplicitlyCopyable& operator=(ExplicitlyCopyable&& other) = default;
-    };
-
-    template <typename From, typename To>
-    class EnumMap final
-    {
-        static constexpr size_t Size = static_cast<size_t>(From::kCount);
-    public:
-
-        struct Mapping
-        {
-            From engine_value;
-            To api_value;
-        };
-
-        template <size_t N>
-        constexpr EnumMap(const std::array<Mapping, N>& mappings)
-        {
-            std::array<uint32, Size> hit_counts{};
-
-            for (size_t i = 0; i < N; ++i)
-            {
-                size_t index = static_cast<size_t>(mappings[i].engine_value);
-
-                if (index < Size)
-                {
-                    m_table[index] = mappings[i].api_value;
-                    ++hit_counts[index];
-                }
-            }
-
-            static_assert(ValidateCount(hit_counts), "Enum mapping error! Did you miss a value or map one twice?");
-        }
-
-        static constexpr bool ValidateCount(const std::array<uint32, Size>& counts)
-        {
-            for (size_t i = 0; i < Size; ++i)
-            {
-                if (counts[i] != 1) return false;
-            }
-            return true;
-        }
-
-        constexpr To map(From value) const
-        {
-            return m_table[static_cast<size_t>(value)];
-        }
-
-        constexpr From map(To value) const;
-        
-    private:
-        std::array<To, Size> m_table{};
     };
 
     using Color = glm::vec4;
